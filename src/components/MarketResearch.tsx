@@ -6,6 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Search, ChevronDown, ChevronUp, Clock, Trash2 } from "lucide-react";
+import { ContainerScroll, CardSticky } from "@/components/ui/card-sticky";
+import { motion, AnimatePresence } from "motion/react";
 import type { Provider } from "@/hooks/use-copywriter";
 
 interface ResearchData {
@@ -125,88 +127,84 @@ export function MarketResearch({ provider, projectId, onUseProduct }: MarketRese
     }
   };
 
+  const researchCards = (data: ResearchData) => [
+    { emoji: "🎯", title: "Nicho", content: <p className="text-sm font-medium text-foreground">{data.nicho}</p> },
+    { emoji: "📈", title: "Tendências", content: (
+      <ul className="space-y-1">
+        {data.tendencias?.map((t, i) => (
+          <li key={i} className="text-sm text-muted-foreground flex gap-2"><span className="text-primary">•</span> {t}</li>
+        ))}
+      </ul>
+    )},
+    { emoji: "💔", title: "Dores", content: (
+      <ul className="space-y-1">
+        {data.dores?.map((d, i) => (
+          <li key={i} className="text-sm text-muted-foreground flex gap-2"><span className="text-destructive">•</span> {d}</li>
+        ))}
+      </ul>
+    )},
+    { emoji: "💡", title: "Oportunidades", content: (
+      <ul className="space-y-1">
+        {data.oportunidades?.map((o, i) => (
+          <li key={i} className="text-sm text-muted-foreground flex gap-2"><span className="text-primary">•</span> {o}</li>
+        ))}
+      </ul>
+    )},
+  ];
+
   const renderResearchResult = (data: ResearchData, showUseButton: boolean) => (
-    <div className="space-y-3 mt-3">
-      <Card className="premium-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">🎯 Nicho</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm font-medium text-foreground">{data.nicho}</p>
-        </CardContent>
-      </Card>
+    <ContainerScroll className="space-y-3 mt-3">
+      {researchCards(data).map((card, i) => (
+        <CardSticky key={card.title} index={i} incrementY={12} incrementZ={5}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.08, duration: 0.35, ease: "easeOut" }}
+          >
+            <Card className="premium-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">{card.emoji} {card.title}</CardTitle>
+              </CardHeader>
+              <CardContent>{card.content}</CardContent>
+            </Card>
+          </motion.div>
+        </CardSticky>
+      ))}
 
-      <Card className="premium-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">📈 Tendências</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-1">
-            {data.tendencias?.map((t, i) => (
-              <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                <span className="text-primary">•</span> {t}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <CardSticky index={researchCards(data).length} incrementY={12} incrementZ={5}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: researchCards(data).length * 0.08, duration: 0.35, ease: "easeOut" }}
+        >
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">📦 Produto Sugerido</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 gap-1.5 text-sm">
+                <div><span className="font-medium text-foreground">Nome:</span> <span className="text-muted-foreground">{data.produto_sugerido?.nome}</span></div>
+                <div><span className="font-medium text-foreground">Público:</span> <span className="text-muted-foreground">{data.produto_sugerido?.publico_alvo}</span></div>
+                <div><span className="font-medium text-foreground">Dor Principal:</span> <span className="text-muted-foreground">{data.produto_sugerido?.dor_principal}</span></div>
+                <div><span className="font-medium text-foreground">Solução:</span> <span className="text-muted-foreground">{data.produto_sugerido?.solucao}</span></div>
+                <div><span className="font-medium text-foreground">Como Funciona:</span> <span className="text-muted-foreground">{data.produto_sugerido?.como_funciona}</span></div>
+                <div><span className="font-medium text-foreground">Diferencial:</span> <span className="text-muted-foreground">{data.produto_sugerido?.diferencial_unico}</span></div>
+              </div>
 
-      <Card className="premium-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">💔 Dores</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-1">
-            {data.dores?.map((d, i) => (
-              <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                <span className="text-destructive">•</span> {d}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      <Card className="premium-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">💡 Oportunidades</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-1">
-            {data.oportunidades?.map((o, i) => (
-              <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                <span className="text-primary">•</span> {o}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">📦 Produto Sugerido</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 gap-1.5 text-sm">
-            <div><span className="font-medium text-foreground">Nome:</span> <span className="text-muted-foreground">{data.produto_sugerido?.nome}</span></div>
-            <div><span className="font-medium text-foreground">Público:</span> <span className="text-muted-foreground">{data.produto_sugerido?.publico_alvo}</span></div>
-            <div><span className="font-medium text-foreground">Dor Principal:</span> <span className="text-muted-foreground">{data.produto_sugerido?.dor_principal}</span></div>
-            <div><span className="font-medium text-foreground">Solução:</span> <span className="text-muted-foreground">{data.produto_sugerido?.solucao}</span></div>
-            <div><span className="font-medium text-foreground">Como Funciona:</span> <span className="text-muted-foreground">{data.produto_sugerido?.como_funciona}</span></div>
-            <div><span className="font-medium text-foreground">Diferencial:</span> <span className="text-muted-foreground">{data.produto_sugerido?.diferencial_unico}</span></div>
-          </div>
-
-          {showUseButton && (
-            <Button
-              onClick={() => onUseProduct(data.produto_formatado)}
-              className="w-full mt-3 premium-button"
-              size="lg"
-            >
-              🚀 Usar este Produto e Gerar Copy
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+              {showUseButton && (
+                <Button
+                  onClick={() => onUseProduct(data.produto_formatado)}
+                  className="w-full mt-3 premium-button"
+                  size="lg"
+                >
+                  🚀 Usar este Produto e Gerar Copy
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </CardSticky>
+    </ContainerScroll>
   );
 
   return (
@@ -254,47 +252,67 @@ export function MarketResearch({ provider, projectId, onUseProduct }: MarketRese
           </h3>
           <ScrollArea className="h-[50vh]">
             <div className="space-y-2">
-              {savedResearches.map((r) => (
-                <Card key={r.id} className="premium-card">
-                  <CardContent className="p-0">
-                    <button
-                      onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
-                      className="w-full flex items-center justify-between p-4 text-left"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-foreground truncate">{r.query}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {r.result?.nicho} • {new Date(r.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0 ml-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteResearch(r.id);
-                          }}
+              <AnimatePresence>
+                {savedResearches.map((r, i) => (
+                  <motion.div
+                    key={r.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
+                    transition={{ delay: i * 0.05, duration: 0.3 }}
+                  >
+                    <Card className="premium-card">
+                      <CardContent className="p-0">
+                        <button
+                          onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}
+                          className="w-full flex items-center justify-between p-4 text-left"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                        {expandedId === r.id ? (
-                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </div>
-                    </button>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-foreground truncate">{r.query}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {r.result?.nicho} • {new Date(r.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0 ml-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteResearch(r.id);
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                            {expandedId === r.id ? (
+                              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </div>
+                        </button>
 
-                    {expandedId === r.id && (
-                      <div className="px-4 pb-4 border-t border-border pt-3">
-                        {renderResearchResult(r.result, true)}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                        <AnimatePresence>
+                          {expandedId === r.id && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-4 pb-4 border-t border-border pt-3">
+                                {renderResearchResult(r.result, true)}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </ScrollArea>
         </div>
