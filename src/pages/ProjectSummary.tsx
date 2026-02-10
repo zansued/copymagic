@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { STEPS } from "@/lib/steps";
 import { motion, AnimatePresence } from "motion/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TextRevealCard, TextRevealCardTitle, TextRevealCardDescription } from "@/components/ui/text-reveal-card";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
@@ -23,6 +24,15 @@ function truncateMarkdown(text: string, maxLines = 6): string {
   const lines = text.split("\n").filter(Boolean);
   if (lines.length <= maxLines) return text;
   return lines.slice(0, maxLines).join("\n") + "\n\n...";
+}
+
+function getFirstHeadline(content: string): string {
+  const lines = content.split("\n").filter(Boolean);
+  for (const line of lines) {
+    const clean = line.replace(/^#+\s*/, "").replace(/\*\*/g, "").trim();
+    if (clean.length > 10 && clean.length < 80) return clean;
+  }
+  return lines[0]?.slice(0, 60) || "";
 }
 
 export default function ProjectSummary() {
@@ -126,6 +136,27 @@ export default function ProjectSummary() {
             />
           </div>
         </motion.div>
+
+        {/* Text Reveal Hero */}
+        {completedSteps.length > 0 && results["pagina_vendas"] && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mb-10 flex justify-center"
+          >
+            <TextRevealCard
+              text={getFirstHeadline(results["avatar"] || "") || "Deslize para revelar"}
+              revealText={getFirstHeadline(results["pagina_vendas"]) || "Sua copy de alta conversão"}
+              className="w-full max-w-3xl"
+            >
+              <TextRevealCardTitle>✨ Headline Principal</TextRevealCardTitle>
+              <TextRevealCardDescription>
+                Deslize para revelar a headline da sua página de vendas
+              </TextRevealCardDescription>
+            </TextRevealCard>
+          </motion.div>
+        )}
 
         {/* Cards grid */}
         {completedSteps.length === 0 ? (
