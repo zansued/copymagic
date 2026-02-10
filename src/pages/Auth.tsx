@@ -1,19 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { AnimatedInput } from "@/components/auth/AnimatedInput";
 import { BoxReveal } from "@/components/auth/BoxReveal";
-import { SplineScene } from "@/components/ui/SplineScene";
-import { Eye, EyeOff } from "lucide-react";
-import { motion } from "motion/react";
-
-const BottomGradient = () => (
-  <>
-    <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-primary to-transparent" />
-    <span className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-accent-foreground to-transparent" />
-  </>
-);
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles, Zap, Target } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import loginBgVideo from "@/assets/login-bg.mp4";
 
 export default function Auth() {
   const { user, loading } = useAuth();
@@ -25,10 +18,17 @@ export default function Auth() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!loading && user) navigate("/", { replace: true });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,89 +59,119 @@ export default function Auth() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left side — Spline 3D (hidden on mobile) */}
-      <div className="hidden lg:flex w-1/2 relative items-center justify-center overflow-hidden surface-gradient">
-        {/* Ambient glow */}
-        <div className="absolute w-96 h-96 rounded-full opacity-15 blur-3xl" style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }} />
-
-        {/* Spline 3D Scene */}
-        <div className="absolute inset-0">
-          <SplineScene
-            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-            className="w-full h-full"
-          />
-        </div>
-
-        {/* Overlay text */}
-        <div className="relative z-10 pointer-events-none text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.5, duration: 0.8 }}
-            className="text-5xl font-bold gradient-text font-['Space_Grotesk'] drop-shadow-lg"
-          >
-            CopyEngine
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2, duration: 0.6 }}
-            className="mt-3 text-sm text-muted-foreground tracking-wider uppercase"
-          >
-            Copywriting movido a IA
-          </motion.p>
-        </div>
+    <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
+      {/* Video Background */}
+      <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 bg-background/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-background/60 z-10" />
+        <video
+          ref={videoRef}
+          className="absolute inset-0 min-w-full min-h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src={loginBgVideo} type="video/mp4" />
+        </video>
       </div>
 
-      {/* Right side — Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 sm:px-12 lg:px-16">
-        <div className="w-full max-w-md flex flex-col gap-5">
-          {/* Header */}
-          <BoxReveal boxColor="hsl(var(--primary))" duration={0.3}>
-            <div className="flex items-center gap-3 mb-1">
-              <span className="text-3xl">🎯</span>
-              <h1 className="font-bold text-3xl text-foreground font-['Space_Grotesk']">
-                {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
-              </h1>
+      {/* Content */}
+      <div className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+        
+        {/* Left — Marketing Copy */}
+        <div className="flex-1 text-center lg:text-left max-w-xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="flex items-center gap-2 justify-center lg:justify-start mb-4">
+              <span className="text-4xl">🎯</span>
+              <span className="text-sm font-medium text-primary uppercase tracking-[0.2em]">CopyEngine</span>
             </div>
-          </BoxReveal>
 
-          <BoxReveal boxColor="hsl(var(--primary))" duration={0.3} className="pb-2">
-            <p className="text-muted-foreground text-sm">
-              {isLogin
-                ? "Entre para continuar criando copies de alta conversão."
-                : "Comece a criar copies persuasivas em minutos."}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight font-['Space_Grotesk'] text-foreground mb-6">
+              Copies que{" "}
+              <span className="gradient-text">convertem</span>
+              <br />
+              em minutos,
+              <br />
+              não em dias.
+            </h1>
+
+            <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-md mx-auto lg:mx-0">
+              Transforme a descrição do seu produto em uma{" "}
+              <span className="text-foreground font-medium">máquina de vendas completa</span>
+              : páginas de vendas, upsells, anúncios e VSLs — tudo gerado por IA especializada em copywriting direto.
             </p>
-          </BoxReveal>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
+            {/* Feature pills */}
+            <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
+              {[
+                { icon: <Sparkles className="size-4" />, text: "9 etapas de copy" },
+                { icon: <Zap className="size-4" />, text: "IA especializada" },
+                { icon: <Target className="size-4" />, text: "Alta conversão" },
+              ].map((pill, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 + i * 0.15, duration: 0.5 }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-border/50 bg-card/30 backdrop-blur-sm text-sm text-muted-foreground"
+                >
+                  <span className="text-primary">{pill.icon}</span>
+                  {pill.text}
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Right — Glassmorphism Login Form */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="w-full max-w-md"
+        >
+          <div className="p-8 rounded-2xl backdrop-blur-xl bg-card/40 border border-border/30 shadow-2xl shadow-primary/5">
+            {/* Form Header */}
+            <div className="mb-6">
               <BoxReveal boxColor="hsl(var(--primary))" duration={0.3}>
-                <label className="text-sm font-medium text-foreground">
-                  Email <span className="text-destructive">*</span>
-                </label>
+                <h2 className="text-2xl font-bold text-foreground font-['Space_Grotesk']">
+                  {isLogin ? "Bem-vindo de volta" : "Crie sua conta"}
+                </h2>
               </BoxReveal>
-              <BoxReveal width="100%" boxColor="hsl(var(--primary))" duration={0.3}>
-                <AnimatedInput
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+              <BoxReveal boxColor="hsl(var(--primary))" duration={0.3}>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {isLogin
+                    ? "Entre para continuar criando copies de alta conversão."
+                    : "Comece a criar copies persuasivas em minutos."}
+                </p>
               </BoxReveal>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <BoxReveal boxColor="hsl(var(--primary))" duration={0.3}>
-                <label className="text-sm font-medium text-foreground">
-                  Senha <span className="text-destructive">*</span>
-                </label>
-              </BoxReveal>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email */}
               <BoxReveal width="100%" boxColor="hsl(var(--primary))" duration={0.3}>
                 <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10 pointer-events-none" />
+                  <AnimatedInput
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="pl-10"
+                  />
+                </div>
+              </BoxReveal>
+
+              {/* Password */}
+              <BoxReveal width="100%" boxColor="hsl(var(--primary))" duration={0.3}>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10 pointer-events-none" />
                   <AnimatedInput
                     type={showPassword ? "text" : "password"}
                     placeholder="Mínimo 6 caracteres"
@@ -149,65 +179,87 @@ export default function Auth() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
+                    className="pl-10 pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
                   >
-                    {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                    {showPassword ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
                   </button>
                 </div>
               </BoxReveal>
+
+              {/* Error / Success Messages */}
+              <AnimatePresence>
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20"
+                  >
+                    {error}
+                  </motion.p>
+                )}
+                {message && (
+                  <motion.p
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="text-sm text-primary bg-primary/10 p-3 rounded-lg border border-primary/20"
+                  >
+                    {message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+
+              {/* Submit */}
+              <BoxReveal width="100%" boxColor="hsl(var(--primary))" duration={0.3}>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="relative group/btn w-full py-3 rounded-lg premium-button text-primary-foreground font-semibold text-sm
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    outline-none cursor-pointer
+                    transform hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    {submitting ? "Aguarde..." : isLogin ? "Entrar" : "Cadastrar"}
+                    {!submitting && <ArrowRight className="size-4" />}
+                  </span>
+                  {/* Bottom glow */}
+                  <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-primary to-transparent" />
+                  <span className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-accent-foreground to-transparent" />
+                </button>
+              </BoxReveal>
+            </form>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center my-6">
+              <div className="border-t border-border/30 absolute w-full" />
+              <span className="bg-transparent px-3 relative text-xs text-muted-foreground">
+                {isLogin ? "ou" : "já tem conta?"}
+              </span>
             </div>
 
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-destructive bg-destructive/10 p-3 rounded-md"
-              >
-                {error}
-              </motion.p>
-            )}
+            {/* Toggle */}
+            <button
+              onClick={() => { setIsLogin(!isLogin); setError(""); setMessage(""); }}
+              className="w-full py-2.5 rounded-lg border border-border/30 bg-card/20 backdrop-blur-sm
+                text-sm text-muted-foreground hover:text-foreground hover:border-border/60
+                transition-all duration-200 cursor-pointer"
+            >
+              {isLogin ? "Criar uma conta gratuita" : "Já tenho conta — Entrar"}
+            </button>
 
-            {message && (
-              <motion.p
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-primary bg-primary/10 p-3 rounded-md"
-              >
-                {message}
-              </motion.p>
-            )}
-
-            <BoxReveal width="100%" boxColor="hsl(var(--primary))" duration={0.3}>
-              <button
-                className="relative group/btn w-full h-11 rounded-md font-semibold text-sm
-                  premium-button text-primary-foreground
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  outline-none cursor-pointer"
-                type="submit"
-                disabled={submitting}
-              >
-                {submitting ? "Aguarde..." : isLogin ? "Entrar →" : "Cadastrar →"}
-                <BottomGradient />
-              </button>
-            </BoxReveal>
-          </form>
-
-          {/* Toggle */}
-          <BoxReveal boxColor="hsl(var(--primary))" duration={0.3}>
-            <div className="text-center mt-2">
-              <button
-                onClick={() => { setIsLogin(!isLogin); setError(""); setMessage(""); }}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              >
-                {isLogin ? "Não tem conta? Cadastre-se" : "Já tem conta? Entre"}
-              </button>
-            </div>
-          </BoxReveal>
-        </div>
+            {/* Trust signal */}
+            <p className="mt-6 text-center text-[11px] text-muted-foreground/60">
+              🔒 Seus dados estão protegidos com criptografia de ponta a ponta.
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
