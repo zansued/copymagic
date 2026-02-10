@@ -111,6 +111,12 @@ export default function ProjectDetail() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(`/project/${id}/summary`)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              📊 Resumo
+            </button>
             {!isInputPhase && (
               <button
                 onClick={() => setCurrentStepIndex(-1)}
