@@ -252,7 +252,7 @@ export function MarketResearch({ provider, projectId, onUseProduct }: MarketRese
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
             <Clock className="h-4 w-4" /> Pesquisas Salvas ({savedResearches.length})
           </h3>
-          <ScrollArea className="max-h-[60vh]">
+          <ScrollArea className="h-[50vh]">
             <div className="space-y-2">
               {savedResearches.map((r) => (
                 <Card key={r.id} className="premium-card">
