@@ -1,18 +1,29 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { useCopywriter } from "@/hooks/use-copywriter";
 import { ProductInputForm } from "@/components/ProductInputForm";
 import { StepSidebar } from "@/components/StepSidebar";
 import { StepOutput } from "@/components/StepOutput";
 import { MarketResearch } from "@/components/MarketResearch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
-const Index = () => {
+export default function ProjectDetail() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [projectName, setProjectName] = useState("");
+  const [loading, setLoading] = useState(true);
+
   const {
     productInput,
     setProductInput,
     currentStepIndex,
     setCurrentStepIndex,
     results,
+    setResults,
     streamingText,
     isGenerating,
     provider,
@@ -24,35 +35,93 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<string>("research");
   const isInputPhase = currentStepIndex === -1;
 
-  const handleUseProduct = (productText: string) => {
+  // Load project data
+  useEffect(() => {
+    if (!id) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (error || !data) {
+        toast.error("Projeto não encontrado");
+        navigate("/", { replace: true });
+        return;
+      }
+      setProjectName(data.name);
+      if (data.product_input) setProductInput(data.product_input);
+      if (data.copy_results && typeof data.copy_results === "object") {
+        setResults(data.copy_results as Record<string, string>);
+      }
+      setLoading(false);
+    })();
+  }, [id]);
+
+  // Auto-save results when they change
+  const saveTimeout = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    if (loading || !id) return;
+    clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(async () => {
+      await supabase
+        .from("projects")
+        .update({ product_input: productInput, copy_results: results })
+        .eq("id", id);
+    }, 1000);
+    return () => clearTimeout(saveTimeout.current);
+  }, [results, productInput, loading, id]);
+
+  const handleUseProduct = async (productText: string) => {
     setProductInput(productText);
     setActiveTab("manual");
+    // Save research product to project
+    if (id) {
+      await supabase
+        .from("projects")
+        .update({ product_input: productText })
+        .eq("id", id);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando projeto...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b bg-card">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🎯</span>
             <div>
-              <h1 className="text-lg font-bold text-foreground leading-tight">CopyEngine</h1>
-              <p className="text-xs text-muted-foreground">Inteligência de Marketing Direto</p>
+              <h1 className="text-lg font-bold text-foreground leading-tight">{projectName}</h1>
+              <p className="text-xs text-muted-foreground">CopyEngine</p>
             </div>
           </div>
-          {!isInputPhase && (
+          <div className="flex items-center gap-3">
+            {!isInputPhase && (
+              <button
+                onClick={() => setCurrentStepIndex(-1)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← Input
+              </button>
+            )}
             <button
-              onClick={() => setCurrentStepIndex(-1)}
+              onClick={() => navigate("/")}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              ← Voltar ao Input
+              ← Projetos
             </button>
-          )}
+          </div>
         </div>
       </header>
 
-      {/* Main */}
       <main className="container px-4 py-8">
         {isInputPhase ? (
           <div className="max-w-2xl mx-auto">
@@ -103,6 +172,4 @@ const Index = () => {
       </main>
     </div>
   );
-};
-
-export default Index;
+}

@@ -66,6 +66,7 @@ export function useCopywriter() {
     currentStepIndex,
     setCurrentStepIndex,
     results,
+    setResults,
     streamingText,
     isGenerating,
     provider,
