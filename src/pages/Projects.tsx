@@ -152,11 +152,8 @@ export default function Projects() {
             {filtered.map((p) => (
               <Card key={p.id} className="premium-card">
                 <CardContent className="flex items-center gap-4 p-4">
-                  <button
-                    onClick={() => navigate(`/project/${p.id}`)}
-                    className="flex-1 text-left min-w-0"
-                  >
-                    {editingId === p.id ? (
+                  {editingId === p.id ? (
+                    <div className="flex-1 min-w-0">
                       <Input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
@@ -166,19 +163,21 @@ export default function Projects() {
                           if (e.key === "Escape") setEditingId(null);
                         }}
                         autoFocus
-                        onClick={(e) => e.stopPropagation()}
                         className="max-w-xs"
                       />
-                    ) : (
-                      <>
-                        <h3 className="font-semibold text-foreground truncate">{p.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {completedSteps(p.copy_results)}/9 etapas •{" "}
-                          {new Date(p.updated_at).toLocaleDateString("pt-BR")}
-                        </p>
-                      </>
-                    )}
-                  </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => navigate(`/project/${p.id}`)}
+                      className="flex-1 text-left min-w-0"
+                    >
+                      <h3 className="font-semibold text-foreground truncate">{p.name}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {completedSteps(p.copy_results)}/9 etapas •{" "}
+                        {new Date(p.updated_at).toLocaleDateString("pt-BR")}
+                      </p>
+                    </button>
+                  )}
                   <div className="flex gap-1 shrink-0">
                     <Button
                       variant="ghost"
