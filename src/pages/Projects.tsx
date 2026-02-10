@@ -18,6 +18,7 @@ import {
 import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { TopNav } from "@/components/TopNav";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 interface Project {
   id: string;
@@ -140,7 +141,15 @@ export default function Projects() {
         ) : (
           <div className="space-y-3">
             {filtered.map((p) => (
-              <Card key={p.id} className="premium-card">
+              <Card key={p.id} className="premium-card relative">
+                <GlowingEffect
+                  blur={6}
+                  borderWidth={2}
+                  spread={25}
+                  proximity={80}
+                  inactiveZone={0.5}
+                  disabled={false}
+                />
                 <CardContent className="flex items-center gap-4 p-4">
                   {editingId === p.id ? (
                     <div className="flex-1 min-w-0">
