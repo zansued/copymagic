@@ -10,7 +10,7 @@ import { StepOutput } from "@/components/StepOutput";
 import { MarketResearch } from "@/components/MarketResearch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { AppDock } from "@/components/AppDock";
+import { TopNav } from "@/components/TopNav";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -101,31 +101,8 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-background surface-gradient pb-28">
-      <header className="pt-6 pb-2 px-4">
-        <div className="container flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold gradient-text">{projectName}</h1>
-            <p className="text-xs text-muted-foreground">CopyEngine</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(`/project/${id}/summary`)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              📊 Resumo
-            </button>
-            {!isInputPhase && (
-              <button
-                onClick={() => setCurrentStepIndex(-1)}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                ← Input
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background surface-gradient">
+      <TopNav projectName={projectName} />
 
       <main className="container px-4 py-6">
         {isInputPhase ? (
@@ -176,7 +153,7 @@ export default function ProjectDetail() {
         )}
       </main>
 
-      <AppDock />
+      
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import { HeadlineReveal } from "@/components/ui/headline-reveal";
 import { toast } from "sonner";
-import { AppDock } from "@/components/AppDock";
+import { TopNav } from "@/components/TopNav";
 
 const STEP_COLORS = [
   { bg: "from-violet-500/20 to-violet-900/5", border: "border-violet-500/30", glow: "shadow-violet-500/10", accent: "#a78bfa" },
@@ -130,18 +130,8 @@ export default function ProjectSummary() {
   }
 
   return (
-    <div className="min-h-screen bg-background surface-gradient pb-28">
-      <header className="pt-6 pb-2 px-4">
-        <div className="container flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold gradient-text">{projectName}</h1>
-            <p className="text-xs text-muted-foreground">Resumo do Projeto</p>
-          </div>
-          <button onClick={() => navigate(`/project/${id}`)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Editar Projeto
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background surface-gradient">
+      <TopNav projectName={projectName} />
 
       <main className="container px-4 py-6 pb-20 max-w-5xl mx-auto">
         {/* Project Hero */}
@@ -269,7 +259,7 @@ export default function ProjectSummary() {
 
                     {/* Card content with scrollbar */}
                     <ScrollArea className={isExpanded ? "h-[50vh]" : "h-44"} style={{ overflow: "auto" }}>
-                      <div className="prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed pr-3">
+                      <div className="prose-premium max-w-none text-xs leading-relaxed pr-3">
                         <ReactMarkdown>{content}</ReactMarkdown>
                       </div>
                     </ScrollArea>
@@ -307,7 +297,7 @@ export default function ProjectSummary() {
         )}
       </main>
 
-      <AppDock />
+      
     </div>
   );
 }

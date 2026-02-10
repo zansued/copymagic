@@ -162,6 +162,164 @@
   .glow-ring:focus-within {
     box-shadow: 0 0 0 2px hsl(var(--glow) / 0.3), 0 0 20px -4px hsl(var(--glow) / 0.2);
   }
+
+  /* Premium prose styling for generated copy */
+  .prose-premium {
+    @apply text-foreground leading-relaxed;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .prose-premium h1 {
+    @apply text-2xl font-bold mt-8 mb-4 pb-3;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .prose-premium h2 {
+    @apply text-xl font-bold mt-7 mb-3 pb-2 flex items-center gap-2;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    color: hsl(var(--accent-foreground));
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+  }
+
+  .prose-premium h3 {
+    @apply text-lg font-semibold mt-5 mb-2;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    color: hsl(262 83% 75%);
+  }
+
+  .prose-premium h4 {
+    @apply text-base font-semibold mt-4 mb-2;
+    color: hsl(292 70% 65%);
+  }
+
+  .prose-premium p {
+    @apply mb-4 leading-7;
+    color: hsl(var(--foreground) / 0.9);
+  }
+
+  .prose-premium strong {
+    color: hsl(var(--accent-foreground));
+    font-weight: 700;
+  }
+
+  .prose-premium em {
+    color: hsl(292 70% 70%);
+    font-style: italic;
+  }
+
+  .prose-premium blockquote {
+    @apply my-4 pl-4 py-2 rounded-r-lg;
+    border-left: 3px solid hsl(var(--gradient-start));
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.08), transparent);
+    color: hsl(var(--foreground) / 0.85);
+  }
+
+  .prose-premium blockquote p {
+    @apply mb-0;
+  }
+
+  .prose-premium ul {
+    @apply my-4 space-y-2 pl-0;
+    list-style: none;
+  }
+
+  .prose-premium ul li {
+    @apply pl-6 relative;
+  }
+
+  .prose-premium ul li::before {
+    content: "▸";
+    position: absolute;
+    left: 0.5rem;
+    color: hsl(var(--gradient-start));
+    font-weight: bold;
+  }
+
+  .prose-premium ol {
+    @apply my-4 space-y-2 pl-0;
+    list-style: none;
+    counter-reset: premium-counter;
+  }
+
+  .prose-premium ol li {
+    @apply pl-8 relative;
+    counter-increment: premium-counter;
+  }
+
+  .prose-premium ol li::before {
+    content: counter(premium-counter);
+    position: absolute;
+    left: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+    color: white;
+  }
+
+  .prose-premium hr {
+    @apply my-6 border-0 h-px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gradient-start) / 0.4), hsl(var(--gradient-end) / 0.4), transparent);
+  }
+
+  .prose-premium code {
+    @apply px-1.5 py-0.5 rounded text-sm;
+    background: hsl(var(--muted));
+    color: hsl(var(--accent-foreground));
+  }
+
+  .prose-premium pre {
+    @apply my-4 p-4 rounded-lg overflow-x-auto;
+    background: hsl(var(--muted));
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .prose-premium pre code {
+    @apply p-0 bg-transparent;
+  }
+
+  .prose-premium a {
+    color: hsl(var(--gradient-start));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+  }
+
+  .prose-premium a:hover {
+    color: hsl(var(--gradient-end));
+  }
+
+  .prose-premium table {
+    @apply w-full my-4 text-sm;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .prose-premium th {
+    @apply px-3 py-2 text-left font-semibold text-xs uppercase tracking-wider;
+    background: hsl(var(--muted));
+    color: hsl(var(--accent-foreground));
+    border-bottom: 2px solid hsl(var(--gradient-start) / 0.3);
+  }
+
+  .prose-premium td {
+    @apply px-3 py-2;
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+  }
+
+  .prose-premium tr:hover td {
+    background: hsl(var(--primary) / 0.04);
+  }
 }
 
 @layer utilities {

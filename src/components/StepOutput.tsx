@@ -72,7 +72,7 @@ export function StepOutput({
 
       <ScrollArea className="flex-1 rounded-lg border bg-card p-6">
         {hasContent ? (
-          <div className="prose prose-sm dark:prose-invert max-w-none">
+          <div className="prose-premium max-w-none">
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
         ) : (
