@@ -44,12 +44,13 @@ export const HeadlineReveal: React.FC<HeadlineRevealProps> = ({
           opacity: 0;
           margin: 0 0.12em;
           transition: text-shadow 0.3s ease, transform 0.3s ease;
+          color: hsl(var(--foreground));
         }
         .headline-word.revealed {
           animation: headline-word-appear 0.7s ease-out forwards;
         }
         .headline-word:hover {
-          text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+          text-shadow: 0 0 20px hsl(var(--primary) / 0.6);
           transform: translateY(-2px);
         }
         .headline-underline {
