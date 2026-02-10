@@ -5,12 +5,14 @@ interface HeadlineRevealProps {
   text: string;
   className?: string;
   delayStart?: number;
+  gradient?: boolean;
 }
 
 export const HeadlineReveal: React.FC<HeadlineRevealProps> = ({
   text,
   className,
   delayStart = 300,
+  gradient = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -44,8 +46,13 @@ export const HeadlineReveal: React.FC<HeadlineRevealProps> = ({
           opacity: 0;
           margin: 0 0.12em;
           transition: text-shadow 0.3s ease, transform 0.3s ease;
-          color: inherit;
-          -webkit-text-fill-color: inherit;
+        }
+        .headline-word-gradient {
+          background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
         }
         .headline-word.revealed {
           animation: headline-word-appear 0.7s ease-out forwards;
@@ -67,7 +74,7 @@ export const HeadlineReveal: React.FC<HeadlineRevealProps> = ({
         {words.map((word, i) => (
           <span
             key={i}
-            className={cn("headline-word cursor-default", visible && "revealed")}
+            className={cn("headline-word cursor-default", gradient && "headline-word-gradient", visible && "revealed")}
             style={{ animationDelay: visible ? `${delayStart + i * 120}ms` : undefined }}
           >
             {word}

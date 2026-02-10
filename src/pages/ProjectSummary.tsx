@@ -198,7 +198,8 @@ export default function ProjectSummary() {
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">✨ Headline Principal</p>
               <HeadlineReveal
                 text={`"${mainHeadline}"`}
-                className="text-xl md:text-2xl font-bold gradient-text"
+                className="text-xl md:text-2xl font-bold"
+                gradient
               />
             </div>
           )}
