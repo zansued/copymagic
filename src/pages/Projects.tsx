@@ -234,7 +234,7 @@ export default function Projects() {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Essa ação não pode ser desfeita. Todas as copys desse projeto serão perdidas.
+              Deseja excluir o projeto <strong>"{projects.find(p => p.id === deleteId)?.name}"</strong>? Essa ação não pode ser desfeita. Todas as copys desse projeto serão perdidas.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
