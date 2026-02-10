@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GlowButton } from "@/components/ui/glow-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,8 +22,12 @@ export function StepOutput({
   onGenerate,
   onStop,
 }: StepOutputProps) {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const step = STEPS[currentStepIndex];
   if (!step) return null;
+
+  const allCompleted = STEPS.every(s => results[s.id]);
 
   const content = isGenerating ? streamingText : results[step.id] || "";
   const hasContent = content.length > 0;
@@ -84,6 +89,14 @@ export function StepOutput({
         <div className="mt-4 flex justify-end">
           <GlowButton glowColor="#34d399" onClick={() => onGenerate(currentStepIndex + 1)}>
             Próxima Etapa: {STEPS[currentStepIndex + 1].icon} {STEPS[currentStepIndex + 1].label} →
+          </GlowButton>
+        </div>
+      )}
+
+      {!isGenerating && allCompleted && currentStepIndex === STEPS.length - 1 && (
+        <div className="mt-4 flex justify-center">
+          <GlowButton glowColor="#facc15" className="px-6 py-3 text-base" onClick={() => navigate(`/project/${id}/summary`)}>
+            📊 Ver Resumo Completo →
           </GlowButton>
         </div>
       )}
