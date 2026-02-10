@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
-import { AppDock } from "@/components/AppDock";
+import { TopNav } from "@/components/TopNav";
 
 interface Project {
   id: string;
@@ -101,10 +101,10 @@ export default function Projects() {
   };
 
   return (
-    <div className="min-h-screen bg-background surface-gradient pb-28">
+    <div className="min-h-screen bg-background surface-gradient">
+      <TopNav />
       <header className="pt-8 pb-2 px-4 text-center">
-        <h1 className="text-2xl font-bold gradient-text">CopyEngine</h1>
-        <p className="text-sm text-muted-foreground mt-1">Seus Projetos</p>
+        <h1 className="text-2xl font-bold gradient-text">Seus Projetos</h1>
       </header>
 
       <main className="container px-4 py-6 max-w-3xl mx-auto space-y-6">
@@ -235,7 +235,7 @@ export default function Projects() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AppDock />
+      
     </div>
   );
 }
