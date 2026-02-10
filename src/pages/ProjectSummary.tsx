@@ -42,27 +42,41 @@ function extractHeadline(content: string): string {
   return "";
 }
 
-function extractProductSummary(productInput: string): { produto: string; publico: string; resumo: string } {
-  const lines = productInput.split("\n").filter(Boolean);
-  let produto = "";
-  let publico = "";
-  const resumoLines: string[] = [];
+function extractProductSummary(productInput: string): { produto: string; publico: string; problema: string; solucao: string } {
+  const text = productInput;
+  
+  // Try structured format: "Product" is for people who "Audience" suffer from "Problem" solves it through "Solution"
+  const productMatch = text.match(/^[""]?(.+?)[""]?\s+is for/i) || text.match(/^(.+?)(?:\n|$)/);
+  const audienceMatch = text.match(/is for (?:people who|those who|)\s*[""]?(.+?)[""]?\s*(?:suffer|who suffer|,)/i);
+  const problemMatch = text.match(/suffer from\s*[""]?(.+?)[""]?\s*(?:,\s*solves|solves)/i);
+  const solutionMatch = text.match(/solves it through\s*[""]?(.+?)[""]?\s*(?:,\s*works|works)/i);
 
-  for (const line of lines) {
-    const lower = line.toLowerCase();
-    if (!produto && (lower.includes("produto") || lower.includes("nome") || lower.includes("product"))) {
-      produto = line.replace(/^[^:]+:\s*/, "").trim();
-    } else if (!publico && (lower.includes("público") || lower.includes("audiência") || lower.includes("avatar") || lower.includes("target"))) {
-      publico = line.replace(/^[^:]+:\s*/, "").trim();
-    } else {
-      resumoLines.push(line.trim());
+  // Fallback: line-based extraction
+  const lines = text.split("\n").filter(Boolean);
+  let produto = productMatch?.[1]?.trim() || "";
+  let publico = audienceMatch?.[1]?.trim() || "";
+  let problema = problemMatch?.[1]?.trim() || "";
+  let solucao = solutionMatch?.[1]?.trim() || "";
+
+  if (!produto || !publico) {
+    for (const line of lines) {
+      const lower = line.toLowerCase();
+      if (!produto && (lower.includes("produto") || lower.includes("nome") || lower.includes("product"))) {
+        produto = line.replace(/^[^:]+:\s*/, "").trim();
+      } else if (!publico && (lower.includes("público") || lower.includes("audiência") || lower.includes("avatar") || lower.includes("target") || lower.includes("homens e mulheres") || lower.includes("pessoas que"))) {
+        publico = line.replace(/^[^:]+:\s*/, "").trim();
+      }
     }
   }
 
+  // Truncate long values
+  const truncate = (s: string, max: number) => s.length > max ? s.slice(0, max) + "…" : s;
+
   return {
-    produto: produto || lines[0]?.trim() || "Não informado",
-    publico: publico || "Não especificado",
-    resumo: resumoLines.slice(0, 3).join(" • ") || "",
+    produto: truncate(produto || lines[0]?.trim() || "Não informado", 100),
+    publico: truncate(publico || "Não especificado", 120),
+    problema: truncate(problema, 120),
+    solucao: truncate(solucao, 150),
   };
 }
 
@@ -157,10 +171,16 @@ export default function ProjectSummary() {
                   <td className="px-4 py-3 text-muted-foreground font-medium">🎯 Público-alvo</td>
                   <td className="px-4 py-3 text-foreground">{summary.publico}</td>
                 </tr>
-                {summary.resumo && (
+                {summary.problema && (
                   <tr className="border-b border-border/50">
-                    <td className="px-4 py-3 text-muted-foreground font-medium">💡 Detalhes</td>
-                    <td className="px-4 py-3 text-foreground">{summary.resumo}</td>
+                    <td className="px-4 py-3 text-muted-foreground font-medium">🔥 Problema</td>
+                    <td className="px-4 py-3 text-foreground">{summary.problema}</td>
+                  </tr>
+                )}
+                {summary.solucao && (
+                  <tr className="border-b border-border/50">
+                    <td className="px-4 py-3 text-muted-foreground font-medium">💡 Solução</td>
+                    <td className="px-4 py-3 text-foreground">{summary.solucao}</td>
                   </tr>
                 )}
                 <tr>
