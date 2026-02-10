@@ -7,14 +7,14 @@ export interface Step {
 }
 
 export const STEPS: Step[] = [
-  { id: "avatar", label: "Avatar", icon: "🧠", description: "Dr. Marcus Vale — Psicologia do Consumidor", agent: "Dr. Marcus Vale" },
-  { id: "usp", label: "USP", icon: "💎", description: "Rafael Rez — Estrategista de Posicionamento", agent: "Rafael Rez" },
-  { id: "oferta", label: "Oferta", icon: "📦", description: "André Diamand — Arquiteto de Ofertas", agent: "André Diamand" },
-  { id: "pagina_vendas", label: "Página de Vendas", icon: "📄", description: "Flávia Gamonar — Copywriter de Alta Conversão", agent: "Flávia Gamonar" },
-  { id: "upsells", label: "Upsells", icon: "🔥", description: "Pedro Superti — Maximização de LTV", agent: "Pedro Superti" },
-  { id: "vsl_longa", label: "VSL 60min", icon: "🎬", description: "Leandro Ladeira — Roteirista de VSLs", agent: "Leandro Ladeira" },
-  { id: "vsl_curta", label: "VSL 15min", icon: "🎥", description: "Leandro Ladeira — Modo Cirurgião de Atenção", agent: "Leandro Ladeira" },
-  { id: "pagina_upsell", label: "Pág. Upsell", icon: "🛒", description: "Natalia Arcuri — Copywriting Pós-Compra", agent: "Natalia Arcuri" },
-  { id: "vsl_upsell", label: "VSL Upsell", icon: "📹", description: "Especialista em VSL Pós-Compra", agent: "Especialista" },
-  { id: "anuncios", label: "Anúncios", icon: "📢", description: "Thiago Nigro — Criativo de Tráfego Pago", agent: "Thiago Nigro" },
+  { id: "avatar", label: "Avatar", icon: "🧠", description: "Psicologia do Consumidor", agent: "Dr. Marcus Vale" },
+  { id: "usp", label: "USP", icon: "💎", description: "Proposta Única de Vendas", agent: "Especialista USP" },
+  { id: "oferta", label: "Oferta", icon: "📦", description: "Oferta Irresistível", agent: "Especialista em Ofertas" },
+  { id: "pagina_vendas", label: "Página de Vendas", icon: "📄", description: "Copy de Alta Conversão", agent: "Copywriter" },
+  { id: "upsells", label: "Upsells", icon: "🔥", description: "Order Bumps & Upsells", agent: "Especialista em Funis" },
+  { id: "pagina_upsell", label: "Pág. Upsell", icon: "🛒", description: "Página Pós-Compra", agent: "Copywriter Pós-Compra" },
+  { id: "anuncios", label: "Anúncios", icon: "📢", description: "Criativos de Tráfego Pago", agent: "Especialista em Ads" },
+  { id: "vsl_upsell", label: "VSL Upsell", icon: "📹", description: "VSL 15min Pós-Compra", agent: "Roteirista" },
+  { id: "vsl_curta", label: "VSL 15min", icon: "🎥", description: "VSL Curta de Vendas", agent: "Roteirista" },
+  { id: "vsl_longa", label: "VSL 60min", icon: "🎬", description: "VSL Completa de Vendas", agent: "Roteirista" },
 ];
