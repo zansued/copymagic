@@ -15,6 +15,5 @@ export const STEPS: Step[] = [
   { id: "pagina_upsell", label: "Pág. Upsell", icon: "🛒", description: "Página Pós-Compra", agent: "Copywriter Pós-Compra" },
   { id: "anuncios", label: "Anúncios", icon: "📢", description: "Criativos de Tráfego Pago", agent: "Especialista em Ads" },
   { id: "vsl_upsell", label: "VSL Upsell", icon: "📹", description: "VSL 15min Pós-Compra", agent: "Roteirista" },
-  { id: "vsl_curta", label: "VSL 15min", icon: "🎥", description: "VSL Curta de Vendas", agent: "Roteirista" },
   { id: "vsl_longa", label: "VSL 60min", icon: "🎬", description: "VSL Completa de Vendas", agent: "Roteirista" },
 ];
