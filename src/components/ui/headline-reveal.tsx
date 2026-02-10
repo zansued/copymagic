@@ -44,7 +44,8 @@ export const HeadlineReveal: React.FC<HeadlineRevealProps> = ({
           opacity: 0;
           margin: 0 0.12em;
           transition: text-shadow 0.3s ease, transform 0.3s ease;
-          color: hsl(var(--foreground));
+          color: inherit;
+          -webkit-text-fill-color: inherit;
         }
         .headline-word.revealed {
           animation: headline-word-appear 0.7s ease-out forwards;
