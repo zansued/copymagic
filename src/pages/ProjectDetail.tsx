@@ -10,6 +10,7 @@ import { StepOutput } from "@/components/StepOutput";
 import { MarketResearch } from "@/components/MarketResearch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { AppDock } from "@/components/AppDock";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -100,15 +101,12 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-background surface-gradient">
-      <header className="glass-header">
-        <div className="container flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🎯</span>
-            <div>
-              <h1 className="text-lg font-bold leading-tight gradient-text">{projectName}</h1>
-              <p className="text-xs text-muted-foreground">CopyEngine</p>
-            </div>
+    <div className="min-h-screen bg-background surface-gradient pb-28">
+      <header className="pt-6 pb-2 px-4">
+        <div className="container flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold gradient-text">{projectName}</h1>
+            <p className="text-xs text-muted-foreground">CopyEngine</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -125,17 +123,11 @@ export default function ProjectDetail() {
                 ← Input
               </button>
             )}
-            <button
-              onClick={() => navigate("/")}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              ← Projetos
-            </button>
           </div>
         </div>
       </header>
 
-      <main className="container px-4 py-8">
+      <main className="container px-4 py-6">
         {isInputPhase ? (
           <div className="max-w-2xl mx-auto">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -183,6 +175,8 @@ export default function ProjectDetail() {
           </div>
         )}
       </main>
+
+      <AppDock />
     </div>
   );
 }

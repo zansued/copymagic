@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
+import { AppDock } from "@/components/AppDock";
 
 interface Project {
   id: string;
@@ -100,24 +101,13 @@ export default function Projects() {
   };
 
   return (
-    <div className="min-h-screen bg-background surface-gradient">
-      <header className="glass-header">
-        <div className="container flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🎯</span>
-            <div>
-              <h1 className="text-lg font-bold leading-tight gradient-text">CopyEngine</h1>
-              <p className="text-xs text-muted-foreground">Seus Projetos</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:inline">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={signOut}>Sair</Button>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background surface-gradient pb-28">
+      <header className="pt-8 pb-2 px-4 text-center">
+        <h1 className="text-2xl font-bold gradient-text">CopyEngine</h1>
+        <p className="text-sm text-muted-foreground mt-1">Seus Projetos</p>
       </header>
 
-      <main className="container px-4 py-8 max-w-3xl mx-auto space-y-6">
+      <main className="container px-4 py-6 max-w-3xl mx-auto space-y-6">
         <div className="flex gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -244,6 +234,8 @@ export default function Projects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AppDock />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import { HeadlineReveal } from "@/components/ui/headline-reveal";
 import { toast } from "sonner";
+import { AppDock } from "@/components/AppDock";
 
 const STEP_COLORS = [
   { bg: "from-violet-500/20 to-violet-900/5", border: "border-violet-500/30", glow: "shadow-violet-500/10", accent: "#a78bfa" },
@@ -129,28 +130,20 @@ export default function ProjectSummary() {
   }
 
   return (
-    <div className="min-h-screen bg-background surface-gradient">
-      <header className="glass-header">
-        <div className="container flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">📊</span>
-            <div>
-              <h1 className="text-lg font-bold leading-tight gradient-text">{projectName}</h1>
-              <p className="text-xs text-muted-foreground">Resumo do Projeto</p>
-            </div>
+    <div className="min-h-screen bg-background surface-gradient pb-28">
+      <header className="pt-6 pb-2 px-4">
+        <div className="container flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold gradient-text">{projectName}</h1>
+            <p className="text-xs text-muted-foreground">Resumo do Projeto</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(`/project/${id}`)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              ← Editar Projeto
-            </button>
-            <button onClick={() => navigate("/")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              ← Projetos
-            </button>
-          </div>
+          <button onClick={() => navigate(`/project/${id}`)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            ← Editar Projeto
+          </button>
         </div>
       </header>
 
-      <main className="container px-4 py-8 pb-20 max-w-5xl mx-auto">
+      <main className="container px-4 py-6 pb-20 max-w-5xl mx-auto">
         {/* Project Hero */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -313,6 +306,8 @@ export default function ProjectSummary() {
           </motion.div>
         )}
       </main>
+
+      <AppDock />
     </div>
   );
 }
