@@ -37,7 +37,9 @@ export function StepOutput({
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             {step.icon} {step.label}
           </h2>
-          <p className="text-sm text-muted-foreground">{step.description}</p>
+          <p className="text-sm text-muted-foreground">
+            🤖 <span className="font-medium">{step.agent}</span> — {step.description}
+          </p>
         </div>
         <div className="flex gap-2">
           {hasContent && !isGenerating && (
