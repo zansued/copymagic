@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
+import { GlowButton } from "@/components/ui/glow-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { STEPS } from "@/lib/steps";
 
@@ -48,13 +49,13 @@ export function StepOutput({
             </Button>
           )}
           {isGenerating ? (
-            <Button variant="destructive" size="sm" onClick={onStop}>
+            <GlowButton glowColor="#ef4444" className="h-9 px-3 text-sm" onClick={onStop}>
               ⏹ Parar
-            </Button>
+            </GlowButton>
           ) : (
-            <Button size="sm" onClick={() => onGenerate(currentStepIndex)}>
+            <GlowButton glowColor="#a78bfa" className="h-9 px-3 text-sm" onClick={() => onGenerate(currentStepIndex)}>
               {results[step.id] ? "🔄 Regenerar" : "▶️ Gerar"}
-            </Button>
+            </GlowButton>
           )}
         </div>
       </div>
@@ -76,9 +77,9 @@ export function StepOutput({
 
       {!isGenerating && results[step.id] && currentStepIndex < STEPS.length - 1 && (
         <div className="mt-4 flex justify-end">
-          <Button onClick={() => onGenerate(currentStepIndex + 1)}>
+          <GlowButton glowColor="#34d399" onClick={() => onGenerate(currentStepIndex + 1)}>
             Próxima Etapa: {STEPS[currentStepIndex + 1].icon} {STEPS[currentStepIndex + 1].label} →
-          </Button>
+          </GlowButton>
         </div>
       )}
     </div>

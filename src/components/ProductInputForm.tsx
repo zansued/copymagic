@@ -1,5 +1,6 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { GlowButton } from "@/components/ui/glow-button";
 import type { Provider } from "@/hooks/use-copywriter";
 
 interface ProductInputFormProps {
@@ -59,14 +60,14 @@ export function ProductInputForm({ value, onChange, onSubmit, isGenerating, prov
         className="min-h-[200px] font-mono text-sm"
       />
       <div className="flex gap-3">
-        <Button
+        <GlowButton
           onClick={onSubmit}
           disabled={!value.trim() || isGenerating}
-          size="lg"
-          className="flex-1"
+          glowColor="#a78bfa"
+          className="flex-1 h-11 text-base"
         >
           🚀 Gerar Etapa por Etapa
-        </Button>
+        </GlowButton>
       </div>
     </div>
   );
