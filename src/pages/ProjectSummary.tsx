@@ -5,6 +5,7 @@ import { STEPS } from "@/lib/steps";
 import { motion, AnimatePresence } from "motion/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
+import { MagicText } from "@/components/ui/magic-text";
 import { toast } from "sonner";
 
 const STEP_COLORS = [
@@ -210,17 +211,13 @@ export default function ProjectSummary() {
 
           {/* Main headline */}
           {mainHeadline && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="premium-card p-5 mb-6"
-            >
+            <div className="premium-card p-5 mb-6">
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">✨ Headline Principal</p>
-              <p className="text-xl md:text-2xl font-bold gradient-text leading-snug">
-                "{mainHeadline}"
-              </p>
-            </motion.div>
+              <MagicText
+                text={`"${mainHeadline}"`}
+                className="text-xl md:text-2xl font-bold gradient-text"
+              />
+            </div>
           )}
         </motion.div>
 
