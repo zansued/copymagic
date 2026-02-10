@@ -21,11 +21,25 @@ const STEP_COLORS = [
 
 function extractHeadline(content: string): string {
   const lines = content.split("\n").filter(Boolean);
+  // Skip lines that look like section headers, labels, or markdown headings
+  const skipPatterns = [/^#+\s/, /^---/, /^\*\*\[/, /^\[/, /^página/i, /^headline/i, /^início/i, /^seção/i, /^estrutura/i, /^módulo/i];
+  for (const line of lines) {
+    const clean = line.replace(/^#+\s*/, "").replace(/\*\*/g, "").replace(/\[.*?\]/g, "").trim();
+    if (clean.length < 15 || clean.length > 150) continue;
+    if (skipPatterns.some(p => p.test(line.trim()))) continue;
+    // Prefer lines that look like actual headlines (have emotional/action words)
+    if (clean.includes("?") || clean.includes("!") || clean.includes("como") || clean.includes("descubra") || clean.includes("método") || clean.includes("sistema") || clean.includes("segredo") || clean.includes("sem") || clean.includes("eliminar") || clean.includes("transforme") || clean.includes("único")) {
+      return clean;
+    }
+  }
+  // Fallback: find first substantial non-header line
   for (const line of lines) {
     const clean = line.replace(/^#+\s*/, "").replace(/\*\*/g, "").trim();
-    if (clean.length > 10 && clean.length < 120) return clean;
+    if (clean.length >= 20 && clean.length <= 150 && !skipPatterns.some(p => p.test(line.trim()))) {
+      return clean;
+    }
   }
-  return lines[0]?.slice(0, 80) || "";
+  return "";
 }
 
 function extractProductSummary(productInput: string): { produto: string; publico: string; resumo: string } {
@@ -131,19 +145,47 @@ export default function ProjectSummary() {
         >
           <h2 className="text-3xl md:text-4xl font-bold gradient-text mb-2">{projectName}</h2>
 
-          {/* Product summary */}
-          <div className="flex flex-wrap gap-3 mb-4">
-            <span className="inline-flex items-center gap-1.5 text-sm bg-secondary/60 text-secondary-foreground px-3 py-1 rounded-full">
-              📦 {summary.produto}
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-sm bg-secondary/60 text-secondary-foreground px-3 py-1 rounded-full">
-              🎯 {summary.publico}
-            </span>
-            {summary.resumo && (
-              <span className="inline-flex items-center gap-1.5 text-sm bg-secondary/60 text-secondary-foreground px-3 py-1 rounded-full max-w-md truncate">
-                💡 {summary.resumo}
-              </span>
-            )}
+          {/* Project info table */}
+          <div className="premium-card overflow-hidden mb-6">
+            <table className="w-full text-sm">
+              <tbody>
+                <tr className="border-b border-border/50">
+                  <td className="px-4 py-3 text-muted-foreground font-medium w-36">📦 Produto</td>
+                  <td className="px-4 py-3 text-foreground">{summary.produto}</td>
+                </tr>
+                <tr className="border-b border-border/50">
+                  <td className="px-4 py-3 text-muted-foreground font-medium">🎯 Público-alvo</td>
+                  <td className="px-4 py-3 text-foreground">{summary.publico}</td>
+                </tr>
+                {summary.resumo && (
+                  <tr className="border-b border-border/50">
+                    <td className="px-4 py-3 text-muted-foreground font-medium">💡 Detalhes</td>
+                    <td className="px-4 py-3 text-foreground">{summary.resumo}</td>
+                  </tr>
+                )}
+                <tr>
+                  <td className="px-4 py-3 text-muted-foreground font-medium">📈 Progresso</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden max-w-xs">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                          className="h-full rounded-full"
+                          style={{
+                            background: "linear-gradient(90deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)))",
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-muted-foreground font-medium">
+                        {completedSteps.length}/{totalSteps}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           {/* Main headline */}
@@ -154,31 +196,12 @@ export default function ProjectSummary() {
               transition={{ delay: 0.3, duration: 0.5 }}
               className="premium-card p-5 mb-6"
             >
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">✨ Headline Principal — Página de Vendas</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">✨ Headline Principal</p>
               <p className="text-xl md:text-2xl font-bold gradient-text leading-snug">
-                {mainHeadline}
+                "{mainHeadline}"
               </p>
             </motion.div>
           )}
-
-          {/* Progress */}
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-foreground">Progresso</span>
-            <span className="text-sm text-muted-foreground font-medium">
-              {completedSteps.length}/{totalSteps} etapas
-            </span>
-          </div>
-          <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
-              className="h-full rounded-full"
-              style={{
-                background: "linear-gradient(90deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)))",
-              }}
-            />
-          </div>
         </motion.div>
 
         {/* Cards grid */}
