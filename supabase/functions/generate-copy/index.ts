@@ -248,19 +248,47 @@ Gere para mídia paga:
 Linguagem falada, natural, como se estivesse conversando.`
 };
 
+interface ProviderConfig {
+  url: string;
+  apiKey: string;
+  model: string;
+}
+
+function getProviderConfig(provider: string): ProviderConfig {
+  if (provider === "deepseek") {
+    const apiKey = Deno.env.get("DEEPSEEK_API_KEY");
+    if (!apiKey) throw new Error("DEEPSEEK_API_KEY não está configurada");
+    return {
+      url: "https://api.deepseek.com/chat/completions",
+      apiKey,
+      model: "deepseek-chat",
+    };
+  }
+  
+  if (provider === "openai") {
+    const apiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!apiKey) throw new Error("OPENAI_API_KEY não está configurada");
+    return {
+      url: "https://api.openai.com/v1/chat/completions",
+      apiKey,
+      model: "gpt-4o",
+    };
+  }
+
+  throw new Error(`Provedor inválido: ${provider}`);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { product_input, step, previous_context } = await req.json();
-    
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const { product_input, step, previous_context, provider = "deepseek" } = await req.json();
 
+    const config = getProviderConfig(provider);
     const stepPrompt = STEP_PROMPTS[step];
-    if (!stepPrompt) throw new Error(`Invalid step: ${step}`);
+    if (!stepPrompt) throw new Error(`Etapa inválida: ${step}`);
 
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
@@ -278,14 +306,14 @@ serve(async (req) => {
       content: `PRODUTO: ${product_input}\n\n${stepPrompt}`
     });
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(config.url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${config.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: config.model,
         messages,
         stream: true,
       }),
@@ -297,14 +325,9 @@ serve(async (req) => {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos ao seu workspace." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "Erro no gateway de IA" }), {
+      console.error("API error:", response.status, t);
+      return new Response(JSON.stringify({ error: `Erro na API ${provider}: ${response.status}` }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

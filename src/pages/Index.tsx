@@ -12,6 +12,8 @@ const Index = () => {
     results,
     streamingText,
     isGenerating,
+    provider,
+    setProvider,
     generateStep,
     stopGeneration,
   } = useCopywriter();
@@ -50,6 +52,8 @@ const Index = () => {
               onChange={setProductInput}
               onSubmit={() => generateStep(0)}
               isGenerating={isGenerating}
+              provider={provider}
+              onProviderChange={setProvider}
             />
           </div>
         ) : (

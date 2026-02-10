@@ -4,6 +4,7 @@ export async function streamCopy({
   productInput,
   step,
   previousContext,
+  provider,
   onDelta,
   onDone,
   signal,
@@ -11,6 +12,7 @@ export async function streamCopy({
   productInput: string;
   step: string;
   previousContext?: string;
+  provider: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   signal?: AbortSignal;
@@ -25,6 +27,7 @@ export async function streamCopy({
       product_input: productInput,
       step,
       previous_context: previousContext,
+      provider,
     }),
     signal,
   });
@@ -69,7 +72,6 @@ export async function streamCopy({
     }
   }
 
-  // Final flush
   if (textBuffer.trim()) {
     for (let raw of textBuffer.split("\n")) {
       if (!raw) continue;
