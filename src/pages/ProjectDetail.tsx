@@ -93,13 +93,13 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+    <div className="min-h-screen bg-background surface-gradient">
+      <header className="glass-header">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🎯</span>
             <div>
-              <h1 className="text-lg font-bold text-foreground leading-tight">{projectName}</h1>
+              <h1 className="text-lg font-bold leading-tight gradient-text">{projectName}</h1>
               <p className="text-xs text-muted-foreground">CopyEngine</p>
             </div>
           </div>
