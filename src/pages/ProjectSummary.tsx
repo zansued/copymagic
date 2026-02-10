@@ -121,7 +121,7 @@ export default function ProjectSummary() {
         </div>
       </header>
 
-      <main className="container px-4 py-8 max-w-5xl mx-auto">
+      <main className="container px-4 py-8 pb-20 max-w-5xl mx-auto">
         {/* Project Hero */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -235,7 +235,7 @@ export default function ProjectSummary() {
                     </div>
 
                     {/* Card content with scrollbar */}
-                    <ScrollArea className={isExpanded ? "h-[50vh]" : "h-40"}>
+                    <ScrollArea className={isExpanded ? "h-[50vh]" : "h-44"} style={{ overflow: "auto" }}>
                       <div className="prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed pr-3">
                         <ReactMarkdown>{content}</ReactMarkdown>
                       </div>
