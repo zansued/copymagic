@@ -5,7 +5,7 @@ import { STEPS } from "@/lib/steps";
 import { motion, AnimatePresence } from "motion/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
-import { HeadlineReveal } from "@/components/ui/headline-reveal";
+
 import { toast } from "sonner";
 import { TopNav } from "@/components/TopNav";
 
@@ -196,10 +196,27 @@ export default function ProjectSummary() {
           {mainHeadline && (
             <div className="premium-card p-6 mb-6 overflow-hidden">
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">✨ Headline Principal</p>
-              <HeadlineReveal
-                text={`"${mainHeadline}"`}
-                className="text-xl md:text-2xl font-bold"
-                gradient
+              <p className="text-xl md:text-2xl font-bold text-center leading-snug">
+                <span className="gradient-text">"</span>
+                {mainHeadline.split(" ").map((word, i) => (
+                  <motion.span
+                    key={i}
+                    initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ duration: 0.4, delay: 0.3 + i * 0.07, ease: "easeOut" }}
+                    className="inline-block mx-[0.15em] gradient-text"
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+                <span className="gradient-text">"</span>
+              </p>
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 1.2, delay: 0.3 + mainHeadline.split(" ").length * 0.07 + 0.2, ease: "easeOut" }}
+                className="mt-4 h-px mx-auto max-w-xs origin-center"
+                style={{ background: "linear-gradient(90deg, transparent, hsl(var(--gradient-start) / 0.5), hsl(var(--gradient-end) / 0.5), transparent)" }}
               />
             </div>
           )}
