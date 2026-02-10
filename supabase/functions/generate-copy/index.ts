@@ -1032,9 +1032,17 @@ REGRAS ABSOLUTAS DO SISTEMA:
         role: "assistant",
         content: continue_from
       });
+      // Get the last ~300 chars to help the model know exactly where it stopped
+      const lastChunk = continue_from.slice(-300);
       messages.push({
         role: "user",
-        content: "O texto acima foi cortado antes de terminar. Continue EXATAMENTE de onde parou, sem repetir o que já foi escrito. Mantenha o mesmo tom, estilo e estrutura. Complete todas as seções restantes."
+        content: `O texto acima foi cortado antes de terminar. As últimas palavras escritas foram:
+
+"""
+${lastChunk}
+"""
+
+Continue EXATAMENTE de onde parou. NÃO repita nenhum conteúdo que já foi escrito acima. Apenas continue escrevendo as seções e parágrafos que faltam, mantendo o mesmo tom, estilo e estrutura. Complete TODAS as seções restantes da estrutura obrigatória.`
       });
     }
 
