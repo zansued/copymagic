@@ -87,7 +87,6 @@ export default function Auth() {
             transition={{ duration: 0.8 }}
           >
             <div className="flex items-center gap-2 justify-center lg:justify-start mb-4">
-              <span className="text-4xl">🎯</span>
               <span className="text-sm font-medium text-primary uppercase tracking-[0.2em]">CopyEngine</span>
             </div>
 
