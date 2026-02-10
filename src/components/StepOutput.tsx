@@ -9,7 +9,7 @@ interface StepOutputProps {
   results: Record<string, string>;
   streamingText: string;
   isGenerating: boolean;
-  onGenerate: (index: number) => void;
+  onGenerate: (index: number, continueFrom?: string) => void;
   onStop: () => void;
 }
 
@@ -44,9 +44,14 @@ export function StepOutput({
         </div>
         <div className="flex gap-2">
           {hasContent && !isGenerating && (
-            <Button variant="outline" size="sm" onClick={handleCopy}>
-              📋 Copiar
-            </Button>
+            <>
+              <Button variant="outline" size="sm" onClick={handleCopy}>
+                📋 Copiar
+              </Button>
+              <GlowButton glowColor="#38bdf8" className="h-9 px-3 text-sm" onClick={() => onGenerate(currentStepIndex, content)}>
+                ▶️ Continuar
+              </GlowButton>
+            </>
           )}
           {isGenerating ? (
             <GlowButton glowColor="#ef4444" className="h-9 px-3 text-sm" onClick={onStop}>

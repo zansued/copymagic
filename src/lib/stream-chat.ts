@@ -5,6 +5,7 @@ export async function streamCopy({
   step,
   previousContext,
   provider,
+  continueFrom,
   onDelta,
   onDone,
   signal,
@@ -13,6 +14,7 @@ export async function streamCopy({
   step: string;
   previousContext?: string;
   provider: string;
+  continueFrom?: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   signal?: AbortSignal;
@@ -28,6 +30,7 @@ export async function streamCopy({
       step,
       previous_context: previousContext,
       provider,
+      continue_from: continueFrom,
     }),
     signal,
   });

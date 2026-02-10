@@ -993,7 +993,7 @@ serve(async (req) => {
   }
 
   try {
-    const { product_input, step, previous_context, provider = "deepseek" } = await req.json();
+    const { product_input, step, previous_context, provider = "deepseek", continue_from } = await req.json();
 
     const config = getProviderConfig(provider);
     const agent = AGENTS[step];
@@ -1025,6 +1025,18 @@ REGRAS ABSOLUTAS DO SISTEMA:
       role: "user",
       content: `PRODUTO: ${product_input}\n\n${agent.instructions}`
     });
+
+    // If continuing from previous incomplete output, inject it as assistant message
+    if (continue_from) {
+      messages.push({
+        role: "assistant",
+        content: continue_from
+      });
+      messages.push({
+        role: "user",
+        content: "O texto acima foi cortado antes de terminar. Continue EXATAMENTE de onde parou, sem repetir o que já foi escrito. Mantenha o mesmo tom, estilo e estrutura. Complete todas as seções restantes."
+      });
+    }
 
     const response = await fetch(config.url, {
       method: "POST",

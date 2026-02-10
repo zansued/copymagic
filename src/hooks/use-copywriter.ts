@@ -13,12 +13,13 @@ export function useCopywriter() {
   const [provider, setProvider] = useState<Provider>("deepseek");
   const abortRef = useRef<AbortController | null>(null);
 
-  const generateStep = useCallback(async (stepIndex: number) => {
+  const generateStep = useCallback(async (stepIndex: number, continueFrom?: string) => {
     const step = STEPS[stepIndex];
     if (!step) return;
 
     setCurrentStepIndex(stepIndex);
-    setStreamingText("");
+    const existingContent = continueFrom || "";
+    setStreamingText(existingContent);
     setIsGenerating(true);
 
     const previousSteps = STEPS.slice(0, stepIndex);
@@ -28,7 +29,7 @@ export function useCopywriter() {
       .join("\n\n---\n\n");
 
     abortRef.current = new AbortController();
-    let accumulated = "";
+    let accumulated = existingContent;
 
     try {
       await streamCopy({
@@ -36,6 +37,7 @@ export function useCopywriter() {
         step: step.id,
         previousContext: previousContext || undefined,
         provider,
+        continueFrom: continueFrom || undefined,
         onDelta: (text) => {
           accumulated += text;
           setStreamingText(accumulated);
