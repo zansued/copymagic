@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { STEPS } from "@/lib/steps";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -52,7 +53,13 @@ export default function ProjectDetail() {
       setProjectName(data.name);
       if (data.product_input) setProductInput(data.product_input);
       if (data.copy_results && typeof data.copy_results === "object") {
-        setResults(data.copy_results as Record<string, string>);
+        const savedResults = data.copy_results as Record<string, string>;
+        setResults(savedResults);
+        // Restore step index to last completed step
+        const completedSteps = STEPS.map((s, i) => savedResults[s.id] ? i : -1).filter(i => i >= 0);
+        if (completedSteps.length > 0) {
+          setCurrentStepIndex(Math.max(...completedSteps));
+        }
       }
       setLoading(false);
     })();
