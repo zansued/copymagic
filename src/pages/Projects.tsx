@@ -100,13 +100,13 @@ export default function Projects() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+    <div className="min-h-screen bg-background surface-gradient">
+      <header className="glass-header">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🎯</span>
             <div>
-              <h1 className="text-lg font-bold text-foreground leading-tight">CopyEngine</h1>
+              <h1 className="text-lg font-bold leading-tight gradient-text">CopyEngine</h1>
               <p className="text-xs text-muted-foreground">Seus Projetos</p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function Projects() {
         ) : (
           <div className="space-y-3">
             {filtered.map((p) => (
-              <Card key={p.id} className="hover:shadow-md transition-shadow">
+              <Card key={p.id} className="premium-card">
                 <CardContent className="flex items-center gap-4 p-4">
                   <button
                     onClick={() => navigate(`/project/${p.id}`)}
