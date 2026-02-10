@@ -132,7 +132,7 @@ export default function ProjectDetail() {
               </TabsList>
 
               <TabsContent value="research">
-                <MarketResearch provider={provider} onUseProduct={handleUseProduct} />
+                <MarketResearch provider={provider} projectId={id!} onUseProduct={handleUseProduct} />
               </TabsContent>
 
               <TabsContent value="manual">
