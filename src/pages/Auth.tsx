@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { AnimatedInput } from "@/components/auth/AnimatedInput";
 import { BoxReveal } from "@/components/auth/BoxReveal";
-import { OrbitingCircles } from "@/components/auth/OrbitingCircles";
-import { Eye, EyeOff, Zap, Target, PenTool, BarChart3, Sparkles, Megaphone } from "lucide-react";
+import { SplineScene } from "@/components/ui/SplineScene";
+import { Eye, EyeOff } from "lucide-react";
 import { motion } from "motion/react";
 
 const BottomGradient = () => (
@@ -60,60 +60,38 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left side — Orbit display (hidden on mobile) */}
+      {/* Left side — Spline 3D (hidden on mobile) */}
       <div className="hidden lg:flex w-1/2 relative items-center justify-center overflow-hidden surface-gradient">
-        {/* Background grid */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="authGrid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#authGrid)" />
-        </svg>
-
         {/* Ambient glow */}
-        <div className="absolute w-96 h-96 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }} />
+        <div className="absolute w-96 h-96 rounded-full opacity-15 blur-3xl" style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }} />
 
-        {/* Orbiting icons */}
-        <div className="relative flex h-[500px] w-[500px] items-center justify-center">
-          <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-foreground to-muted-foreground bg-clip-text text-center text-6xl font-bold leading-none text-transparent font-['Space_Grotesk']">
-            Copy<br />Engine
-          </span>
-
-          <OrbitingCircles className="size-10 border-none bg-transparent" duration={20} delay={0} radius={120}>
-            <Zap className="size-5 text-primary" />
-          </OrbitingCircles>
-          <OrbitingCircles className="size-10 border-none bg-transparent" duration={20} delay={5} radius={120}>
-            <Target className="size-5 text-accent-foreground" />
-          </OrbitingCircles>
-          <OrbitingCircles className="size-10 border-none bg-transparent" duration={20} delay={10} radius={120}>
-            <PenTool className="size-5 text-primary" />
-          </OrbitingCircles>
-          <OrbitingCircles className="size-10 border-none bg-transparent" duration={20} delay={15} radius={120}>
-            <Sparkles className="size-5 text-accent-foreground" />
-          </OrbitingCircles>
-
-          <OrbitingCircles className="size-12 border-none bg-transparent" duration={30} delay={0} radius={200} reverse>
-            <BarChart3 className="size-6 text-muted-foreground" />
-          </OrbitingCircles>
-          <OrbitingCircles className="size-12 border-none bg-transparent" duration={30} delay={10} radius={200} reverse>
-            <Megaphone className="size-6 text-muted-foreground" />
-          </OrbitingCircles>
-          <OrbitingCircles className="size-12 border-none bg-transparent" duration={30} delay={20} radius={200} reverse>
-            <Zap className="size-6 text-muted-foreground" />
-          </OrbitingCircles>
+        {/* Spline 3D Scene */}
+        <div className="absolute inset-0">
+          <SplineScene
+            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+            className="w-full h-full"
+          />
         </div>
 
-        {/* Bottom tagline */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="absolute bottom-12 text-sm text-muted-foreground tracking-wider uppercase"
-        >
-          Copywriting movido a IA
-        </motion.p>
+        {/* Overlay text */}
+        <div className="relative z-10 pointer-events-none text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.5, duration: 0.8 }}
+            className="text-5xl font-bold gradient-text font-['Space_Grotesk'] drop-shadow-lg"
+          >
+            CopyEngine
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2, duration: 0.6 }}
+            className="mt-3 text-sm text-muted-foreground tracking-wider uppercase"
+          >
+            Copywriting movido a IA
+          </motion.p>
+        </div>
       </div>
 
       {/* Right side — Form */}
