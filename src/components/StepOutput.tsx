@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GlowButton } from "@/components/ui/glow-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { STEPS } from "@/lib/steps";
 
 interface StepOutputProps {
@@ -70,20 +71,30 @@ export function StepOutput({
         </div>
       </div>
 
-      <ScrollArea className="flex-1 rounded-lg border bg-card p-6">
-        {hasContent ? (
-          <div className="prose-premium max-w-none">
-            <ReactMarkdown>{content}</ReactMarkdown>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-64 text-muted-foreground">
-            <p>Clique em "Gerar" para criar o conteúdo desta etapa.</p>
-          </div>
-        )}
-        {isGenerating && (
-          <span className="inline-block w-2 h-5 bg-primary animate-pulse ml-1" />
-        )}
-      </ScrollArea>
+      <div className="relative flex-1 rounded-lg">
+        <GlowingEffect
+          blur={8}
+          borderWidth={2}
+          spread={30}
+          proximity={100}
+          inactiveZone={0.4}
+          disabled={false}
+        />
+        <ScrollArea className="h-full rounded-lg border bg-card p-6">
+          {hasContent ? (
+            <div className="prose-premium max-w-none">
+              <ReactMarkdown>{content}</ReactMarkdown>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
+              <p>Clique em "Gerar" para criar o conteúdo desta etapa.</p>
+            </div>
+          )}
+          {isGenerating && (
+            <span className="inline-block w-2 h-5 bg-primary animate-pulse ml-1" />
+          )}
+        </ScrollArea>
+      </div>
 
       {!isGenerating && results[step.id] && currentStepIndex < STEPS.length - 1 && (
         <div className="mt-4 flex justify-end">
