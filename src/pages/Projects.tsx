@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Edit2, FolderOpen, Plus, Search } from "lucide-react";
+import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Project {
@@ -190,6 +190,17 @@ export default function Projects() {
                       }}
                     >
                       <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/project/${p.id}/summary`);
+                      }}
+                      title="Resumo"
+                    >
+                      <BarChart3 className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
