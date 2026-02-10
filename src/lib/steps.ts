@@ -3,17 +3,18 @@ export interface Step {
   label: string;
   icon: string;
   description: string;
+  agent: string;
 }
 
 export const STEPS: Step[] = [
-  { id: "avatar", label: "Avatar", icon: "🧠", description: "Perfil psicológico profundo do público-alvo" },
-  { id: "usp", label: "USP", icon: "💎", description: "Proposta Única de Vendas" },
-  { id: "oferta", label: "Oferta", icon: "📦", description: "Oferta irresistível completa" },
-  { id: "pagina_vendas", label: "Página de Vendas", icon: "📄", description: "Página de vendas com todas as seções" },
-  { id: "upsells", label: "Upsells", icon: "🔥", description: "Order Bumps, Upsells e Upsell refinado" },
-  { id: "vsl_longa", label: "VSL 60min", icon: "🎬", description: "Script completo da VSL de 60 minutos" },
-  { id: "vsl_curta", label: "VSL 15min", icon: "🎥", description: "VSL condensada de 15 minutos" },
-  { id: "pagina_upsell", label: "Pág. Upsell", icon: "🛒", description: "Página de upsell completa" },
-  { id: "vsl_upsell", label: "VSL Upsell", icon: "📹", description: "VSL de upsell (15 min)" },
-  { id: "anuncios", label: "Anúncios", icon: "📢", description: "Headlines, scripts e copies para ads" },
+  { id: "avatar", label: "Avatar", icon: "🧠", description: "Dr. Marcus Vale — Psicologia do Consumidor", agent: "Dr. Marcus Vale" },
+  { id: "usp", label: "USP", icon: "💎", description: "Rafael Rez — Estrategista de Posicionamento", agent: "Rafael Rez" },
+  { id: "oferta", label: "Oferta", icon: "📦", description: "André Diamand — Arquiteto de Ofertas", agent: "André Diamand" },
+  { id: "pagina_vendas", label: "Página de Vendas", icon: "📄", description: "Flávia Gamonar — Copywriter de Alta Conversão", agent: "Flávia Gamonar" },
+  { id: "upsells", label: "Upsells", icon: "🔥", description: "Pedro Superti — Maximização de LTV", agent: "Pedro Superti" },
+  { id: "vsl_longa", label: "VSL 60min", icon: "🎬", description: "Leandro Ladeira — Roteirista de VSLs", agent: "Leandro Ladeira" },
+  { id: "vsl_curta", label: "VSL 15min", icon: "🎥", description: "Leandro Ladeira — Modo Cirurgião de Atenção", agent: "Leandro Ladeira" },
+  { id: "pagina_upsell", label: "Pág. Upsell", icon: "🛒", description: "Natalia Arcuri — Copywriting Pós-Compra", agent: "Natalia Arcuri" },
+  { id: "vsl_upsell", label: "VSL Upsell", icon: "📹", description: "Especialista em VSL Pós-Compra", agent: "Especialista" },
+  { id: "anuncios", label: "Anúncios", icon: "📢", description: "Thiago Nigro — Criativo de Tráfego Pago", agent: "Thiago Nigro" },
 ];
