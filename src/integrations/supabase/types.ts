@@ -59,6 +59,65 @@ export type Database = {
         }
         Relationships: []
       }
+      site_generations: {
+        Row: {
+          branding: Json | null
+          created_at: string
+          cultural_region: string | null
+          generated_assets: Json | null
+          generated_html: string | null
+          id: string
+          include_upsells: boolean | null
+          language_code: string | null
+          locale_code: string | null
+          project_id: string
+          status: string
+          template_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          branding?: Json | null
+          created_at?: string
+          cultural_region?: string | null
+          generated_assets?: Json | null
+          generated_html?: string | null
+          id?: string
+          include_upsells?: boolean | null
+          language_code?: string | null
+          locale_code?: string | null
+          project_id: string
+          status?: string
+          template_key?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          branding?: Json | null
+          created_at?: string
+          cultural_region?: string | null
+          generated_assets?: Json | null
+          generated_html?: string | null
+          id?: string
+          include_upsells?: boolean | null
+          language_code?: string | null
+          locale_code?: string | null
+          project_id?: string
+          status?: string
+          template_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_generations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
