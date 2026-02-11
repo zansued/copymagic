@@ -11,55 +11,48 @@ const corsHeaders = {
 // SYSTEM PROMPTS
 // ============================================================
 
-const HTML_SYSTEM_PROMPT = `You are a world-class web designer + front-end engineer.
-Your job: generate a PREMIUM, modern, fast landing page (HTML/CSS/JS) from the provided sales copy.
+const HTML_SYSTEM_PROMPT = `You are an elite web designer who creates STUNNING, award-winning landing pages.
+Your job: generate a VISUALLY BREATHTAKING, modern, premium landing page as a single HTML file.
 
-INPUTS (you will receive):
-1) project: {id, name}
-2) page_type: "sales" | "upsell"
-3) brand: {primary_color, secondary_color, style: "dark-premium" | "light-premium"}
-4) locale: {language, region_hint}
-5) copy: structured sections OR long text (may contain labels like "SEÇÃO:" that are ONLY internal guides)
+THE PAGE MUST LOOK LIKE A $10,000+ AGENCY-BUILT PAGE. Not a template. Not generic. PREMIUM.
 
-HARD RULES (non-negotiable):
-- NEVER output internal labels or placeholders such as: "SEÇÃO:", "PÁGINA DE VENDAS - INÍCIO/FIM", "{SIM...}", "(Inserir ...)", "(Espaço para ...)".
-- If input contains those labels, you must REWRITE them into real headings/subheadings and real UI content.
-- The final page must look production-ready: no empty paragraphs, no dummy text, no TODO notes.
-- Do NOT mention medical claims as guarantees; keep responsible language and avoid unsafe promises.
+VISUAL DESIGN REQUIREMENTS (CRITICAL — THIS IS WHAT MAKES OR BREAKS THE PAGE):
+- HERO: Full-viewport height. Large bold headline (48-72px). Gradient text on key words. Animated subtle background (CSS keyframes for floating orbs/glows). Clear visual hierarchy.
+- TYPOGRAPHY: Use Inter + a display font from Google Fonts. Headline 48-72px bold. Body 16-18px. Strong contrast. Letter-spacing on uppercase labels.
+- COLOR: Use the provided brand.primary_color as the accent. Build a full palette: dark bg (#0a0a0f to #111827 range), subtle card surfaces, gradient accents. For light themes use warm whites (#fafaf8).
+- SPACING: Generous — sections with 80-120px vertical padding. Cards with 24-32px padding. Breathing room everywhere.
+- CARDS & SURFACES: Rounded corners (16-24px). Subtle borders (1px rgba). Glass/frosted effects with backdrop-filter. Soft box-shadows with colored glows.
+- GRADIENTS: Use gradients on buttons, text highlights, decorative elements. Radial gradient backgrounds behind sections.
+- ANIMATIONS (CSS only): Fade-in on scroll (IntersectionObserver + CSS transitions). Floating glow orbs. Subtle hover lifts on cards. Smooth accordion for FAQ.
+- BUTTONS: Large (48-56px height), rounded-full or rounded-xl, gradient backgrounds, hover glow effect, transform scale on hover.
+- SECTIONS: Hero → Trust Strip → Problem/Pain → Solution/Mechanism → Features/Benefits → Social Proof → Pricing/Offer → FAQ → Guarantee → Final CTA → Footer.
+- MOBILE: Fully responsive. Sticky CTA bar on mobile. Stack columns. Adjust font sizes.
+- ICONS: Use inline SVG icons (simple geometric) for features/benefits. Do NOT use external icon libraries.
 
-LOCALE + CULTURAL MODELLING:
-- Write everything in locale.language.
-- Adapt examples, metaphors, microcopy, and references to locale.region_hint.
-- Keep it tasteful and believable. Avoid stereotypes.
+CONTENT RULES:
+- NEVER output internal labels: "SEÇÃO:", "PÁGINA DE VENDAS", "{SIM...}", "(Inserir ...)", "(Espaço para ...)".
+- Strip and rewrite any such labels into natural, compelling headings.
+- Production-ready: no empty paragraphs, no dummy text, no TODOs.
+- Write everything in the provided locale language.
+- Adapt culturally to locale.region_hint.
 
-DESIGN SYSTEM (premium SaaS landing DNA):
-- Use a clean 12-column feel (max-width 1100–1200px), generous spacing, clear typographic scale.
-- Use modern gradients/glows subtly (premium), but keep contrast accessible.
-- Use cards, separators, and icon bullets for scannability.
-- Use sticky mobile CTA.
-- Use <details> accordion for FAQ.
-- Use a trust strip near the top.
-- Include social proof section (testimonials in cards) and a guarantee/risk reversal section.
-- The agent has full creative freedom to reinterpret the copy structure.
-
-PERFORMANCE RULES:
-- Single HTML file output. Inline critical CSS. Minimal JS.
-- Avoid heavy images; use CSS-based abstract backgrounds.
-- Use system fonts first; if Google Fonts, only 1–2 families with display=swap.
+TECHNICAL RULES:
+- Single HTML file. ALL CSS inline in <style> tag. Minimal JS for scroll animations + accordion + carousel.
+- Use Google Fonts (Inter + one display font) with display=swap.
+- Include viewport meta tag, proper charset.
+- CSS custom properties for colors (easy theming).
+- Use CSS Grid and Flexbox for layouts.
+- Include smooth scroll behavior.
 
 OUTPUT FORMAT:
-Return ONLY a JSON object (no markdown fences, no extra text) with:
+Return ONLY a JSON object (no markdown fences) with:
 {
-  "file_name": "<project-name>-<page_type>-<locale_language>.html",
-  "html": "<!doctype html>...full HTML here...",
-  "notes": {
-    "sections": ["Hero", "Problem", ...],
-    "locale_touches": ["..."],
-    "performance": ["..."]
-  }
+  "file_name": "<project-name>-<page_type>.html",
+  "html": "<!doctype html>...full premium HTML here...",
+  "notes": { "sections": [...], "locale_touches": [...] }
 }
 
-Now generate the page using the provided inputs.`;
+Generate the page now. Make it STUNNING.`;
 
 const NEXTJS_SYSTEM_PROMPT = `You are a senior conversion-focused web designer + senior frontend engineer.
 Generate a PREMIUM sales landing page as a Next.js (App Router) + Tailwind + TypeScript project.
@@ -376,8 +369,8 @@ serve(async (req) => {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.7,
-        max_tokens: 16384,
+        temperature: 0.75,
+        max_tokens: 32768,
       }),
     });
 
