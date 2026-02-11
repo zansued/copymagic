@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { validateGenerationContext, buildCulturalSystemPrompt } from "../_shared/cultural-prompt.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -993,7 +994,10 @@ serve(async (req) => {
   }
 
   try {
-    const { product_input, step, previous_context, provider = "deepseek", continue_from } = await req.json();
+    const { product_input, step, previous_context, provider = "deepseek", continue_from, generation_context } = await req.json();
+
+    const genCtx = validateGenerationContext(generation_context);
+    const culturalPrompt = buildCulturalSystemPrompt(genCtx);
 
     const config = getProviderConfig(provider);
     const agent = AGENTS[step];
@@ -1001,8 +1005,9 @@ serve(async (req) => {
 
     const systemPrompt = `${agent.persona}
 
+${culturalPrompt}
+
 REGRAS ABSOLUTAS DO SISTEMA:
-• Responda SEMPRE em português do Brasil.
 • Nunca inventar dados científicos, estudos ou estatísticas falsas.
 • Nunca quebrar coerência psicológica do avatar.
 • Linguagem sempre humana, emocional e persuasiva.

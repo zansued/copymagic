@@ -9,6 +9,7 @@ import { Search, ChevronDown, ChevronUp, Clock, Trash2 } from "lucide-react";
 import { ContainerScroll, CardSticky } from "@/components/ui/card-sticky";
 import { motion, AnimatePresence } from "motion/react";
 import type { Provider } from "@/hooks/use-copywriter";
+import type { GenerationContext } from "@/lib/lcm-types";
 
 interface ResearchData {
   nicho: string;
@@ -37,9 +38,10 @@ interface MarketResearchProps {
   provider: Provider;
   projectId: string;
   onUseProduct: (productText: string) => void;
+  generationContext?: GenerationContext;
 }
 
-export function MarketResearch({ provider, projectId, onUseProduct }: MarketResearchProps) {
+export function MarketResearch({ provider, projectId, onUseProduct, generationContext }: MarketResearchProps) {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ResearchData | null>(null);
@@ -96,7 +98,7 @@ export function MarketResearch({ provider, projectId, onUseProduct }: MarketRese
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ query, provider }),
+          body: JSON.stringify({ query, provider, generation_context: generationContext }),
         }
       );
 

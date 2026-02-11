@@ -16,32 +16,44 @@ export type Database = {
     Tables: {
       projects: {
         Row: {
+          avoid_real_names: boolean
           copy_results: Json
           created_at: string
+          cultural_region: string | null
           id: string
+          language_code: string
           name: string
           product_input: string
           research_data: Json | null
+          tone_formality: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          avoid_real_names?: boolean
           copy_results?: Json
           created_at?: string
+          cultural_region?: string | null
           id?: string
+          language_code?: string
           name: string
           product_input?: string
           research_data?: Json | null
+          tone_formality?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          avoid_real_names?: boolean
           copy_results?: Json
           created_at?: string
+          cultural_region?: string | null
           id?: string
+          language_code?: string
           name?: string
           product_input?: string
           research_data?: Json | null
+          tone_formality?: string
           updated_at?: string
           user_id?: string
         }

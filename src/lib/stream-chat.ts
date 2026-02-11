@@ -1,3 +1,5 @@
+import type { GenerationContext } from "@/lib/lcm-types";
+
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-copy`;
 
 export async function streamCopy({
@@ -6,6 +8,7 @@ export async function streamCopy({
   previousContext,
   provider,
   continueFrom,
+  generationContext,
   onDelta,
   onDone,
   signal,
@@ -15,6 +18,7 @@ export async function streamCopy({
   previousContext?: string;
   provider: string;
   continueFrom?: string;
+  generationContext?: GenerationContext;
   onDelta: (text: string) => void;
   onDone: () => void;
   signal?: AbortSignal;
@@ -31,6 +35,7 @@ export async function streamCopy({
       previous_context: previousContext,
       provider,
       continue_from: continueFrom,
+      generation_context: generationContext,
     }),
     signal,
   });
