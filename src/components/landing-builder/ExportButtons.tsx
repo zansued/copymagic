@@ -90,9 +90,8 @@ export function ExportButtons({
       const result = await res.json();
 
       await downloadNextJsZip({
-        pageTsx: result.page_tsx,
-        globalsCss: result.globals_css,
-        projectName: selectedProjectName || "landing-page",
+        files: result.files || [],
+        projectName: result.project_name || selectedProjectName || "landing-page",
         primaryColor: brandingColor || "#7c3aed",
       });
 
