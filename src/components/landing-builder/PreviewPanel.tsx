@@ -66,7 +66,7 @@ export function PreviewPanel({ html, generating }: PreviewPanelProps) {
           <iframe
             srcDoc={html}
             className="w-full h-full border-0"
-            sandbox="allow-same-origin"
+            sandbox="allow-same-origin allow-scripts"
             title="Preview da página gerada"
             style={{ minHeight: 560 }}
           />
