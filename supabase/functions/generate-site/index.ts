@@ -11,67 +11,261 @@ const corsHeaders = {
 // SYSTEM PROMPTS
 // ============================================================
 
-const HTML_SYSTEM_PROMPT = `You are an elite web designer who creates STUNNING, award-winning landing pages.
+const HTML_SYSTEM_PROMPT = `You are an elite, award-winning web designer at a $500/hr agency.
 Your job: generate a VISUALLY BREATHTAKING, modern, premium landing page as a single HTML file.
+THE PAGE MUST LOOK LIKE A $50,000 AGENCY-BUILT PAGE. Not a template. PREMIUM CRAFT.
 
-THE PAGE MUST LOOK LIKE A $10,000+ AGENCY-BUILT PAGE. Not a template. Not generic. PREMIUM.
+═══════════════════════════════════════
+SECTION MARKERS (REQUIRED)
+═══════════════════════════════════════
+Every major section MUST have a data-section attribute:
+data-section="hero" | "trust-strip" | "problems" | "solution" | "features" | "social-proof" | "pricing" | "faq" | "guarantee" | "final-cta" | "footer"
+Example: <section data-section="hero" class="...">
 
-CRITICAL: SECTION MARKERS
-Every major section MUST have a data-section attribute for identification. Use these exact values:
-- data-section="hero"
-- data-section="trust-strip"
-- data-section="problems"
-- data-section="solution"
-- data-section="features"
-- data-section="social-proof"
-- data-section="pricing"
-- data-section="faq"
-- data-section="guarantee"
-- data-section="final-cta"
-- data-section="footer"
+═══════════════════════════════════════
+🖼️ IMAGES (CRITICAL — THIS MAKES THE PAGE REAL)
+═══════════════════════════════════════
+Use REAL images from Unsplash via direct URL. This is what separates amateur from professional.
 
-Example: <section data-section="hero" class="...">...</section>
+Pattern: https://images.unsplash.com/photo-{ID}?w={width}&h={height}&fit=crop&q=80
 
-VISUAL DESIGN REQUIREMENTS (CRITICAL — THIS IS WHAT MAKES OR BREAKS THE PAGE):
-- HERO: Full-viewport height. Large bold headline (48-72px). Gradient text on key words. Animated subtle background (CSS keyframes for floating orbs/glows). Clear visual hierarchy.
-- TYPOGRAPHY: Use Inter + a display font from Google Fonts. Headline 48-72px bold. Body 16-18px. Strong contrast. Letter-spacing on uppercase labels.
-- COLOR: Use the provided brand.primary_color as the accent. Build a full palette: dark bg (#0a0a0f to #111827 range), subtle card surfaces, gradient accents. For light themes use warm whites (#fafaf8).
-- SPACING: Generous — sections with 80-120px vertical padding. Cards with 24-32px padding. Breathing room everywhere.
-- CARDS & SURFACES: Rounded corners (16-24px). Subtle borders (1px rgba). Glass/frosted effects with backdrop-filter. Soft box-shadows with colored glows.
-- GRADIENTS: Use gradients on buttons, text highlights, decorative elements. Radial gradient backgrounds behind sections.
-- ANIMATIONS (CSS only): Fade-in on scroll (IntersectionObserver + CSS transitions). Floating glow orbs. Subtle hover lifts on cards. Smooth accordion for FAQ.
-- BUTTONS: Large (48-56px height), rounded-full or rounded-xl, gradient backgrounds, hover glow effect, transform scale on hover.
-- SECTIONS: Hero → Trust Strip → Problem/Pain → Solution/Mechanism → Features/Benefits → Social Proof → Pricing/Offer → FAQ → Guarantee → Final CTA → Footer.
-- MOBILE: Fully responsive. Sticky CTA bar on mobile. Stack columns. Adjust font sizes.
-- ICONS: Use inline SVG icons (simple geometric) for features/benefits. Do NOT use external icon libraries.
+REQUIRED image placements:
+- HERO: Full-width background or side image. Use abstract/tech/lifestyle depending on niche.
+  Example: <div style="background-image: url('https://images.unsplash.com/photo-1551434678-e076c223a692?w=1920&h=1080&fit=crop&q=80')">
+- TESTIMONIALS: Avatar photos for each testimonial (use portrait photos).
+  Example: <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" class="rounded-full w-12 h-12">
+- FEATURES/MECHANISM: Relevant contextual images, screenshots, or abstract visuals.
+- ABOUT/TRUST: Team photos, office, or professional environment images.
+- GUARANTEE: Shield/trust imagery.
 
-CONTENT RULES:
-- NEVER output internal labels: "SEÇÃO:", "PÁGINA DE VENDAS", "{SIM...}", "(Inserir ...)", "(Espaço para ...)".
-- Strip and rewrite any such labels into natural, compelling headings.
-- Production-ready: no empty paragraphs, no dummy text, no TODOs.
-- Write everything in the provided locale language.
-- Adapt culturally to locale.region_hint.
+Image selection rules:
+- Search Unsplash mentally for the BEST match to the product/niche described in the copy
+- Use high-quality professional photos, NOT stock-looking generic ones
+- Vary the photo IDs — never repeat the same image
+- Always include w, h, fit=crop, q=80 params for performance
+- Use object-fit: cover for background images
+- Add subtle overlay gradients on hero images for text readability
 
-TECHNICAL RULES:
-- Single HTML file. ALL CSS inline in <style> tag. Minimal JS for scroll animations + accordion + carousel.
-- Use Google Fonts (Inter + one display font) with display=swap.
-- Include viewport meta tag, proper charset.
-- CSS custom properties for colors (easy theming).
-- Use CSS Grid and Flexbox for layouts.
-- Include smooth scroll behavior.
+═══════════════════════════════════════
+🎨 ICONS (USE LUCIDE CDN)
+═══════════════════════════════════════
+Include Lucide icons via CDN for professional iconography:
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-OUTPUT FORMAT:
+Then use: <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+And init: <script>lucide.createIcons();</script>
+
+REQUIRED icon placements:
+- Feature cards: relevant icons (shield, zap, target, brain, heart, star, etc.)
+- Benefit bullets: check-circle or check icons
+- Trust strip: award, shield-check, users, clock icons  
+- FAQ: chevron-down for accordion arrows
+- Guarantee: shield, lock icons
+- CTAs: arrow-right icon next to button text
+- Social proof: quote icon for testimonials
+- Navigation: menu icon for mobile
+
+═══════════════════════════════════════
+✨ INTERACTIVE COMPONENTS (REQUIRED)
+═══════════════════════════════════════
+The page MUST include these interactive elements (vanilla JS):
+
+1) SCROLL REVEAL ANIMATIONS:
+   - Every section fades in + slides up on scroll entry
+   - Staggered children animation (cards appear one by one)
+   - Use IntersectionObserver + CSS transitions
+   
+2) ANIMATED NUMBER COUNTERS:
+   - Any number/stat in the copy should count up when scrolled into view
+   - Smooth easing animation over 2 seconds
+
+3) TESTIMONIAL CAROUSEL:
+   - Auto-rotating testimonials with dots/indicators
+   - Smooth CSS transitions between slides
+   - Pause on hover
+
+4) FAQ ACCORDION:
+   - Smooth height animation on open/close
+   - Rotate chevron icon
+   - Only one open at a time
+
+5) STICKY CTA BAR:
+   - Appears after scrolling past hero
+   - Slide-down animation
+   - Compact with headline + CTA button
+   - Hide on scroll up, show on scroll down
+
+6) FLOATING ELEMENTS:
+   - Subtle floating glow orbs in hero (CSS @keyframes)
+   - Parallax effect on decorative elements
+   
+7) HOVER EFFECTS:
+   - Cards: translateY(-8px) + enhanced shadow + border glow
+   - Buttons: scale(1.05) + glow spread
+   - Images: subtle zoom (scale 1.05)
+   - Links: underline slide animation
+
+8) PROGRESS BAR:
+   - Reading progress bar at top of page
+   - Thin line that fills as user scrolls
+
+═══════════════════════════════════════
+🎨 VISUAL DESIGN SYSTEM
+═══════════════════════════════════════
+TYPOGRAPHY:
+- Load from Google Fonts: Inter (body) + Space Grotesk or Outfit (headings)
+- Hero headline: 56-80px, font-weight 800, line-height 1.05
+- Section titles: 36-48px, font-weight 700  
+- Body: 17-19px, line-height 1.7, font-weight 400
+- Labels/badges: 11-12px, uppercase, letter-spacing 0.1em, font-weight 600
+
+COLOR SYSTEM (CSS custom properties):
+:root {
+  --primary: {brand.primary_color};
+  --primary-glow: {lighter version};
+  --bg-deep: #050508;
+  --bg-section: #0a0a12;
+  --bg-card: rgba(255,255,255,0.03);
+  --bg-card-hover: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.15);
+  --text-primary: #f0f0f5;
+  --text-secondary: #8a8a9a;
+  --text-muted: #5a5a6a;
+  --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  --gradient-mesh: radial-gradient(ellipse at 20% 50%, rgba(var(--primary-rgb), 0.08) 0%, transparent 50%);
+}
+For light themes (longform-dr): warm whites, creams, dark text.
+
+SPACING:
+- Sections: 100-140px vertical padding
+- Cards: 28-40px padding, 20-24px border-radius
+- Content max-width: 1200px, centered
+- Generous whitespace between elements
+
+SURFACES & CARDS:
+- backdrop-filter: blur(20px) saturate(1.5)
+- border: 1px solid var(--border)
+- Colored shadow on hover: box-shadow: 0 20px 60px -15px rgba(var(--primary-rgb), 0.3)
+- Gradient borders using border-image or pseudo-elements
+
+GRADIENTS:
+- Text gradients on key headlines: background-clip: text
+- Button gradients: linear-gradient with hover shift
+- Section mesh backgrounds: radial-gradient decorative blobs
+- Divider lines: gradient from transparent to primary to transparent
+
+BUTTONS:
+- Height: 52-60px, padding: 0 32px
+- Border-radius: 14px or 100px (pill)
+- Primary: gradient background + glow shadow
+- Secondary: glass/outline with border
+- Micro-interaction: translateY(-2px) on hover
+- Arrow icon inside button
+
+═══════════════════════════════════════
+📐 SECTION BLUEPRINT
+═══════════════════════════════════════
+Generate sections in this order with these design patterns:
+
+A) HERO (data-section="hero")
+   - Full viewport height, background image with dark overlay gradient
+   - Floating glow orbs animation behind text
+   - Badge/pill at top ("🔥 Método Exclusivo" etc.)
+   - Massive headline with gradient text on key words
+   - Subheadline with lighter weight
+   - 3-4 benefit bullets with check icons
+   - Two CTA buttons (primary gradient + secondary outline)
+   - Trust strip below: avatars + "1.247+ alunos" with star rating
+
+B) TRUST STRIP (data-section="trust-strip")
+   - Logos or trust badges in a row
+   - Subtle separator lines
+
+C) PROBLEMS (data-section="problems")
+   - Card grid (2-3 columns)
+   - Each card: icon + title + description + "false solution" crossed out
+   - Alternating subtle backgrounds
+
+D) SOLUTION/MECHANISM (data-section="solution")
+   - Split layout: text left, image right
+   - Step indicators with numbers
+   - Differentiator highlights
+
+E) FEATURES/PHASES (data-section="features")  
+   - Timeline layout (vertical on mobile, horizontal tabs on desktop)
+   - Phase cards with number badges
+   - Progress connector lines between phases
+
+F) SOCIAL PROOF (data-section="social-proof")
+   - Testimonial carousel with avatar photos from Unsplash
+   - Star ratings ★★★★★
+   - Quotation marks decorative element
+   - Auto-rotate with dot indicators
+
+G) PRICING/OFFER (data-section="pricing")
+   - Central pricing card with glow border
+   - Includes checklist with check icons
+   - Original price struck through
+   - Bonus stack cards below
+   - "Para quem é / Para quem NÃO é" two-column
+
+H) GUARANTEE (data-section="guarantee")
+   - Shield icon + guarantee badge
+   - Highlighted card with gradient border
+   - Bold guarantee text
+
+I) FAQ (data-section="faq")
+   - Animated accordion
+   - Chevron rotation on open
+   - Smooth height transition
+
+J) FINAL CTA (data-section="final-cta")
+   - Dark gradient background
+   - Recap of key benefits
+   - Large CTA button with pulse animation
+   - Urgency element if present in copy
+
+K) FOOTER (data-section="footer")
+   - Links + disclaimers + copyright
+
+═══════════════════════════════════════
+🧹 CONTENT RULES
+═══════════════════════════════════════
+- NEVER output internal labels: "SEÇÃO:", "PÁGINA DE VENDAS", "{SIM...}", "(Inserir ...)"
+- Strip and rewrite any such labels into natural, compelling headings
+- Production-ready: no empty paragraphs, no dummy text, no TODOs
+- Write everything in the provided locale language
+- Adapt culturally to locale.region_hint
+- Preserve ALL copy content — do NOT summarize long sections
+
+═══════════════════════════════════════
+⚙️ TECHNICAL RULES
+═══════════════════════════════════════
+- Single HTML file. ALL CSS in <style> tag. JS at bottom of <body>.
+- Google Fonts with display=swap
+- Viewport meta tag, charset UTF-8
+- CSS custom properties for all colors
+- CSS Grid + Flexbox layouts
+- Smooth scroll behavior
+- Responsive: mobile-first with breakpoints at 640px, 768px, 1024px
+- Lazy loading on images: loading="lazy"
+- Semantic HTML: <header>, <main>, <section>, <footer>
+
+═══════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════
 Return ONLY a JSON object (no markdown fences) with:
 {
   "file_name": "<project-name>-<page_type>.html",
   "html": "<!doctype html>...full premium HTML here...",
-  "sections": ["hero", "trust-strip", "problems", ...list of data-section values used],
-  "notes": { "sections": [...], "locale_touches": [...] }
+  "sections": ["hero", "trust-strip", "problems", ...],
+  "notes": { "sections": [...], "locale_touches": [...], "images_used": [...] }
 }
 
-Generate the page now. Make it STUNNING.`;
+Generate the page now. Make it ABSOLUTELY STUNNING — the kind of page that makes competitors jealous.`;
 
-const EDIT_SECTION_PROMPT = `You are an elite web designer. You will receive:
+const EDIT_SECTION_PROMPT = `You are an elite web designer at a premium agency. You will receive:
 1) The current full HTML of a landing page
 2) The name of a section to modify (identified by data-section attribute)
 3) An instruction describing what to change
@@ -86,6 +280,9 @@ RULES:
 - If the instruction asks to add elements, add them within the section
 - If asked to improve styling, enhance it while keeping the design language consistent
 - Write content in the same language as the existing page
+- Use real images from Unsplash (https://images.unsplash.com/photo-{ID}?w={width}&h={height}&fit=crop&q=80)
+- Use Lucide icons (<i data-lucide="icon-name">) if icons are needed
+- Maintain all interactive JS (scroll animations, counters, carousel, etc.)
 
 OUTPUT FORMAT:
 Return ONLY a JSON object (no markdown fences) with:
@@ -278,6 +475,63 @@ ${fullCopy}
 Generate the premium landing page now. Return ONLY valid JSON.`;
 }
 
+// Post-process generated HTML to ensure scroll animations and enhancements
+function postProcessHtml(html: string): string {
+  // If the HTML already has IntersectionObserver, skip injection
+  if (html.includes('IntersectionObserver')) return html;
+
+  const enhancementScript = `
+<script>
+// Scroll Reveal
+document.addEventListener('DOMContentLoaded', () => {
+  const sections = document.querySelectorAll('[data-section]');
+  sections.forEach(s => { s.style.opacity = '0'; s.style.transform = 'translateY(40px)'; s.style.transition = 'opacity 0.8s ease, transform 0.8s ease'; });
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)'; obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  sections.forEach(s => obs.observe(s));
+  
+  // Staggered children
+  document.querySelectorAll('[data-section] .card, [data-section] [class*="grid"] > *').forEach((el, i) => {
+    el.style.opacity = '0'; el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.6s ease ' + (i * 0.1) + 's, transform 0.6s ease ' + (i * 0.1) + 's';
+    const co = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)'; co.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    co.observe(el);
+  });
+
+  // Animated counters
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.getAttribute('data-count'));
+    const co = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) {
+        let current = 0; const step = target / 60;
+        const timer = setInterval(() => { current += step; if (current >= target) { current = target; clearInterval(timer); } el.textContent = Math.floor(current).toLocaleString(); }, 25);
+        co.unobserve(e.target);
+      }});
+    }, { threshold: 0.5 });
+    co.observe(el);
+  });
+
+  // Reading progress bar
+  const prog = document.createElement('div');
+  prog.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:var(--primary,#7c3aed);z-index:99999;transition:width 0.1s linear;width:0';
+  document.body.appendChild(prog);
+  window.addEventListener('scroll', () => { const p = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100; prog.style.width = p + '%'; });
+
+  // Init Lucide icons if loaded
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>`;
+
+  // Inject before </body>
+  if (html.includes('</body>')) {
+    return html.replace('</body>', enhancementScript + '\n</body>');
+  }
+  return html + enhancementScript;
+}
+
 async function callOpenAI(systemPrompt: string, userPrompt: string, maxTokens = 16384): Promise<string> {
   const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
   if (!openaiApiKey) {
@@ -408,7 +662,7 @@ Apply the instruction to ONLY the section identified by data-section="${sectionN
 
       return new Response(
         JSON.stringify({
-          html: parsed.html,
+          html: postProcessHtml(parsed.html),
           changes: parsed.changes || "Section modified",
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -604,6 +858,9 @@ Render this PageSpec into a premium Next.js project. Use ALL the content — do 
     if (!parsed.html) {
       throw new Error("AI response did not contain HTML");
     }
+
+    // Post-process: inject scroll animations, counters, progress bar
+    parsed.html = postProcessHtml(parsed.html);
 
     const { data: saved, error: saveError } = await supabase
       .from("site_generations")
