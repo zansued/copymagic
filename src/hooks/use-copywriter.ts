@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { streamCopy } from "@/lib/stream-chat";
 import { STEPS } from "@/lib/steps";
+import { type GenerationContext, DEFAULT_GENERATION_CONTEXT } from "@/lib/lcm-types";
 
 export type Provider = "deepseek" | "openai";
 
@@ -11,6 +12,7 @@ export function useCopywriter() {
   const [streamingText, setStreamingText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [provider, setProvider] = useState<Provider>("deepseek");
+  const [generationContext, setGenerationContext] = useState<GenerationContext>(DEFAULT_GENERATION_CONTEXT);
   const abortRef = useRef<AbortController | null>(null);
 
   const generateStep = useCallback(async (stepIndex: number, continueFrom?: string) => {
@@ -38,6 +40,7 @@ export function useCopywriter() {
         previousContext: previousContext || undefined,
         provider,
         continueFrom: continueFrom || undefined,
+        generationContext,
         onDelta: (text) => {
           accumulated += text;
           setStreamingText(accumulated);
@@ -55,7 +58,7 @@ export function useCopywriter() {
       }
       setIsGenerating(false);
     }
-  }, [productInput, results, provider]);
+  }, [productInput, results, provider, generationContext]);
 
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
@@ -73,6 +76,8 @@ export function useCopywriter() {
     isGenerating,
     provider,
     setProvider,
+    generationContext,
+    setGenerationContext,
     generateStep,
     stopGeneration,
   };

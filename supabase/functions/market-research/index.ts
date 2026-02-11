@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { validateGenerationContext, buildCulturalSystemPrompt } from "../_shared/cultural-prompt.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +12,8 @@ serve(async (req) => {
   }
 
   try {
-    const { query, provider = "deepseek" } = await req.json();
+    const { query, provider = "deepseek", generation_context } = await req.json();
+    const genCtx = validateGenerationContext(generation_context);
     if (!query) {
       return new Response(JSON.stringify({ error: "Query é obrigatória" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -71,6 +73,8 @@ serve(async (req) => {
       aiModel = "deepseek-chat";
     }
 
+    const culturalPrompt = buildCulturalSystemPrompt(genCtx);
+
     const aiResponse = await fetch(aiApiUrl, {
       method: "POST",
       headers: {
@@ -83,6 +87,8 @@ serve(async (req) => {
           {
             role: "system",
             content: `Você é um especialista em pesquisa de mercado digital. Analise os dados de pesquisa fornecidos e extraia insights para criar um produto digital.
+
+${culturalPrompt}
 
 RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, apenas o JSON puro:
 
