@@ -114,12 +114,14 @@ The page MUST include these interactive elements (vanilla JS):
 ═══════════════════════════════════════
 TYPOGRAPHY:
 - Load from Google Fonts: Inter (body) + Space Grotesk or Outfit (headings)
+  For light/editorial themes: Poppins (body+headings) is also excellent.
 - Hero headline: 56-80px, font-weight 800, line-height 1.05
 - Section titles: 36-48px, font-weight 700  
 - Body: 17-19px, line-height 1.7, font-weight 400
 - Labels/badges: 11-12px, uppercase, letter-spacing 0.1em, font-weight 600
 
 COLOR SYSTEM (CSS custom properties):
+For DARK themes:
 :root {
   --primary: {brand.primary_color};
   --primary-glow: {lighter version};
@@ -135,19 +137,35 @@ COLOR SYSTEM (CSS custom properties):
   --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-glow));
   --gradient-mesh: radial-gradient(ellipse at 20% 50%, rgba(var(--primary-rgb), 0.08) 0%, transparent 50%);
 }
-For light themes (longform-dr): warm whites, creams, dark text.
+For LIGHT themes (longform-dr):
+:root {
+  --primary: {brand.primary_color};
+  --primary-glow: {lighter tint};
+  --bg-deep: #EBEDF0;
+  --bg-section: #FFFFFF;
+  --bg-section-alt: #F8F8F8;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F0F0F5;
+  --border: rgba(0,0,0,0.08);
+  --border-hover: rgba(0,0,0,0.15);
+  --text-primary: #1a1a2e;
+  --text-secondary: #393939;
+  --text-muted: #9F9F9F;
+  --shadow-card: 0 2px 10px -1px rgba(0,0,0,0.1);
+  --shadow-card-accent: 1px 1px 8px -1px var(--primary);
+}
 
 SPACING:
 - Sections: 100-140px vertical padding
-- Cards: 28-40px padding, 20-24px border-radius
-- Content max-width: 1200px, centered
+- Cards: 28-40px padding, 15-24px border-radius
+- Content max-width: 870px for centered text-heavy pages, 1200px for wide layouts
 - Generous whitespace between elements
 
 SURFACES & CARDS:
-- backdrop-filter: blur(20px) saturate(1.5)
-- border: 1px solid var(--border)
-- Colored shadow on hover: box-shadow: 0 20px 60px -15px rgba(var(--primary-rgb), 0.3)
-- Gradient borders using border-image or pseudo-elements
+Dark: backdrop-filter: blur(20px) saturate(1.5), border: 1px solid var(--border), glow shadows
+Light: background: var(--bg-section), border-radius: 15px, box-shadow: var(--shadow-card), clean borders
+- Cards on light themes: white containers on light gray background (#EBEDF0)
+- Colored shadow on hover: box-shadow using primary color
 
 GRADIENTS:
 - Text gradients on key headlines: background-clip: text
@@ -156,11 +174,11 @@ GRADIENTS:
 - Divider lines: gradient from transparent to primary to transparent
 
 BUTTONS:
-- Height: 52-60px, padding: 0 32px
-- Border-radius: 14px or 100px (pill)
-- Primary: gradient background + glow shadow
-- Secondary: glass/outline with border
-- Micro-interaction: translateY(-2px) on hover
+- Height: 52-60px, padding: 16px 40px
+- Border-radius: 50px (pill shape) for CTAs, 14px for secondary
+- Primary: solid accent color OR gradient background + glow shadow
+- Text: uppercase, font-weight 500-600, font-size 16-20px
+- Micro-interaction: scale(1.05) + shadow spread on hover
 - Arrow icon inside button
 
 ═══════════════════════════════════════
@@ -169,65 +187,150 @@ BUTTONS:
 Generate sections in this order with these design patterns:
 
 A) HERO (data-section="hero")
-   - Full viewport height, background image with dark overlay gradient
-   - Floating glow orbs animation behind text
+   - Full viewport height or generous padding
    - Badge/pill at top ("🔥 Método Exclusivo" etc.)
-   - Massive headline with gradient text on key words
+   - Massive headline with accent-colored key words (use <span> with primary color)
    - Subheadline with lighter weight
-   - 3-4 benefit bullets with check icons
-   - Two CTA buttons (primary gradient + secondary outline)
-   - Trust strip below: avatars + "1.247+ alunos" with star rating
+   - Video embed area (if applicable) with rounded corners and accent-colored box-shadow
+   - CTA button: pill-shaped, accent color, uppercase, centered
+   - Trust strip below: avatars + social proof numbers
 
 B) TRUST STRIP (data-section="trust-strip")
    - Logos or trust badges in a row
    - Subtle separator lines
 
 C) PROBLEMS (data-section="problems")
-   - Card grid (2-3 columns)
-   - Each card: icon + title + description + "false solution" crossed out
+   - Long-form copy text with emotional engagement
+   - Card grid (2-3 columns) for specific problems
+   - Each card: icon + title + description
    - Alternating subtle backgrounds
 
 D) SOLUTION/MECHANISM (data-section="solution")
-   - Split layout: text left, image right
-   - Step indicators with numbers
-   - Differentiator highlights
+   - Split layout: text left, product image right
+   - Product title in accent color
+   - Description text below
+   - Product images displayed in a row (4 items, ~210px each)
 
-E) FEATURES/PHASES (data-section="features")  
-   - Timeline layout (vertical on mobile, horizontal tabs on desktop)
-   - Phase cards with number badges
-   - Progress connector lines between phases
+E) FEATURES/BENEFITS (data-section="features")
+   - Split layout: product image left, text right
+   - Title in accent color
+   - Bullet list with accent-colored checkmarks
+   - Each bullet is a full descriptive sentence
 
 F) SOCIAL PROOF (data-section="social-proof")
-   - Testimonial carousel with avatar photos from Unsplash
-   - Star ratings ★★★★★
-   - Quotation marks decorative element
-   - Auto-rotate with dot indicators
+   - Section title in accent color, centered
+   - 3-column grid of testimonial cards
+   - Each card: rounded avatar (65px, border in accent color) + testimony text + before/after image + name + city
+   - Cards with border-radius 12px and box-shadow
 
 G) PRICING/OFFER (data-section="pricing")
-   - Central pricing card with glow border
-   - Includes checklist with check icons
-   - Original price struck through
-   - Bonus stack cards below
-   - "Para quem é / Para quem NÃO é" two-column
+   - "What you'll receive" section with product cards (image left, description right)
+   - Bonuses section on alternate background with title + description + images
+   - Pricing block: original price strikethrough + current price bold + discount headline in accent
+   - Product stack image centered
+   - CTA button: pill-shaped, accent color, uppercase
 
 H) GUARANTEE (data-section="guarantee")
-   - Shield icon + guarantee badge
-   - Highlighted card with gradient border
-   - Bold guarantee text
+   - Two-column: guarantee seal/badge image left, text right
+   - Light accent-tinted background (e.g., #FFEEF2 for red accent)
+   - Title in accent color
+   - Full guarantee text
 
 I) FAQ (data-section="faq")
-   - Animated accordion
-   - Chevron rotation on open
-   - Smooth height transition
+   - Title in accent color
+   - Animated accordion with smooth open/close
+   - Chevron rotation on toggle
+   - CTA button after FAQ
 
 J) FINAL CTA (data-section="final-cta")
-   - Dark gradient background
    - Recap of key benefits
    - Large CTA button with pulse animation
    - Urgency element if present in copy
 
 K) FOOTER (data-section="footer")
-   - Links + disclaimers + copyright
+   - Two-column layout on accent-colored background
+   - Left: anti-piracy/legal notice
+   - Right: logo + copyright + terms/privacy links
+   - Small text, light color on dark background
+
+═══════════════════════════════════════
+🏗️ FEW-SHOT REFERENCE SNIPPETS
+═══════════════════════════════════════
+Use these as STYLE REFERENCES. Do NOT copy verbatim — adapt to the copy content.
+
+HERO EXAMPLE (light theme):
+\`\`\`html
+<section data-section="hero" style="background: var(--bg-section); padding: 60px 0 30px; max-width: 870px; margin: 0 auto; border-radius: 15px;">
+  <div style="text-align: center; max-width: 770px; margin: 0 auto; padding: 30px 0 0;">
+    <p style="color: var(--text-muted); font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Plano Inovador de</p>
+    <h1 style="font-size: 30px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; margin: 0 80px;">
+      <span style="color: var(--primary); font-size: 42px;">30 Dias</span> Para Você Transformar Seus Resultados!
+    </h1>
+    <div style="margin: 30px 50px 0; border-radius: 15px; box-shadow: 1px 1px 8px -1px var(--primary);">
+      <!-- Video or hero image here -->
+    </div>
+    <a href="#" style="display: inline-block; margin-top: 12px; padding: 16px 40px; background: var(--primary); color: white; border-radius: 50px; font-size: 20px; font-weight: 500; text-transform: uppercase; text-decoration: none;">
+      Quero Começar Hoje
+    </a>
+  </div>
+</section>
+\`\`\`
+
+TESTIMONIAL CARD EXAMPLE:
+\`\`\`html
+<div style="padding: 20px 0; border-radius: 12px; box-shadow: 1px 2px 10px -1px rgba(0,0,0,0.15); margin: 10px; overflow: hidden;">
+  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80" 
+       alt="Avatar" style="width: 65px; height: 65px; border-radius: 50%; border: 2px solid var(--primary); display: block; margin: 0 auto;">
+  <p style="font-size: 14px; padding: 0 10px; color: var(--text-secondary);">Full testimonial text here...</p>
+  <img src="https://images.unsplash.com/photo-XXXXX?w=400&h=300&fit=crop&q=80" alt="Results" style="width: 100%;">
+  <p style="text-align: center; color: var(--primary); font-size: 14px; font-weight: 600; margin-bottom: -10px;">Name</p>
+  <p style="text-align: center; color: var(--text-secondary); font-size: 12px;">City, State</p>
+</div>
+\`\`\`
+
+GUARANTEE SECTION EXAMPLE:
+\`\`\`html
+<section data-section="guarantee" style="background: #FFEEF2; padding: 40px 0; border-radius: 0;">
+  <div style="display: flex; align-items: center; max-width: 770px; margin: 0 auto; gap: 20px;">
+    <div style="flex-shrink: 0;">
+      <img src="shield-guarantee-badge.png" alt="Guarantee" style="width: 170px;">
+    </div>
+    <div>
+      <h3 style="color: var(--primary); font-size: 24px; font-weight: 600;">Garantia Incondicional</h3>
+      <p style="color: var(--text-secondary); font-size: 16px;">Full guarantee text with all details...</p>
+    </div>
+  </div>
+</section>
+\`\`\`
+
+PRICING BLOCK EXAMPLE:
+\`\`\`html
+<section data-section="pricing" style="padding: 40px 0 60px; text-align: center;">
+  <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; font-weight: 600; text-decoration: line-through;">Valor total de R$ 394,00</p>
+  <p style="color: var(--text-primary); font-size: 20px; font-weight: 900; text-transform: uppercase; margin-top: -10px;">Por R$ 197,00</p>
+  <h2 style="color: var(--primary); font-size: 40px; font-weight: 600; margin: 0 60px;">Tenha acesso com 50% de desconto hoje</h2>
+  <img src="product-stack.png" alt="Product Stack" style="width: 70%; margin: 30px auto 0;">
+  <a href="#" style="display: inline-block; margin-top: 12px; padding: 16px 40px; background: var(--primary); color: white; border-radius: 50px; font-size: 20px; font-weight: 500; text-transform: uppercase; text-decoration: none;">
+    Inscrever-se Agora
+  </a>
+</section>
+\`\`\`
+
+FOOTER EXAMPLE:
+\`\`\`html
+<footer data-section="footer" style="background: var(--primary); border-radius: 0 0 15px 15px; padding: 10px;">
+  <div style="display: flex; gap: 20px; color: white; max-width: 770px; margin: 0 auto;">
+    <div style="flex: 1;">
+      <h5 style="font-size: 18px;">PIRATARIA É <span style="font-weight: 600;">CRIME</span></h5>
+      <p style="font-size: 12px; font-weight: 300;">Legal disclaimer text...</p>
+    </div>
+    <div style="flex: 1; text-align: center;">
+      <p style="font-size: 12px;">Copyright © 2024 - Company Name<br>Todos os direitos reservados.</p>
+      <p style="font-size: 12px;"><a href="#" style="color: #e8e8e8;">Termos de Uso</a> | <a href="#" style="color: #e8e8e8;">Políticas de Privacidade</a></p>
+    </div>
+  </div>
+</footer>
+\`\`\`
 
 ═══════════════════════════════════════
 🧹 CONTENT RULES
