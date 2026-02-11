@@ -171,8 +171,14 @@ export default function LandingBuilder() {
             <ExportButtons
               generating={generating}
               selectedProject={selectedProject}
+              selectedProjectName={selectedProjectData?.name || ""}
               generatedHtml={generatedHtml}
               templateKey={templateKey}
+              language={language}
+              includeUpsells={includeUpsells}
+              brandingTitle={brandingTitle}
+              brandingLogo={brandingLogo}
+              brandingColor={brandingColor}
               onGenerate={handleGenerate}
             />
           </motion.div>
