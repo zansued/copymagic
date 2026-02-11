@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import ProjectSummary from "./pages/ProjectSummary";
+import WebGenerator from "./pages/WebGenerator";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/project/:id" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
             <Route path="/project/:id/summary" element={<ProtectedRoute><ProjectSummary /></ProtectedRoute>} />
+            <Route path="/web-generator" element={<ProtectedRoute><WebGenerator /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
