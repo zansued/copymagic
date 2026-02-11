@@ -369,28 +369,26 @@ Return ONLY a JSON object (no markdown fences) with:
 Generate the page now. Make it ABSOLUTELY STUNNING — the kind of page that makes competitors jealous.`;
 
 const EDIT_SECTION_PROMPT = `You are an elite web designer at a premium agency. You will receive:
-1) The current full HTML of a landing page
-2) The name of a section to modify (identified by data-section attribute)
+1) The HTML of a SINGLE SECTION extracted from a landing page
+2) The name/type of that section
 3) An instruction describing what to change
 
-Your job: modify ONLY the specified section according to the instruction. Keep ALL other sections exactly as they are.
+Your job: modify ONLY this section's HTML according to the instruction.
 
 RULES:
-- Return the COMPLETE modified HTML (full page, not just the section)
-- Preserve all CSS, JS, and other sections untouched
-- Keep the data-section attribute on the modified section
-- Make the changes look professional and consistent with the rest of the page
-- If the instruction asks to add elements, add them within the section
-- If asked to improve styling, enhance it while keeping the design language consistent
-- Write content in the same language as the existing page
+- Return ONLY the modified section HTML (the <section> or element with data-section attribute)
+- Do NOT return a full page — just the section element and its contents
+- Keep the data-section attribute on the root element
+- Make the changes look professional and consistent
+- Write content in the same language as the existing section
 - Use real images from Unsplash (https://images.unsplash.com/photo-{ID}?w={width}&h={height}&fit=crop&q=80)
 - Use Lucide icons (<i data-lucide="icon-name">) if icons are needed
-- Maintain all interactive JS (scroll animations, counters, carousel, etc.)
+- If new CSS is needed, add it as inline styles or a <style> tag inside the section
 
 OUTPUT FORMAT:
 Return ONLY a JSON object (no markdown fences) with:
 {
-  "html": "<!doctype html>...full modified HTML...",
+  "section_html": "<section data-section=\\"...\\">....</section>",
   "changes": "Brief description of what was changed"
 }`;
 
@@ -730,43 +728,62 @@ serve(async (req) => {
         );
       }
 
-      console.log(`Editing section "${sectionName}" with instruction: ${instruction.slice(0, 100)}...`);
+      // Extract only the target section HTML using regex
+      const sectionRegex = new RegExp(
+        `(<(?:section|div|header|footer|main)[^>]*data-section="${sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[\\s\\S]*?)(?=<(?:section|div|header|footer|main)[^>]*data-section="|</body>|</main>|$)`,
+        "i"
+      );
+      const sectionMatch = currentHtml.match(sectionRegex);
 
-      const editPrompt = `Current full HTML of the page:
+      if (!sectionMatch) {
+        return new Response(
+          JSON.stringify({ error: `Section "${sectionName}" not found in HTML` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const originalSectionHtml = sectionMatch[1].trim();
+      console.log(`Editing section "${sectionName}" (${originalSectionHtml.length} chars) with instruction: ${instruction.slice(0, 100)}...`);
+
+      const editPrompt = `Section type: data-section="${sectionName}"
+
+Current section HTML:
 \`\`\`html
-${currentHtml}
+${originalSectionHtml}
 \`\`\`
-
-Section to modify: data-section="${sectionName}"
 
 Instruction: ${instruction}
 
-Apply the instruction to ONLY the section identified by data-section="${sectionName}". Return the COMPLETE page HTML with the modification applied. Return ONLY valid JSON.`;
+Modify this section according to the instruction. Return ONLY the modified section element. Return ONLY valid JSON.`;
 
       const rawContent = await callOpenAI(EDIT_SECTION_PROMPT, editPrompt);
       const jsonStr = parseJsonFromAI(rawContent);
 
-      let parsed: { html: string; changes?: string };
+      let newSectionHtml: string;
       try {
-        parsed = JSON.parse(jsonStr);
+        const parsed = JSON.parse(jsonStr);
+        newSectionHtml = parsed.section_html || parsed.html;
       } catch {
-        // Try extracting HTML directly
-        const htmlMatch = rawContent.match(/<!doctype html[\s\S]*<\/html>/i);
-        if (htmlMatch) {
-          parsed = { html: htmlMatch[0], changes: "Section modified" };
+        // Try extracting section HTML directly
+        const sectionExtract = rawContent.match(/<(?:section|div|header|footer|main)[^>]*data-section[\s\S]*$/i);
+        if (sectionExtract) {
+          newSectionHtml = sectionExtract[0];
         } else {
-          throw new Error("Failed to parse edited HTML");
+          throw new Error("Failed to parse edited section HTML");
         }
       }
 
-      if (!parsed.html) {
-        throw new Error("AI response did not contain HTML");
+      if (!newSectionHtml) {
+        throw new Error("AI response did not contain section HTML");
       }
+
+      // Splice: replace the original section in the full HTML
+      const finalHtml = currentHtml.replace(originalSectionHtml, newSectionHtml.trim());
 
       return new Response(
         JSON.stringify({
-          html: postProcessHtml(parsed.html),
-          changes: parsed.changes || "Section modified",
+          html: postProcessHtml(finalHtml),
+          changes: "Section modified",
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
