@@ -61,64 +61,140 @@ Return ONLY a JSON object (no markdown fences, no extra text) with:
 
 Now generate the page using the provided inputs.`;
 
-const NEXTJS_SYSTEM_PROMPT = `You are a world-class web designer + React/Next.js engineer.
-Your job: generate a PREMIUM landing page as a Next.js App Router React component from the provided sales copy.
+const NEXTJS_SYSTEM_PROMPT = `You are a senior conversion-focused web designer + senior frontend engineer.
+Generate a PREMIUM sales landing page as a Next.js (App Router) + Tailwind + TypeScript project.
 
-INPUTS: same as described below (project, page_type, brand, locale, copy).
+INPUTS YOU RECEIVE
+- project: { id, name }
+- locale: { language_code, cultural_region, tone_formality }
+- offer: { product_name, promise, mechanism, price, guarantee_days, bonuses[], phases[6], testimonials[], faqs[] }
+- copy: raw text from the project (may contain internal guide labels like "SEÇÃO:", "BLOCO:", "HEADLINE:", etc.)
 
-HARD RULES (non-negotiable):
-- NEVER output internal labels or placeholders such as: "SEÇÃO:", "PÁGINA DE VENDAS", "{SIM...}", "(Inserir ...)", "(Espaço para ...)".
-- Rewrite those into real headings/subheadings and real UI content.
-- Production-ready: no empty paragraphs, no dummy text, no TODO notes.
-- Do NOT mention medical claims as guarantees.
+ABSOLUTE RULES (NON-NEGOTIABLE)
+1) NEVER render internal labels like "SEÇÃO", "BLOCO", "HEADLINE", "INÍCIO/FIM", or placeholders. If present, strip them and rewrite into natural headings/subheadings.
+2) Output must be production-ready. No TODOs, no placeholder text, no lorem ipsum.
+3) All page text must be in locale.language_code and culturally modeled for locale.cultural_region (tasteful, 2–4 subtle references total; avoid stereotypes; no false endorsements).
+4) Performance-first: minimal JS, no heavy animation libraries. Prefer CSS animations and small React state only for carousel/accordion.
+5) Compliance: include a footer disclaimer section:
+   - If health related: add "Resultados variam" + "Não substitui acompanhamento profissional" style messaging, without making medical promises.
+   - Never invent guarantees or claims not present in inputs.
 
-LOCALE + CULTURAL MODELLING:
-- Write everything in locale.language.
-- Adapt examples, metaphors, microcopy to locale.region_hint.
-- Keep tasteful, avoid stereotypes.
-
-TECHNICAL RULES FOR NEXT.JS OUTPUT:
-- Output a single default-exported React component for app/page.tsx.
-- Use ONLY Tailwind CSS utility classes for ALL styling. No inline styles, no CSS modules, no styled-components.
-- Use these premium Tailwind tokens: max-w-6xl, rounded-2xl, shadow-sm, spacing (p-8, py-12, py-16, gap-8), prose-like typography scale (text-4xl/5xl for hero, text-2xl/3xl for section headings, text-lg for body).
-- Component must be a Server Component (no "use client" directive, no useState/useEffect).
-- For FAQ accordion, use native HTML <details>/<summary> elements styled with Tailwind.
-- For sticky mobile CTA, use fixed bottom-0 with Tailwind (e.g. fixed bottom-0 left-0 right-0 md:hidden).
-- Do NOT import any external libraries. Only use React and HTML elements with Tailwind classes.
-- Do NOT use next/image — use regular <img> tags or CSS backgrounds.
-- Use semantic HTML: <header>, <main>, <section>, <footer>.
-
-DESIGN DIRECTION:
-- Clean layout with generous whitespace.
-- Modern gradients/glows via Tailwind (bg-gradient-to-r, etc.).
-- Cards for benefits, testimonials, and offer items.
-- Trust strip near the top.
-- Social proof section with testimonial cards.
-- Guarantee/risk reversal section.
-- Offer/pricing card with clear CTA.
-- Full creative freedom to reinterpret copy structure for maximum conversion.
-
-COLOR SYSTEM:
-- Use the provided brand.primary_color as the main accent.
-- Define colors using Tailwind arbitrary values like bg-[#7c3aed], text-[#7c3aed], etc.
-- For dark themes: use bg-gray-950, bg-gray-900, text-white, text-gray-300.
-- For light themes: use bg-white, bg-gray-50, text-gray-900, text-gray-600.
-
-OUTPUT FORMAT:
-Return ONLY a JSON object (no markdown fences) with:
+PROJECT OUTPUT (ZIP CONTENTS)
+Create a complete Next.js project with:
+- package.json (next, react, tailwind, lucide-react)
+- next.config.js
+- tsconfig.json
+- tailwind.config.ts
+- postcss.config.js
+- app/layout.tsx
+- app/page.tsx
+- app/globals.css
+- components/ (sections below)
+- lib/ (helpers: sanitize, copy-to-sections mapping)
+Return ONLY JSON with:
 {
-  "page_tsx": "export default function LandingPage() { return (<>...</>); }",
-  "globals_css": "@tailwind base;\\n@tailwind components;\\n@tailwind utilities;\\n\\n/* any additional global styles */",
-  "notes": {
-    "sections": ["Hero", "Problem", ...],
-    "locale_touches": ["..."],
-    "tailwind_classes_used": ["...key design tokens used..."]
-  }
+  "project_name": "...",
+  "files": [{ "path": "app/page.tsx", "content": "..." }, ...],
+  "notes": { "sections": [...], "conversion_checks": [...], "performance": [...] }
 }
 
-IMPORTANT: The page_tsx value must be a valid single-file React component string. Use standard JSX (className, htmlFor, etc.). No TypeScript types needed — plain JSX is fine.
+VISUAL DESIGN REQUIREMENTS (PREMIUM)
+- Hero background: gradient + subtle animated glow (CSS keyframes). No external images required.
+- Typography scale: strong headline, clear subhead, readable body.
+- Layout: max-w-6xl, spacing 10–16, rounded-2xl cards, soft shadows, subtle borders.
+- Buttons: primary CTA with glow/hover lift; secondary CTA "Ver resultados" or "Como funciona".
+- Mobile-first: sticky CTA bar at bottom on mobile.
 
-Now generate the page using the provided inputs.`;
+REQUIRED PAGE SECTIONS (IN THIS ORDER)
+A) HERO SECTION (impactante)
+- Emotional main headline (from offer.promise + copy)
+- Subhead explaining mechanism simply
+- 3 bullet benefits with Lucide icons
+- Realistic stats block (only if provided in inputs; otherwise omit stats entirely)
+- Dual CTA: primary "Quero começar agora" + secondary "Ver como funciona"
+- Trust strip: "Acesso imediato", "Suporte", "Pagamento seguro" (generic)
+
+B) "PROBLEMAS + SOLUÇÕES FALSAS" SECTION
+- 3–6 problem cards:
+  - Problem title
+  - Common false solution (short)
+  - "The truth" (liberating insight)
+- Add a small "impact stats" row ONLY if provided (otherwise omit)
+
+C) "SOLUÇÃO EM 6 FASES" SECTION
+- Visual progress timeline:
+  - 6 phases displayed horizontally on desktop, vertical on mobile
+  - Each phase has number badge + title + 1–2 lines
+- Add "timeline of results" component if inputs include timeframe milestones
+- Add community results block ONLY if provided
+
+D) TESTIMONIALS (INTERACTIVE)
+- Carousel with:
+  - prev/next buttons
+  - dot indicators
+  - auto-advance with pause on hover
+  - progress bar
+  - verification/check icon
+- Testimonials must be realistic, short, and consistent with offer category. If testimonials are missing: generate 3 "example testimonials" but label internally in code as placeholders and do NOT show any "placeholder" label to end user (use generic names and avoid claims).
+
+E) BONUSES (DESIGN PREMIUM)
+- Gradient cards for each bonus:
+  - Bonus name
+  - What it unlocks
+  - Value badge (only if provided; otherwise omit)
+- Value stack comparison:
+  - "Valor total" vs "Hoje" (only if price/value provided)
+
+F) FAQ (INTERACTIVE)
+- Animated accordion:
+  - Use <details> for accessibility + CSS transitions, or custom minimal component
+- Add category icons (Lucide) per FAQ group if groups exist
+
+G) GUARANTEE (RISK REVERSAL)
+- Highlighted guarantee card:
+  - "Risco zero por X dias"
+  - Bullet list of what guarantee covers
+  - CTA button
+
+H) FINAL CTA (POWERFUL)
+- Summarize transformation
+- Repeat dual CTA
+- Add urgency-controlled note (only if present, e.g., "bônus por tempo limitado"; no fake scarcity)
+
+I) FOOTER (COMPLETE)
+- Links: Termos, Privacidade, Contato (can be anchors or placeholders but not "TODO")
+- Security info, disclaimer text, copyright
+
+CONVERSION OPTIMIZATION CHECKLIST (MUST IMPLEMENT)
+- CTA appears:
+  1) Hero
+  2) After phases
+  3) After bonuses/value stack
+  4) Final CTA
+  5) Sticky mobile CTA bar
+- Social proof appears before the price/offer
+- Guarantee appears close to CTA
+- Scannability: use cards, bullets, short paragraphs
+- Remove wall-of-text: split long copy into sections with headings
+
+IMPLEMENTATION DETAILS
+- Use React 18 + TypeScript components:
+  - components/Hero.tsx
+  - components/ProblemsTruth.tsx
+  - components/PhasesTimeline.tsx
+  - components/TestimonialsCarousel.tsx
+  - components/BonusesValueStack.tsx
+  - components/FAQAccordion.tsx
+  - components/Guarantee.tsx
+  - components/FinalCTA.tsx
+  - components/Footer.tsx
+  - components/StickyCTA.tsx
+- Use lucide-react icons.
+- Use only CSS animations (globals.css) for glow, fade, slide.
+- Include a small sanitizer helper to strip forbidden labels from copy.
+- The page must work with no backend calls.
+
+Now generate the Next.js project files accordingly.`;
 
 // ============================================================
 // HELPERS
@@ -321,7 +397,7 @@ serve(async (req) => {
     }
 
     if (format === "nextjs") {
-      let parsed: { page_tsx: string; globals_css?: string; notes?: Record<string, unknown> };
+      let parsed: { project_name?: string; files?: { path: string; content: string }[]; page_tsx?: string; globals_css?: string; notes?: Record<string, unknown> };
       try {
         parsed = JSON.parse(jsonStr);
       } catch {
@@ -329,8 +405,17 @@ serve(async (req) => {
         throw new Error("Failed to parse AI-generated Next.js project");
       }
 
-      if (!parsed.page_tsx) {
-        throw new Error("AI response did not contain page_tsx");
+      // Support both new files[] format and legacy page_tsx format
+      const files = parsed.files || [];
+      if (files.length === 0 && parsed.page_tsx) {
+        files.push({ path: "app/page.tsx", content: parsed.page_tsx });
+        if (parsed.globals_css) {
+          files.push({ path: "app/globals.css", content: parsed.globals_css });
+        }
+      }
+
+      if (files.length === 0) {
+        throw new Error("AI response did not contain project files");
       }
 
       // Save to DB
@@ -341,8 +426,8 @@ serve(async (req) => {
           project_id: projectId,
           template_key: templateKey,
           status: "generated",
-          generated_html: parsed.page_tsx,
-          generated_assets: { format: "nextjs", notes: parsed.notes || {} },
+          generated_html: files.find(f => f.path === "app/page.tsx")?.content || "",
+          generated_assets: { format: "nextjs", files_count: files.length, notes: parsed.notes || {} },
           language_code: lang,
           cultural_region: project.cultural_region,
           branding: options.branding || {},
@@ -356,8 +441,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           format: "nextjs",
-          page_tsx: parsed.page_tsx,
-          globals_css: parsed.globals_css || "@tailwind base;\n@tailwind components;\n@tailwind utilities;",
+          files,
+          project_name: parsed.project_name || project.name,
           meta: {
             templateKey,
             projectId,

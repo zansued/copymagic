@@ -1,40 +1,31 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
+interface NextJsFile {
+  path: string;
+  content: string;
+}
+
 interface NextJsProjectOptions {
-  pageTsx: string;
-  globalsCss: string;
+  files: NextJsFile[];
   projectName: string;
   primaryColor?: string;
 }
 
-export async function downloadNextJsZip({
-  pageTsx,
-  globalsCss,
-  projectName,
-  primaryColor = "#7c3aed",
-}: NextJsProjectOptions) {
-  const zip = new JSZip();
-
-  const safeName = projectName.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
-
-  // package.json
-  zip.file(
-    "package.json",
+// Boilerplate files that are always needed but the AI might not generate
+const BOILERPLATE: Record<string, (opts: { projectName: string; primaryColor: string }) => string> = {
+  "package.json": ({ projectName, primaryColor }) =>
     JSON.stringify(
       {
-        name: safeName,
+        name: projectName.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-"),
         version: "1.0.0",
         private: true,
-        scripts: {
-          dev: "next dev",
-          build: "next build",
-          start: "next start",
-        },
+        scripts: { dev: "next dev", build: "next build", start: "next start" },
         dependencies: {
           next: "^15.1.0",
           react: "^19.0.0",
           "react-dom": "^19.0.0",
+          "lucide-react": "^0.462.0",
         },
         devDependencies: {
           "@types/node": "^22.0.0",
@@ -47,12 +38,8 @@ export async function downloadNextJsZip({
       },
       null,
       2
-    )
-  );
-
-  // tailwind.config.ts
-  zip.file(
-    "tailwind.config.ts",
+    ),
+  "tailwind.config.ts": ({ primaryColor }) =>
     `import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -68,24 +55,16 @@ const config: Config = {
 };
 
 export default config;
-`
-  );
-
-  // postcss.config.js
-  zip.file(
-    "postcss.config.js",
+`,
+  "postcss.config.js": () =>
     `module.exports = {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
   },
 };
-`
-  );
-
-  // tsconfig.json
-  zip.file(
-    "tsconfig.json",
+`,
+  "tsconfig.json": () =>
     JSON.stringify(
       {
         compilerOptions: {
@@ -110,24 +89,13 @@ export default config;
       },
       null,
       2
-    )
-  );
-
-  // next.config.js
-  zip.file(
-    "next.config.js",
+    ),
+  "next.config.js": () =>
     `/** @type {import('next').NextConfig} */
 const nextConfig = {};
 module.exports = nextConfig;
-`
-  );
-
-  // app/globals.css
-  zip.file("app/globals.css", globalsCss);
-
-  // app/layout.tsx
-  zip.file(
-    "app/layout.tsx",
+`,
+  "app/layout.tsx": ({ projectName }) =>
     `import type { Metadata } from "next";
 import "./globals.css";
 
@@ -147,15 +115,13 @@ export default function RootLayout({
     </html>
   );
 }
-`
-  );
-
-  // app/page.tsx
-  zip.file("app/page.tsx", pageTsx);
-
-  // README.md
-  zip.file(
-    "README.md",
+`,
+  "app/globals.css": () =>
+    `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+`,
+  "README.md": ({ projectName }) =>
     `# ${projectName}
 
 Landing page gerada por **CopyMagic**.
@@ -172,10 +138,27 @@ npm run dev
 Faça deploy na [Vercel](https://vercel.com) com um clique:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+`,
+};
 
-Ou use qualquer plataforma compatível com Next.js (Netlify, Railway, etc.).
-`
-  );
+export async function downloadNextJsZip({ files, projectName, primaryColor = "#7c3aed" }: NextJsProjectOptions) {
+  const zip = new JSZip();
+  const safeName = projectName.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+  const opts = { projectName, primaryColor };
+
+  // Add AI-generated files
+  const aiPaths = new Set<string>();
+  for (const file of files) {
+    zip.file(file.path, file.content);
+    aiPaths.add(file.path);
+  }
+
+  // Fill in boilerplate for any missing files
+  for (const [path, generator] of Object.entries(BOILERPLATE)) {
+    if (!aiPaths.has(path)) {
+      zip.file(path, generator(opts));
+    }
+  }
 
   const blob = await zip.generateAsync({ type: "blob" });
   saveAs(blob, `${safeName}-nextjs.zip`);
