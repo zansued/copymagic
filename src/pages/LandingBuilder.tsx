@@ -184,7 +184,7 @@ export default function LandingBuilder() {
           </motion.div>
 
           {/* RIGHT — Preview */}
-          <PreviewPanel html={generatedHtml} generating={generating} />
+          <PreviewPanel html={generatedHtml} generating={generating} onHtmlUpdate={setGeneratedHtml} />
         </div>
       </main>
     </div>
