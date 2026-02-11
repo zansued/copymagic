@@ -16,6 +16,22 @@ Your job: generate a VISUALLY BREATHTAKING, modern, premium landing page as a si
 
 THE PAGE MUST LOOK LIKE A $10,000+ AGENCY-BUILT PAGE. Not a template. Not generic. PREMIUM.
 
+CRITICAL: SECTION MARKERS
+Every major section MUST have a data-section attribute for identification. Use these exact values:
+- data-section="hero"
+- data-section="trust-strip"
+- data-section="problems"
+- data-section="solution"
+- data-section="features"
+- data-section="social-proof"
+- data-section="pricing"
+- data-section="faq"
+- data-section="guarantee"
+- data-section="final-cta"
+- data-section="footer"
+
+Example: <section data-section="hero" class="...">...</section>
+
 VISUAL DESIGN REQUIREMENTS (CRITICAL — THIS IS WHAT MAKES OR BREAKS THE PAGE):
 - HERO: Full-viewport height. Large bold headline (48-72px). Gradient text on key words. Animated subtle background (CSS keyframes for floating orbs/glows). Clear visual hierarchy.
 - TYPOGRAPHY: Use Inter + a display font from Google Fonts. Headline 48-72px bold. Body 16-18px. Strong contrast. Letter-spacing on uppercase labels.
@@ -49,10 +65,34 @@ Return ONLY a JSON object (no markdown fences) with:
 {
   "file_name": "<project-name>-<page_type>.html",
   "html": "<!doctype html>...full premium HTML here...",
+  "sections": ["hero", "trust-strip", "problems", ...list of data-section values used],
   "notes": { "sections": [...], "locale_touches": [...] }
 }
 
 Generate the page now. Make it STUNNING.`;
+
+const EDIT_SECTION_PROMPT = `You are an elite web designer. You will receive:
+1) The current full HTML of a landing page
+2) The name of a section to modify (identified by data-section attribute)
+3) An instruction describing what to change
+
+Your job: modify ONLY the specified section according to the instruction. Keep ALL other sections exactly as they are.
+
+RULES:
+- Return the COMPLETE modified HTML (full page, not just the section)
+- Preserve all CSS, JS, and other sections untouched
+- Keep the data-section attribute on the modified section
+- Make the changes look professional and consistent with the rest of the page
+- If the instruction asks to add elements, add them within the section
+- If asked to improve styling, enhance it while keeping the design language consistent
+- Write content in the same language as the existing page
+
+OUTPUT FORMAT:
+Return ONLY a JSON object (no markdown fences) with:
+{
+  "html": "<!doctype html>...full modified HTML...",
+  "changes": "Brief description of what was changed"
+}`;
 
 const NEXTJS_SYSTEM_PROMPT = `You are a senior conversion-focused web designer + senior frontend engineer.
 Generate a PREMIUM sales landing page as a Next.js (App Router) + Tailwind + TypeScript project.
@@ -100,92 +140,27 @@ VISUAL DESIGN REQUIREMENTS (PREMIUM)
 
 REQUIRED PAGE SECTIONS (IN THIS ORDER)
 A) HERO SECTION (impactante)
-- Emotional main headline (from offer.promise + copy)
-- Subhead explaining mechanism simply
-- 3 bullet benefits with Lucide icons
-- Realistic stats block (only if provided in inputs; otherwise omit stats entirely)
-- Dual CTA: primary "Quero começar agora" + secondary "Ver como funciona"
-- Trust strip: "Acesso imediato", "Suporte", "Pagamento seguro" (generic)
-
 B) "PROBLEMAS + SOLUÇÕES FALSAS" SECTION
-- 3–6 problem cards:
-  - Problem title
-  - Common false solution (short)
-  - "The truth" (liberating insight)
-- Add a small "impact stats" row ONLY if provided (otherwise omit)
-
 C) "SOLUÇÃO EM 6 FASES" SECTION
-- Visual progress timeline:
-  - 6 phases displayed horizontally on desktop, vertical on mobile
-  - Each phase has number badge + title + 1–2 lines
-- Add "timeline of results" component if inputs include timeframe milestones
-- Add community results block ONLY if provided
-
 D) TESTIMONIALS (INTERACTIVE)
-- Carousel with:
-  - prev/next buttons
-  - dot indicators
-  - auto-advance with pause on hover
-  - progress bar
-  - verification/check icon
-- Testimonials must be realistic, short, and consistent with offer category. If testimonials are missing: generate 3 "example testimonials" but label internally in code as placeholders and do NOT show any "placeholder" label to end user (use generic names and avoid claims).
-
 E) BONUSES (DESIGN PREMIUM)
-- Gradient cards for each bonus:
-  - Bonus name
-  - What it unlocks
-  - Value badge (only if provided; otherwise omit)
-- Value stack comparison:
-  - "Valor total" vs "Hoje" (only if price/value provided)
-
 F) FAQ (INTERACTIVE)
-- Animated accordion:
-  - Use <details> for accessibility + CSS transitions, or custom minimal component
-- Add category icons (Lucide) per FAQ group if groups exist
-
 G) GUARANTEE (RISK REVERSAL)
-- Highlighted guarantee card:
-  - "Risco zero por X dias"
-  - Bullet list of what guarantee covers
-  - CTA button
-
 H) FINAL CTA (POWERFUL)
-- Summarize transformation
-- Repeat dual CTA
-- Add urgency-controlled note (only if present, e.g., "bônus por tempo limitado"; no fake scarcity)
-
 I) FOOTER (COMPLETE)
-- Links: Termos, Privacidade, Contato (can be anchors or placeholders but not "TODO")
-- Security info, disclaimer text, copyright
 
 CONVERSION OPTIMIZATION CHECKLIST (MUST IMPLEMENT)
-- CTA appears:
-  1) Hero
-  2) After phases
-  3) After bonuses/value stack
-  4) Final CTA
-  5) Sticky mobile CTA bar
-- Social proof appears before the price/offer
-- Guarantee appears close to CTA
-- Scannability: use cards, bullets, short paragraphs
-- Remove wall-of-text: split long copy into sections with headings
+- CTA appears: 1) Hero 2) After phases 3) After bonuses 4) Final CTA 5) Sticky mobile
+- Social proof before price/offer
+- Guarantee close to CTA
+- Scannability: cards, bullets, short paragraphs
 
 IMPLEMENTATION DETAILS
-- Use React 18 + TypeScript components:
-  - components/Hero.tsx
-  - components/ProblemsTruth.tsx
-  - components/PhasesTimeline.tsx
-  - components/TestimonialsCarousel.tsx
-  - components/BonusesValueStack.tsx
-  - components/FAQAccordion.tsx
-  - components/Guarantee.tsx
-  - components/FinalCTA.tsx
-  - components/Footer.tsx
-  - components/StickyCTA.tsx
-- Use lucide-react icons.
-- Use only CSS animations (globals.css) for glow, fade, slide.
-- Include a small sanitizer helper to strip forbidden labels from copy.
-- The page must work with no backend calls.
+- Use React 18 + TypeScript components
+- Use lucide-react icons
+- Use only CSS animations (globals.css)
+- Include a sanitizer helper to strip forbidden labels
+- The page must work with no backend calls
 
 Now generate the Next.js project files accordingly.`;
 
@@ -242,6 +217,47 @@ ${fullCopy}
 Generate the premium landing page now. Return ONLY valid JSON.`;
 }
 
+async function callOpenAI(systemPrompt: string, userPrompt: string, maxTokens = 16384): Promise<string> {
+  const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!openaiApiKey) {
+    throw new Error("OPENAI_API_KEY not configured");
+  }
+
+  const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${openaiApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.75,
+      max_tokens: maxTokens,
+    }),
+  });
+
+  if (!aiResponse.ok) {
+    const errText = await aiResponse.text();
+    console.error("AI API error:", aiResponse.status, errText);
+    throw new Error(`AI generation failed: ${aiResponse.status}`);
+  }
+
+  const aiResult = await aiResponse.json();
+  return aiResult.choices?.[0]?.message?.content || "";
+}
+
+function parseJsonFromAI(rawContent: string): string {
+  let jsonStr = rawContent.trim();
+  if (jsonStr.startsWith("```")) {
+    jsonStr = jsonStr.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+  }
+  return jsonStr;
+}
+
 // ============================================================
 // HANDLER
 // ============================================================
@@ -276,6 +292,71 @@ serve(async (req) => {
     const userId = claimsData.claims.sub as string;
 
     const body = await req.json();
+    const action = body.action || "generate";
+
+    // ============================================================
+    // ACTION: edit-section
+    // ============================================================
+    if (action === "edit-section") {
+      const { currentHtml, sectionName, instruction } = body as {
+        action: string;
+        currentHtml: string;
+        sectionName: string;
+        instruction: string;
+      };
+
+      if (!currentHtml || !sectionName || !instruction) {
+        return new Response(
+          JSON.stringify({ error: "currentHtml, sectionName, and instruction are required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log(`Editing section "${sectionName}" with instruction: ${instruction.slice(0, 100)}...`);
+
+      const editPrompt = `Current full HTML of the page:
+\`\`\`html
+${currentHtml}
+\`\`\`
+
+Section to modify: data-section="${sectionName}"
+
+Instruction: ${instruction}
+
+Apply the instruction to ONLY the section identified by data-section="${sectionName}". Return the COMPLETE page HTML with the modification applied. Return ONLY valid JSON.`;
+
+      const rawContent = await callOpenAI(EDIT_SECTION_PROMPT, editPrompt);
+      const jsonStr = parseJsonFromAI(rawContent);
+
+      let parsed: { html: string; changes?: string };
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch {
+        // Try extracting HTML directly
+        const htmlMatch = rawContent.match(/<!doctype html[\s\S]*<\/html>/i);
+        if (htmlMatch) {
+          parsed = { html: htmlMatch[0], changes: "Section modified" };
+        } else {
+          throw new Error("Failed to parse edited HTML");
+        }
+      }
+
+      if (!parsed.html) {
+        throw new Error("AI response did not contain HTML");
+      }
+
+      return new Response(
+        JSON.stringify({
+          html: parsed.html,
+          changes: parsed.changes || "Section modified",
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ============================================================
+    // ACTION: generate (default)
+    // ============================================================
     const { projectId, templateKey = "saas-premium", format = "html", options = {} } = body as {
       projectId: string;
       templateKey?: string;
@@ -349,45 +430,10 @@ serve(async (req) => {
 
     const systemPrompt = format === "nextjs" ? NEXTJS_SYSTEM_PROMPT : HTML_SYSTEM_PROMPT;
 
-    // Call OpenAI
-    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiApiKey) {
-      throw new Error("OPENAI_API_KEY not configured");
-    }
-
     console.log(`Calling OpenAI to generate landing page (format: ${format})...`);
 
-    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${openaiApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.75,
-        max_tokens: 16384,
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      const errText = await aiResponse.text();
-      console.error("AI API error:", aiResponse.status, errText);
-      throw new Error(`AI generation failed: ${aiResponse.status}`);
-    }
-
-    const aiResult = await aiResponse.json();
-    const rawContent = aiResult.choices?.[0]?.message?.content || "";
-
-    // Parse JSON from AI response
-    let jsonStr = rawContent.trim();
-    if (jsonStr.startsWith("```")) {
-      jsonStr = jsonStr.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
-    }
+    const rawContent = await callOpenAI(systemPrompt, userPrompt);
+    const jsonStr = parseJsonFromAI(rawContent);
 
     if (format === "nextjs") {
       let parsed: { project_name?: string; files?: { path: string; content: string }[]; page_tsx?: string; globals_css?: string; notes?: Record<string, unknown> };
@@ -398,7 +444,6 @@ serve(async (req) => {
         throw new Error("Failed to parse AI-generated Next.js project");
       }
 
-      // Support both new files[] format and legacy page_tsx format
       const files = parsed.files || [];
       if (files.length === 0 && parsed.page_tsx) {
         files.push({ path: "app/page.tsx", content: parsed.page_tsx });
@@ -411,7 +456,6 @@ serve(async (req) => {
         throw new Error("AI response did not contain project files");
       }
 
-      // Save to DB
       const { data: saved, error: saveError } = await supabase
         .from("site_generations")
         .insert({
@@ -448,7 +492,7 @@ serve(async (req) => {
     }
 
     // HTML format (default)
-    let parsed: { file_name?: string; html: string; notes?: Record<string, unknown> };
+    let parsed: { file_name?: string; html: string; sections?: string[]; notes?: Record<string, unknown> };
     try {
       parsed = JSON.parse(jsonStr);
     } catch {
@@ -489,6 +533,7 @@ serve(async (req) => {
       JSON.stringify({
         format: "html",
         html: parsed.html,
+        sections: parsed.sections || [],
         meta: {
           templateKey,
           projectId,
