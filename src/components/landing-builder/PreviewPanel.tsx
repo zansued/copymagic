@@ -18,103 +18,114 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
 
   // Inject hover/click script into iframe for section detection
+  const injectSectionInteractions = useCallback((iframe: HTMLIFrameElement) => {
+    try {
+      const doc = iframe.contentDocument;
+      if (!doc || !doc.body) return;
+
+      // Avoid double-injection
+      if (doc.getElementById("section-interact-style")) return;
+
+      const style = doc.createElement("style");
+      style.id = "section-interact-style";
+      style.textContent = `
+        [data-section] {
+          position: relative !important;
+          transition: outline 0.2s ease;
+          cursor: pointer;
+        }
+        [data-section]:hover {
+          outline: 2px dashed rgba(124, 58, 237, 0.5);
+          outline-offset: 4px;
+        }
+        [data-section]:hover::after {
+          content: attr(data-section);
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: rgba(124, 58, 237, 0.9);
+          color: white;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 11px;
+          font-family: Inter, sans-serif;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          z-index: 9999;
+          pointer-events: none;
+          backdrop-filter: blur(4px);
+        }
+        .section-edit-btn {
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          background: rgba(124, 58, 237, 0.9);
+          color: white;
+          border: none;
+          padding: 6px 14px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-family: Inter, sans-serif;
+          font-weight: 600;
+          cursor: pointer;
+          z-index: 10000;
+          display: none;
+          align-items: center;
+          gap: 4px;
+          backdrop-filter: blur(4px);
+          transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .section-edit-btn:hover {
+          background: rgba(124, 58, 237, 1);
+          transform: scale(1.05);
+        }
+        [data-section]:hover .section-edit-btn {
+          display: flex;
+        }
+      `;
+      doc.head.appendChild(style);
+
+      // Add edit buttons to each section
+      const sections = doc.querySelectorAll("[data-section]");
+      sections.forEach((section) => {
+        const btn = doc.createElement("button");
+        btn.className = "section-edit-btn";
+        btn.innerHTML = '✏️ Editar';
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const sectionName = section.getAttribute("data-section");
+          if (sectionName) {
+            window.parent.postMessage(
+              { type: "edit-section", section: sectionName },
+              "*"
+            );
+          }
+        });
+        section.appendChild(btn);
+      });
+    } catch (err) {
+      console.log("Could not inject section interaction:", err);
+    }
+  }, []);
+
   useEffect(() => {
     if (!html || !iframeRef.current) return;
 
     const iframe = iframeRef.current;
-    const handleLoad = () => {
-      try {
-        const doc = iframe.contentDocument;
-        if (!doc) return;
-
-        // Inject section interaction styles and script
-        const style = doc.createElement("style");
-        style.textContent = `
-          [data-section] {
-            position: relative;
-            transition: outline 0.2s ease;
-          }
-          [data-section]:hover {
-            outline: 2px dashed rgba(124, 58, 237, 0.5);
-            outline-offset: 4px;
-          }
-          [data-section]:hover::after {
-            content: attr(data-section);
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(124, 58, 237, 0.9);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-family: Inter, sans-serif;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            z-index: 9999;
-            pointer-events: none;
-            backdrop-filter: blur(4px);
-          }
-          .section-edit-btn {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            background: rgba(124, 58, 237, 0.9);
-            color: white;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-family: Inter, sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            gap: 4px;
-            backdrop-filter: blur(4px);
-            transition: transform 0.15s ease, background 0.15s ease;
-          }
-          .section-edit-btn:hover {
-            background: rgba(124, 58, 237, 1);
-            transform: scale(1.05);
-          }
-          [data-section]:hover .section-edit-btn {
-            display: flex;
-          }
-        `;
-        doc.head.appendChild(style);
-
-        // Add edit buttons to each section
-        const sections = doc.querySelectorAll("[data-section]");
-        sections.forEach((section) => {
-          const btn = doc.createElement("button");
-          btn.className = "section-edit-btn";
-          btn.innerHTML = '✏️ Editar';
-          btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const sectionName = section.getAttribute("data-section");
-            if (sectionName) {
-              // Post message to parent
-              window.parent.postMessage(
-                { type: "edit-section", section: sectionName },
-                "*"
-              );
-            }
-          });
-          (section as HTMLElement).style.position = "relative";
-          section.appendChild(btn);
-        });
-      } catch (err) {
-        console.log("Could not inject section interaction:", err);
-      }
-    };
+    const handleLoad = () => injectSectionInteractions(iframe);
 
     iframe.addEventListener("load", handleLoad);
-    return () => iframe.removeEventListener("load", handleLoad);
-  }, [html]);
+
+    // Also try injecting immediately in case load already fired
+    const timer = setTimeout(() => injectSectionInteractions(iframe), 300);
+
+    return () => {
+      iframe.removeEventListener("load", handleLoad);
+      clearTimeout(timer);
+    };
+  }, [html, injectSectionInteractions]);
 
   // Listen for postMessage from iframe
   useEffect(() => {

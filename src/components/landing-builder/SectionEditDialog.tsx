@@ -18,10 +18,68 @@ const SECTION_LABELS: Record<string, string> = {
   footer: "Footer",
 };
 
-const QUICK_ACTIONS = [
+const AI_SUGGESTIONS: Record<string, string[]> = {
+  hero: [
+    "Aumente o headline para 72px com gradiente de texto",
+    "Adicione um vídeo de fundo ou animação CSS de partículas",
+    "Inclua um contador de urgência (vagas limitadas)",
+    "Melhore o CTA com efeito glow e micro-interação",
+  ],
+  "trust-strip": [
+    "Adicione logos de empresas/veículos de mídia",
+    "Inclua número de clientes atendidos com animação de contagem",
+    "Adicione selos de segurança e certificações",
+  ],
+  problems: [
+    "Torne as dores mais emocionais e específicas",
+    "Adicione ícones ilustrativos para cada problema",
+    "Use cards com sombra e hover effect",
+  ],
+  solution: [
+    "Adicione um diagrama visual do mecanismo",
+    "Inclua um before/after visual",
+    "Destaque o diferencial com gradiente de destaque",
+  ],
+  features: [
+    "Reorganize em grid de cards com ícones",
+    "Adicione animação de entrada ao scroll",
+    "Destaque o benefício principal com badge premium",
+  ],
+  "social-proof": [
+    "Adicione fotos e estrelas aos depoimentos",
+    "Crie um carrossel animado de testimonials",
+    "Inclua resultados numéricos em destaque",
+  ],
+  pricing: [
+    "Adicione um comparativo de preços (de/por)",
+    "Inclua badges de bônus no card de preço",
+    "Adicione efeito de destaque no plano recomendado",
+  ],
+  faq: [
+    "Melhore o accordion com animação suave",
+    "Adicione ícones de + e - animados",
+    "Destaque as perguntas mais importantes",
+  ],
+  guarantee: [
+    "Adicione um selo visual de garantia grande",
+    "Inclua ícone de escudo ou cadeado",
+    "Torne a linguagem mais confiante e direta",
+  ],
+  "final-cta": [
+    "Adicione urgência com countdown timer",
+    "Inclua resumo dos bônus antes do botão",
+    "Adicione efeito pulse no botão CTA",
+  ],
+  footer: [
+    "Melhore o layout com múltiplas colunas",
+    "Adicione links de navegação e redes sociais",
+    "Inclua disclaimer legal e política de privacidade",
+  ],
+};
+
+const GENERIC_ACTIONS = [
   "Deixe mais impactante e emocional",
   "Melhore o design visual",
-  "Adicione mais elementos de prova social",
   "Adicione animações CSS",
   "Torne mais compacto e escaneável",
   "Melhore a responsividade mobile",
@@ -67,10 +125,28 @@ export function SectionEditDialog({
         <div className="space-y-4">
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-              Ações rápidas
+              🤖 Sugestões de IA para "{SECTION_LABELS[sectionName] || sectionName}"
             </label>
             <div className="flex flex-wrap gap-2">
-              {QUICK_ACTIONS.map((action) => (
+              {(AI_SUGGESTIONS[sectionName] || []).map((action) => (
+                <button
+                  key={action}
+                  onClick={() => handleQuickAction(action)}
+                  disabled={loading}
+                  className="text-xs px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors disabled:opacity-50"
+                >
+                  ✨ {action}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+              Ações gerais
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {GENERIC_ACTIONS.map((action) => (
                 <button
                   key={action}
                   onClick={() => handleQuickAction(action)}
