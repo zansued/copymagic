@@ -8,9 +8,8 @@ const corsHeaders = {
 };
 
 // ============================================================
-// HTML TEMPLATES
+// SANITISATION
 // ============================================================
-
 function sanitize(text: string): string {
   return text
     .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -20,13 +19,57 @@ function sanitize(text: string): string {
     .replace(/<embed[\s\S]*?>/gi, "");
 }
 
+// ============================================================
+// COPY PARSER — intelligent section detection
+// ============================================================
 interface ParsedSections {
   heroHeadline: string;
   heroSubhead: string;
-  sections: { title: string; content: string }[];
+  heroBullets: string[];
+  sections: { title: string; content: string; type: string }[];
   cta: string;
-  faq: string;
+  faq: { q: string; a: string }[];
+  guarantee: string;
+  offer: string;
+  testimonials: string[];
   footer: string;
+}
+
+function classifySection(title: string): string {
+  const t = title.toLowerCase();
+  if (/hero|headline|impactante|chamada|aten[cç]/i.test(t)) return "hero";
+  if (/faq|perguntas|d[úu]vidas|questions/i.test(t)) return "faq";
+  if (/cta|a[cç][aã]o|bot[aã]o|button|comprar|começar/i.test(t)) return "cta";
+  if (/garantia|guarantee|risco|refund/i.test(t)) return "guarantee";
+  if (/oferta|offer|pre[cç]o|pricing|investimento|valor/i.test(t)) return "offer";
+  if (/prova|social|depoimento|testimonial|resultado/i.test(t)) return "testimonial";
+  if (/benef[ií]cio|vantage|feature|recurso|inclui|incluso/i.test(t)) return "benefits";
+  if (/b[oô]nus|bonus|extra|brinde/i.test(t)) return "bonus";
+  if (/urg[eê]ncia|escassez|scarcity|limit/i.test(t)) return "urgency";
+  if (/mecanismo|mechanism|como funciona|how it works/i.test(t)) return "mechanism";
+  if (/hist[oó]ria|story|jornada|journey/i.test(t)) return "story";
+  if (/compar/i.test(t)) return "comparison";
+  return "content";
+}
+
+function parseFaq(content: string): { q: string; a: string }[] {
+  const faqs: { q: string; a: string }[] = [];
+  const lines = content.split("\n").filter((l) => l.trim());
+  let currentQ = "";
+  let currentA: string[] = [];
+
+  for (const line of lines) {
+    const t = line.trim();
+    if (/^[\d]+[.)]\s|^\*\*.*\?\*\*|^#{1,4}\s|.*\?$/.test(t)) {
+      if (currentQ) faqs.push({ q: currentQ, a: currentA.join(" ") });
+      currentQ = t.replace(/^[\d]+[.)]\s*/, "").replace(/^\*\*|\*\*$/g, "").replace(/^#{1,4}\s*/, "");
+      currentA = [];
+    } else if (currentQ) {
+      currentA.push(t);
+    }
+  }
+  if (currentQ) faqs.push({ q: currentQ, a: currentA.join(" ") });
+  return faqs;
 }
 
 function parseCopy(rawCopy: string): ParsedSections {
@@ -34,9 +77,13 @@ function parseCopy(rawCopy: string): ParsedSections {
   const result: ParsedSections = {
     heroHeadline: "",
     heroSubhead: "",
+    heroBullets: [],
     sections: [],
     cta: "",
-    faq: "",
+    faq: [],
+    guarantee: "",
+    offer: "",
+    testimonials: [],
     footer: "",
   };
 
@@ -45,18 +92,13 @@ function parseCopy(rawCopy: string): ParsedSections {
 
   for (const line of lines) {
     const trimmed = line.trim();
-
-    // Detect section headings
     const sectionMatch = trimmed.match(
       /^\[([^\]]+)\]$|^#{1,3}\s+(.+)$|^([A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][A-ZÀÁÂÃÉÊÍÓÔÕÚÇ\s\-–—:]{5,})$/
     );
 
     if (sectionMatch) {
       if (currentSection) {
-        allSections.push({
-          title: currentSection.title,
-          content: currentSection.content.join("\n"),
-        });
+        allSections.push({ title: currentSection.title, content: currentSection.content.join("\n") });
       }
       currentSection = {
         title: (sectionMatch[1] || sectionMatch[2] || sectionMatch[3]).trim(),
@@ -65,48 +107,41 @@ function parseCopy(rawCopy: string): ParsedSections {
     } else if (currentSection) {
       currentSection.content.push(trimmed);
     } else {
-      // Before any section heading
-      if (!result.heroHeadline) {
-        result.heroHeadline = trimmed;
-      } else if (!result.heroSubhead) {
-        result.heroSubhead = trimmed;
-      } else {
-        // Create implicit first section
-        currentSection = { title: "Introdução", content: [trimmed] };
+      if (!result.heroHeadline) result.heroHeadline = trimmed;
+      else if (!result.heroSubhead) result.heroSubhead = trimmed;
+      else {
+        // Detect bullets
+        if (/^[•\-✅▸✓→]/.test(trimmed)) {
+          result.heroBullets.push(trimmed.replace(/^[•\-✅▸✓→]\s*/, ""));
+        } else {
+          currentSection = { title: "Introdução", content: [trimmed] };
+        }
       }
     }
   }
-
   if (currentSection) {
-    allSections.push({
-      title: currentSection.title,
-      content: currentSection.content.join("\n"),
-    });
+    allSections.push({ title: currentSection.title, content: currentSection.content.join("\n") });
   }
 
-  // Classify sections
+  // Classify
   for (const s of allSections) {
-    const titleLow = s.title.toLowerCase();
-    if (
-      titleLow.includes("hero") ||
-      titleLow.includes("headline") ||
-      titleLow.includes("impactante")
-    ) {
-      if (!result.heroHeadline) result.heroHeadline = s.content.split("\n")[0];
-      if (!result.heroSubhead)
-        result.heroSubhead = s.content.split("\n").slice(1).join(" ");
-    } else if (titleLow.includes("faq") || titleLow.includes("perguntas")) {
-      result.faq = s.content;
-    } else if (titleLow.includes("cta") || titleLow.includes("chamada")) {
-      result.cta = s.content;
-    } else if (
-      titleLow.includes("garantia") ||
-      titleLow.includes("footer") ||
-      titleLow.includes("rodapé")
-    ) {
-      result.footer = s.content;
+    const type = classifySection(s.title);
+    if (type === "hero") {
+      const sLines = s.content.split("\n");
+      if (!result.heroHeadline) result.heroHeadline = sLines[0] || s.title;
+      if (!result.heroSubhead) result.heroSubhead = sLines.slice(1, 3).join(" ");
+    } else if (type === "faq") {
+      result.faq = parseFaq(s.content);
+    } else if (type === "cta") {
+      result.cta = s.content.split("\n")[0] || s.title;
+    } else if (type === "guarantee") {
+      result.guarantee = s.content;
+    } else if (type === "offer") {
+      result.offer = s.content;
+    } else if (type === "testimonial") {
+      result.testimonials = s.content.split("\n").filter((l) => l.trim().length > 20);
     } else {
-      result.sections.push(s);
+      result.sections.push({ title: s.title, content: s.content, type });
     }
   }
 
@@ -117,175 +152,290 @@ function parseCopy(rawCopy: string): ParsedSections {
   }
   if (!result.heroHeadline) result.heroHeadline = "Transforme sua vida hoje";
   if (!result.cta) result.cta = "Quero Começar Agora";
-  if (!result.footer) result.footer = "© " + new Date().getFullYear();
+  if (!result.footer) result.footer = `© ${new Date().getFullYear()}`;
 
   return result;
 }
 
+// ============================================================
+// CONTENT HELPERS
+// ============================================================
 function contentToHtml(content: string): string {
-  return content
-    .split("\n")
-    .map((line) => {
-      const t = line.trim();
-      if (!t) return "";
-      if (t.startsWith("•") || t.startsWith("-") || t.startsWith("✅") || t.startsWith("▸")) {
-        return `<li>${sanitize(t.replace(/^[•\-✅▸]\s*/, ""))}</li>`;
-      }
-      return `<p>${sanitize(t)}</p>`;
-    })
-    .join("\n");
+  const lines = content.split("\n");
+  let inList = false;
+  const parts: string[] = [];
+
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) continue;
+    if (/^[•\-✅▸✓→]/.test(t)) {
+      if (!inList) { parts.push("<ul>"); inList = true; }
+      parts.push(`<li>${sanitize(t.replace(/^[•\-✅▸✓→]\s*/, ""))}</li>`);
+    } else {
+      if (inList) { parts.push("</ul>"); inList = false; }
+      parts.push(`<p>${sanitize(t)}</p>`);
+    }
+  }
+  if (inList) parts.push("</ul>");
+  return parts.join("\n");
 }
 
-function buildSectionsHtml(
-  sections: { title: string; content: string }[],
-  templateKey: string
-): string {
-  const altClass = templateKey === "clean-light" ? "section-alt-light" : "section-alt";
-  return sections
-    .map(
-      (s, i) => `
-    <section class="content-section ${i % 2 !== 0 ? altClass : ""}">
-      <div class="container">
-        <h2>${sanitize(s.title)}</h2>
-        <div class="section-body">${contentToHtml(s.content)}</div>
-      </div>
-    </section>`
-    )
+function buildFaqHtml(faqs: { q: string; a: string }[], colors: TemplateColors): string {
+  if (faqs.length === 0) return "";
+  const items = faqs
+    .map((f) => `
+      <details class="faq-item">
+        <summary>${sanitize(f.q)}</summary>
+        <p>${sanitize(f.a)}</p>
+      </details>`)
     .join("\n");
-}
-
-function buildFaqHtml(faq: string): string {
-  if (!faq) return "";
   return `
-  <section class="faq-section">
+  <section class="faq-section" id="faq">
     <div class="container">
       <h2>Perguntas Frequentes</h2>
-      <div class="faq-body">${contentToHtml(faq)}</div>
+      <div class="faq-grid">${items}</div>
+    </div>
+  </section>`;
+}
+
+function buildGuaranteeHtml(guarantee: string): string {
+  if (!guarantee) return "";
+  return `
+  <section class="guarantee-section">
+    <div class="container">
+      <div class="guarantee-card">
+        <div class="guarantee-icon">🛡️</div>
+        <h2>Garantia Total</h2>
+        <div class="guarantee-body">${contentToHtml(guarantee)}</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function buildOfferHtml(offer: string, cta: string): string {
+  if (!offer) return "";
+  return `
+  <section class="offer-section">
+    <div class="container">
+      <div class="offer-card">
+        <h2>Oferta Especial</h2>
+        <div class="offer-body">${contentToHtml(offer)}</div>
+        <a href="#" class="cta-button">${sanitize(cta)}</a>
+      </div>
+    </div>
+  </section>`;
+}
+
+function buildTestimonialsHtml(testimonials: string[]): string {
+  if (testimonials.length === 0) return "";
+  const items = testimonials.slice(0, 6).map((t) => `
+    <div class="testimonial-card">
+      <p>"${sanitize(t)}"</p>
+    </div>`).join("\n");
+  return `
+  <section class="testimonials-section">
+    <div class="container">
+      <h2>O Que Dizem Nossos Clientes</h2>
+      <div class="testimonials-grid">${items}</div>
     </div>
   </section>`;
 }
 
 // ============================================================
-// CSS PER TEMPLATE
+// TEMPLATE SYSTEM
 // ============================================================
+interface TemplateColors {
+  bg: string; bgAlt: string; text: string; textMuted: string;
+  heading: string; primary: string; primaryHover: string;
+  cardBg: string; cardBorder: string; heroBg: string;
+}
 
-const CSS_TEMPLATES: Record<string, (primary: string) => string> = {
-  "modern-dark": (primary) => `
-    :root { --primary: ${primary}; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #0d0f14; color: #e4e8ef; line-height: 1.7; }
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-    .hero { padding: 100px 0 80px; text-align: center; background: linear-gradient(180deg, #13151d 0%, #0d0f14 100%); }
-    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.8rem; font-weight: 700; background: linear-gradient(135deg, var(--primary), #c45aff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; line-height: 1.2; }
-    .hero p { font-size: 1.15rem; color: #a0a8b8; max-width: 600px; margin: 0 auto; }
-    .content-section { padding: 60px 0; }
-    .section-alt { background: #111320; }
-    h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; color: #fff; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid ${primary}33; }
-    .section-body p { margin-bottom: 14px; color: #c8cdd8; }
-    .section-body li { margin-bottom: 10px; padding-left: 20px; position: relative; color: #c8cdd8; list-style: none; }
-    .section-body li::before { content: "▸"; position: absolute; left: 0; color: var(--primary); font-weight: bold; }
-    .cta-section { padding: 80px 0; text-align: center; background: linear-gradient(180deg, #0d0f14, #13151d); }
-    .cta-button { display: inline-block; padding: 16px 48px; background: linear-gradient(135deg, var(--primary), #c45aff); color: #fff; font-weight: 700; font-size: 1.1rem; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 24px ${primary}44; transition: transform 0.2s, box-shadow 0.2s; }
-    .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 32px ${primary}66; }
-    .faq-section { padding: 60px 0; background: #111320; }
-    .faq-section h2 { text-align: center; }
-    .faq-body p { margin-bottom: 14px; color: #c8cdd8; }
-    .footer { padding: 40px 0; text-align: center; color: #555; font-size: 0.85rem; border-top: 1px solid #1a1d2e; }
-    @media (max-width: 640px) { .hero h1 { font-size: 1.8rem; } .hero { padding: 60px 0 40px; } }
-  `,
-  "clean-light": (primary) => `
-    :root { --primary: ${primary}; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #fafbfc; color: #1a1d2e; line-height: 1.7; }
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-    .hero { padding: 100px 0 80px; text-align: center; background: #fff; }
-    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.8rem; font-weight: 700; color: #111; margin-bottom: 20px; line-height: 1.2; }
-    .hero p { font-size: 1.15rem; color: #666; max-width: 600px; margin: 0 auto; }
-    .content-section { padding: 60px 0; }
-    .section-alt-light { background: #f0f2f5; }
-    h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; color: #111; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid ${primary}33; }
-    .section-body p { margin-bottom: 14px; color: #444; }
-    .section-body li { margin-bottom: 10px; padding-left: 20px; position: relative; color: #444; list-style: none; }
-    .section-body li::before { content: "▸"; position: absolute; left: 0; color: var(--primary); font-weight: bold; }
-    .cta-section { padding: 80px 0; text-align: center; background: #fff; }
-    .cta-button { display: inline-block; padding: 16px 48px; background: var(--primary); color: #fff; font-weight: 700; font-size: 1.1rem; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 16px ${primary}33; transition: transform 0.2s; }
-    .cta-button:hover { transform: translateY(-2px); }
-    .faq-section { padding: 60px 0; background: #f0f2f5; }
-    .faq-section h2 { text-align: center; }
-    .faq-body p { margin-bottom: 14px; color: #444; }
-    .footer { padding: 40px 0; text-align: center; color: #999; font-size: 0.85rem; border-top: 1px solid #e0e0e0; }
-    @media (max-width: 640px) { .hero h1 { font-size: 1.8rem; } .hero { padding: 60px 0 40px; } }
-  `,
-  "premium-gradient": (primary) => `
-    :root { --primary: ${primary}; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #0a0a0f; color: #e4e8ef; line-height: 1.7; }
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-    .hero { padding: 120px 0 80px; text-align: center; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); position: relative; overflow: hidden; }
-    .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 50%, ${primary}15, transparent 60%); }
-    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; background: linear-gradient(135deg, #fff, ${primary}, #c45aff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; line-height: 1.2; position: relative; }
-    .hero p { font-size: 1.15rem; color: #a0a8c8; max-width: 600px; margin: 0 auto; position: relative; }
-    .content-section { padding: 60px 0; }
-    .section-alt { background: #0e0e18; }
-    h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; background: linear-gradient(90deg, #fff, ${primary}); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid ${primary}22; }
-    .section-body p { margin-bottom: 14px; color: #c0c4d4; }
-    .section-body li { margin-bottom: 10px; padding-left: 20px; position: relative; color: #c0c4d4; list-style: none; }
-    .section-body li::before { content: "✦"; position: absolute; left: 0; color: ${primary}; }
-    .cta-section { padding: 80px 0; text-align: center; background: linear-gradient(135deg, #0f0c29, #302b63); }
-    .cta-button { display: inline-block; padding: 18px 56px; background: linear-gradient(135deg, ${primary}, #c45aff, ${primary}); background-size: 200% auto; color: #fff; font-weight: 700; font-size: 1.15rem; border-radius: 14px; text-decoration: none; box-shadow: 0 6px 32px ${primary}55; transition: all 0.3s; animation: shimmer 3s linear infinite; }
-    @keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
-    .cta-button:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 40px ${primary}77; }
-    .faq-section { padding: 60px 0; background: #0e0e18; }
-    .faq-section h2 { text-align: center; }
-    .faq-body p { margin-bottom: 14px; color: #c0c4d4; }
-    .footer { padding: 40px 0; text-align: center; color: #444; font-size: 0.85rem; border-top: 1px solid #1a1a2e; }
-    @media (max-width: 640px) { .hero h1 { font-size: 2rem; } .hero { padding: 80px 0 50px; } }
-  `,
-  minimalist: (primary) => `
-    :root { --primary: ${primary}; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #fff; color: #222; line-height: 1.8; }
-    .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
-    .hero { padding: 120px 0 60px; text-align: left; }
-    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.4rem; font-weight: 700; color: #111; margin-bottom: 16px; line-height: 1.2; }
-    .hero p { font-size: 1.1rem; color: #666; }
-    .content-section { padding: 48px 0; }
-    .section-alt { border-top: 1px solid #eee; }
-    h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; color: #111; margin-bottom: 16px; font-weight: 600; }
-    .section-body p { margin-bottom: 12px; color: #444; }
-    .section-body li { margin-bottom: 8px; padding-left: 16px; position: relative; color: #444; list-style: none; }
-    .section-body li::before { content: "—"; position: absolute; left: 0; color: ${primary}; }
-    .cta-section { padding: 80px 0; text-align: center; }
-    .cta-button { display: inline-block; padding: 14px 40px; background: #111; color: #fff; font-weight: 600; font-size: 1rem; border-radius: 8px; text-decoration: none; transition: background 0.2s; }
-    .cta-button:hover { background: ${primary}; }
-    .faq-section { padding: 48px 0; border-top: 1px solid #eee; }
-    .faq-body p { margin-bottom: 12px; color: #444; }
-    .footer { padding: 40px 0; text-align: center; color: #bbb; font-size: 0.85rem; }
-    @media (max-width: 640px) { .hero h1 { font-size: 1.8rem; } .hero { padding: 60px 0 40px; } }
-  `,
+const TEMPLATE_COLORS: Record<string, (p: string) => TemplateColors> = {
+  "saas-premium": (p) => ({
+    bg: "#0b0d12", bgAlt: "#10131a", text: "#d4d8e4", textMuted: "#8890a4",
+    heading: "#ffffff", primary: p, primaryHover: p + "cc",
+    cardBg: "#12151e", cardBorder: "#1e2234", heroBg: "linear-gradient(160deg, #0b0d12 0%, #141728 50%, #0b0d12 100%)",
+  }),
+  "vsl-page": (p) => ({
+    bg: "#0a0a0f", bgAlt: "#0e0e16", text: "#ccc", textMuted: "#777",
+    heading: "#fff", primary: p, primaryHover: p + "dd",
+    cardBg: "#111118", cardBorder: "#222", heroBg: "linear-gradient(180deg, #0a0a0f 0%, #12121f 100%)",
+  }),
+  "longform-dr": (p) => ({
+    bg: "#fafaf8", bgAlt: "#f0efe8", text: "#2a2a2a", textMuted: "#6b6b6b",
+    heading: "#111", primary: p, primaryHover: p + "dd",
+    cardBg: "#fff", cardBorder: "#e0ddd4", heroBg: "#fafaf8",
+  }),
+  "upsell-focus": (p) => ({
+    bg: "#0d0f14", bgAlt: "#111422", text: "#d0d4e0", textMuted: "#7a7f92",
+    heading: "#fff", primary: p, primaryHover: p + "cc",
+    cardBg: "#13162088", cardBorder: "#1e2136", heroBg: "linear-gradient(135deg, #0d0f14, #1a1040, #0d0f14)",
+  }),
 };
 
+function buildCSS(templateKey: string, primary: string): string {
+  const cf = TEMPLATE_COLORS[templateKey] || TEMPLATE_COLORS["saas-premium"];
+  const c = cf(primary);
+  const isDark = templateKey !== "longform-dr";
+
+  return `
+    :root { --primary: ${primary}; --primary-rgb: ${hexToRgb(primary)}; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: ${c.bg}; color: ${c.text}; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* HERO */
+    .hero { padding: 100px 0 80px; text-align: center; background: ${c.heroBg}; position: relative; overflow: hidden; }
+    ${isDark ? `.hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(var(--primary-rgb),0.12), transparent 70%); pointer-events: none; }` : ""}
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; color: ${c.heading}; margin-bottom: 20px; line-height: 1.15; position: relative; max-width: 800px; margin-left: auto; margin-right: auto; }
+    ${isDark ? `.hero h1 { background: linear-gradient(135deg, #fff, ${primary}); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }` : ""}
+    .hero .subhead { font-size: 1.15rem; color: ${c.textMuted}; max-width: 640px; margin: 0 auto 32px; position: relative; }
+    .hero .hero-bullets { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; margin-bottom: 36px; position: relative; }
+    .hero .hero-bullets span { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; color: ${c.text}; }
+    .hero .hero-bullets span::before { content: "✓"; color: ${primary}; font-weight: 700; }
+
+    /* CTA BUTTON */
+    .cta-button { display: inline-block; padding: 16px 48px; background: ${primary}; color: #fff; font-weight: 700; font-size: 1.05rem; border-radius: 12px; text-decoration: none; transition: all 0.25s; box-shadow: 0 4px 20px rgba(var(--primary-rgb),0.35); }
+    .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(var(--primary-rgb),0.5); }
+    .cta-mid { padding: 60px 0; text-align: center; background: ${c.bgAlt}; }
+
+    /* SECTIONS */
+    .content-section { padding: 64px 0; }
+    .content-section.alt { background: ${c.bgAlt}; }
+    h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; color: ${c.heading}; margin-bottom: 24px; font-weight: 600; }
+    .section-body p { margin-bottom: 14px; }
+    .section-body ul { padding: 0; list-style: none; margin: 16px 0; }
+    .section-body li { padding: 8px 0 8px 24px; position: relative; }
+    .section-body li::before { content: "▸"; position: absolute; left: 0; color: ${primary}; font-weight: 700; }
+
+    /* CARDS GRID (for benefits/features) */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 24px; }
+    .feature-card { background: ${c.cardBg}; border: 1px solid ${c.cardBorder}; border-radius: 16px; padding: 28px; }
+    .feature-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; color: ${c.heading}; margin-bottom: 8px; }
+    .feature-card p { font-size: 0.95rem; color: ${c.textMuted}; }
+
+    /* FAQ */
+    .faq-section { padding: 64px 0; background: ${c.bgAlt}; }
+    .faq-section h2 { text-align: center; margin-bottom: 32px; }
+    .faq-grid { max-width: 720px; margin: 0 auto; }
+    .faq-item { border-bottom: 1px solid ${c.cardBorder}; }
+    .faq-item summary { padding: 18px 0; font-weight: 600; cursor: pointer; color: ${c.heading}; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    .faq-item summary::after { content: "+"; font-size: 1.4rem; color: ${primary}; transition: transform 0.2s; }
+    .faq-item[open] summary::after { transform: rotate(45deg); }
+    .faq-item p { padding: 0 0 18px; color: ${c.textMuted}; }
+
+    /* GUARANTEE */
+    .guarantee-section { padding: 64px 0; }
+    .guarantee-card { max-width: 640px; margin: 0 auto; text-align: center; background: ${c.cardBg}; border: 1px solid ${c.cardBorder}; border-radius: 20px; padding: 48px 32px; }
+    .guarantee-icon { font-size: 3rem; margin-bottom: 16px; }
+    .guarantee-card h2 { margin-bottom: 16px; }
+
+    /* OFFER */
+    .offer-section { padding: 80px 0; background: ${c.bgAlt}; }
+    .offer-card { max-width: 640px; margin: 0 auto; text-align: center; background: ${c.cardBg}; border: 2px solid ${primary}33; border-radius: 20px; padding: 48px 32px; }
+    .offer-card h2 { color: ${primary}; margin-bottom: 20px; }
+    .offer-card .cta-button { margin-top: 28px; }
+
+    /* TESTIMONIALS */
+    .testimonials-section { padding: 64px 0; }
+    .testimonials-section h2 { text-align: center; margin-bottom: 32px; }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .testimonial-card { background: ${c.cardBg}; border: 1px solid ${c.cardBorder}; border-radius: 16px; padding: 24px; font-style: italic; color: ${c.textMuted}; font-size: 0.95rem; }
+
+    /* COMPARISON (upsell) */
+    .comparison-section { padding: 64px 0; }
+    .comparison-section h2 { text-align: center; }
+
+    /* CTA FINAL */
+    .cta-section { padding: 80px 0; text-align: center; background: ${c.bgAlt}; }
+    .cta-section h2 { margin-bottom: 12px; }
+    .cta-section p { color: ${c.textMuted}; margin-bottom: 32px; }
+
+    /* STICKY MOBILE CTA */
+    .sticky-cta { display: none; position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 16px; background: ${isDark ? "rgba(11,13,18,0.95)" : "rgba(255,255,255,0.95)"}; backdrop-filter: blur(12px); border-top: 1px solid ${c.cardBorder}; z-index: 100; text-align: center; }
+    .sticky-cta .cta-button { width: 100%; padding: 14px; font-size: 1rem; }
+
+    /* FOOTER */
+    .footer { padding: 40px 0; text-align: center; color: ${c.textMuted}; font-size: 0.85rem; border-top: 1px solid ${c.cardBorder}; }
+
+    @media (max-width: 768px) {
+      .hero { padding: 64px 0 48px; }
+      .hero h1 { font-size: 1.8rem; }
+      .sticky-cta { display: block; }
+      body { padding-bottom: 72px; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  `;
+}
+
+function hexToRgb(hex: string): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `${r},${g},${b}`;
+}
+
+// ============================================================
+// BUILD FULL HTML
+// ============================================================
 function buildFullHtml(
   parsed: ParsedSections,
   templateKey: string,
-  branding: { title?: string; logoUrl?: string; primaryColor?: string }
+  branding: { title?: string; logoUrl?: string; primaryColor?: string },
+  lang: string
 ): string {
   const primary = branding.primaryColor || "#7c3aed";
   const title = sanitize(branding.title || parsed.heroHeadline || "Landing Page");
-  const cssGen = CSS_TEMPLATES[templateKey] || CSS_TEMPLATES["modern-dark"];
-  const css = cssGen(primary);
-  const sectionsHtml = buildSectionsHtml(parsed.sections, templateKey);
-  const faqHtml = buildFaqHtml(parsed.faq);
+  const css = buildCSS(templateKey, primary);
+
   const logoHtml = branding.logoUrl
-    ? `<img src="${sanitize(branding.logoUrl)}" alt="Logo" style="height:40px;margin-bottom:24px;" />`
+    ? `<img src="${sanitize(branding.logoUrl)}" alt="Logo" style="height:36px;margin-bottom:24px;" loading="lazy" />`
     : "";
 
+  const bulletsHtml = parsed.heroBullets.length > 0
+    ? `<div class="hero-bullets">${parsed.heroBullets.map((b) => `<span>${sanitize(b)}</span>`).join("")}</div>`
+    : "";
+
+  // Build sections HTML with alternating backgrounds
+  const sectionsHtml = parsed.sections.map((s, i) => {
+    if (s.type === "benefits") {
+      // Render as card grid
+      const bullets = s.content.split("\n").filter((l) => /^[•\-✅▸✓→]/.test(l.trim()));
+      if (bullets.length >= 3) {
+        const cards = bullets.map((b) => {
+          const text = b.trim().replace(/^[•\-✅▸✓→]\s*/, "");
+          const parts = text.split(/[:\-–—]\s*/);
+          return `<div class="feature-card"><h3>${sanitize(parts[0])}</h3>${parts[1] ? `<p>${sanitize(parts[1])}</p>` : ""}</div>`;
+        }).join("\n");
+        return `<section class="content-section ${i % 2 !== 0 ? "alt" : ""}"><div class="container"><h2>${sanitize(s.title)}</h2><div class="cards-grid">${cards}</div></div></section>`;
+      }
+    }
+    return `<section class="content-section ${i % 2 !== 0 ? "alt" : ""}"><div class="container"><h2>${sanitize(s.title)}</h2><div class="section-body">${contentToHtml(s.content)}</div></div></section>`;
+  }).join("\n");
+
+  // Mid CTA after ~40% of sections
+  const midPoint = Math.max(1, Math.floor(parsed.sections.length * 0.4));
+  const sectionsArray = sectionsHtml.split("</section>");
+  if (sectionsArray.length > 2) {
+    sectionsArray.splice(midPoint, 0, `<section class="cta-mid"><div class="container"><a href="#" class="cta-button">${sanitize(parsed.cta)}</a></div></section>`);
+  }
+  const finalSectionsHtml = sectionsArray.join("</section>");
+
+  const cf = TEMPLATE_COLORS[templateKey] || TEMPLATE_COLORS["saas-premium"];
+  const c = cf(primary);
+  const faqHtml = buildFaqHtml(parsed.faq, c);
+  const guaranteeHtml = buildGuaranteeHtml(parsed.guarantee);
+  const offerHtml = buildOfferHtml(parsed.offer, parsed.cta);
+  const testimonialsHtml = buildTestimonialsHtml(parsed.testimonials);
+
   return `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${lang || "pt-BR"}">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="${sanitize(parsed.heroSubhead || title)}"/>
+  <meta name="description" content="${sanitize(parsed.heroSubhead || title).slice(0, 160)}"/>
   <title>${title}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -297,16 +447,23 @@ function buildFullHtml(
     <div class="container">
       ${logoHtml}
       <h1>${sanitize(parsed.heroHeadline)}</h1>
-      <p>${sanitize(parsed.heroSubhead)}</p>
+      <p class="subhead">${sanitize(parsed.heroSubhead)}</p>
+      ${bulletsHtml}
+      <a href="#" class="cta-button">${sanitize(parsed.cta)}</a>
     </div>
   </header>
 
-  ${sectionsHtml}
+  ${finalSectionsHtml}
 
+  ${testimonialsHtml}
+  ${guaranteeHtml}
+  ${offerHtml}
   ${faqHtml}
 
   <section class="cta-section">
     <div class="container">
+      <h2>${sanitize(parsed.heroHeadline)}</h2>
+      <p>${sanitize(parsed.heroSubhead)}</p>
       <a href="#" class="cta-button">${sanitize(parsed.cta)}</a>
     </div>
   </section>
@@ -314,26 +471,27 @@ function buildFullHtml(
   <footer class="footer">
     <div class="container">${sanitize(parsed.footer)}</div>
   </footer>
+
+  <div class="sticky-cta">
+    <a href="#" class="cta-button">${sanitize(parsed.cta)}</a>
+  </div>
 </body>
 </html>`;
 }
 
 // ============================================================
-// MAIN HANDLER
+// HANDLER
 // ============================================================
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -344,95 +502,61 @@ serve(async (req) => {
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } =
-      await supabase.auth.getClaims(token);
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
     if (claimsError || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const userId = claimsData.claims.sub as string;
 
-    // Parse body
     const body = await req.json();
-    const {
-      projectId,
-      templateKey = "modern-dark",
-      options = {},
-    } = body as {
+    const { projectId, templateKey = "saas-premium", options = {} } = body as {
       projectId: string;
       templateKey?: string;
       options?: {
         includeUpsells?: boolean;
-        branding?: {
-          title?: string;
-          logoUrl?: string;
-          primaryColor?: string;
-        };
+        branding?: { title?: string; logoUrl?: string; primaryColor?: string };
+        language?: string;
       };
     };
 
     if (!projectId) {
-      return new Response(
-        JSON.stringify({ error: "projectId is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ error: "projectId is required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Load project
     const { data: project, error: projectError } = await supabase
-      .from("projects")
-      .select("*")
-      .eq("id", projectId)
-      .single();
+      .from("projects").select("*").eq("id", projectId).single();
 
     if (projectError || !project) {
-      return new Response(
-        JSON.stringify({ error: "Project not found" }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Project not found" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Extract copy
-    const copyResults =
-      typeof project.copy_results === "string"
-        ? JSON.parse(project.copy_results)
-        : project.copy_results || {};
+    const copyResults = typeof project.copy_results === "string"
+      ? JSON.parse(project.copy_results) : project.copy_results || {};
 
     const salesCopy = copyResults.pagina_vendas || "";
     if (!salesCopy) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "Este projeto não possui copy da Página de Vendas gerada. Gere a etapa 'Página de Vendas' primeiro.",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({
+        error: "Este projeto não possui copy da Página de Vendas gerada. Gere a etapa 'Página de Vendas' primeiro.",
+      }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     let fullCopy = salesCopy;
     if (options.includeUpsells) {
       const upsellCopy = copyResults.pagina_upsell || "";
-      if (upsellCopy) {
-        fullCopy += "\n\n" + upsellCopy;
-      }
+      if (upsellCopy) fullCopy += "\n\n" + upsellCopy;
     }
 
-    // Parse and build
+    const lang = options.language || project.language_code || "pt-BR";
     const parsed = parseCopy(fullCopy);
-    const html = buildFullHtml(parsed, templateKey, options.branding || {});
+    const html = buildFullHtml(parsed, templateKey, options.branding || {}, lang);
 
-    // Save to DB
+    // Save
     const { data: saved, error: saveError } = await supabase
       .from("site_generations")
       .insert({
@@ -442,41 +566,24 @@ serve(async (req) => {
         status: "generated",
         generated_html: html,
         generated_assets: {},
-        language_code: project.language_code || "pt-BR",
+        language_code: lang,
         cultural_region: project.cultural_region,
         branding: options.branding || {},
         include_upsells: options.includeUpsells || false,
       })
-      .select()
-      .single();
+      .select().single();
 
-    if (saveError) {
-      console.error("Save error:", saveError);
-    }
+    if (saveError) console.error("Save error:", saveError);
 
-    return new Response(
-      JSON.stringify({
-        html,
-        assets: {},
-        meta: {
-          templateKey,
-          projectId,
-          generationId: saved?.id || null,
-        },
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({
+      html,
+      assets: {},
+      meta: { templateKey, projectId, generationId: saved?.id || null },
+    }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
     console.error("generate-site error:", err);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

@@ -88,11 +88,11 @@ export function TopNav({ projectName }: { projectName?: string }) {
           )}
 
           <button
-            onClick={() => navigate("/web-generator")}
+            onClick={() => navigate("/landing-builder")}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
           >
             <Globe className="h-3.5 w-3.5" />
-            Gerar Web
+            Landing Builder
           </button>
 
           <button
