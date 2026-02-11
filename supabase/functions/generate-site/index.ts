@@ -94,141 +94,136 @@ Return ONLY a JSON object (no markdown fences) with:
   "changes": "Brief description of what was changed"
 }`;
 
-const NEXTJS_SYSTEM_PROMPT = `ROLE
-You are "Premium Landing Builder Agent", a senior conversion-focused web designer + senior front-end engineer.
-You generate production-ready landing pages from existing copy.
+// Step 1: Extract structured PageSpec from copy
+const PAGESPEC_SYSTEM_PROMPT = `ROLE
+You are a senior conversion copywriter and content architect.
+Your job: extract and structure the provided copy into a rich PageSpec JSON.
 
-PRIMARY OUTPUT
-Generate a complete Next.js (App Router) + React 18 + TypeScript + Tailwind project (ready for Vercel).
-Return ONLY a JSON object containing a file list (paths + contents). No extra commentary, no markdown.
+CRITICAL RULES:
+1) PRESERVE ALL COPY CONTENT. Do NOT summarize or reduce sections to single phrases.
+   Each section must contain the FULL text, paragraphs, bullets, and details from the original copy.
+   If the copy has 5 paragraphs for a section, the PageSpec must have all 5 paragraphs.
+2) Strip internal labels ("SEÇÃO:", "BLOCO:", "HEADLINE:", "INÍCIO", "FIM", "{...}", "(insira...)", "TODO")
+   but keep ALL the actual content text.
+3) Organize content into the correct section structure.
+4) Write in the same language as the copy.
 
-INPUTS YOU RECEIVE
-- project: { id, name }
-- page_goal: "sales" | "upsell"
-- locale: { language_code, cultural_region, tone_formality }
-- brand: { primary_color?, secondary_color?, style: "dark-premium" | "light-premium" | "gradient-premium" }
-- copy: raw text and/or structured copy blocks (may include internal guide labels like "SEÇÃO:", "BLOCO:", "HEADLINE:", "INÍCIO", etc.)
-- optional_data: { stats?, phases?, bonuses?, testimonials?, faqs?, price?, guarantee_days?, urgency? }
+OUTPUT FORMAT (ONLY JSON, no markdown):
+{
+  "hero": {
+    "headline": "full headline text",
+    "subhead": "full subheadline text",
+    "bullets": ["full bullet 1", "full bullet 2", "full bullet 3"],
+    "cta_primary": "CTA text",
+    "cta_secondary": "secondary CTA text",
+    "trust_items": ["item1", "item2", "item3"]
+  },
+  "problems": [
+    { "title": "problem title", "description": "full description paragraph(s)", "false_solution": "what people try", "truth": "the real insight" }
+  ],
+  "mechanism": {
+    "title": "section title",
+    "description": "full explanation text - ALL paragraphs",
+    "steps": [{ "title": "step", "description": "full detail" }],
+    "differentiators": [{ "title": "diff", "description": "full detail" }]
+  },
+  "phases": [
+    { "title": "phase name", "description": "full description with ALL details from copy", "outcome": "expected result" }
+  ],
+  "testimonials": [
+    { "name": "person", "role": "context", "text": "FULL testimonial text - do not truncate" }
+  ],
+  "bonuses": [
+    { "title": "bonus name", "description": "full description", "value": "R$ X" }
+  ],
+  "offer": {
+    "title": "offer title",
+    "includes": ["full item description 1", "full item description 2"],
+    "price": "price if mentioned",
+    "original_price": "original price if mentioned",
+    "for_who": ["full description 1"],
+    "not_for_who": ["full description 1"],
+    "urgency": "urgency text if present"
+  },
+  "guarantee": {
+    "title": "guarantee title",
+    "days": 30,
+    "description": "FULL guarantee description - all paragraphs",
+    "bullets": ["bullet 1", "bullet 2"]
+  },
+  "faqs": [
+    { "category": "category if inferable", "question": "full question", "answer": "FULL answer - do not truncate" }
+  ],
+  "final_cta": {
+    "headline": "full headline",
+    "description": "full description text",
+    "cta_text": "CTA text"
+  },
+  "footer": {
+    "disclaimers": ["disclaimer text"],
+    "links": ["Terms", "Privacy", "Contact"]
+  }
+}
 
-NON-NEGOTIABLE RULES
-1) NEVER render internal labels or placeholders:
-   - Forbidden strings: "SEÇÃO", "BLOCO", "HEADLINE:", "INÍCIO", "FIM", "{...}", "(insira...)", "TODO", "lorem ipsum".
-   - If present in copy, strip them and rewrite content into natural headings and paragraphs.
-2) Build must NOT break on Next.js App Router rules:
-   - Any component that uses React hooks (useState/useEffect/useMemo/useRef) OR event handlers (onClick/onMouseEnter) MUST start with "use client";
-   - Keep app/page.tsx as a Server Component whenever possible; import Client Components for interactive parts.
-3) Performance-first:
-   - Minimal JS. No heavy animation libraries.
-   - Prefer CSS animations and small React state only for carousel/accordion.
-   - No external images required; hero visuals can be CSS gradient + subtle animated glow.
-4) No fake data:
-   - Do NOT invent stats, numbers, endorsements, or "Harvard says…".
-   - Only show stats/metrics if provided in optional_data.stats or explicitly in copy.
-   - If missing, omit stats or use qualitative proof (non-numeric).
-5) Compliance-safe copy:
-   - Avoid absolute promises like "garantido", "100% seguro", "cura", "sem remédios em X dias".
-   - Use responsible language: "pode ajudar", "resultados variam".
-   - Add footer disclaimer if topic is health/finance/legal: "Resultados variam. Não substitui acompanhamento profissional."
-6) Cultural modeling (NOT translation):
-   - Write all text in locale.language_code.
-   - Apply 2–4 subtle cultural touches total (idioms, examples, contexts) aligned with locale.cultural_region.
-   - Avoid stereotypes or protected-class targeting.
-7) Design must look premium:
-   - Strong typographic hierarchy
-   - Generous spacing
-   - Card-based scannability
-   - Alternating section rhythm (not every section same background)
-   - Clear CTAs and trust cues
+IMPORTANT: Every text field must contain the COMPLETE original text from the copy. 
+If a section has multiple paragraphs, include ALL of them joined with newlines.
+Do NOT reduce rich copy to skeleton summaries.`;
 
-REQUIRED SECTION BLUEPRINT (ALWAYS IN THIS ORDER)
-A) Hero (impactful)
-- Gradient premium background with subtle animated glow (CSS keyframes)
-- Emotional headline + subhead (derived from copy)
-- 3 bullet benefits with Lucide icons
-- Trust strip (3–4 items): "Acesso imediato", "Suporte", "Pagamento seguro", "Garantia"
-- Dual CTA: Primary action + Secondary scroll
-- Stats row ONLY if provided (optional_data.stats). If not provided, do NOT show stats.
+// Step 2: Render PageSpec into Next.js project
+const NEXTJS_RENDER_PROMPT = `ROLE
+You are "Premium Landing Builder Agent", a senior conversion-focused web designer + front-end engineer.
 
-B) Problems + False Solutions (cards)
-- 3–6 cards with problem title, common false solution, "truth" insight
-- Optional: impact metrics if provided (no invention)
+INPUT: You receive a structured PageSpec JSON with ALL the copy content already extracted and organized.
 
-C) Mechanism / The Big Idea
-- Explain how it works in 3–6 short steps or bullets
-- Use icons and small callouts
-- Add a "Why this is different" mini-grid
+YOUR JOB: Render it into a complete Next.js (App Router) + React 18 + TypeScript + Tailwind project.
+Use ALL the content from the PageSpec. Do NOT shorten, summarize, or skip any text.
 
-D) 6-Phase Protocol (visual timeline)
-- MUST be exactly 6 phases (always).
-- Desktop: horizontal steps with progress styling; Mobile: vertical steps
-- If optional_data.phases missing, infer 6 phases from copy (meaningful names).
+RULES:
+1) Use ALL text from the PageSpec as-is. Every paragraph, bullet, testimonial must appear in the final page.
+2) Strip any remaining internal labels but preserve the actual content.
+3) Performance-first: minimal JS, CSS animations preferred, no heavy libraries.
+4) Compliance: include footer disclaimers from PageSpec. Use responsible language.
+5) Cultural modeling: write in the locale language, apply subtle cultural touches.
+6) Design must look premium: strong typography, generous spacing, card-based scannability,
+   alternating section rhythm, clear CTAs and trust cues.
 
-E) Social Proof (interactive)
-- Testimonials carousel with autoplay, pause on hover, prev/next, dots, progress bar, verified check
-- If testimonials missing, generate 3 realistic short testimonials consistent with offer category, without numeric claims.
+REQUIRED SECTIONS (IN THIS ORDER):
+A) Hero - gradient background, animated glow, headline + subhead + bullets + trust strip + dual CTA
+B) Problems + False Solutions - card grid
+C) Mechanism / The Big Idea - steps + differentiators
+D) 6-Phase Protocol - visual timeline (desktop: horizontal, mobile: vertical)
+E) Social Proof - testimonials carousel with autoplay, dots, progress
+F) Bonuses - gradient cards + value stack
+G) Offer + Pricing - checklist + price block + for who / not for who
+H) Guarantee - highlighted card + CTA
+I) FAQ - accessible accordion
+J) Final CTA - recap + dual CTA
+K) Footer - links + disclaimers + copyright
 
-F) Bonuses (premium design)
-- Gradient cards for each bonus (3–7) with name, description, value badge only if provided
-- Value stack comparison only if price/value provided
-
-G) Offer + Pricing (conversion block)
-- What is included (checklist)
-- Price block only if provided; otherwise "Escolha seu acesso" with CTA
-- "For who / not for who" mini section
-
-H) Guarantee (risk reversal)
-- Highlighted guarantee card with days if provided
-- Bullets: "Sem risco", "Processo simples"
-- CTA button
-
-I) FAQ (interactive)
-- Accessible accordion with <details> + CSS transitions OR minimal client accordion
-- Group by categories if possible, each with icon
-
-J) Final CTA (powerful)
-- Recap transformation in 2–3 lines
-- Dual CTA
-- Optional urgency note ONLY if provided
-
-K) Footer (complete)
-- Links: Terms, Privacy, Contact
-- Security note, disclaimers, copyright
-
-DESIGN TOKENS (CONSISTENT)
+DESIGN TOKENS:
 - Container: max-w-6xl mx-auto px-4 sm:px-6
-- Spacing: py-16 / py-20; section gaps: space-y-8/12
-- Cards: rounded-2xl, border-white/10, bg-white/5 (dark) or bg-zinc-50 (light), shadow-sm
-- Buttons: rounded-xl, font-semibold, hover translate-y-0.5, ring/outline focus states
-- Typography: H1: text-4xl sm:text-5xl font-extrabold tracking-tight; H2: text-2xl sm:text-3xl font-bold; Body: text-base/relaxed
-- Use CSS variables for brand colors in globals.css: --brand, --brand2, --bg, --card, --text, --muted
+- Spacing: py-16/py-20; Cards: rounded-2xl, shadow-sm
+- Typography: H1 text-4xl sm:text-5xl font-extrabold; H2 text-2xl sm:text-3xl font-bold
+- CSS variables for brand colors in globals.css
 
-ANIMATIONS (LIGHT, CSS ONLY)
-- Animated gradient glow in hero (keyframes)
-- Carousel transitions: transform/opacity with transition classes
-
-FILES TO GENERATE (MINIMUM)
+FILES TO GENERATE:
 - package.json, next.config.js, tsconfig.json, tailwind.config.ts, postcss.config.js
 - app/layout.tsx, app/page.tsx, app/globals.css
-- components/: Hero.tsx, ProblemsTruth.tsx, Mechanism.tsx, PhasesTimeline.tsx, TestimonialsCarousel.tsx ("use client"), BonusesValue.tsx, OfferBlock.tsx, Guarantee.tsx, FAQAccordion.tsx ("use client" if custom), FinalCTA.tsx, Footer.tsx, StickyCTA.tsx ("use client")
-- lib/: sanitize.ts, copyMapper.ts, types.ts
+- components/: Hero, ProblemsTruth, Mechanism, PhasesTimeline, TestimonialsCarousel, BonusesValue, OfferBlock, Guarantee, FAQAccordion, FinalCTA, Footer, StickyCTA
+- lib/: sanitize.ts, types.ts
 
-INTERNAL PROCESS
-Step 1: Sanitize copy (remove forbidden labels/strings and unsafe HTML).
-Step 2: Build a PageSpec object mapping copy to structured sections.
-Step 3: Render sections using the blueprint and design tokens.
-
-OUTPUT FORMAT (ONLY JSON)
+OUTPUT FORMAT (ONLY JSON):
 {
   "project_name": "<slugged-name>",
   "files": [{ "path": "package.json", "content": "..." }, ...],
   "notes": {
-    "sections": ["Hero","Problems","Mechanism","6 Phases","Proof","Bonuses","Offer","Guarantee","FAQ","Final CTA","Footer"],
-    "conversion_checks": ["CTA in hero, after phases, after offer, final CTA, sticky CTA", "Proof before offer", "Guarantee close to CTA", "No fake stats", "No forbidden labels"],
-    "performance": ["Minimal JS", "CSS animations only", "No heavy external assets", "Stable layout"]
+    "sections": [...],
+    "conversion_checks": [...],
+    "performance": [...]
   }
 }
 
-Now generate the full project.`;
+Now render the PageSpec into a premium Next.js project.`;
 
 // ============================================================
 // HELPERS
@@ -494,14 +489,44 @@ Apply the instruction to ONLY the section identified by data-section="${sectionN
       fullCopy
     );
 
-    const systemPrompt = format === "nextjs" ? NEXTJS_SYSTEM_PROMPT : HTML_SYSTEM_PROMPT;
-
-    console.log(`Calling OpenAI to generate landing page (format: ${format})...`);
-
-    const rawContent = await callOpenAI(systemPrompt, userPrompt);
-    const jsonStr = parseJsonFromAI(rawContent);
-
     if (format === "nextjs") {
+      // 2-STEP FLOW: PageSpec → Render
+      console.log("Step 1/2: Generating PageSpec from copy...");
+      const pageSpecPrompt = `Here are the inputs:
+
+project: { "id": "${projectId}", "name": "${project.name}" }
+locale: { "language": "${lang}", "region": "${project.cultural_region || 'auto'}" }
+
+Copy to extract and structure:
+"""
+${fullCopy}
+"""
+
+Extract ALL the copy content into the PageSpec JSON structure. Preserve every paragraph, bullet, and detail. Return ONLY valid JSON.`;
+
+      const rawPageSpec = await callOpenAI(PAGESPEC_SYSTEM_PROMPT, pageSpecPrompt);
+      const pageSpecJson = parseJsonFromAI(rawPageSpec);
+      
+      let pageSpec: Record<string, unknown>;
+      try {
+        pageSpec = JSON.parse(pageSpecJson);
+      } catch {
+        console.error("Failed to parse PageSpec:", pageSpecJson.slice(0, 500));
+        throw new Error("Failed to parse PageSpec from copy");
+      }
+      
+      console.log("Step 2/2: Rendering PageSpec into Next.js project...");
+      const renderPrompt = `PageSpec (structured copy):
+${JSON.stringify(pageSpec, null, 2)}
+
+Brand: { "primary_color": "${primaryColor}", "style": "${style}" ${logoUrl ? `, "logo_url": "${logoUrl}"` : ""} ${siteTitle ? `, "site_title": "${siteTitle}"` : ""} }
+Locale: { "language": "${lang}", "region": "${project.cultural_region || 'auto'}" }
+Template style: "${templateKey}"
+
+Render this PageSpec into a premium Next.js project. Use ALL the content — do not summarize or shorten any text. Return ONLY valid JSON.`;
+
+      const rawContent = await callOpenAI(NEXTJS_RENDER_PROMPT, renderPrompt);
+      const jsonStr = parseJsonFromAI(rawContent);
       let parsed: { project_name?: string; files?: { path: string; content: string }[]; page_tsx?: string; globals_css?: string; notes?: Record<string, unknown> };
       try {
         parsed = JSON.parse(jsonStr);
@@ -558,6 +583,10 @@ Apply the instruction to ONLY the section identified by data-section="${sectionN
     }
 
     // HTML format (default)
+    console.log("Calling OpenAI to generate landing page (format: html)...");
+    const rawContent = await callOpenAI(HTML_SYSTEM_PROMPT, userPrompt);
+    const jsonStr = parseJsonFromAI(rawContent);
+
     let parsed: { file_name?: string; html: string; sections?: string[]; notes?: Record<string, unknown> };
     try {
       parsed = JSON.parse(jsonStr);
