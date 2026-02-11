@@ -8,10 +8,10 @@ const corsHeaders = {
 };
 
 // ============================================================
-// AI-POWERED LANDING PAGE GENERATOR
+// SYSTEM PROMPTS
 // ============================================================
 
-const SYSTEM_PROMPT = `You are a world-class web designer + front-end engineer.
+const HTML_SYSTEM_PROMPT = `You are a world-class web designer + front-end engineer.
 Your job: generate a PREMIUM, modern, fast landing page (HTML/CSS/JS) from the provided sales copy.
 
 INPUTS (you will receive):
@@ -29,13 +29,8 @@ HARD RULES (non-negotiable):
 
 LOCALE + CULTURAL MODELLING:
 - Write everything in locale.language.
-- Adapt examples, metaphors, microcopy, and references to locale.region_hint:
-  - If es-ES: Spain references (cities, idioms, cultural touchpoints) and Spain-style Spanish.
-  - If es-MX: Mexico references and Mexico-style Spanish.
-  - If en-US: US references and idioms; if en-GB: UK references and spelling.
-  - If pt-BR: Brazilian Portuguese with Brazilian cultural references.
-- Keep it tasteful and believable. Avoid stereotypes. Prefer safe, mainstream references (cities, common institutions, widely-known places).
-- Do not overuse references: 2–4 subtle touches across the page is enough.
+- Adapt examples, metaphors, microcopy, and references to locale.region_hint.
+- Keep it tasteful and believable. Avoid stereotypes.
 
 DESIGN SYSTEM (premium SaaS landing DNA):
 - Use a clean 12-column feel (max-width 1100–1200px), generous spacing, clear typographic scale.
@@ -43,29 +38,14 @@ DESIGN SYSTEM (premium SaaS landing DNA):
 - Use cards, separators, and icon bullets for scannability.
 - Use sticky mobile CTA.
 - Use <details> accordion for FAQ.
-- Use a trust strip near the top: "Secure checkout", "Instant access", "Support" (translated to locale).
+- Use a trust strip near the top.
 - Include social proof section (testimonials in cards) and a guarantee/risk reversal section.
-- The agent has full creative freedom to reinterpret the copy structure — it does NOT need to follow the exact section order from the copy. Reorganize, merge, or split sections as needed for maximum conversion and visual impact.
+- The agent has full creative freedom to reinterpret the copy structure.
 
 PERFORMANCE RULES:
-- Single HTML file output.
-- Inline critical CSS (in <style>).
-- Minimal JS (only for small interactions: smooth scroll, optional sticky CTA behavior).
-- Avoid heavy images; if you need a hero visual, generate a CSS-based abstract background.
-- Use system fonts first; if using Google Fonts, only 1–2 families, with display=swap.
-
-CONTENT MAPPING LOGIC:
-- Parse the copy into these sections:
-  Hero (big promise + subhead + 3 bullets + CTA)
-  Problem agitation (without fearmongering)
-  Mechanism (how it works, clearly)
-  Benefits (3–6 cards)
-  Proof (testimonials + credibility cues)
-  Offer (what's included + bonuses)
-  Guarantee (risk reversal)
-  FAQ
-  Final CTA (summary + CTA)
-- If page_type = "upsell": focus on "protect results / accelerate / shortcut", add comparison table and "one-time offer" tone.
+- Single HTML file output. Inline critical CSS. Minimal JS.
+- Avoid heavy images; use CSS-based abstract backgrounds.
+- Use system fonts first; if Google Fonts, only 1–2 families with display=swap.
 
 OUTPUT FORMAT:
 Return ONLY a JSON object (no markdown fences, no extra text) with:
@@ -73,19 +53,124 @@ Return ONLY a JSON object (no markdown fences, no extra text) with:
   "file_name": "<project-name>-<page_type>-<locale_language>.html",
   "html": "<!doctype html>...full HTML here...",
   "notes": {
-    "sections": ["Hero", "Problem", "Mechanism", "Benefits", "Proof", "Offer", "FAQ", "Final CTA"],
-    "locale_touches": ["...2-4 examples of cultural adaptation you applied..."],
-    "performance": ["what you did for speed and accessibility"]
+    "sections": ["Hero", "Problem", ...],
+    "locale_touches": ["..."],
+    "performance": ["..."]
   }
 }
 
 Now generate the page using the provided inputs.`;
 
+const NEXTJS_SYSTEM_PROMPT = `You are a world-class web designer + React/Next.js engineer.
+Your job: generate a PREMIUM landing page as a Next.js App Router React component from the provided sales copy.
+
+INPUTS: same as described below (project, page_type, brand, locale, copy).
+
+HARD RULES (non-negotiable):
+- NEVER output internal labels or placeholders such as: "SEÇÃO:", "PÁGINA DE VENDAS", "{SIM...}", "(Inserir ...)", "(Espaço para ...)".
+- Rewrite those into real headings/subheadings and real UI content.
+- Production-ready: no empty paragraphs, no dummy text, no TODO notes.
+- Do NOT mention medical claims as guarantees.
+
+LOCALE + CULTURAL MODELLING:
+- Write everything in locale.language.
+- Adapt examples, metaphors, microcopy to locale.region_hint.
+- Keep tasteful, avoid stereotypes.
+
+TECHNICAL RULES FOR NEXT.JS OUTPUT:
+- Output a single default-exported React component for app/page.tsx.
+- Use ONLY Tailwind CSS utility classes for ALL styling. No inline styles, no CSS modules, no styled-components.
+- Use these premium Tailwind tokens: max-w-6xl, rounded-2xl, shadow-sm, spacing (p-8, py-12, py-16, gap-8), prose-like typography scale (text-4xl/5xl for hero, text-2xl/3xl for section headings, text-lg for body).
+- Component must be a Server Component (no "use client" directive, no useState/useEffect).
+- For FAQ accordion, use native HTML <details>/<summary> elements styled with Tailwind.
+- For sticky mobile CTA, use fixed bottom-0 with Tailwind (e.g. fixed bottom-0 left-0 right-0 md:hidden).
+- Do NOT import any external libraries. Only use React and HTML elements with Tailwind classes.
+- Do NOT use next/image — use regular <img> tags or CSS backgrounds.
+- Use semantic HTML: <header>, <main>, <section>, <footer>.
+
+DESIGN DIRECTION:
+- Clean layout with generous whitespace.
+- Modern gradients/glows via Tailwind (bg-gradient-to-r, etc.).
+- Cards for benefits, testimonials, and offer items.
+- Trust strip near the top.
+- Social proof section with testimonial cards.
+- Guarantee/risk reversal section.
+- Offer/pricing card with clear CTA.
+- Full creative freedom to reinterpret copy structure for maximum conversion.
+
+COLOR SYSTEM:
+- Use the provided brand.primary_color as the main accent.
+- Define colors using Tailwind arbitrary values like bg-[#7c3aed], text-[#7c3aed], etc.
+- For dark themes: use bg-gray-950, bg-gray-900, text-white, text-gray-300.
+- For light themes: use bg-white, bg-gray-50, text-gray-900, text-gray-600.
+
+OUTPUT FORMAT:
+Return ONLY a JSON object (no markdown fences) with:
+{
+  "page_tsx": "export default function LandingPage() { return (<>...</>); }",
+  "globals_css": "@tailwind base;\\n@tailwind components;\\n@tailwind utilities;\\n\\n/* any additional global styles */",
+  "notes": {
+    "sections": ["Hero", "Problem", ...],
+    "locale_touches": ["..."],
+    "tailwind_classes_used": ["...key design tokens used..."]
+  }
+}
+
+IMPORTANT: The page_tsx value must be a valid single-file React component string. Use standard JSX (className, htmlFor, etc.). No TypeScript types needed — plain JSX is fine.
+
+Now generate the page using the provided inputs.`;
+
 // ============================================================
-// TEMPLATE STYLE MAPPING
+// HELPERS
 // ============================================================
 function getStyleFromTemplate(templateKey: string): "dark-premium" | "light-premium" {
   return templateKey === "longform-dr" ? "light-premium" : "dark-premium";
+}
+
+function buildUserPrompt(
+  projectId: string,
+  projectName: string,
+  pageType: string,
+  primaryColor: string,
+  style: string,
+  logoUrl: string | undefined,
+  siteTitle: string | undefined,
+  lang: string,
+  culturalRegion: string,
+  templateKey: string,
+  fullCopy: string
+): string {
+  return `Here are the inputs:
+
+1) project: { "id": "${projectId}", "name": "${projectName}" }
+
+2) page_type: "${pageType}"
+
+3) brand: {
+  "primary_color": "${primaryColor}",
+  "secondary_color": "${style === 'dark-premium' ? '#1a1a2e' : '#f5f5f0'}",
+  "style": "${style}"
+  ${logoUrl ? `, "logo_url": "${logoUrl}"` : ""}
+  ${siteTitle ? `, "site_title": "${siteTitle}"` : ""}
+}
+
+4) locale: {
+  "language": "${lang}",
+  "region_hint": "${culturalRegion}"
+}
+
+5) template_style: "${templateKey}" — use this as creative direction:
+  - "saas-premium": Dark, sleek SaaS aesthetic. Hero + features + proof + pricing + FAQ. Gradient glows, glass cards.
+  - "vsl-page": Dark, video-first. Hero com vídeo placeholder + bullets + proof + sticky CTA.
+  - "longform-dr": Light, editorial. Headline forte + storytelling + mechanism + offer. Warm tones, serif accents.
+  - "upsell-focus": Dark with purple accents. Comparison table + bonuses + urgency + guarantee.
+
+6) copy:
+"""
+${fullCopy}
+"""
+
+Generate the premium landing page now. Return ONLY valid JSON.`;
 }
 
 // ============================================================
@@ -122,9 +207,10 @@ serve(async (req) => {
     const userId = claimsData.claims.sub as string;
 
     const body = await req.json();
-    const { projectId, templateKey = "saas-premium", options = {} } = body as {
+    const { projectId, templateKey = "saas-premium", format = "html", options = {} } = body as {
       projectId: string;
       templateKey?: string;
+      format?: "html" | "nextjs";
       options?: {
         includeUpsells?: boolean;
         branding?: { title?: string; logoUrl?: string; primaryColor?: string };
@@ -161,8 +247,7 @@ serve(async (req) => {
     if (!salesCopy) {
       return new Response(
         JSON.stringify({
-          error:
-            "Este projeto não possui copy da Página de Vendas gerada. Gere a etapa 'Página de Vendas' primeiro.",
+          error: "Este projeto não possui copy da Página de Vendas gerada. Gere a etapa 'Página de Vendas' primeiro.",
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -179,38 +264,21 @@ serve(async (req) => {
     const primaryColor = options.branding?.primaryColor || "#7c3aed";
     const style = getStyleFromTemplate(templateKey);
 
-    // Build the user prompt with all inputs
-    const userPrompt = `Here are the inputs:
+    const userPrompt = buildUserPrompt(
+      projectId,
+      project.name,
+      pageType,
+      primaryColor,
+      style,
+      options.branding?.logoUrl,
+      options.branding?.title,
+      lang,
+      project.cultural_region || "auto",
+      templateKey,
+      fullCopy
+    );
 
-1) project: { "id": "${projectId}", "name": "${project.name}" }
-
-2) page_type: "${pageType}"
-
-3) brand: {
-  "primary_color": "${primaryColor}",
-  "secondary_color": "${style === 'dark-premium' ? '#1a1a2e' : '#f5f5f0'}",
-  "style": "${style}"
-  ${options.branding?.logoUrl ? `, "logo_url": "${options.branding.logoUrl}"` : ""}
-  ${options.branding?.title ? `, "site_title": "${options.branding.title}"` : ""}
-}
-
-4) locale: {
-  "language": "${lang}",
-  "region_hint": "${project.cultural_region || 'auto'}"
-}
-
-5) template_style: "${templateKey}" — use this as creative direction:
-  - "saas-premium": Dark, sleek SaaS aesthetic. Hero + features + proof + pricing + FAQ. Gradient glows, glass cards.
-  - "vsl-page": Dark, video-first. Hero com vídeo placeholder + bullets + proof + sticky CTA.
-  - "longform-dr": Light, editorial. Headline forte + storytelling + mechanism + offer. Warm tones, serif accents.
-  - "upsell-focus": Dark with purple accents. Comparison table + bonuses + urgency + guarantee.
-
-6) copy:
-"""
-${fullCopy}
-"""
-
-Generate the premium landing page now. Return ONLY valid JSON.`;
+    const systemPrompt = format === "nextjs" ? NEXTJS_SYSTEM_PROMPT : HTML_SYSTEM_PROMPT;
 
     // Call OpenAI
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
@@ -218,7 +286,7 @@ Generate the premium landing page now. Return ONLY valid JSON.`;
       throw new Error("OPENAI_API_KEY not configured");
     }
 
-    console.log("Calling OpenAI to generate landing page...");
+    console.log(`Calling OpenAI to generate landing page (format: ${format})...`);
 
     const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -229,7 +297,7 @@ Generate the premium landing page now. Return ONLY valid JSON.`;
       body: JSON.stringify({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
         temperature: 0.7,
@@ -246,18 +314,67 @@ Generate the premium landing page now. Return ONLY valid JSON.`;
     const aiResult = await aiResponse.json();
     const rawContent = aiResult.choices?.[0]?.message?.content || "";
 
-    // Parse JSON from AI response (handle markdown fences)
+    // Parse JSON from AI response
+    let jsonStr = rawContent.trim();
+    if (jsonStr.startsWith("```")) {
+      jsonStr = jsonStr.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+    }
+
+    if (format === "nextjs") {
+      let parsed: { page_tsx: string; globals_css?: string; notes?: Record<string, unknown> };
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch {
+        console.error("Failed to parse Next.js JSON:", jsonStr.slice(0, 500));
+        throw new Error("Failed to parse AI-generated Next.js project");
+      }
+
+      if (!parsed.page_tsx) {
+        throw new Error("AI response did not contain page_tsx");
+      }
+
+      // Save to DB
+      const { data: saved, error: saveError } = await supabase
+        .from("site_generations")
+        .insert({
+          user_id: userId,
+          project_id: projectId,
+          template_key: templateKey,
+          status: "generated",
+          generated_html: parsed.page_tsx,
+          generated_assets: { format: "nextjs", notes: parsed.notes || {} },
+          language_code: lang,
+          cultural_region: project.cultural_region,
+          branding: options.branding || {},
+          include_upsells: options.includeUpsells || false,
+        })
+        .select()
+        .single();
+
+      if (saveError) console.error("Save error:", saveError);
+
+      return new Response(
+        JSON.stringify({
+          format: "nextjs",
+          page_tsx: parsed.page_tsx,
+          globals_css: parsed.globals_css || "@tailwind base;\n@tailwind components;\n@tailwind utilities;",
+          meta: {
+            templateKey,
+            projectId,
+            generationId: saved?.id || null,
+            notes: parsed.notes || null,
+          },
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // HTML format (default)
     let parsed: { file_name?: string; html: string; notes?: Record<string, unknown> };
     try {
-      // Remove markdown code fences if present
-      let jsonStr = rawContent.trim();
-      if (jsonStr.startsWith("```")) {
-        jsonStr = jsonStr.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
-      }
       parsed = JSON.parse(jsonStr);
-    } catch (parseErr) {
-      console.error("Failed to parse AI JSON response, attempting to extract HTML...");
-      // Fallback: try to extract HTML directly
+    } catch {
+      console.error("Failed to parse AI JSON, attempting HTML extraction...");
       const htmlMatch = rawContent.match(/<!doctype html[\s\S]*<\/html>/i);
       if (htmlMatch) {
         parsed = { html: htmlMatch[0] };
@@ -271,9 +388,6 @@ Generate the premium landing page now. Return ONLY valid JSON.`;
       throw new Error("AI response did not contain HTML");
     }
 
-    const html = parsed.html;
-
-    // Save to database
     const { data: saved, error: saveError } = await supabase
       .from("site_generations")
       .insert({
@@ -281,7 +395,7 @@ Generate the premium landing page now. Return ONLY valid JSON.`;
         project_id: projectId,
         template_key: templateKey,
         status: "generated",
-        generated_html: html,
+        generated_html: parsed.html,
         generated_assets: parsed.notes || {},
         language_code: lang,
         cultural_region: project.cultural_region,
@@ -295,8 +409,8 @@ Generate the premium landing page now. Return ONLY valid JSON.`;
 
     return new Response(
       JSON.stringify({
-        html,
-        assets: {},
+        format: "html",
+        html: parsed.html,
         meta: {
           templateKey,
           projectId,
