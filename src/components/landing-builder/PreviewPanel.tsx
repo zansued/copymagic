@@ -86,7 +86,7 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
       `;
       doc.head.appendChild(style);
 
-      // Add edit buttons to each section
+      // Add edit buttons to each section — use direct callback instead of postMessage
       const sections = doc.querySelectorAll("[data-section]");
       sections.forEach((section) => {
         const btn = doc.createElement("button");
@@ -97,10 +97,7 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
           e.stopPropagation();
           const sectionName = section.getAttribute("data-section");
           if (sectionName) {
-            window.parent.postMessage(
-              { type: "edit-section", section: sectionName },
-              "*"
-            );
+            setEditingSection(sectionName);
           }
         });
         section.appendChild(btn);
@@ -127,16 +124,6 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
     };
   }, [html, injectSectionInteractions]);
 
-  // Listen for postMessage from iframe
-  useEffect(() => {
-    const handler = (e: MessageEvent) => {
-      if (e.data?.type === "edit-section" && e.data.section) {
-        setEditingSection(e.data.section);
-      }
-    };
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
-  }, []);
 
   const handleEditSubmit = useCallback(
     async (instruction: string) => {
