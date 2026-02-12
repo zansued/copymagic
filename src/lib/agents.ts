@@ -43,6 +43,15 @@ export const AGENTS: AgentDef[] = [
     category: "copywriting",
     available: false,
   },
+  {
+    id: "email-subjects",
+    name: "Assuntos de E-mails",
+    emoji: "✉️",
+    role: "Especialista em Títulos de E-mail",
+    description: "Cria títulos de e-mail que disparam taxas de abertura com micro-histórias irresistíveis e preheaders estratégicos.",
+    category: "copywriting",
+    available: true,
+  },
   // Content & Social
   {
     id: "carousel-creator",
