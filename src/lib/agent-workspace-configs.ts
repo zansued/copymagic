@@ -465,6 +465,118 @@ ${inputs.current_ad}`;
     },
   },
 
+  "youtube-titles": {
+    id: "youtube-titles",
+    name: "Ângulos e Títulos YouTube",
+    emoji: "▶️",
+    subtitle: "Gere títulos otimizados para maximizar CTR no YouTube",
+    inputs: [
+      {
+        key: "video_topic",
+        label: "Tema / Ideia do Vídeo",
+        placeholder: "Descreva o tema principal do vídeo. Ex: '7 erros fatais ao usar IA com PDFs', 'Como ganhar R$5k/mês com freelancing'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "niche",
+        label: "Nicho / Canal",
+        type: "input",
+        placeholder: "Ex: Marketing Digital, Tecnologia, Finanças, Desenvolvimento Pessoal...",
+      },
+      {
+        key: "style",
+        label: "Estilo de Título",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "curiosity", label: "🧲 Curiosidade (gap de informação)" },
+          { value: "urgency", label: "🔥 Urgência (FOMO)" },
+          { value: "authority", label: "🎓 Autoridade (dados e provas)" },
+          { value: "contrarian", label: "⚡ Contrário (opinião polêmica)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Tom mais casual", "Público iniciante", "Complementar com ideias de thumb"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const styleMap: Record<string, string> = {
+        curiosity: "curiosidade e gap de informação — o espectador PRECISA clicar para saber",
+        urgency: "urgência e FOMO — sensação de que perder este vídeo custa caro",
+        authority: "autoridade e dados — números, provas e credibilidade que geram confiança",
+        contrarian: "contrário e polêmico — desafia crenças comuns e gera debate",
+      };
+
+      return `Você é o Estrategista de Títulos YouTube — um especialista em otimização de CTR, psicologia do clique e engenharia de títulos que performam no algoritmo do YouTube.
+
+MISSÃO: A partir do tema fornecido, gerar MÚLTIPLAS VARIAÇÕES de títulos otimizados, ângulos complementares e sugestões de thumb.
+
+ESTILO PREDOMINANTE: ${styleMap[inputs.style] || "misto — variar entre curiosidade, urgência e autoridade"}
+${inputs.niche ? `NICHO: ${inputs.niche}` : ""}
+
+ESTRUTURA OBRIGATÓRIA:
+
+## 1. ANÁLISE DO TEMA
+- **Tema central**: resumo do assunto
+- **Público-alvo provável**: quem buscaria este conteúdo
+- **Intenção de busca**: o que o espectador espera encontrar
+- **Palavras-chave estratégicas**: termos com volume de busca relevante
+
+## 2. TÍTULOS PRINCIPAIS (10 variações)
+Para cada título:
+- O título em si (50-60 caracteres ideal, máximo 70)
+- Contagem de caracteres
+- Framework usado (curiosidade, número, como fazer, polêmico, urgente, etc.)
+- Score de CTR estimado: ⭐ a ⭐⭐⭐⭐⭐
+- Por que funciona (1 linha)
+
+## 3. ÂNGULOS ALTERNATIVOS (5 ângulos)
+Explore o MESMO tema por perspectivas diferentes:
+- **Ângulo**: nome do ângulo
+- **Título sugerido**: título otimizado
+- **Por que testar**: justificativa estratégica
+- **Público específico**: para quem este ângulo ressoa mais
+
+## 4. COMBOS TÍTULO + THUMB
+Para os 5 melhores títulos:
+- **Título**: o título escolhido
+- **Sugestão de Thumb**: descrição visual da thumbnail que COMPLEMENTA (não repete) o título
+- **Texto na Thumb**: texto curto de impacto (3-5 palavras máx.)
+- **Regra aplicada**: como título e thumb se complementam
+
+## 5. VARIAÇÕES POR FORMATO
+- **Listicle**: versões com números ("7 erros...", "5 passos...")
+- **How-to**: versões tutorial ("Como fazer...", "O método...")
+- **Polêmico**: versões contrárias ("Pare de...", "Nunca faça...")
+- **Storytelling**: versões narrativas ("Como eu...", "O dia que...")
+- **Urgente**: versões FOMO ("Antes que seja tarde...", "ALERTA:")
+
+## 6. DICAS DE OTIMIZAÇÃO
+- Melhores horários de publicação para o nicho
+- Tags sugeridas (10-15)
+- Primeira frase do vídeo (hook dos primeiros 5 segundos)
+- Descrição otimizada (primeiras 2 linhas)
+
+REGRAS:
+- Títulos devem ter entre 50-60 caracteres (ideal) — NUNCA mais de 70
+- Use números ímpares quando possível (7 > 6, 5 > 4)
+- Evite clickbait vazio — todo título deve entregar no conteúdo
+- Thumb e título COMPLEMENTAM, nunca repetem a mesma informação
+- Priorize clareza sobre criatividade
+- Considere o algoritmo: palavras-chave no início do título
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+TEMA DO VÍDEO:
+${inputs.video_topic}`;
+    },
+  },
+
   "brand-voice": {
     id: "brand-voice",
     name: "Arquiteto de Marca",
