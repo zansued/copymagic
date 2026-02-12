@@ -670,6 +670,104 @@ ${inputs.product_info}`;
     },
   },
 
+  "email-subjects": {
+    id: "email-subjects",
+    name: "Assuntos de E-mails",
+    emoji: "✉️",
+    subtitle: "Crie títulos de e-mail que disparam taxas de abertura",
+    inputs: [
+      {
+        key: "content_base",
+        label: "Texto Base",
+        placeholder: "Compartilhe o conteúdo do e-mail ou a ideia que será transformada em títulos persuasivos. Quanto mais contexto, melhores os resultados.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "goal",
+        label: "Objetivo do E-mail",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "open", label: "📬 Maximizar abertura" },
+          { value: "click", label: "🔗 Gerar cliques" },
+          { value: "launch", label: "🚀 Lançamento de produto" },
+          { value: "reactivate", label: "🔄 Reativar lista dormente" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Público feminino 30-45", "Tom urgente", "Evitar emojis no assunto", "Sequência de 5 e-mails"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const goalMap: Record<string, string> = {
+        open: "maximizar taxa de abertura — priorizar curiosidade e intriga",
+        click: "gerar cliques — priorizar promessa de valor e urgência",
+        launch: "lançamento de produto — priorizar novidade e escassez",
+        reactivate: "reativar lista dormente — priorizar reconexão e valor inesperado",
+      };
+
+      return `Você é o Especialista em Assuntos de E-mail — um copywriter obsessivo por taxas de abertura, com domínio profundo em psicologia da curiosidade, micro-storytelling e engenharia de atenção em caixas de entrada lotadas.
+
+MISSÃO: Criar 10 TÍTULOS DE E-MAIL únicos e irresistíveis a partir do conteúdo fornecido, cada um com preheader estratégico.
+
+OBJETIVO: ${goalMap[inputs.goal] || "maximizar taxa de abertura"}
+
+CRITÉRIOS OBRIGATÓRIOS (cada título deve atender TODOS):
+1. **Intrigante**: provoca curiosidade impossível de ignorar
+2. **Pessoal**: parece escrito para UMA pessoa, não para uma lista
+3. **Conciso**: máximo 50 caracteres (ideal: 30-40)
+4. **Específico**: evita generalidades vagas
+5. **Urgente**: cria sensação de que precisa ser aberto AGORA
+6. **Valioso**: promete algo que o leitor quer
+
+ESTRUTURA OBRIGATÓRIA:
+
+## ANÁLISE DO CONTEÚDO
+- **Tema central**: do que se trata
+- **Gancho principal**: o elemento mais interessante/surpreendente
+- **Público provável**: quem receberia este e-mail
+- **Emoção dominante**: qual sentimento explorar
+
+## 10 TÍTULOS COM PREHEADERS
+
+Para cada título:
+
+### Título [N]: "[assunto do e-mail]"
+- **Preheader**: texto complementar que aparece após o assunto (máx. 80 caracteres)
+- **Técnica usada**: qual gatilho psicológico sustenta (curiosidade, contraste, especificidade, urgência, personalização, polêmica, storytelling, etc.)
+- **Por que funciona**: explicação em 1 linha
+- **Contagem**: X caracteres
+- **Score estimado de abertura**: ⭐ a ⭐⭐⭐⭐⭐
+
+## VARIAÇÕES POR CATEGORIA
+Organize os 10 títulos em categorias:
+- **Micro-história**: títulos que contam uma história em uma linha
+- **Contraste dramático**: títulos que usam oposição (antes/depois, erro/acerto)
+- **Pergunta provocativa**: títulos em formato de pergunta irresistível
+- **Declaração ousada**: títulos que fazem afirmações surpreendentes
+- **Personalização**: títulos que parecem escritos sob medida
+
+## COMBINAÇÕES PARA SEQUÊNCIA
+Se for uma sequência de e-mails, sugira a ordem ideal dos títulos e o espaçamento entre envios.
+
+## BOAS PRÁTICAS
+- Palavras que AUMENTAM abertura neste contexto
+- Palavras que DIMINUEM abertura (spam triggers)
+- Melhor horário de envio sugerido
+- Teste A/B recomendado: quais 2 títulos testar primeiro
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+CONTEÚDO BASE:
+${inputs.content_base}`;
+    },
+  },
+
   "brand-voice": {
     id: "brand-voice",
     name: "Arquiteto de Marca",
