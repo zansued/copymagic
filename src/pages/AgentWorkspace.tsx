@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Sparkles, Square, Copy, Check } from "lucide-react";
+import { ArrowLeft, Sparkles, Square, Copy, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
 import { AGENT_WORKSPACE_CONFIGS } from "@/lib/agent-workspace-configs";
 import { profileToMarkdown } from "@/lib/brand-profile-types";
+import { firecrawlApi } from "@/lib/api/firecrawl";
 import ReactMarkdown from "react-markdown";
 
 interface BrandProfileOption {
@@ -91,6 +92,24 @@ export default function AgentWorkspace() {
     setIsGenerating(true);
     setOutput("");
 
+    // Scrape reference URL if present
+    const enrichedInputs = { ...inputs };
+    if (inputs.reference_url?.trim()) {
+      try {
+        setOutput("🔍 Extraindo conteúdo da URL de referência...\n");
+        const scrapeResult = await firecrawlApi.scrape(inputs.reference_url.trim());
+        if (scrapeResult.success) {
+          const markdown = scrapeResult.data?.markdown || scrapeResult.data?.data?.markdown;
+          if (markdown) {
+            enrichedInputs.scraped_content = markdown.slice(0, 8000);
+          }
+        }
+      } catch {
+        // Continue without scraped content
+      }
+      setOutput("");
+    }
+
     // Load brand context
     let brandContext = "";
     if (selectedProfileId) {
@@ -110,7 +129,7 @@ export default function AgentWorkspace() {
       }
     }
 
-    const systemPrompt = config.buildPrompt(inputs, brandContext);
+    const systemPrompt = config.buildPrompt(enrichedInputs, brandContext);
     abortRef.current = new AbortController();
 
     const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/agent-generate`;

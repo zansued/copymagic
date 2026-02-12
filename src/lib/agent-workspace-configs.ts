@@ -1385,4 +1385,132 @@ CONTEÚDO ORIGINAL PARA TRANSFORMAR:
 ${inputs.content}`;
     },
   },
+
+  "twitter-content": {
+    id: "twitter-content",
+    name: "Conteúdo para Twitter/X",
+    emoji: "𝕏",
+    subtitle: "Tweets, threads e frases que engajam, educam e vendem",
+    inputs: [
+      {
+        key: "content",
+        label: "Instruções / Conteúdo Base",
+        placeholder: "Descreva o que quer no conteúdo ou cole qualquer texto que será a base da criação (ideia, rascunho, transcrição, artigo...).",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Cole uma URL de artigo, vídeo ou post para usar como inspiração adicional",
+        type: "input",
+      },
+      {
+        key: "funnel_stage",
+        label: "Estágio do Funil",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "captacao", label: "🧲 Captação — Atrair atenção e novos seguidores" },
+          { value: "consideracao", label: "🤔 Consideração — Educar e construir autoridade" },
+          { value: "conversao", label: "💰 Conversão — Gerar ação e vendas" },
+        ],
+      },
+      {
+        key: "format",
+        label: "Formato de Tweet",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "thread", label: "🧵 Thread Completa (até 12 tweets)" },
+          { value: "single", label: "💬 Tweet Único (3 variações)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Tom específico, público-alvo, link para incluir, hashtags...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const isThread = inputs.format === "thread";
+      const stageMap: Record<string, string> = {
+        captacao: "CAPTAÇÃO — Foco em atrair atenção, gerar curiosidade, provocar e conquistar novos seguidores. Use ganchos irresistíveis, opiniões fortes e insights surpreendentes.",
+        consideracao: "CONSIDERAÇÃO — Foco em educar, construir autoridade e criar confiança. Use frameworks, listas, histórias de bastidores e provas sociais.",
+        conversao: "CONVERSÃO — Foco em gerar ação direta: cliques, cadastros, vendas. Use urgência, prova social, benefícios claros e CTAs específicos.",
+      };
+
+      return `Você é um Estrategista de Conteúdo para Twitter/X, especializado em criar conteúdo de alta performance que combina frameworks persuasivos com a cultura única da plataforma.
+
+## SUA MISSÃO
+Criar conteúdo para Twitter/X no formato ${isThread ? "THREAD COMPLETA (até 12 tweets narrativos)" : "TWEET ÚNICO (3 variações otimizadas)"} focado no estágio: ${stageMap[inputs.funnel_stage] || stageMap.captacao}
+
+## REGRAS DA PLATAFORMA
+- Limite de 280 caracteres por tweet
+- Threads: primeiro tweet é o GANCHO (mais importante)
+- Linguagem conversacional, direta, sem formalidades
+- Quebras de linha estratégicas para escaneabilidade
+- Emojis com moderação (máximo 1-2 por tweet)
+- Sem hashtags no corpo (apenas no último tweet se relevante)
+
+${isThread ? `## FORMATO: THREAD COMPLETA
+
+Estruture a thread com até 12 tweets seguindo esta arquitetura:
+
+**Tweet 1 — GANCHO**: O tweet mais importante. Deve parar o scroll. Use uma das técnicas:
+- Afirmação contraintuitiva
+- Promessa de valor específica
+- Pergunta provocativa
+- Número + resultado surpreendente
+
+**Tweets 2-3 — CONTEXTO**: Estabeleça o problema ou a premissa
+**Tweets 4-8 — DESENVOLVIMENTO**: Entregue o valor principal (framework, lista, história, argumentos)
+**Tweets 9-10 — PROVA/EXEMPLO**: Ilustre com caso real ou analogia
+**Tweet 11 — CONCLUSÃO**: Sintetize o insight principal
+**Tweet 12 — CTA**: Chamada à ação (seguir, salvar, compartilhar, link)
+
+### REGRAS DA THREAD:
+- Cada tweet deve funcionar SOZINHO (quem lê no meio deve entender)
+- Numerar tweets (1/, 2/, etc.)
+- Primeiro tweet NÃO começa com "Thread:" ou "🧵"
+- Transições naturais entre tweets
+- Variar estrutura (não repetir formato em tweets consecutivos)
+` : `## FORMATO: TWEET ÚNICO
+
+Crie 3 VARIAÇÕES do tweet, cada uma com abordagem diferente:
+
+**Variação 1 — Provocativo**: Opinião forte ou afirmação contraintuitiva
+**Variação 2 — Valor Direto**: Insight prático e acionável
+**Variação 3 — Storytelling**: Mini-história ou analogia poderosa
+
+Para cada variação forneça:
+- O tweet completo (máximo 280 caracteres)
+- Por que funciona para o estágio escolhido
+- Sugestão de melhor horário para postar
+`}
+
+## FRAMEWORKS DISPONÍVEIS (combine conforme necessário)
+- **AIDA**: Atenção → Interesse → Desejo → Ação
+- **PAS**: Problema → Agitação → Solução
+- **BAB**: Before → After → Bridge
+- **4U**: Útil, Urgente, Único, Ultra-específico
+- **Contraste**: Expectativa vs. Realidade
+- **Lista de Poder**: "X coisas que [resultado]"
+
+## QUALIDADE EXIGIDA
+- Zero palavras genéricas ("incrível", "fantástico", "revolucionário")
+- Especificidade > Generalização
+- Cada tweet deve provocar uma REAÇÃO (concordar, discordar, salvar, compartilhar)
+- Tom conversacional como se falasse com um amigo inteligente
+- Adaptar ao DNA da marca quando disponível
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA selecionado. Crie conteúdo genérico mas de alta qualidade."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL SCRAPEADA) ---\n${inputs.scraped_content}` : ""}
+
+CONTEÚDO BASE / INSTRUÇÕES DO USUÁRIO:
+${inputs.content}`;
+    },
+  },
 };

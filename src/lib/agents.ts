@@ -135,6 +135,15 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "twitter-content",
+    name: "Conteúdo para Twitter/X",
+    emoji: "𝕏",
+    role: "Especialista em Conteúdo para Twitter/X",
+    description: "Cria tweets, threads e frases que engajam, educam e vendem usando frameworks estratégicos por estágio de funil.",
+    category: "content",
+    available: true,
+  },
   // Storytelling (special - content category)
   {
     id: "storytelling-adapter",
