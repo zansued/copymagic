@@ -81,4 +81,14 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: false,
   },
+  // Storytelling (special - content category)
+  {
+    id: "storytelling-adapter",
+    name: "Adaptador de Storytelling",
+    emoji: "📖",
+    role: "Especialista em Narrativa Persuasiva",
+    description: "Transforma qualquer conteúdo em uma narrativa mais poderosa usando frameworks clássicos de storytelling.",
+    category: "content",
+    available: true,
+  },
 ];
