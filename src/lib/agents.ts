@@ -91,4 +91,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "universal-adapter",
+    name: "Adaptador Universal",
+    emoji: "🔄",
+    role: "Especialista em Replicação Estrutural",
+    description: "Replica a arquitetura persuasiva de qualquer criativo validado, adaptando o conteúdo ao DNA da sua campanha.",
+    category: "copywriting",
+    available: true,
+  },
 ];
