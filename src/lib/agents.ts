@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "presentation-generator",
+    name: "Gerador de Apresentação",
+    emoji: "🎤",
+    role: "Especialista em Apresentações Persuasivas",
+    description: "Transforma ideias em roteiros completos de apresentação, slide a slide, para propostas comerciais, palestras e webinários.",
+    category: "content",
+    available: true,
+  },
+  {
     id: "ad-generator",
     name: "Gerador de Anúncios",
     emoji: "📣",
