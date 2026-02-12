@@ -12,6 +12,7 @@ import LandingBuilder from "./pages/LandingBuilder";
 import Auth from "./pages/Auth";
 import AgentsHub from "./pages/AgentsHub";
 import AgentSetup from "./pages/AgentSetup";
+import StorytellingAgent from "./pages/StorytellingAgent";
 import BrandProfiles from "./pages/BrandProfiles";
 import BrandProfileEdit from "./pages/BrandProfileEdit";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/web-generator" element={<ProtectedRoute><LandingBuilder /></ProtectedRoute>} />
             <Route path="/agents" element={<ProtectedRoute><AgentsHub /></ProtectedRoute>} />
             <Route path="/agents/setup" element={<ProtectedRoute><AgentSetup /></ProtectedRoute>} />
+            <Route path="/agents/storytelling-adapter" element={<ProtectedRoute><StorytellingAgent /></ProtectedRoute>} />
             <Route path="/brand-profiles" element={<ProtectedRoute><BrandProfiles /></ProtectedRoute>} />
             <Route path="/brand-profiles/:id" element={<ProtectedRoute><BrandProfileEdit /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
