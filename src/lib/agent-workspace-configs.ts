@@ -577,6 +577,99 @@ ${inputs.video_topic}`;
     },
   },
 
+  "persuasive-premise": {
+    id: "persuasive-premise",
+    name: "Premissa Persuasiva",
+    emoji: "💎",
+    subtitle: "Defina a crença que torna seu produto a única solução lógica",
+    inputs: [
+      {
+        key: "product_info",
+        label: "Produto / Oferta",
+        placeholder: "Descreva seu produto ou serviço: o que é, qual transformação oferece, qual o mecanismo único, para quem é, o que o diferencia...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "transformation",
+        label: "Transformação Desejada",
+        type: "input",
+        placeholder: "Ex: 'Emagrecer depois dos 40', 'Escalar vendas online', 'Rentabilizar conhecimento'...",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Tenho um mecanismo chamado Método XYZ", "Concorrentes usam abordagem tradicional", "Público cético"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Arquiteto de Premissas — um estrategista de persuasão especializado em construir a crença fundamental que transforma audiência em clientes, usando lógica aristotélica e engenharia de convicção.
+
+MISSÃO: Criar a PREMISSA PERSUASIVA completa para o produto/oferta descrita — a única crença que, se aceita pelo cliente, torna a compra o único caminho lógico.
+
+CONCEITO CENTRAL:
+A Premissa Persuasiva segue a estrutura lógica aristotélica:
+1. Cliente quer uma transformação (emagrecer, ganhar dinheiro, etc.)
+2. Esta transformação só é possível de determinada maneira (mecanismo)
+3. Seu produto/serviço é o único que oferece dito mecanismo
+4. Logo, seu produto é a única solução possível
+
+FÓRMULA: "[Solução] é a única maneira de conseguir [Transformação] pois [Mecanismo]."
+
+ESTRUTURA OBRIGATÓRIA:
+
+## 1. DIAGNÓSTICO DA OFERTA
+- **Transformação prometida**: o resultado final que o cliente deseja
+- **Mecanismo atual**: como o produto entrega essa transformação
+- **Diferencial real**: o que existe no produto que ninguém mais oferece
+- **Alternativas do mercado**: o que o cliente tentaria se não comprasse
+
+## 2. CONSTRUÇÃO DA PREMISSA CENTRAL
+- **Premissa principal** (frase única e poderosa)
+- **Versão expandida** (2-3 frases que aprofundam)
+- **Silogismo completo**: a cadeia lógica aristotélica passo a passo
+- **Teste de solidez**: a premissa resiste a contra-argumentos?
+
+## 3. MECANISMO ÚNICO
+- **Nome do mecanismo**: batize o processo/método (se não tiver nome)
+- **Explicação simplificada**: como funciona em linguagem leiga
+- **Por que é único**: o que impede outros de replicar
+- **Prova de funcionamento**: que tipo de evidência sustenta
+
+## 4. VARIAÇÕES DA PREMISSA (5 versões)
+Reescreva a premissa em 5 ângulos diferentes:
+1. **Versão lógica**: foco em razão e dados
+2. **Versão emocional**: foco em dor e desejo
+3. **Versão provocativa**: desafia crenças do mercado
+4. **Versão storytelling**: como narrativa pessoal
+5. **Versão curta**: para headlines e anúncios (máx. 15 palavras)
+
+## 5. CADEIA DE CRENÇAS AUXILIARES
+Liste 5-7 crenças menores que sustentam a premissa principal:
+- Crença → Por que é necessária → Como instalar no público
+
+## 6. APLICAÇÃO PRÁTICA
+- **Em anúncios**: como usar a premissa em ads
+- **Em conteúdo**: como reforçar em posts e vídeos
+- **Em vendas**: como usar em VSLs e páginas de vendas
+- **Em e-mails**: como nutrir a crença em sequências
+- **Em objeções**: como a premissa neutraliza as principais objeções
+
+## 7. TESTE DE VALIDAÇÃO
+- **Checklist de solidez**: 10 perguntas para validar se a premissa é forte
+- **Armadilhas comuns**: erros que enfraquecem premissas
+- **Score final**: avaliação de 1 a 10 da premissa criada
+
+${inputs.transformation ? `\nTRANSFORMAÇÃO DESEJADA: ${inputs.transformation}` : ""}
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+PRODUTO/OFERTA:
+${inputs.product_info}`;
+    },
+  },
+
   "brand-voice": {
     id: "brand-voice",
     name: "Arquiteto de Marca",

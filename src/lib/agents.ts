@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: false,
   },
+  {
+    id: "persuasive-premise",
+    name: "Premissa Persuasiva",
+    emoji: "💎",
+    role: "Especialista em Premissa Única",
+    description: "Define a única crença que, se aceita pelo cliente, torna a compra do seu produto o único caminho lógico.",
+    category: "branding",
+    available: true,
+  },
   // Storytelling (special - content category)
   {
     id: "storytelling-adapter",
