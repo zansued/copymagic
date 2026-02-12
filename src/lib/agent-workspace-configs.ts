@@ -872,6 +872,137 @@ ${inputs.raw_idea}`;
     },
   },
 
+  "high-value-compass": {
+    id: "high-value-compass",
+    name: "Bússola do Cliente de Alto Valor",
+    emoji: "🧭",
+    subtitle: "Encontre clientes ideais que pagam mais usando a metodologia da bússola",
+    inputs: [
+      {
+        key: "current_client",
+        label: "Cliente Atual / Público",
+        placeholder: "Descreva o que sabe sobre seu cliente atual ou quem imagina ser o ideal: nicho, ticket médio, dores, nível de sofisticação, tamanho do negócio...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "offer_type",
+        label: "Tipo de Oferta",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "service", label: "🤝 Serviço / Consultoria" },
+          { value: "mentoring", label: "🎓 Mentoria / Coaching" },
+          { value: "saas", label: "💻 SaaS / Produto Digital" },
+          { value: "agency", label: "🏢 Agência / Done-for-you" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Ticket atual R$2k, quero chegar a R$10k", "Mercado de saúde", "Já tentei vender para PMEs"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const offerMap: Record<string, string> = {
+        service: "serviço ou consultoria especializada",
+        mentoring: "mentoria, coaching ou programa de aceleração",
+        saas: "SaaS ou produto digital",
+        agency: "agência ou serviço done-for-you",
+      };
+
+      return `Você é o Estrategista de Clientes de Alto Valor — um especialista em segmentação premium que utiliza a Metodologia da Bússola (6 direções) para identificar os clientes ideais que pagam mais e valorizam mais o trabalho entregue.
+
+FUNDAMENTO: Axioma 41-39-20 de Brian Kurtz — 41% do sucesso está no PÚBLICO escolhido, 39% na oferta e apenas 20% na copy. Escolher o cliente certo é a decisão mais importante do negócio.
+
+TIPO DE OFERTA: ${offerMap[inputs.offer_type] || "serviço ou consultoria"}
+
+MISSÃO: Analisar o cliente atual, explorar as 6 direções da bússola e recomendar o segmento ideal de alto valor.
+
+ESTRUTURA OBRIGATÓRIA:
+
+## 1. DIAGNÓSTICO DO CLIENTE ATUAL
+- **Perfil resumido**: quem é o cliente hoje
+- **Ticket médio atual**: estimativa baseada nas informações
+- **Nível de sofisticação**: quão educado é sobre a solução
+- **Dor principal**: o que mais incomoda este cliente
+- **Limitações**: por que este perfil pode não ser o ideal
+- **Score de adequação atual**: 1 a 10
+
+## 2. ANÁLISE DAS 6 DIREÇÕES DA BÚSSOLA
+
+### 🔼 NORTE — Hierarquia Superior
+Quem está ACIMA do seu cliente atual na cadeia de valor?
+- **Perfil**: quem são (cargo, empresa, receita)
+- **Por que pagam mais**: justificativa de valor
+- **Como acessar**: canais e abordagem
+- **Ticket potencial**: estimativa
+- **Nota de adequação**: 1 a 10
+
+### 🔽 SUL — Hierarquia Inferior
+Quem está ABAIXO mas em maior volume?
+- **Perfil**: quem são
+- **Modelo de negócio**: como atender em escala
+- **Viabilidade**: vale a pena descer?
+- **Nota de adequação**: 1 a 10
+
+### ➡️ LESTE — Mercados Relacionados
+Que mercados ADJACENTES precisam da mesma solução?
+- **3 mercados identificados**: com justificativa
+- **Transferibilidade**: quão fácil é adaptar a oferta
+- **Oportunidade não explorada**: o gap que ninguém viu
+- **Nota de adequação**: 1 a 10
+
+### ⬅️ OESTE — Agrupamentos Diferentes
+Que GRUPOS DISTINTOS poderiam se beneficiar?
+- **Associações e comunidades**: grupos organizados
+- **Nichos de interesse**: tribos com necessidades similares
+- **Abordagem coletiva**: como vender para o grupo
+- **Nota de adequação**: 1 a 10
+
+### 🔄 ATRAVÉS — Jornada do Cliente
+Onde o cliente está ANTES e DEPOIS de precisar de você?
+- **Antes**: o que ele busca antes de encontrar sua solução
+- **Depois**: o que ele precisa após usar sua solução
+- **Oportunidades de expansão**: upsell, cross-sell, continuidade
+- **Nota de adequação**: 1 a 10
+
+### 🌐 FORA — Análise de Concorrentes
+Quem seus CONCORRENTES atendem que você não atende?
+- **Gaps identificados**: segmentos negligenciados
+- **Clientes insatisfeitos**: quem está mal atendido
+- **Posicionamento diferencial**: como capturar esses clientes
+- **Nota de adequação**: 1 a 10
+
+## 3. RECOMENDAÇÃO ESTRATÉGICA
+- **🏆 Melhor cliente identificado**: perfil completo
+- **Nota final de adequação**: score composto
+- **Justificativa**: por que ESTE é o melhor segmento
+- **Ticket recomendado**: faixa de preço sugerida
+- **Comparação**: tabela cliente atual vs. cliente ideal
+
+## 4. PROGRAMA COMPLETO PARA O CLIENTE IDEAL
+- **Entregáveis estruturados**: o que incluir na oferta
+- **Formato ideal**: como entregar (1:1, grupo, digital, presencial)
+- **Duração sugerida**: tempo de engajamento
+- **Pricing strategy**: como justificar o ticket alto
+- **Posicionamento**: como se apresentar para este perfil
+
+## 5. PLANO DE TRANSIÇÃO
+- **Passos imediatos**: 3 ações para começar esta semana
+- **Validação**: como testar a hipótese antes de pivotar 100%
+- **Timeline**: cronograma de 30-60-90 dias
+- **Riscos e mitigações**: o que pode dar errado
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+CLIENTE ATUAL / PÚBLICO:
+${inputs.current_client}`;
+    },
+  },
+
   "brand-voice": {
     id: "brand-voice",
     name: "Arquiteto de Marca",

@@ -117,6 +117,15 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: true,
   },
+  {
+    id: "high-value-compass",
+    name: "Bússola do Cliente de Alto Valor",
+    emoji: "🧭",
+    role: "Especialista em Segmentação de Alto Ticket",
+    description: "Identifica clientes ideais de alto valor usando a metodologia da bússola (6 direções) e o Axioma 41-39-20.",
+    category: "branding",
+    available: true,
+  },
   // Storytelling (special - content category)
   {
     id: "storytelling-adapter",
