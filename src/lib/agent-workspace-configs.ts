@@ -2126,4 +2126,213 @@ CONTEÚDO BASE:
 ${inputs.content}`;
     },
   },
+
+  "presentation-generator": {
+    id: "presentation-generator",
+    name: "Gerador de Apresentação",
+    emoji: "🎤",
+    subtitle: "Transforme ideias em apresentações persuasivas, slide a slide",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo e Instruções Específicas",
+        placeholder: "Cole conteúdo bruto (transcrições, artigos, anotações) ou dê comandos diretos. Ex: 'Use um tom mais sério', 'Na oferta, foque no bônus X'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "https://youtube.com/watch?v=... ou qualquer URL — o conteúdo será extraído automaticamente",
+        type: "input",
+      },
+      {
+        key: "objective",
+        label: "Tipo de Apresentação",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "commercial", label: "💼 Proposta Comercial (vendas 1-a-1)" },
+          { value: "keynote", label: "🎤 Palestra Direta (palco/evento)" },
+          { value: "webinar", label: "🖥️ Webinário Perfeito (venda em escala)" },
+        ],
+      },
+      {
+        key: "depth",
+        label: "Profundidade",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "short", label: "⚡ Rápida e Direta (~15 slides)" },
+          { value: "standard", label: "🎯 Padrão — Recomendado (~25 slides)" },
+          { value: "full", label: "📚 Completa e Detalhada (~35 slides)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Inclua dados de mercado', 'Tom inspiracional', 'Foco em ROI'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const objectiveMap: Record<string, { name: string; structure: string }> = {
+        commercial: {
+          name: "Proposta Comercial",
+          structure: `## ESTRUTURA — PROPOSTA COMERCIAL (Vendas 1-a-1)
+
+### BLOCO 1: ABERTURA E RAPPORT (2-3 slides)
+- Slide de capa com título magnético
+- Agenda clara: o que será coberto
+- Pergunta de conexão ou dado impactante
+
+### BLOCO 2: DIAGNÓSTICO (3-4 slides)
+- Cenário atual do mercado/cliente
+- Dores e desafios específicos
+- Custo de não agir (números)
+- "Você se identifica com isso?"
+
+### BLOCO 3: VISÃO DE FUTURO (2-3 slides)
+- Cenário ideal após a solução
+- Resultados tangíveis e mensuráveis
+- Cases de sucesso similares
+
+### BLOCO 4: A SOLUÇÃO (4-5 slides)
+- Apresentação do produto/serviço
+- Como funciona (processo claro)
+- Diferenciais competitivos
+- Stack de valor
+
+### BLOCO 5: PROVA E CREDIBILIDADE (2-3 slides)
+- Depoimentos e resultados
+- Dados e métricas
+- Logos de clientes / parceiros
+
+### BLOCO 6: INVESTIMENTO E PRÓXIMOS PASSOS (2-3 slides)
+- Opções de planos/pacotes
+- ROI esperado
+- CTA claro: próximo passo concreto
+- Slide de encerramento`,
+        },
+        keynote: {
+          name: "Palestra Direta",
+          structure: `## ESTRUTURA — PALESTRA DIRETA (Palco/Evento)
+
+### BLOCO 1: ABERTURA IMPACTANTE (2-3 slides)
+- Slide de capa cinematográfico
+- Gancho que prende a audiência nos primeiros 30 segundos
+- Promessa do que vão levar da palestra
+
+### BLOCO 2: HISTÓRIA DE ORIGEM (3-4 slides)
+- Contexto pessoal ou do mercado
+- O momento de virada / descoberta
+- Conexão emocional com a audiência
+
+### BLOCO 3: O PROBLEMA REAL (3-4 slides)
+- A crença limitante que todos compartilham
+- Por que as soluções tradicionais falham
+- Dados que sustentam a nova perspectiva
+
+### BLOCO 4: A GRANDE IDEIA (4-6 slides)
+- O insight central da palestra
+- Framework ou metodologia
+- Exemplos práticos e aplicáveis
+- Momentos "aha" estrategicamente posicionados
+
+### BLOCO 5: PROVA E TRANSFORMAÇÃO (3-4 slides)
+- Cases e resultados reais
+- Antes vs. Depois
+- O padrão que se repete
+
+### BLOCO 6: CHAMADA À AÇÃO (2-3 slides)
+- Resumo dos 3 pontos principais
+- O que fazer AMANHÃ (ação concreta)
+- Slide de encerramento memorável`,
+        },
+        webinar: {
+          name: "Webinário Perfeito",
+          structure: `## ESTRUTURA — WEBINÁRIO PERFEITO (Venda em Escala)
+
+### BLOCO 1: AQUECIMENTO (3-4 slides)
+- Slide de boas-vindas e expectativas
+- Promessa principal: "Ao final, você vai saber..."
+- Prova de autoridade rápida
+- Regras do jogo (câmera, chat, etc.)
+
+### BLOCO 2: CONTEÚDO — CRENÇA 1 (4-5 slides)
+- Mito/crença limitante #1
+- Desconstrução com dados e lógica
+- Nova perspectiva + exemplo
+- Transição: "Mas isso não é tudo..."
+
+### BLOCO 3: CONTEÚDO — CRENÇA 2 (4-5 slides)
+- Mito/crença limitante #2
+- Framework ou metodologia revelada
+- Case de sucesso que comprova
+- Transição: "Agora o mais importante..."
+
+### BLOCO 4: CONTEÚDO — CRENÇA 3 (4-5 slides)
+- Mito/crença limitante #3
+- A "virada de chave" definitiva
+- Resultado transformador
+- Transição para a oferta
+
+### BLOCO 5: A OFERTA (5-7 slides)
+- Apresentação do produto/programa
+- Stack de valor completo (item a item)
+- Bônus exclusivos
+- Garantia
+- Preço e condições
+- Comparação de valor (vale X, leva por Y)
+
+### BLOCO 6: FECHAMENTO (3-4 slides)
+- FAQ / Objeções antecipadas
+- Depoimentos finais
+- CTA urgente com escassez
+- Slide de encerramento + link`,
+        },
+      };
+
+      const depthMap: Record<string, string> = {
+        short: "~15 slides — concisa e direta, apenas os pontos essenciais",
+        standard: "~25 slides — equilibrada, com profundidade adequada",
+        full: "~35 slides — completa e detalhada, ideal para webinários",
+      };
+
+      const objective = objectiveMap[inputs.objective] || objectiveMap.commercial;
+
+      return `Você é um Gerador de Apresentações de elite — estrategista de comunicação especializado em criar roteiros completos e persuasivos, slide a slide.
+
+MISSÃO: Criar um roteiro completo de **${objective.name}** com ${depthMap[inputs.depth] || depthMap.standard}.
+
+${objective.structure}
+
+## FORMATO DE ENTREGA — SLIDE A SLIDE
+
+Para CADA slide, entregue:
+
+### 📊 SLIDE [N]: [TÍTULO DO SLIDE]
+- **Texto principal**: O que aparece no slide (frases curtas, impactantes)
+- **Notas do apresentador**: O que o apresentador FALA neste momento (roteiro oral)
+- **Elemento visual**: Sugestão de imagem, gráfico, ícone ou layout
+- **Transição**: Como conecta ao próximo slide (frase-ponte)
+- **Tempo estimado**: Duração sugerida neste slide
+
+## REGRAS DE OURO
+
+1. **1 ideia por slide** — nunca sobrecarregue visualmente
+2. **Frases curtas no slide** — o apresentador complementa oralmente
+3. **Progressão emocional** — cada slide deve elevar o nível de engajamento
+4. **Pattern interrupts** — a cada 5-7 slides, algo inesperado (pergunta, dado chocante, história)
+5. **Visual > Texto** — priorize sugestões visuais sobre paredes de texto
+6. **Roteiro oral detalhado** — as notas devem ser completas o suficiente para apresentar sem decorar
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}` : ""}
+
+CONTEÚDO BASE:
+${inputs.content}`;
+    },
+  },
 };
