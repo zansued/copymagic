@@ -126,6 +126,15 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: true,
   },
+  {
+    id: "content-calendar",
+    name: "Calendário de Conteúdo",
+    emoji: "📅",
+    role: "Especialista em Planejamento de Conteúdo",
+    description: "Cria calendário estratégico com 15 posts conectados à jornada do cliente, equilibrando valor e conversão.",
+    category: "content",
+    available: true,
+  },
   // Storytelling (special - content category)
   {
     id: "storytelling-adapter",

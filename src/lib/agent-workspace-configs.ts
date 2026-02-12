@@ -1169,4 +1169,126 @@ TEXTO PARA ANÁLISE:
 ${inputs.source_text}`;
     },
   },
+
+  "content-calendar": {
+    id: "content-calendar",
+    name: "Calendário de Conteúdo",
+    emoji: "📅",
+    subtitle: "Crie 15 posts estratégicos conectados à jornada do cliente",
+    inputs: [
+      {
+        key: "macro_theme",
+        label: "Macrotema Central",
+        placeholder: "Ex: 'Lançamento da Mentoria de Vendas', 'Posicionamento como autoridade em nutrição esportiva', 'Pré-lançamento do curso de copywriting'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "platform",
+        label: "Plataforma Principal",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "instagram", label: "📸 Instagram" },
+          { value: "linkedin", label: "💼 LinkedIn" },
+          { value: "tiktok", label: "🎵 TikTok" },
+          { value: "multi", label: "🔄 Multiplataforma" },
+        ],
+      },
+      {
+        key: "goal",
+        label: "Objetivo do Mês",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "launch", label: "🚀 Lançamento de produto/serviço" },
+          { value: "authority", label: "🎓 Construção de autoridade" },
+          { value: "nurture", label: "💛 Nutrição e relacionamento" },
+          { value: "reposition", label: "🔄 Reposicionamento de marca" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Público feminino 30-45 anos', 'Evitar tom muito formal', 'Incluir datas comemorativas do mês'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const platformMap: Record<string, string> = {
+        instagram: "Instagram (Reels, Carrosséis, Stories, Posts estáticos)",
+        linkedin: "LinkedIn (artigos, posts longos, carrosséis profissionais)",
+        tiktok: "TikTok (vídeos curtos, trends, storytelling rápido)",
+        multi: "Multiplataforma (formatos adaptáveis para Instagram, LinkedIn e TikTok)",
+      };
+      const goalMap: Record<string, string> = {
+        launch: "lançamento de produto/serviço — construir expectativa e converter",
+        authority: "construção de autoridade — posicionar como referência no nicho",
+        nurture: "nutrição e relacionamento — fortalecer conexão com a audiência",
+        reposition: "reposicionamento de marca — comunicar nova direção estratégica",
+      };
+
+      return `Você é o Estrategista de Calendário de Conteúdo — um planejador editorial de elite que transforma o DNA de uma marca em 15 posts estratégicos distribuídos equilibradamente pelas etapas da jornada do cliente.
+
+MISSÃO: Criar um calendário editorial completo com 15 posts estratégicos, cada um posicionado intencionalmente na jornada do cliente.
+
+PLATAFORMA: ${platformMap[inputs.platform] || "Instagram"}
+OBJETIVO DO MÊS: ${goalMap[inputs.goal] || "construção de autoridade"}
+
+PROCESSO OBRIGATÓRIO:
+
+## FASE 1 — ANÁLISE ESTRATÉGICA DO DNA
+Analise o macrotema e o DNA de campanha para extrair:
+- **Pilares de conteúdo** derivados do posicionamento
+- **Dores e desejos** do público que orientam a jornada
+- **Tom de voz** e estilo narrativo a manter
+- **Promessas e ofertas** que serão comunicadas
+
+## FASE 2 — MACROTEMA E FASES DA JORNADA
+Defina:
+- **Macrotema unificador**: o tema central que conecta todos os 15 posts
+- **Distribuição por fase da jornada**:
+  - 🔵 **Descoberta (3 posts)**: Atrair novos seguidores, gerar curiosidade
+  - 🟢 **Consideração (4 posts)**: Educar, construir autoridade, gerar confiança
+  - 🟡 **Conversão (3 posts)**: Apresentar oferta, provas sociais, CTAs diretos
+  - 🟣 **Experiência Própria (3 posts)**: Bastidores, vulnerabilidade, conexão pessoal
+  - 🟠 **UGC/Prova Social (2 posts)**: Depoimentos, resultados, comunidade
+
+REGRA 80/20: 80% dos posts = valor e conexão | 20% = conversão direta
+
+## FASE 3 — CALENDÁRIO COMPLETO (15 POSTS)
+
+Para CADA post, forneça:
+
+### POST [N] — [TÍTULO DO POST]
+- **Dia sugerido**: Dia [N] (ex: Dia 1, Dia 3, Dia 5...)
+- **Fase da jornada**: 🔵/🟢/🟡/🟣/🟠 + nome da fase
+- **Formato**: Reels / Carrossel / Story Sequence / Post estático / Live
+- **Tema**: Assunto específico do post
+- **Hook/Gancho**: Primeira frase que para o scroll
+- **Briefing**: 3-5 linhas descrevendo o conteúdo principal
+- **CTA**: Chamada à ação específica
+- **Hashtags sugeridas**: 5-8 hashtags relevantes
+
+## FASE 4 — VISÃO ESTRATÉGICA
+- **Mapa visual da jornada**: resumo de como os 15 posts se conectam
+- **Ritmo de publicação**: frequência e melhores horários sugeridos
+- **Métricas-chave**: o que acompanhar em cada fase
+- **Dicas de reaproveitamento**: como transformar posts em outros formatos
+
+REGRAS:
+- Os posts devem fluir como uma NARRATIVA COERENTE, não como peças isoladas
+- Cada post deve ter um objetivo CLARO e mensurável
+- Alternar formatos para manter variedade e engajamento
+- Incluir pelo menos 2 Reels e 2 Carrosséis no calendário
+- Os hooks devem ser irresistíveis e adaptados ao formato
+- Manter coerência com o tom de voz do DNA de campanha
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA selecionado. Crie posts com base apenas no macrotema fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+MACROTEMA CENTRAL:
+${inputs.macro_theme}`;
+    },
+  },
 };
