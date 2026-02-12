@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "text-structure",
+    name: "Estrutura de Textos Memoráveis",
+    emoji: "🗺️",
+    role: "Especialista em Estruturação Estratégica",
+    description: "Usa o método GPS da Escrita para criar estruturas de texto poderosas, mapeando da conclusão ao título.",
+    category: "content",
+    available: true,
+  },
+  {
     id: "big-ideas",
     name: "Big Ideas para Newsletter",
     emoji: "💡",

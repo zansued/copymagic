@@ -1734,4 +1734,117 @@ CONTEÚDO / ESTRUTURA FORNECIDA:
 ${inputs.content}`;
     },
   },
+
+  "text-structure": {
+    id: "text-structure",
+    name: "Estrutura de Textos Memoráveis",
+    emoji: "🗺️",
+    subtitle: "Crie estruturas de texto que prendem atenção do início ao fim",
+    inputs: [
+      {
+        key: "context",
+        label: "Contexto Completo",
+        placeholder: "Descreva: tema principal, objetivo (educar, persuadir, vender), referências que gosta, formato desejado (artigo, e-mail, roteiro, apresentação)...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "format",
+        label: "Tipo de Texto",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "article", label: "📝 Artigo / Newsletter" },
+          { value: "email", label: "📧 E-mail Persuasivo" },
+          { value: "script", label: "🎬 Roteiro de Vídeo" },
+          { value: "presentation", label: "🎤 Apresentação" },
+          { value: "sales", label: "💰 Texto de Vendas" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foco em storytelling', 'Público mais técnico', 'Tom provocativo'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const formatMap: Record<string, string> = {
+        article: "Artigo / Newsletter (texto longo, reflexivo, narrativo)",
+        email: "E-mail Persuasivo (direto, com CTA claro)",
+        script: "Roteiro de Vídeo (visual, com marcações de cena)",
+        presentation: "Apresentação (slides lógicos, impacto por tela)",
+        sales: "Texto de Vendas (persuasivo, com stack de valor)",
+      };
+
+      return `Você é o Arquiteto de Textos Memoráveis — um estrategista que usa o MÉTODO GPS DA ESCRITA para criar estruturas de texto poderosas antes de qualquer palavra ser escrita.
+
+MISSÃO: Criar uma ESTRUTURA COMPLETA usando o Método GPS, mapeando todo o caminho do texto de forma estratégica.
+
+FORMATO DO TEXTO: ${formatMap[inputs.format] || "Artigo / Newsletter"}
+
+## MÉTODO GPS DA ESCRITA
+
+O GPS funciona ao CONTRÁRIO — você define o destino antes de traçar a rota:
+
+### FASE 1 — CONCLUSÃO (O Destino)
+Defina PRIMEIRO onde o leitor deve chegar:
+- **Transformação desejada**: qual mudança de pensamento/ação o leitor terá ao final?
+- **Insight final**: qual a grande revelação ou lição?
+- **Emoção de saída**: como o leitor deve se SENTIR ao terminar?
+- **CTA implícito ou explícito**: o que o leitor fará depois?
+
+### FASE 2 — INTRODUÇÃO (O Ponto de Partida)
+Agora que sabe o destino, crie o início perfeito:
+- **Gancho**: qual frase/cena/pergunta vai PARAR o leitor e forçá-lo a continuar?
+- **Promessa implícita**: o que o texto vai entregar (sem revelar demais)?
+- **Identificação**: como o leitor se vê no texto nos primeiros segundos?
+- **Tensão inicial**: qual conflito ou curiosidade puxa para o desenvolvimento?
+
+### FASE 3 — DESENVOLVIMENTO (A Rota)
+Trace o caminho lógico entre início e fim:
+- **Blocos de conteúdo**: liste 3-5 blocos temáticos com título e briefing de cada um
+- **Progressão**: como cada bloco eleva o nível de consciência do leitor
+- **Transições**: como cada bloco conecta ao próximo (ponte lógica ou emocional)
+- **Elementos de prova**: onde encaixar dados, histórias, exemplos ou analogias
+
+### FASE 4 — TÍTULO (A Chamada Magnética)
+Por último, crie o título que melhor representa a jornada completa:
+- **3 opções de título**: do mais direto ao mais criativo
+- **Justificativa**: por que cada título funciona para este texto específico
+
+## FORMATO DE ENTREGA
+
+Entregue a estrutura organizada assim:
+
+---
+## 🎯 CONCLUSÃO (Destino)
+[Conteúdo da Fase 1]
+
+## 🚀 INTRODUÇÃO (Partida)
+[Conteúdo da Fase 2]
+
+## 🗺️ DESENVOLVIMENTO (Rota)
+[Conteúdo da Fase 3 — blocos detalhados]
+
+## ✨ TÍTULO (Chamada)
+[3 opções com justificativa]
+
+## 📋 RESUMO DA ESTRUTURA
+[Visão geral linear: Título → Intro → Bloco 1 → Bloco 2 → ... → Conclusão]
+---
+
+REGRAS:
+- Cada fase deve ter instruções claras o suficiente para que QUALQUER escritor consiga executar
+- Os blocos do Desenvolvimento devem ter briefings detalhados (não apenas títulos)
+- A estrutura deve funcionar como um MAPA COMPLETO — sem ambiguidades
+- Priorize clareza e direção sobre criatividade vazia
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+CONTEXTO FORNECIDO:
+${inputs.context}`;
+    },
+  },
 };
