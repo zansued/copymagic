@@ -1847,4 +1847,120 @@ CONTEXTO FORNECIDO:
 ${inputs.context}`;
     },
   },
+
+  "ad-funnel": {
+    id: "ad-funnel",
+    name: "Funil de Anúncios",
+    emoji: "🔻",
+    subtitle: "Crie funil completo do 1º contato até a conversão final",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Produto / Oferta",
+        placeholder: "Descreva seu produto, oferta, transformação principal, público-alvo, preço e diferenciais...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "platform",
+        label: "Plataforma",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "meta", label: "📱 Meta Ads (Facebook/Instagram)" },
+          { value: "youtube", label: "▶️ YouTube Ads" },
+          { value: "both", label: "🔄 Ambos" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foco em público feminino 25-40', 'Produto de ticket alto', 'Já tenho base de e-mails'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const platformMap: Record<string, string> = {
+        meta: "Meta Ads (Facebook e Instagram)",
+        youtube: "YouTube Ads",
+        both: "Meta Ads + YouTube Ads",
+      };
+
+      return `Você é um Estrategista de Funil de Anúncios — especialista nos 5 Níveis de Consciência de Eugene Schwartz (Breakthrough Advertising), aplicados a campanhas de tráfego pago.
+
+MISSÃO: Criar um FUNIL COMPLETO de anúncios cobrindo todos os 5 níveis de consciência, do mais frio (N5) ao mais quente (N1).
+
+PLATAFORMA: ${platformMap[inputs.platform] || "Meta Ads"}
+
+## OS 5 NÍVEIS DE CONSCIÊNCIA
+
+### NÍVEL 5 — INSCIENTE TOTAL 🧊
+O prospect NÃO sabe que tem um problema. Maior mercado potencial, menor intenção de compra.
+- **Estratégia**: Conteúdo educativo, documentários, curiosidade pura
+- **Objetivo**: Despertar consciência sobre um problema que ele nem sabia que tinha
+- **Formato ideal**: Vídeos longos, documentários, conteúdo viral
+
+### NÍVEL 4 — CIENTE DA NECESSIDADE 🤔
+Sabe que tem o problema mas NÃO procura solução ativamente.
+- **Estratégia**: Agitar a dor, mostrar consequências de não agir
+- **Objetivo**: Criar urgência e desejo de mudança
+- **Formato ideal**: Anúncios de problema/agitação, storytelling
+
+### NÍVEL 3 — CIENTE DO DESEJO 🎯
+Quer resolver o problema AGORA mas não conhece as soluções.
+- **Estratégia**: Apresentar a solução como caminho lógico
+- **Objetivo**: Posicionar seu produto como a melhor opção
+- **Formato ideal**: Comparativos, benefícios, mecanismo único
+
+### NÍVEL 2 — CIENTE DO PRODUTO 🔍
+Conhece as soluções disponíveis, está comparando.
+- **Estratégia**: Diferenciação, provas sociais, stack de valor
+- **Objetivo**: Eliminar objeções e destacar diferenciais
+- **Formato ideal**: Depoimentos, cases, demonstrações
+
+### NÍVEL 1 — CIENTE TOTAL 🔥
+Já decidiu, espera o momento certo (ou o empurrão final).
+- **Estratégia**: Oferta irresistível, escassez, urgência real
+- **Objetivo**: Converter AGORA
+- **Formato ideal**: Retargeting, ofertas limitadas, countdown
+
+## PARA CADA NÍVEL, ENTREGUE:
+
+### 📢 NÍVEL [N]: [NOME DO NÍVEL]
+**Temperatura do público**: Frio / Morno / Quente
+**Segmentação sugerida**: Interesses, lookalikes, retargeting, etc.
+
+**ANÚNCIO PRINCIPAL:**
+- **Hook/Gancho** (3 opções): Primeiras frases que param o scroll
+- **Corpo do anúncio**: Copy completa pronta para usar
+- **CTA**: Chamada para ação específica deste nível
+- **Formato criativo**: Tipo de mídia recomendado + briefing visual
+- **Destino**: Para onde o clique leva (landing page, vídeo, formulário, etc.)
+
+**VARIAÇÃO DE TESTE:**
+- Uma versão alternativa com ângulo diferente
+
+**MÉTRICAS-CHAVE**: O que medir neste nível (CPM, CTR, CPA, etc.)
+
+## ESTRATÉGIA DE FUNIL
+Ao final, entregue:
+- **Fluxo completo**: Como os níveis se conectam (N5 → N4 → N3 → N2 → N1)
+- **Regras de retargeting**: Quem viu o anúncio do N5, recebe o do N4, etc.
+- **Budget sugerido**: Distribuição percentual por nível
+- **Timeline**: Tempo estimado para rodar o funil completo
+- **KPIs por fase**: Métricas de sucesso em cada etapa
+
+REGRAS:
+- Cada nível deve ter copy PRONTA PARA USAR, não apenas diretrizes
+- A linguagem deve evoluir do educativo (N5) ao urgente (N1)
+- Mantenha coerência narrativa entre os níveis — o prospect deve sentir uma jornada
+- Adapte formatos à plataforma escolhida
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+PRODUTO/OFERTA:
+${inputs.product_description}`;
+    },
+  },
 };

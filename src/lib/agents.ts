@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "ad-funnel",
+    name: "Funil de Anúncios",
+    emoji: "🔻",
+    role: "Especialista em Funil de Consciência",
+    description: "Cria sequência completa de anúncios baseada nos 5 Níveis de Consciência de Schwartz, do insciente à conversão.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "text-structure",
     name: "Estrutura de Textos Memoráveis",
     emoji: "🗺️",
