@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_configs: {
+        Row: {
+          brand_personality: string
+          created_at: string
+          id: string
+          product_service: string
+          target_audience: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_personality?: string
+          created_at?: string
+          id?: string
+          product_service?: string
+          target_audience?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_personality?: string
+          created_at?: string
+          id?: string
+          product_service?: string
+          target_audience?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           avoid_real_names: boolean
