@@ -1513,4 +1513,111 @@ CONTEÚDO BASE / INSTRUÇÕES DO USUÁRIO:
 ${inputs.content}`;
     },
   },
+
+  "youtube-description": {
+    id: "youtube-description",
+    name: "Descrição YouTube",
+    emoji: "📝",
+    subtitle: "Crie descrições otimizadas para SEO no YouTube",
+    inputs: [
+      {
+        key: "topic",
+        label: "Tema Principal do Vídeo",
+        placeholder: "Ex: 'inteligência artificial para negócios', 'como investir em renda fixa', 'treino HIIT para iniciantes'...",
+        type: "input",
+        required: true,
+      },
+      {
+        key: "video_title",
+        label: "Título do Vídeo (se já definido)",
+        placeholder: "Cole o título atual do vídeo para alinhar a descrição",
+        type: "input",
+      },
+      {
+        key: "search_terms",
+        label: "Termos de Busca Reais (opcional)",
+        placeholder: "Cole termos do YouTube Analytics (Traffic Source > YouTube Search) para otimizar a descrição com palavras que já ranqueiam",
+        type: "textarea",
+      },
+      {
+        key: "video_type",
+        label: "Tipo de Vídeo",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "busca", label: "🔍 Vídeo de Busca (SEO)" },
+          { value: "curiosidade", label: "🎯 Vídeo de Curiosidade (Feed)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Inclua link para mentoria', 'Mencione os capítulos do vídeo', 'Tom mais técnico'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const videoTypeMap: Record<string, string> = {
+        busca: "Vídeo de Busca (foco em SEO e ranqueamento para palavras-chave específicas)",
+        curiosidade: "Vídeo de Curiosidade (foco em recomendação e feed, com descrição que reforça retenção)",
+      };
+
+      return `Você é um Especialista em SEO para YouTube — domina a arte de criar descrições que ajudam vídeos a ranquear melhor em buscas específicas do YouTube e do Google.
+
+MISSÃO: Criar uma descrição otimizada e natural para o vídeo, maximizando a descoberta via busca.
+
+TIPO DE VÍDEO: ${videoTypeMap[inputs.video_type] || "Vídeo de Busca"}
+
+PALAVRAS AUXILIARES PRÉ-PROGRAMADAS (use naturalmente na descrição):
+- Interrogativas: como, quando, onde, o que, por que, qual, quem
+- Comerciais: comprar, preço, preços, modelos, comparativo, melhor, top, review, análise
+- Complementares: tutorial, guia, passo a passo, dicas, iniciantes, avançado, completo, atualizado, 2025
+
+ESTRUTURA DA DESCRIÇÃO:
+
+## 1. PARÁGRAFO DE ABERTURA (2-3 linhas)
+- Inclua a palavra-chave principal naturalmente na PRIMEIRA frase
+- Descreva o que o espectador vai aprender/descobrir
+- Use linguagem natural, não robótica
+
+## 2. CORPO DA DESCRIÇÃO (5-8 linhas)
+- Expanda o tema com palavras-chave secundárias e auxiliares
+- Inclua variações naturais do tema principal (sinônimos, perguntas relacionadas)
+- Mencione benefícios específicos de assistir ao vídeo
+- Use parágrafos curtos para escaneabilidade
+
+## 3. TIMESTAMPS / CAPÍTULOS (se aplicável)
+- Sugira 5-8 timestamps com títulos otimizados
+- Cada timestamp deve conter uma palavra-chave relevante
+- Formato: 0:00 - Título do capítulo
+
+## 4. SEÇÃO DE LINKS E RECURSOS
+- Placeholder para links relevantes (curso, mentoria, material gratuito)
+- Formato organizado e limpo
+
+## 5. TAGS DE CAUDA LONGA (ao final)
+- Liste 10-15 termos de busca de cauda longa relacionados
+- Formato: separados por vírgula
+- Inclua variações com palavras auxiliares
+
+## 6. HASHTAGS
+- 3-5 hashtags relevantes para o tema
+
+REGRAS DE SEO:
+- Palavra-chave principal nas primeiras 25 palavras
+- Densidade natural de keywords (sem keyword stuffing)
+- Mínimo de 200 palavras na descrição
+- Inclua perguntas que o público faria sobre o tema
+- Use as palavras auxiliares de forma orgânica e contextual
+- Se termos de busca reais foram fornecidos, PRIORIZE-os na descrição
+${inputs.search_terms ? "\n⚡ TERMOS REAIS DO YOUTUBE ANALYTICS FORNECIDOS — estes são termos que JÁ ranqueiam. Incorpore-os com prioridade máxima na descrição de forma natural." : ""}
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.search_terms ? `\n--- TERMOS DE BUSCA REAIS (ANALYTICS) ---\n${inputs.search_terms}` : ""}
+
+TEMA PRINCIPAL: ${inputs.topic}
+${inputs.video_title ? `TÍTULO DO VÍDEO: ${inputs.video_title}` : ""}`;
+    },
+  },
 };

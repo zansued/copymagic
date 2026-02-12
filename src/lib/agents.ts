@@ -144,6 +144,15 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "youtube-description",
+    name: "Descrição YouTube",
+    emoji: "📝",
+    role: "Especialista em SEO para YouTube",
+    description: "Cria descrições otimizadas para SEO que ajudam seus vídeos a ranquear melhor em buscas específicas no YouTube.",
+    category: "content",
+    available: true,
+  },
   // Storytelling (special - content category)
   {
     id: "storytelling-adapter",
