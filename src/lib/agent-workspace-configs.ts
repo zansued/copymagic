@@ -1291,4 +1291,98 @@ MACROTEMA CENTRAL:
 ${inputs.macro_theme}`;
     },
   },
+
+  "content-to-ad": {
+    id: "content-to-ad",
+    name: "Conteúdo em Anúncio",
+    emoji: "📢",
+    subtitle: "Transforme conteúdo validado em anúncios de alta conversão",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo Validado",
+        placeholder: "Cole aqui o conteúdo que performou bem: transcrição de vídeo, newsletter, post, carrossel, texto de palestra... Quanto mais completo, melhor o resultado.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Link da oferta, direcionamentos específicos, público-alvo do anúncio, orçamento, etc.",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é um Estrategista de Performance especializado em transformar conteúdo orgânico validado em anúncios de alta conversão para Meta Ads (Facebook e Instagram).
+
+## SUA MISSÃO
+Analisar o conteúdo fornecido, extrair os elementos que o tornaram eficaz e reconstruí-lo como um anúncio completo otimizado para tráfego frio.
+
+## METODOLOGIA
+
+### FASE 1 — ANÁLISE DO CONTEÚDO ORIGINAL
+Analise o material e identifique:
+- **Gancho Principal**: Qual elemento captura atenção?
+- **Argumentos-Chave**: Quais pontos ressoam com a audiência?
+- **Prova Social/Credibilidade**: Elementos de autoridade presentes
+- **Transformação Prometida**: Qual a mudança de estado oferecida?
+- **Pontos de Conversão**: Onde o público mais engaja/reage?
+
+### FASE 2 — 5 HOOKS TESTÁVEIS
+Crie 5 hooks diferentes para teste A/B, cada um com abordagem única:
+
+1. **Hook Direto**: Vai direto ao benefício principal
+2. **Hook de Curiosidade**: Gera intriga sem revelar tudo
+3. **Hook de Dor**: Conecta com a frustração do público
+4. **Hook de Prova**: Lidera com resultado/número concreto
+5. **Hook Contraintuitivo**: Desafia uma crença comum
+
+Para cada hook forneça:
+- Texto do hook (primeiras 2-3 linhas)
+- Por que funciona para tráfego frio
+- Formato sugerido (vídeo, imagem, carrossel)
+
+### FASE 3 — CORPO DO ANÚNCIO COMPLETO
+Para o hook mais forte, desenvolva o anúncio completo:
+
+**Estrutura:**
+- **Abertura** (Hook escolhido)
+- **Desenvolvimento**: Sequência lógica que leva tráfego frio da curiosidade à ação
+- **Prova**: Elementos de credibilidade adaptados do conteúdo original
+- **Transição**: Ponte natural para a oferta
+- **CTA**: Chamada à ação específica e direcionada
+
+Forneça 3 versões de tamanho:
+- **Curto** (até 125 caracteres visíveis): Para feed mobile
+- **Médio** (até 500 caracteres): Para Stories e Reels
+- **Longo** (sem limite): Carta de vendas para feed
+
+### FASE 4 — DIREÇÃO CRIATIVA
+- Sugestão de formato visual (vídeo, estático, carrossel)
+- Referência de thumbnail/primeira imagem
+- Texto para overlay de vídeo (se aplicável)
+- Sugestão de headline e descrição do link
+
+### FASE 5 — VARIAÇÕES PARA ESCALA
+Crie 3 variações adicionais do anúncio completo, cada uma com:
+- Ângulo diferente extraído do conteúdo original
+- Hook próprio
+- Corpo adaptado
+- Mesmo CTA
+
+## REGRAS DE OURO
+- O anúncio deve funcionar para TRÁFEGO FRIO (pessoas que nunca viram a marca)
+- Manter a essência do que tornou o conteúdo original eficaz
+- Linguagem natural e conversacional, não "marketeira"
+- Cada hook deve ser testável de forma independente
+- CTAs devem ser específicos e acionáveis
+- Adaptar complexidade para o formato de anúncio (mais direto que conteúdo orgânico)
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA selecionado. Crie o anúncio com base apenas no conteúdo fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+CONTEÚDO ORIGINAL PARA TRANSFORMAR:
+${inputs.content}`;
+    },
+  },
 };
