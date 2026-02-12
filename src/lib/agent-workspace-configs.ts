@@ -1,0 +1,401 @@
+// Agent workspace configurations - defines inputs and prompts per agent
+
+export interface AgentInput {
+  key: string;
+  label: string;
+  placeholder: string;
+  type: "textarea" | "select" | "input";
+  options?: { value: string; label: string }[];
+  required?: boolean;
+}
+
+export interface AgentWorkspaceConfig {
+  id: string;
+  name: string;
+  emoji: string;
+  subtitle: string;
+  inputs: AgentInput[];
+  buildPrompt: (inputs: Record<string, string>, brandContext?: string) => string;
+}
+
+export const AGENT_WORKSPACE_CONFIGS: Record<string, AgentWorkspaceConfig> = {
+  "sales-page": {
+    id: "sales-page",
+    name: "Arquiteto de Vendas",
+    emoji: "🏗️",
+    subtitle: "Crie páginas de vendas de alta conversão",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Produto / Oferta",
+        placeholder: "Descreva seu produto ou oferta em detalhes: o que é, para quem, qual a transformação principal, preço, garantia...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "page_format",
+        label: "Formato da Página",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "long-form", label: "Carta de Vendas (longa)" },
+          { value: "landing-page", label: "Landing Page (média)" },
+          { value: "mini-page", label: "Mini-Page (curta)" },
+        ],
+      },
+      {
+        key: "tone",
+        label: "Tom Principal",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "urgente", label: "🔥 Urgente e Escasso" },
+          { value: "empatico", label: "💛 Empático e Acolhedor" },
+          { value: "autoridade", label: "🎓 Autoritário e Científico" },
+          { value: "provocativo", label: "⚡ Provocativo e Ousado" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Inclua seção de FAQ', 'Foque em provas sociais', 'Tom mais casual'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const format = inputs.page_format || "long-form";
+      const formatMap: Record<string, string> = {
+        "long-form": "Carta de Vendas longa e detalhada (3000-5000 palavras)",
+        "landing-page": "Landing Page de tamanho médio (1500-2500 palavras)",
+        "mini-page": "Mini-page concisa e direta (800-1200 palavras)",
+      };
+      const toneMap: Record<string, string> = {
+        urgente: "urgente, com escassez e FOMO",
+        empatico: "empático, acolhedor e compreensivo",
+        autoridade: "autoritário, científico e técnico",
+        provocativo: "provocativo, ousado e desafiador",
+      };
+
+      return `Você é o Arquiteto de Vendas — um copywriter de elite especializado em criar páginas de vendas de altíssima conversão.
+
+MISSÃO: Criar uma ${formatMap[format]} completa e pronta para uso.
+
+TOM: ${toneMap[inputs.tone] || "equilibrado entre autoridade e empatia"}
+
+ESTRUTURA OBRIGATÓRIA:
+1. HEADLINE PRINCIPAL — gancho irresistível com big promise
+2. SUB-HEADLINE — reforço emocional
+3. LEAD/ABERTURA — história ou gancho que prende nos primeiros parágrafos
+4. IDENTIFICAÇÃO DO PROBLEMA — dores do avatar detalhadas
+5. AGITAÇÃO — consequências de não agir
+6. APRESENTAÇÃO DA SOLUÇÃO — o produto como ponte
+7. MECANISMO ÚNICO — como e por que funciona
+8. BENEFÍCIOS — lista emocional e tangível
+9. PROVAS SOCIAIS — depoimentos e resultados
+10. OFERTA IRRESISTÍVEL — stack de valor
+11. BÔNUS — complementos que aumentam o valor percebido
+12. GARANTIA — eliminação de risco
+13. CTA PRINCIPAL — chamada à ação urgente
+14. FAQ — objeções transformadas em respostas
+15. CTA FINAL — fechamento com urgência
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+PRODUTO/OFERTA:
+${inputs.product_description}`;
+    },
+  },
+
+  "vsl-writer": {
+    id: "vsl-writer",
+    name: "Roteirista VSL",
+    emoji: "🎬",
+    subtitle: "Produza roteiros cinematográficos para Video Sales Letters",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Produto / Oferta",
+        placeholder: "Descreva o produto, a transformação que oferece, provas, preço e garantia...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "duration",
+        label: "Duração do Vídeo",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "15min", label: "⚡ Curto (15 min)" },
+          { value: "30min", label: "🎯 Médio (30 min)" },
+          { value: "45min", label: "🎬 Longo (45 min)" },
+          { value: "60min", label: "🎥 Épico (60 min)" },
+        ],
+      },
+      {
+        key: "style",
+        label: "Estilo Narrativo",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "emotional", label: "💔 Emocional (história pessoal)" },
+          { value: "logical", label: "🧠 Lógico (dados e provas)" },
+          { value: "mixed", label: "⚖️ Misto (emoção + lógica)" },
+          { value: "documentary", label: "📹 Documentário (investigativo)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Inclua pattern interrupt a cada 5 min', 'Foco em urgência no final'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const durationMap: Record<string, string> = {
+        "15min": "15 minutos (~2.200 palavras)",
+        "30min": "30 minutos (~4.500 palavras)",
+        "45min": "45 minutos (~6.700 palavras)",
+        "60min": "60 minutos (~9.000 palavras)",
+      };
+      const styleMap: Record<string, string> = {
+        emotional: "emocional, com história pessoal central e gatilhos emocionais profundos",
+        logical: "lógico e baseado em evidências, dados, estudos e provas científicas",
+        mixed: "equilibrado entre emoção e lógica, alternando entre histórias e dados",
+        documentary: "estilo documentário investigativo, como se revelasse uma descoberta oculta",
+      };
+
+      return `Você é o Roteirista VSL — um especialista em criar roteiros cinematográficos para Video Sales Letters que mantêm o espectador grudado do início ao fim.
+
+MISSÃO: Criar um roteiro completo de VSL de ${durationMap[inputs.duration] || "30 minutos"}.
+
+ESTILO: ${styleMap[inputs.style] || "misto"}
+
+ESTRUTURA OBRIGATÓRIA DO ROTEIRO:
+
+[GANCHO — 0:00 a 0:30]
+Primeiros 30 segundos que param o scroll. Big promise + curiosidade + padrão interrompido.
+
+[IDENTIFICAÇÃO — 0:30 a 3:00]
+"Se você é [avatar]..." — crie identificação profunda com o espectador.
+
+[HISTÓRIA DE ORIGEM — 3:00 a 8:00]
+A história do herói/descoberta. Use tensão narrativa crescente.
+
+[O PROBLEMA REAL — 8:00 a 12:00]
+Revele a causa raiz que ninguém fala. Mude a perspectiva.
+
+[A DESCOBERTA — 12:00 a 18:00]
+O mecanismo único, a "virada de chave", o insight revolucionário.
+
+[PROVAS E RESULTADOS — 18:00 a 22:00]
+Cases, dados, estudos, depoimentos. Stack de credibilidade.
+
+[A OFERTA — 22:00 a 26:00]
+Apresentação do produto como solução inevitável. Stack de valor.
+
+[URGÊNCIA E ESCASSEZ — 26:00 a 28:00]
+Por que agir AGORA. Bônus limitados, vagas, tempo.
+
+[CTA FINAL — 28:00 a 30:00]
+Fechamento emocional + racional. Resumo da transformação.
+
+DIREÇÕES DE CENA:
+- Inclua [PAUSA], [ZOOM], [B-ROLL], [TEXTO NA TELA] quando relevante
+- Marque PATTERN INTERRUPTS a cada 5 minutos
+- Use timestamps aproximados
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+PRODUTO/OFERTA:
+${inputs.product_description}`;
+    },
+  },
+
+  "carousel-creator": {
+    id: "carousel-creator",
+    name: "Designer de Carrosséis",
+    emoji: "🎠",
+    subtitle: "Crie roteiros de carrosséis virais para redes sociais",
+    inputs: [
+      {
+        key: "topic",
+        label: "Tema / Assunto",
+        placeholder: "Qual o tema do carrossel? Ex: '5 erros que destroem suas vendas online', 'Como perder 10kg sem dieta restritiva'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "platform",
+        label: "Plataforma",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "instagram", label: "📸 Instagram" },
+          { value: "linkedin", label: "💼 LinkedIn" },
+          { value: "both", label: "🔄 Ambos (adaptável)" },
+        ],
+      },
+      {
+        key: "slides_count",
+        label: "Número de Slides",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "5", label: "5 slides (rápido)" },
+          { value: "7", label: "7 slides (ideal)" },
+          { value: "10", label: "10 slides (completo)" },
+        ],
+      },
+      {
+        key: "objective",
+        label: "Objetivo",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "engagement", label: "💬 Engajamento (salvar/compartilhar)" },
+          { value: "authority", label: "🎓 Autoridade (educar)" },
+          { value: "sales", label: "💰 Vendas (converter)" },
+          { value: "viral", label: "🚀 Viral (alcance máximo)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Use dados estatísticos', 'Tom humorístico', 'Inclua CTA para link na bio'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const platformMap: Record<string, string> = {
+        instagram: "Instagram (visual, emojis, linguagem casual, hashtags)",
+        linkedin: "LinkedIn (profissional, insights, dados, credibilidade)",
+        both: "Instagram e LinkedIn (versátil, adaptável)",
+      };
+      const objMap: Record<string, string> = {
+        engagement: "máximo engajamento (salvar + compartilhar + comentar)",
+        authority: "construir autoridade e educar o público",
+        sales: "converter seguidores em leads/compradores",
+        viral: "alcance viral máximo",
+      };
+
+      return `Você é o Designer de Carrosséis — um criador de conteúdo visual especializado em carrosséis que viralizam e convertem.
+
+MISSÃO: Criar um roteiro completo de carrossel com ${inputs.slides_count || "7"} slides.
+
+PLATAFORMA: ${platformMap[inputs.platform] || "Instagram"}
+OBJETIVO: ${objMap[inputs.objective] || "engajamento"}
+
+ESTRUTURA POR SLIDE:
+
+Para cada slide, forneça:
+- **SLIDE [N]** — Título do slide
+- **TEXTO PRINCIPAL** — O conteúdo do slide (2-4 linhas, impactante)
+- **NOTA DE DESIGN** — Sugestão visual (cor de fundo, ícone, layout)
+- **HOOK/GANCHO** (apenas slide 1) — A frase que para o scroll
+
+REGRAS:
+1. SLIDE 1 = HOOK IRRESISTÍVEL — deve parar o scroll em 1.5 segundos
+2. Cada slide deve ter uma ideia ÚNICA e autossuficiente
+3. Use frases curtas, diretas e visualmente escaneáveis
+4. Alterne entre provocação, dados, insights e emoção
+5. ÚLTIMO SLIDE = CTA claro (salvar, compartilhar, comentar, link na bio)
+6. Inclua sugestão de CAPTION (legenda) com emojis e hashtags
+7. Linguagem adaptada à plataforma
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+TEMA:
+${inputs.topic}`;
+    },
+  },
+
+  "brand-voice": {
+    id: "brand-voice",
+    name: "Arquiteto de Marca",
+    emoji: "🎭",
+    subtitle: "Defina o posicionamento e tom de voz da sua marca",
+    inputs: [
+      {
+        key: "brand_info",
+        label: "Informações da Marca",
+        placeholder: "Descreva sua marca/empresa: nome, setor, o que oferece, como começou, valores, o que a torna única...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "industry",
+        label: "Setor / Indústria",
+        type: "input",
+        placeholder: "Ex: Saúde e Bem-estar, Marketing Digital, Educação, Tecnologia...",
+      },
+      {
+        key: "references",
+        label: "Marcas de Referência",
+        type: "input",
+        placeholder: "Ex: 'Tom da Apple + energia da Red Bull + acessibilidade da Nubank'",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foco em redes sociais', 'Tom mais jovem', 'Marca premium'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Arquiteto de Marca — um estrategista de branding especializado em definir identidade verbal, tom de voz e posicionamento de marca com precisão cirúrgica.
+
+MISSÃO: Criar um GUIA COMPLETO DE TOM DE VOZ E POSICIONAMENTO para a marca descrita.
+
+ESTRUTURA OBRIGATÓRIA:
+
+## 1. ESSÊNCIA DA MARCA
+- Propósito central (por que existe)
+- Visão (onde quer chegar)
+- Missão (como vai chegar)
+- Valores fundamentais (3-5 valores com descrição)
+
+## 2. POSICIONAMENTO
+- Declaração de posicionamento (frase única)
+- Categoria que ocupa na mente do consumidor
+- Diferencial competitivo
+- Promessa de marca
+
+## 3. PERSONALIDADE DE MARCA
+- Arquétipo dominante (Jung) + arquétipo secundário
+- 5 adjetivos que definem a personalidade
+- Se a marca fosse uma pessoa: idade, estilo, como fala, como se veste
+
+## 4. TOM DE VOZ
+- Tom principal (ex: confiante, acolhedor, provocativo)
+- Espectro de formalidade (escala de 1-10)
+- Palavras que USA (lista de 10-15 palavras-chave)
+- Palavras que NUNCA usa (lista de 10 proibidas)
+- Estruturas de frase preferidas
+- Ritmo e cadência da escrita
+
+## 5. GUIA DE APLICAÇÃO
+- Como falar em redes sociais
+- Como falar em e-mails
+- Como falar em anúncios
+- Como falar em atendimento
+- Exemplos de frases no tom certo vs. tom errado (tabela comparativa)
+
+## 6. IDENTIDADE VERBAL
+- Tagline principal
+- 3 taglines alternativas
+- Expressões proprietárias (bordões da marca)
+- Estilo de títulos e headlines
+
+${inputs.industry ? `\nSETOR: ${inputs.industry}` : ""}
+${inputs.references ? `\nREFERÊNCIAS: ${inputs.references}` : ""}
+${brandContext ? `\n--- DNA DE MARCA EXISTENTE (use como base e expanda) ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+INFORMAÇÕES DA MARCA:
+${inputs.brand_info}`;
+    },
+  },
+};
