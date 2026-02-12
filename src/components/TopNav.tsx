@@ -2,7 +2,7 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FolderOpen, Plus, LogOut, BarChart3, ArrowLeft, Globe } from "lucide-react";
+import { FolderOpen, Plus, LogOut, BarChart3, ArrowLeft, Globe, Dna, Bot } from "lucide-react";
 
 export function TopNav({ projectName }: { projectName?: string }) {
   const navigate = useNavigate();
@@ -86,6 +86,22 @@ export function TopNav({ projectName }: { projectName?: string }) {
               Novo
             </button>
           )}
+
+          <button
+            onClick={() => navigate("/brand-profiles")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+          >
+            <Dna className="h-3.5 w-3.5" />
+            DNA de Marca
+          </button>
+
+          <button
+            onClick={() => navigate("/agents")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+          >
+            <Bot className="h-3.5 w-3.5" />
+            Agentes
+          </button>
 
           <button
             onClick={() => navigate("/landing-builder")}

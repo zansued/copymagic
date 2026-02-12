@@ -44,6 +44,57 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_profiles: {
+        Row: {
+          audience_summary: string
+          brand_identity: Json
+          brand_voice: Json
+          created_at: string
+          credentials: Json
+          id: string
+          is_default: boolean
+          name: string
+          personality_summary: string
+          product_service: Json
+          product_summary: string
+          target_audience: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audience_summary?: string
+          brand_identity?: Json
+          brand_voice?: Json
+          created_at?: string
+          credentials?: Json
+          id?: string
+          is_default?: boolean
+          name?: string
+          personality_summary?: string
+          product_service?: Json
+          product_summary?: string
+          target_audience?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audience_summary?: string
+          brand_identity?: Json
+          brand_voice?: Json
+          created_at?: string
+          credentials?: Json
+          id?: string
+          is_default?: boolean
+          name?: string
+          personality_summary?: string
+          product_service?: Json
+          product_summary?: string
+          target_audience?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           avoid_real_names: boolean
