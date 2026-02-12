@@ -80,6 +80,15 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "big-ideas",
+    name: "Big Ideas para Newsletter",
+    emoji: "💡",
+    role: "Especialista em Conceitos Memoráveis",
+    description: "Transforma ideias brutas em big ideas estratégicas que geram impacto imediato e conexão emocional.",
+    category: "content",
+    available: true,
+  },
   // Branding & Strategy
   {
     id: "brand-voice",
