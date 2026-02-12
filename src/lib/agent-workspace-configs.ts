@@ -1620,4 +1620,118 @@ TEMA PRINCIPAL: ${inputs.topic}
 ${inputs.video_title ? `TÍTULO DO VÍDEO: ${inputs.video_title}` : ""}`;
     },
   },
+
+  "newsletter-writer": {
+    id: "newsletter-writer",
+    name: "Escritor de Newsletter",
+    emoji: "📰",
+    subtitle: "Transforme ideias em narrativas que engajam seus leitores",
+    inputs: [
+      {
+        key: "content",
+        label: "Instruções para o Agente",
+        placeholder: "Cole a Estrutura gerada. Nas etapas seguintes, adicione abaixo o texto gerado na etapa anterior separado por ---",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "section",
+        label: "Parte da Newsletter",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "intro", label: "📖 Introdução" },
+          { value: "development", label: "📝 Desenvolvimento" },
+          { value: "conclusion", label: "🎯 Conclusão" },
+        ],
+      },
+      {
+        key: "tone",
+        label: "Tom do Texto",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "reflexivo", label: "🧠 Reflexivo e Profundo" },
+          { value: "conversacional", label: "💬 Conversacional e Próximo" },
+          { value: "provocativo", label: "⚡ Provocativo e Desafiador" },
+          { value: "inspiracional", label: "✨ Inspiracional e Motivador" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Use mais metáforas', 'Tom mais direto', 'Inclua uma história pessoal'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const sectionMap: Record<string, { name: string; instructions: string }> = {
+        intro: {
+          name: "INTRODUÇÃO",
+          instructions: `Crie uma INTRODUÇÃO poderosa que:
+- Abra com um gancho narrativo irresistível (história, cena, pergunta provocativa ou dado surpreendente)
+- Estabeleça o tema central e a promessa do texto
+- Crie tensão e curiosidade suficientes para o leitor querer continuar
+- Termine com uma transição natural para o desenvolvimento
+- Extensão: 3-5 parágrafos densos e envolventes
+
+A Estrutura fornecida pelo usuário é seu mapa — siga a direção indicada mas traga vida e profundidade narrativa.`,
+        },
+        development: {
+          name: "DESENVOLVIMENTO",
+          instructions: `Crie o DESENVOLVIMENTO que:
+- Continue EXATAMENTE de onde a Introdução parou (mantenha tom, voz e ritmo)
+- Aprofunde os argumentos centrais com camadas de insight
+- Alterne entre reflexão, exemplos concretos, analogias e provocações
+- Construa uma progressão lógica e emocional
+- Use transições suaves entre ideias
+- Extensão: 6-10 parágrafos que formam o corpo principal
+
+IMPORTANTE: O usuário forneceu a Estrutura original E a Introdução já gerada. Leia ambas para manter coesão total.`,
+        },
+        conclusion: {
+          name: "CONCLUSÃO",
+          instructions: `Crie uma CONCLUSÃO que:
+- Amarre todos os fios narrativos abertos
+- Entregue o insight final — a grande lição ou provocação
+- Crie um momento de reflexão profunda
+- Termine com uma frase memorável
+- Extensão: 2-4 parágrafos com impacto
+- Pode incluir um CTA sutil
+
+IMPORTANTE: O usuário forneceu a Estrutura, Introdução e Desenvolvimento. Leia TUDO para criar um fechamento coeso.`,
+        },
+      };
+
+      const section = sectionMap[inputs.section] || sectionMap.intro;
+      const toneMap: Record<string, string> = {
+        reflexivo: "reflexivo e profundo — como um ensaio de um pensador contemporâneo",
+        conversacional: "conversacional e próximo — como uma conversa com um amigo inteligente",
+        provocativo: "provocativo e desafiador — que questiona crenças e provoca desconforto produtivo",
+        inspiracional: "inspiracional e motivador — que eleva e energiza o leitor para ação",
+      };
+
+      return `Você é um Escritor de Newsletter de elite — mestre em storytelling e copywriting para textos longos, reflexivos e magnéticos.
+
+MISSÃO: Criar a **${section.name}** da newsletter.
+
+TOM: ${toneMap[inputs.tone] || "reflexivo e profundo"}
+
+${section.instructions}
+
+REGRAS DE ESCRITA:
+- Parágrafos curtos a médios (3-5 linhas) para leitura em e-mail
+- Frases com ritmo variado — alterne entre curtas (impacto) e longas (fluidez)
+- Zero jargões vazios ou frases genéricas
+- Cada frase deve MERECER estar no texto
+- Use **negrito** para ênfase, > para citações, --- para separadores
+- Escreva como se falasse com UMA pessoa
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+CONTEÚDO / ESTRUTURA FORNECIDA:
+${inputs.content}`;
+    },
+  },
 };

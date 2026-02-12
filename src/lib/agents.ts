@@ -81,6 +81,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "newsletter-writer",
+    name: "Escritor de Newsletter",
+    emoji: "📰",
+    role: "Especialista em Storytelling para Newsletters",
+    description: "Transforma ideias em narrativas longas e reflexivas para newsletters, com fluxo modular de Introdução, Desenvolvimento e Conclusão.",
+    category: "content",
+    available: true,
+  },
+  {
     id: "big-ideas",
     name: "Big Ideas para Newsletter",
     emoji: "💡",
