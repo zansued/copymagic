@@ -10,6 +10,8 @@ import ProjectDetail from "./pages/ProjectDetail";
 import ProjectSummary from "./pages/ProjectSummary";
 import LandingBuilder from "./pages/LandingBuilder";
 import Auth from "./pages/Auth";
+import AgentsHub from "./pages/AgentsHub";
+import AgentSetup from "./pages/AgentSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/project/:id/summary" element={<ProtectedRoute><ProjectSummary /></ProtectedRoute>} />
             <Route path="/landing-builder" element={<ProtectedRoute><LandingBuilder /></ProtectedRoute>} />
             <Route path="/web-generator" element={<ProtectedRoute><LandingBuilder /></ProtectedRoute>} />
+            <Route path="/agents" element={<ProtectedRoute><AgentsHub /></ProtectedRoute>} />
+            <Route path="/agents/setup" element={<ProtectedRoute><AgentSetup /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
