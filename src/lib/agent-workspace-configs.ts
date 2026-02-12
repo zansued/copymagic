@@ -1963,4 +1963,167 @@ PRODUTO/OFERTA:
 ${inputs.product_description}`;
     },
   },
+
+  "ad-generator": {
+    id: "ad-generator",
+    name: "Gerador de Anúncios",
+    emoji: "📣",
+    subtitle: "Transforme conteúdo em anúncios de alta conversão por estágio do funil",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo Base / Instruções",
+        placeholder: "Cole o artigo, post, e-mail ou qualquer texto que será a base do anúncio. Ou descreva instruções específicas para a criação.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "https://exemplo.com/artigo — o conteúdo será extraído automaticamente",
+        type: "input",
+      },
+      {
+        key: "cta",
+        label: "CTA (Ação Desejada)",
+        placeholder: "Ex: 'Inscrever na mentoria', 'Baixar e-book gratuito', 'Agendar consultoria', 'Comprar agora'...",
+        type: "input",
+      },
+      {
+        key: "template",
+        label: "Template de Anúncio",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "pas", label: "🔥 PAS — Problema, Agitação, Solução" },
+          { value: "aida", label: "🎯 AIDA — Atenção, Interesse, Desejo, Ação" },
+          { value: "bab", label: "🌉 BAB — Before, After, Bridge" },
+          { value: "star", label: "⭐ STAR — Situação, Tarefa, Ação, Resultado" },
+          { value: "4u", label: "⚡ 4U — Útil, Urgente, Único, Ultra-específico" },
+          { value: "storytelling", label: "📖 Storytelling — Narrativa Persuasiva" },
+          { value: "social-proof", label: "🏆 Prova Social — Resultados e Depoimentos" },
+          { value: "contrarian", label: "🔄 Contraintuitivo — Quebre Crenças" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Público feminino 25-40', 'Tom mais agressivo', 'Produto de R$2.000'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const templateMap: Record<string, { name: string; structure: string }> = {
+        pas: {
+          name: "PAS (Problema → Agitação → Solução)",
+          structure: `**PROBLEMA**: Identifique a dor principal do público de forma específica e visceral
+**AGITAÇÃO**: Amplifique as consequências de não resolver — torne impossível ignorar
+**SOLUÇÃO**: Apresente o produto/oferta como a ponte natural para a transformação`,
+        },
+        aida: {
+          name: "AIDA (Atenção → Interesse → Desejo → Ação)",
+          structure: `**ATENÇÃO**: Hook poderoso que para o scroll em 1.5 segundos
+**INTERESSE**: Informação relevante que mantém o leitor engajado
+**DESEJO**: Benefícios emocionais e tangíveis que criam vontade
+**AÇÃO**: CTA claro e urgente`,
+        },
+        bab: {
+          name: "BAB (Before → After → Bridge)",
+          structure: `**BEFORE (Antes)**: Pinte o cenário atual de dor/frustração do público
+**AFTER (Depois)**: Mostre o cenário ideal após a transformação
+**BRIDGE (Ponte)**: Posicione o produto como o caminho entre os dois cenários`,
+        },
+        star: {
+          name: "STAR (Situação → Tarefa → Ação → Resultado)",
+          structure: `**SITUAÇÃO**: Contextualize o cenário do público-alvo
+**TAREFA**: O desafio ou objetivo que precisam alcançar
+**AÇÃO**: O que fizeram (ou devem fazer) para resolver
+**RESULTADO**: A transformação concreta alcançada`,
+        },
+        "4u": {
+          name: "4U (Útil, Urgente, Único, Ultra-específico)",
+          structure: `**ÚTIL**: Valor imediato e prático para o público
+**URGENTE**: Razão para agir AGORA, não depois
+**ÚNICO**: O que diferencia esta oferta de todas as outras
+**ULTRA-ESPECÍFICO**: Dados, números e detalhes concretos`,
+        },
+        storytelling: {
+          name: "Storytelling (Narrativa Persuasiva)",
+          structure: `**CENA DE ABERTURA**: Situação vívida e identificável
+**CONFLITO**: O obstáculo ou virada dramática
+**JORNADA**: A descoberta ou transformação
+**RESOLUÇÃO**: O resultado + conexão com a oferta
+**MORAL**: A lição que leva à ação`,
+        },
+        "social-proof": {
+          name: "Prova Social (Resultados e Depoimentos)",
+          structure: `**RESULTADO IMPACTANTE**: Abra com um número ou conquista específica
+**CONTEXTO**: Quem alcançou e em qual situação estava antes
+**PROCESSO**: O que fez de diferente (conectado ao produto)
+**VALIDAÇÃO**: Mais resultados que reforçam o padrão
+**CONVITE**: CTA baseado em "junte-se aos que já conseguiram"`,
+        },
+        contrarian: {
+          name: "Contraintuitivo (Quebre Crenças)",
+          structure: `**CRENÇA COMUM**: Apresente algo que "todo mundo acredita"
+**CONTRADIÇÃO**: Mostre por que está errado (com evidência)
+**NOVA PERSPECTIVA**: A verdade que ninguém conta
+**PROVA**: Dados ou cases que sustentam a nova visão
+**SOLUÇÃO**: Como aplicar essa nova perspectiva (via produto)`,
+        },
+      };
+
+      const template = templateMap[inputs.template] || templateMap.pas;
+
+      return `Você é um Gerador de Anúncios de elite — especialista em criar anúncios de alta conversão para Meta Ads usando frameworks estratégicos comprovados.
+
+MISSÃO: Criar um anúncio completo usando o template **${template.name}**.
+
+## FRAMEWORK APLICADO
+
+${template.structure}
+
+## ENTREGA OBRIGATÓRIA
+
+### 1. HOOKS (5 variações)
+Crie 5 ganchos de abertura diferentes, cada um com abordagem única:
+1. **Hook Direto**: Vai direto ao ponto com a promessa principal
+2. **Hook de Curiosidade**: Cria um loop aberto irresistível
+3. **Hook de Dor**: Começa pela frustração mais visceral do público
+4. **Hook de Prova**: Abre com resultado ou número impactante
+5. **Hook Contraintuitivo**: Desafia uma crença comum
+
+### 2. CORPO DO ANÚNCIO (3 versões)
+Seguindo a estrutura do template ${template.name}:
+- **Versão Curta** (50-80 palavras): Para formato de imagem estática
+- **Versão Média** (120-180 palavras): Para carrossel ou vídeo curto
+- **Versão Longa** (250-400 palavras): Para formato longo ou VSL
+
+### 3. CTAs (3 variações)
+${inputs.cta ? `Baseados na ação desejada: "${inputs.cta}"` : "Crie 3 CTAs estratégicos adequados ao estágio do funil"}
+
+### 4. DIREÇÃO CRIATIVA
+- Formato visual recomendado (imagem, carrossel, vídeo)
+- Briefing visual para o designer (cores, elementos, mood)
+- Sugestão de thumbnail/primeira imagem
+
+### 5. VARIAÇÕES PARA ESCALA
+- 2 ângulos alternativos do mesmo anúncio para teste A/B
+- Sugestão de segmentação ideal
+
+REGRAS:
+- Copy PRONTA PARA USAR — sem placeholders genéricos
+- Linguagem natural e conversacional, não robótica
+- Cada hook deve funcionar independentemente
+- Adapte o tom ao framework escolhido
+- Maximize especificidade — dados > generalidades
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}` : ""}
+
+CONTEÚDO BASE:
+${inputs.content}`;
+    },
+  },
 };

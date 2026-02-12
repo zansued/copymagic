@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "ad-generator",
+    name: "Gerador de Anúncios",
+    emoji: "📣",
+    role: "Especialista em Criação de Anúncios",
+    description: "Transforma conteúdo em anúncios de alta conversão para Meta Ads usando templates estratégicos por estágio do funil.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "ad-funnel",
     name: "Funil de Anúncios",
     emoji: "🔻",
