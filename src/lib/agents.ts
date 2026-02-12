@@ -101,6 +101,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "ad-angles",
+    name: "Ângulos de Anúncios",
+    emoji: "🎯",
+    role: "Especialista em Ângulos Criativos",
+    description: "Transforma um anúncio em 5 abordagens estratégicas únicas para maximizar performance no Meta Ads.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "writing-analysis",
     name: "Análise de Escrita",
     emoji: "🔍",

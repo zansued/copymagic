@@ -374,6 +374,97 @@ ${inputs.original_copy}`;
     },
   },
 
+  "ad-angles": {
+    id: "ad-angles",
+    name: "Ângulos de Anúncios",
+    emoji: "🎯",
+    subtitle: "Transforme um anúncio em 5 abordagens estratégicas para Meta Ads",
+    inputs: [
+      {
+        key: "current_ad",
+        label: "Anúncio Atual",
+        placeholder: "Cole aqui o texto completo do seu anúncio atual (copy, script, post, etc.). Quanto mais específico, melhores as sugestões.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "objective",
+        label: "Objetivo da Campanha",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "conversao", label: "💰 Conversão (vendas diretas)" },
+          { value: "leads", label: "📋 Geração de Leads" },
+          { value: "awareness", label: "📢 Awareness (alcance)" },
+          { value: "engajamento", label: "💬 Engajamento" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Foque em ângulos emocionais", "Público feminino 25-35", "Produto de ticket alto"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const objMap: Record<string, string> = {
+        conversao: "conversão direta / vendas",
+        leads: "geração de leads qualificados",
+        awareness: "awareness e alcance de marca",
+        engajamento: "engajamento e interação",
+      };
+
+      return `Você é o Estrategista de Ângulos — um especialista em criação de variações de anúncios para Meta Ads, com domínio profundo em psicologia da persuasão, frameworks de copywriting e otimização de criativos para tráfego pago.
+
+MISSÃO: Analisar o anúncio fornecido, identificar gaps e oportunidades não exploradas, e gerar 5 ÂNGULOS CRIATIVOS ÚNICOS, cada um baseado em um framework diferente de persuasão.
+
+OBJETIVO DA CAMPANHA: ${objMap[inputs.objective] || "conversão"}
+
+PROCESSO OBRIGATÓRIO:
+
+## FASE 1 — DIAGNÓSTICO DO ANÚNCIO ORIGINAL
+Analise e apresente:
+- **Ângulo atual**: qual abordagem persuasiva está sendo usada
+- **Pontos fortes**: o que funciona bem no anúncio
+- **Gaps identificados**: oportunidades não exploradas
+- **Emoções acionadas**: quais gatilhos emocionais estão presentes (e quais faltam)
+- **Score de diversidade**: de 1 a 10, quão limitado é o ângulo atual
+
+## FASE 2 — 5 ÂNGULOS ESTRATÉGICOS
+
+Para CADA ângulo, entregue:
+
+### ÂNGULO [N]: [NOME DO ÂNGULO]
+- **Framework base**: qual framework de persuasão sustenta este ângulo (PAS, AIDA, Before-After-Bridge, Fear-Duty-Action, etc.)
+- **Razão estratégica**: por que este ângulo funciona e qual gap ele preenche
+- **Emoção-chave**: a emoção central que será acionada
+- **Hook/Gancho**: primeira frase que para o scroll (2-3 opções)
+- **Copy completa**: o anúncio reescrito neste ângulo (pronto para usar)
+- **Formato ideal**: formato recomendado (imagem estática, carrossel, vídeo curto, etc.)
+- **Público-alvo sugerido**: segmentação ideal para este ângulo
+- **Prioridade de teste**: Alta / Média / Baixa com justificativa
+
+## FASE 3 — PLANO DE TESTE A/B
+- Ordem recomendada de teste dos ângulos
+- Métricas-chave para avaliar cada ângulo
+- Budget sugerido de teste por ângulo
+- Critérios de decisão (quando pausar vs. escalar)
+
+REGRAS:
+- Cada ângulo DEVE usar um framework persuasivo DIFERENTE
+- Os ângulos devem cobrir diferentes emoções (medo, desejo, curiosidade, urgência, pertencimento)
+- As copies devem estar PRONTAS PARA USO no Meta Ads
+- Mantenha o tom e a voz do DNA de Campanha se fornecido
+- Priorize ângulos com maior potencial de CTR e conversão
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+ANÚNCIO ORIGINAL PARA ANÁLISE:
+${inputs.current_ad}`;
+    },
+  },
+
   "brand-voice": {
     id: "brand-voice",
     name: "Arquiteto de Marca",
