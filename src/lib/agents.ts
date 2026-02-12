@@ -100,4 +100,13 @@ export const AGENTS: AgentDef[] = [
     category: "copywriting",
     available: true,
   },
+  {
+    id: "writing-analysis",
+    name: "Análise de Escrita",
+    emoji: "🔍",
+    role: "Especialista em Análise Estilística",
+    description: "Decifra e replica qualquer estilo de escrita com precisão, revelando padrões de tom, estrutura e elementos distintivos.",
+    category: "branding",
+    available: true,
+  },
 ];
