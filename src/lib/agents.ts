@@ -62,6 +62,15 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: false,
   },
+  {
+    id: "youtube-titles",
+    name: "Ângulos e Títulos YouTube",
+    emoji: "▶️",
+    role: "Especialista em Títulos e CTR",
+    description: "Gera ângulos, variações e títulos otimizados para maximizar CTR e performance no YouTube.",
+    category: "content",
+    available: true,
+  },
   // Branding & Strategy
   {
     id: "brand-voice",
