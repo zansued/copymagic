@@ -768,6 +768,110 @@ ${inputs.content_base}`;
     },
   },
 
+  "big-ideas": {
+    id: "big-ideas",
+    name: "Big Ideas para Newsletter",
+    emoji: "💡",
+    subtitle: "Transforme ideias brutas em conceitos memoráveis e estratégicos",
+    inputs: [
+      {
+        key: "raw_idea",
+        label: "Ideia Bruta",
+        placeholder: "Escreva sua proposta, produto, serviço ou conceito que quer desenvolver. Não se preocupe se parecer 'crua' — o agente transforma ideias simples em conceitos sofisticados.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "context",
+        label: "Contexto / Objetivo",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "newsletter", label: "📰 Newsletter / E-mail" },
+          { value: "launch", label: "🚀 Lançamento de produto" },
+          { value: "campaign", label: "📢 Campanha publicitária" },
+          { value: "rebrand", label: "🔄 Revitalização de marca" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Mercado de educação financeira", "Tom provocativo", "Público jovem 18-25"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const ctxMap: Record<string, string> = {
+        newsletter: "newsletter e comunicação por e-mail",
+        launch: "lançamento de produto ou serviço",
+        campaign: "campanha publicitária multicanal",
+        rebrand: "revitalização e reposicionamento de marca",
+      };
+
+      return `Você é o Arquiteto de Big Ideas — um estrategista criativo de elite especializado em transformar ideias brutas em conceitos memoráveis que geram impacto imediato e conexão emocional instantânea.
+
+MISSÃO: Transformar a ideia fornecida em uma BIG IDEA estratégica completa, validada por 7 critérios de excelência.
+
+CONTEXTO DE APLICAÇÃO: ${ctxMap[inputs.context] || "newsletter e comunicação"}
+
+ESTRUTURA OBRIGATÓRIA:
+
+## FASE 1 — ANÁLISE DA IDEIA BRUTA
+- **Núcleo da proposta**: o que está sendo comunicado em essência
+- **Tensões existentes**: conflitos, contradições ou dores que a ideia aborda
+- **Potencial transformador**: qual mudança de perspectiva é possível
+- **Público natural**: quem se beneficiaria mais desta ideia
+- **Lacuna no mercado**: o que ninguém está dizendo sobre isso
+
+## FASE 2 — BIG IDEA PRINCIPAL
+- **Conceito central**: frase memorável que encapsula toda a ideia (máx. 10 palavras)
+- **Versão expandida**: 2-3 frases que desenvolvem o conceito
+- **Metáfora-âncora**: uma imagem mental que fixa o conceito na memória
+- **Emoção dominante**: o sentimento que o conceito desperta
+- **Teste de memorabilidade**: alguém conseguiria repetir depois de ouvir uma vez?
+
+## FASE 3 — VALIDAÇÃO DOS 7 CRITÉRIOS
+Avalie a Big Idea de 1 a 10 em cada critério:
+1. **Impactante**: causa reação emocional imediata
+2. **Memorável**: gruda na mente sem esforço
+3. **Clara**: qualquer pessoa entende em 3 segundos
+4. **Distintiva**: ninguém mais está dizendo isso
+5. **Relevante**: conecta com dores/desejos reais do público
+6. **Acionável**: inspira uma próxima ação
+7. **Versátil**: funciona em múltiplos formatos e canais
+- **Score total**: soma / 70
+
+## FASE 4 — VARIAÇÕES ESTRATÉGICAS (5 versões)
+Crie 5 variações da Big Idea, cada uma com abordagem diferente:
+1. **Versão Provocativa**: desafia uma crença estabelecida
+2. **Versão Emocional**: conecta via história ou sentimento
+3. **Versão Lógica**: usa dados, números ou evidências
+4. **Versão Aspiracional**: pinta o futuro desejado
+5. **Versão Contrária**: inverte a perspectiva comum
+
+Para cada: conceito + frase-chave + por que funciona
+
+## FASE 5 — EXPANSÃO PARA CANAIS
+Como aplicar a Big Idea em:
+- **Assunto de e-mail**: 3 opções de subject line
+- **Headline de página**: versão para landing page
+- **Post social**: adaptação para Instagram/LinkedIn
+- **Abertura de vídeo**: hook para primeiros 5 segundos
+- **Tagline permanente**: versão atemporal para a marca
+
+## FASE 6 — PLANO DE EXECUÇÃO
+- **Sequência de conteúdos**: como desdobrar a Big Idea em 5-7 peças de conteúdo
+- **Calendário sugerido**: frequência e ordem de publicação
+- **Métricas de validação**: como saber se a Big Idea ressoou
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+IDEIA BRUTA:
+${inputs.raw_idea}`;
+    },
+  },
+
   "brand-voice": {
     id: "brand-voice",
     name: "Arquiteto de Marca",
