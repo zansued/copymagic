@@ -460,4 +460,84 @@ INFORMAÇÕES DA MARCA:
 ${inputs.brand_info}`;
     },
   },
+
+  "writing-analysis": {
+    id: "writing-analysis",
+    name: "Análise de Escrita",
+    emoji: "🔍",
+    subtitle: "Decifre e replique qualquer estilo de escrita com precisão",
+    inputs: [
+      {
+        key: "source_text",
+        label: "Conteúdo para Análise",
+        placeholder: "Cole aqui os textos do estilo que você quer decifrar e replicar. Quanto mais texto, mais precisa será a análise estilística.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Foque nos padrões de headline", "Compare com tom corporativo", "Analise só os CTAs"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Analista de Escrita — um especialista em linguística aplicada, estilística e engenharia reversa de voz autoral. Sua capacidade de decifrar padrões de escrita é cirúrgica.
+
+MISSÃO: Analisar profundamente o texto fornecido e entregar um GUIA DE ESTILO COMPLETO que permita replicar esse estilo com fidelidade absoluta.
+
+ESTRUTURA OBRIGATÓRIA DA ANÁLISE:
+
+## 1. DNA DO TOM
+- **Espectro de Formalidade**: escala de 1 (ultra casual) a 10 (ultra formal) com justificativa
+- **Temperatura Emocional**: frio/analítico ↔ quente/passional — onde se posiciona
+- **Registro Dominante**: conversacional, jornalístico, acadêmico, publicitário, literário, técnico
+- **Atitude**: assertivo, questionador, provocativo, acolhedor, autoritário, conspiratório
+- **Persona Implícita**: quem é o "eu" por trás do texto (mentor, amigo, especialista, rebelde, etc.)
+
+## 2. ARQUITETURA ESTRUTURAL
+- **Tamanho médio de frases**: curtas (até 10 palavras), médias (10-20), longas (20+)
+- **Tamanho médio de parágrafos**: quantas frases por bloco
+- **Ritmo e Cadência**: alternância entre frases curtas e longas, padrão rítmico
+- **Estrutura de abertura**: como começa textos/seções (pergunta, afirmação, história, dado)
+- **Transições**: como conecta ideias (conectivos, quebras, perguntas retóricas)
+- **Fechamento**: padrão de encerramento (CTA, reflexão, provocação, resumo)
+
+## 3. VOCABULÁRIO E LINGUAGEM
+- **Nível de sofisticação lexical**: simples, intermediário, avançado
+- **Palavras-chave recorrentes**: lista das 15-20 palavras/expressões mais usadas
+- **Palavras NUNCA usadas**: padrões de evitação lexical
+- **Jargão/Terminologia**: termos técnicos ou de nicho frequentes
+- **Estrangeirismos**: uso de palavras em outros idiomas
+- **Gírias e coloquialismos**: presença e frequência
+
+## 4. ELEMENTOS DISTINTIVOS
+- **Metáforas e analogias**: padrões de comparação usados
+- **Gatilhos emocionais**: quais emoções são acionadas e como
+- **Recursos retóricos**: anáfora, paralelismo, ironia, hipérbole, etc.
+- **Pontuação expressiva**: uso de travessões, reticências, exclamações, parênteses
+- **Formatação**: uso de negrito, itálico, caps, listas, emojis
+- **Storytelling**: presença e estilo de narrativas
+
+## 5. PADRÕES PERSUASIVOS
+- **Framework implícito**: PAS, AIDA, storytelling, lógico-dedutivo, etc.
+- **Prova social**: como apresenta credibilidade e autoridade
+- **Objeções**: como antecipa e neutraliza resistências
+- **CTAs**: estilo, frequência e posicionamento de chamadas à ação
+- **Urgência/Escassez**: como e se utiliza esses gatilhos
+
+## 6. GUIA DE REPLICAÇÃO PRÁTICA
+- **10 Regras de Ouro**: lista das regras mais importantes para escrever neste estilo
+- **Template de parágrafo**: exemplo de estrutura de parágrafo típico
+- **Frases modelo**: 5 frases de exemplo no estilo analisado (originais, não copiadas)
+- **Checklist de revisão**: 10 itens para verificar se um texto está no estilo correto
+- **O que FAZER vs. O que NÃO FAZER**: tabela comparativa
+
+${brandContext ? `\n--- DNA DE CAMPANHA (use para contextualizar a análise e sugerir adaptações) ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+TEXTO PARA ANÁLISE:
+${inputs.source_text}`;
+    },
+  },
 };
