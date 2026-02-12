@@ -155,6 +155,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "content-to-ad",
+    name: "Conteúdo em Anúncio",
+    emoji: "📢",
+    role: "Especialista em Conversão de Conteúdo para Ads",
+    description: "Transforma conteúdo orgânico validado em anúncios de alta conversão para Meta Ads com 5 hooks testáveis.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "ad-angles",
     name: "Ângulos de Anúncios",
     emoji: "🎯",
