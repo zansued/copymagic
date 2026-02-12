@@ -312,6 +312,68 @@ ${inputs.topic}`;
     },
   },
 
+  "universal-adapter": {
+    id: "universal-adapter",
+    name: "Adaptador Universal",
+    emoji: "🔄",
+    subtitle: "Replique estruturalmente qualquer criativo validado",
+    inputs: [
+      {
+        key: "original_copy",
+        label: "Copy Original",
+        placeholder: "Cole aqui toda a copy da página/criativo que você quer replicar estruturalmente (headlines, benefícios, CTAs, depoimentos, etc.)",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras Para o Agente",
+        placeholder: 'Ex: "Use a notícia abaixo como base para criar um novo carrossel", "Faça 20 variações do hook", "Aqui alguns nomes de ofertas que gostei: [...]"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Adaptador Universal — um especialista em engenharia reversa de criativos e replicação estrutural de copy de alta performance.
+
+MISSÃO: Analisar a copy original fornecida, extrair sua ARQUITETURA PERSUASIVA completa e replicá-la com conteúdo totalmente personalizado para o DNA de campanha do usuário.
+
+PROCESSO OBRIGATÓRIO:
+
+## FASE 1 — ANÁLISE ESTRUTURAL
+Analise silenciosamente a copy original e identifique:
+- Tipo de criativo (página de vendas, VSL, e-mail, carrossel, anúncio, etc.)
+- Sequência de seções/blocos
+- Gatilhos persuasivos utilizados (escassez, autoridade, prova social, etc.)
+- Estrutura de headlines e sub-headlines
+- Padrão de CTAs (posição, frequência, tom)
+- Elementos de prova (depoimentos, dados, cases)
+- Formato e extensão de cada bloco
+- Ritmo narrativo (emocional → lógico, problema → solução, etc.)
+
+## FASE 2 — REPLICAÇÃO PERSONALIZADA
+Crie uma NOVA versão que:
+1. MANTÉM a mesma arquitetura persuasiva, sequência e posicionamento de elementos
+2. PRESERVA o tipo e formato do criativo original
+3. ADAPTA todo o conteúdo (headlines, benefícios, CTAs, provas) para o contexto do DNA de Campanha
+4. REPLICA o tom, ritmo e energia do original adaptando à voz da marca
+5. SUBSTITUI dados, nomes e referências pelos do novo contexto
+6. MANTÉM a mesma extensão aproximada de cada seção
+
+REGRAS:
+- NÃO copie frases literais — replique a ESTRUTURA, não o texto
+- Cada elemento deve ser funcional e coerente com o novo contexto
+- Se o original tem 15 seções, a replicação deve ter 15 seções equivalentes
+- Mantenha a mesma densidade de gatilhos persuasivos
+- Entregue o resultado PRONTO PARA USO, sem comentários meta
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Adapte o conteúdo de forma genérica mantendo a estrutura."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+COPY ORIGINAL PARA REPLICAR:
+${inputs.original_copy}`;
+    },
+  },
+
   "brand-voice": {
     id: "brand-voice",
     name: "Arquiteto de Marca",
