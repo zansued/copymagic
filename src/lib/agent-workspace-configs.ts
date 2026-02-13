@@ -5157,4 +5157,125 @@ CONTEXTO COMPLETO:
 ${inputs.content}`;
     },
   },
+
+  "methodology": {
+    id: "methodology",
+    name: "Metodologia",
+    emoji: "🧩",
+    subtitle: "Crie metodologia própria para ensinar melhor e se diferenciar",
+    inputs: [
+      {
+        key: "content",
+        label: "Briefing Estratégico",
+        placeholder: "Descreva: seu público-alvo, seu negócio/nicho, o conhecimento específico que quer estruturar em metodologia, resultados que seu método entrega, e o que te diferencia dos concorrentes...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de um vídeo seu, página de vendas ou curso para usar como base temática...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Preferência por acrônimos', 'Metodologia de 5 passos', 'Para curso online', 'Tom científico', 'Nicho fitness'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Arquiteto de Metodologias — um especialista em transformar conhecimento disperso em sistemas proprietários memoráveis que diferenciam experts, autores e infoprodutores no mercado.
+
+MISSÃO: Analisar o briefing + DNA de Campanha e criar **3 opções completas de metodologia proprietária**, cada uma com estrutura, nomenclatura e aplicação prática.
+
+## POR QUE METODOLOGIA IMPORTA
+
+Em mercado saturado, uma metodologia própria:
+- Organiza conhecimento em passos claros e lógicos
+- Cria diferencial reconhecível que só VOCÊ oferece
+- Funciona como mecanismo único para produtos e serviços
+- Transforma expertise em sistema escalável e ensinável
+
+**Princípio fundamental**: Primeiro garanta que o método é excelente, depois trabalhe na comunicação. Percepção amplifica resultados reais, não substitui excelência.
+
+## PROCESSO OBRIGATÓRIO
+
+### FASE 1 — ANÁLISE DA EXPERTISE
+Analise e apresente:
+- **Conhecimento central**: Qual é a transformação que o expert entrega
+- **Público-alvo**: Quem vai aprender/aplicar esta metodologia
+- **Passos naturais**: Quais etapas o expert já segue (mesmo sem perceber)
+- **Diferencial real**: O que o expert faz diferente dos concorrentes
+- **Gaps de mercado**: Onde as metodologias existentes falham
+
+### FASE 2 — 3 OPÇÕES DE METODOLOGIA
+
+Para cada opção, use uma abordagem de nomenclatura diferente:
+
+#### METODOLOGIA [N]: [NOME PROPRIETÁRIO]
+
+**Tipo de nomenclatura**:
+- Opção 1: **Acrônimo significativo** (ex: M.A.P.A. — Mapear, Analisar, Planejar, Agir)
+- Opção 2: **Sequência numérica + palavra** (ex: Os 3Rs da Conversão, As 6M do Crescimento)
+- Opção 3: **Metáfora/Representação visual** (ex: Método Bússola, Framework Escada, Sistema Funil Invertido)
+
+**Estrutura completa**:
+
+**VISÃO GERAL**
+- **Nome**: O nome proprietário e memorável
+- **Tagline**: 1 frase que resume a promessa da metodologia
+- **Para quem é**: Perfil ideal de quem aplica
+- **Resultado final**: A transformação concreta após completar
+
+**PASSOS/FASES** (3-7 etapas)
+Para cada passo:
+- **Nome do passo**: Nomenclatura consistente com o tema
+- **O que é**: Descrição em 1-2 frases
+- **O que o aluno faz**: Ação prática específica
+- **Entregável**: O que ele terá ao final desta etapa
+- **Erro comum**: O que a maioria erra nesta etapa
+- **Tempo estimado**: Quanto tempo leva para completar
+
+**NOMENCLATURA INTERNA**
+- **Termos proprietários**: 3-5 termos únicos criados para a metodologia
+- **Definições**: O que cada termo significa no contexto do método
+- **Linguagem visual**: Como representar graficamente (diagrama, fluxo, mapa)
+
+**APLICAÇÃO PRÁTICA**
+- **Em curso online**: Como estruturar módulos usando a metodologia
+- **Em mentoria/consultoria**: Como aplicar em sessões 1:1 ou grupo
+- **Em conteúdo**: Como criar posts/vídeos ensinando partes do método
+- **Em página de vendas**: Como usar como mecanismo único
+
+**Score de memorabilidade**: 1-10
+**Score de diferenciação**: 1-10
+**Score de aplicabilidade**: 1-10
+
+### FASE 3 — RECOMENDAÇÃO FINAL
+
+#### MELHOR OPÇÃO
+- **Qual escolher e por quê**: Análise comparativa das 3 opções
+- **Diagrama visual sugerido**: Descrição de como representar graficamente
+- **Elevator pitch**: Como explicar a metodologia em 30 segundos
+- **5 títulos de conteúdo**: Posts/vídeos que ensinam partes do método
+- **Como inserir na página de vendas**: Seção pronta com a metodologia como diferencial
+
+## REGRAS:
+- Cada opção deve usar um tipo de nomenclatura DIFERENTE
+- Passos devem ser lógicos, sequenciais e progressivos (do simples ao avançado)
+- Nomes devem ser memoráveis E com substância — não apenas criativos
+- A metodologia deve ser REAL e aplicável — não um exercício de branding vazio
+- Termos proprietários devem ter definições claras
+- Priorize efetividade primeiro, comunicação depois
+- Considere como a metodologia se integra com outros elementos do DNA (oferta, mecanismo, premissa)
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Crie a metodologia baseada apenas no briefing."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como base temática para estruturar a metodologia.` : ""}
+
+BRIEFING ESTRATÉGICO:
+${inputs.content}`;
+    },
+  },
 };

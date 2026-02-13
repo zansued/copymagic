@@ -402,6 +402,15 @@ export const AGENTS: AgentDef[] = [
     category: "products",
     available: true,
   },
+  {
+    id: "methodology",
+    name: "Metodologia",
+    emoji: "🧩",
+    role: "Especialista em Estruturação de Métodos",
+    description: "Transforma conhecimento disperso em metodologia proprietária memorável com nomenclatura única e estrutura pronta para produtos e cursos.",
+    category: "products",
+    available: true,
+  },
 
   // ── Branding & Posicionamento ──
   {
