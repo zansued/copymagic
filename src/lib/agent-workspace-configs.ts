@@ -8225,4 +8225,193 @@ TEMA / IDEIA DO VÍDEO:
 ${inputs.content}`;
     },
   },
+
+  "spin-selling": {
+    id: "spin-selling",
+    name: "SPIN Selling",
+    emoji: "🔄",
+    subtitle: "Perguntas estratégicas para vendas consultivas",
+    inputs: [
+      {
+        key: "content",
+        label: "Produto / Serviço / Contexto de Venda",
+        placeholder: "Descreva o que você vende, para quem, e o contexto da venda (ex: consultoria de marketing para PMEs, software SaaS para RH, mentoria para infoprodutores...)",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "sales_context",
+        label: "Contexto da Venda",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "call", label: "Call de vendas (1:1)" },
+          { value: "presentation", label: "Apresentação / Reunião" },
+          { value: "chat", label: "Chat / WhatsApp / DM" },
+          { value: "webinar", label: "Webinar / Evento ao vivo" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "https://exemplo.com/pagina-do-produto",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Meu público é resistente a preço, foque em objeções de tempo, quero perguntas mais diretas...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const contextLabels: Record<string, string> = {
+        "call": "Call de vendas 1:1",
+        "presentation": "Apresentação / Reunião",
+        "chat": "Chat / WhatsApp / DM",
+        "webinar": "Webinar / Evento ao vivo",
+      };
+      const contextLabel = contextLabels[inputs.sales_context] || "Call de vendas 1:1";
+
+      return `Você é um Consultor de Vendas especialista no método SPIN Selling de Neil Rackham. Sua missão é gerar perguntas estratégicas personalizadas para cada estágio do SPIN, adaptadas ao produto/serviço e contexto de venda fornecidos.
+
+## O MÉTODO SPIN SELLING
+
+O SPIN é um framework de vendas consultivas baseado em 4 estágios de perguntas, cada um com um objetivo estratégico:
+
+### 🔵 S — SITUAÇÃO (Entender o cenário atual)
+**Objetivo**: Coletar fatos e contexto sobre a situação atual do prospect.
+- Entender o que ele faz hoje, como faz, com quais ferramentas/métodos
+- NÃO exagere neste estágio — muitas perguntas de situação entediam
+- Use no máximo 3-4 perguntas de situação (as mais relevantes)
+
+### 🟡 P — PROBLEMA (Revelar dores e insatisfações)
+**Objetivo**: Fazer o prospect verbalizar seus problemas e frustrações.
+- Perguntas que revelam dificuldades, insatisfações e limitações
+- O prospect precisa ADMITIR que tem um problema
+- Foque nos problemas que SEU produto/serviço resolve
+
+### 🔴 I — IMPLICAÇÃO (Amplificar a dor)
+**Objetivo**: Mostrar as CONSEQUÊNCIAS de não resolver o problema.
+- Este é o estágio MAIS IMPORTANTE e mais negligenciado
+- Faça o prospect perceber o custo real de não agir
+- Conecte o problema a impactos financeiros, emocionais, profissionais
+- Crie urgência sem ser agressivo
+
+### 🟢 N — NECESSIDADE DE SOLUÇÃO (Criar desejo pela solução)
+**Objetivo**: Fazer o prospect descrever como seria o cenário ideal.
+- O prospect deve "vender para si mesmo"
+- Perguntas que fazem ele visualizar a vida COM a solução
+- Ele deve verbalizar os benefícios antes de você apresentar
+
+## CONTEXTO DA VENDA
+**Canal**: ${contextLabel}
+
+## FORMATO DE ENTREGA
+
+---
+
+## 🔵 S — PERGUNTAS DE SITUAÇÃO
+
+Para cada pergunta:
+
+### Pergunta S[N]
+> **"[pergunta]"**
+
+**Objetivo**: [o que você quer descobrir com essa pergunta]
+**Se a resposta for X**: [como reagir / próximo passo]
+**Se a resposta for Y**: [como reagir / próximo passo]
+
+_(4-5 perguntas de situação)_
+
+---
+
+## 🟡 P — PERGUNTAS DE PROBLEMA
+
+### Pergunta P[N]
+> **"[pergunta]"**
+
+**Objetivo**: [qual dor você quer que ele verbalize]
+**Sinal positivo**: [resposta que indica que há dor real]
+**Se ele minimizar**: [como aprofundar]
+
+_(5-7 perguntas de problema)_
+
+---
+
+## 🔴 I — PERGUNTAS DE IMPLICAÇÃO
+
+### Pergunta I[N]
+> **"[pergunta]"**
+
+**Objetivo**: [qual consequência você quer que ele perceba]
+**Impacto esperado**: [financeiro / emocional / profissional]
+**Follow-up natural**: "[pergunta de follow-up]"
+
+_(5-7 perguntas de implicação)_
+
+---
+
+## 🟢 N — PERGUNTAS DE NECESSIDADE
+
+### Pergunta N[N]
+> **"[pergunta]"**
+
+**Objetivo**: [qual benefício você quer que ele visualize]
+**Ponte para a oferta**: [como conectar a resposta ao seu produto]
+
+_(4-5 perguntas de necessidade)_
+
+---
+
+## ⚠️ OBJEÇÕES MAIS COMUNS
+
+Para cada objeção:
+
+### Objeção [N]: "[objeção típica]"
+**Quando surge**: [em qual estágio do SPIN geralmente aparece]
+**Causa raiz**: [por que o prospect diz isso]
+**Resposta sugerida**: "[como responder de forma consultiva]"
+**Pergunta de redirecionamento**: "[pergunta SPIN para retomar o controle]"
+
+_(5-7 objeções)_
+
+---
+
+## 🗺️ ROTEIRO DE CONVERSA
+
+Sequência sugerida de como conduzir a conversa completa:
+
+1. **Abertura** (1-2 min): [como começar]
+2. **Situação** (3-5 min): [quais perguntas S priorizar]
+3. **Problema** (5-8 min): [transição e perguntas P]
+4. **Implicação** (5-10 min): [como amplificar]
+5. **Necessidade** (3-5 min): [como fazer ele "vender para si mesmo"]
+6. **Apresentação** (5-10 min): [como apresentar sua solução]
+7. **Fechamento** (2-5 min): [como fechar naturalmente]
+
+---
+
+## 💡 DICAS DE EXECUÇÃO
+- Não faça todas as perguntas — use como guia
+- Ouça mais do que fala (proporção 70/30)
+- Anote as palavras exatas do prospect e use-as depois
+- Se ele já verbalizou o problema, pule para Implicação
+- As perguntas de Implicação são onde a venda realmente acontece
+
+## REGRAS
+- Perguntas devem ser ABERTAS (não de sim/não)
+- Cada pergunta deve ter objetivo estratégico claro
+- Adapte a linguagem ao canal de venda (${contextLabel})
+- Não seja robótico — as perguntas devem fluir naturalmente
+- Escreva em português brasileiro
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nUse o DNA para personalizar as perguntas ao produto/serviço específico e alinhar o tom da abordagem.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL) ---\n${inputs.scraped_content}\n\nUse como contexto adicional sobre o produto/serviço.` : ""}
+
+PRODUTO / SERVIÇO / CONTEXTO:
+${inputs.content}`;
+    },
+  },
 };
