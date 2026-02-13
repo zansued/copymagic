@@ -62,6 +62,15 @@ const AVAILABLE_AGENTS = [
   { id: "buyer-profiles", name: "Perfis de Compra", category: "branding", description: "Arquétipos de compra" },
 ];
 
+function buildAgentList(): string {
+  const catNames: Record<string, string> = { ideation: "Ideação & Estratégia", copywriting: "Copywriting", content: "Conteúdo & Social", products: "Produtos & Ofertas", branding: "Branding & Posicionamento" };
+  return ["ideation", "copywriting", "content", "products", "branding"].map(cat => {
+    const agents = AVAILABLE_AGENTS.filter(a => a.category === cat);
+    const lines = agents.map(a => "- `" + a.id + "` → " + a.name + ": " + a.description);
+    return "**" + catNames[cat] + "**:\n" + lines.join("\n");
+  }).join("\n\n");
+}
+
 const SYSTEM_PROMPT = `Você é o **Mentor de Riqueza** — um estrategista digital de elite que ajuda empreendedores a alcançar seus objetivos de negócio criando planos de ação práticos usando ferramentas de IA especializadas.
 
 ## SUA PERSONALIDADE
@@ -72,13 +81,9 @@ const SYSTEM_PROMPT = `Você é o **Mentor de Riqueza** — um estrategista digi
 - Celebra vitórias e mantém foco no resultado
 
 ## FERRAMENTAS DISPONÍVEIS (AGENTES DE IA)
-Você tem acesso a ${AVAILABLE_AGENTS.length} agentes especializados organizados em 5 categorias:
+Você tem acesso a ${AVAILABLE_AGENTS.length} agentes especializados. IMPORTANTE: Use EXATAMENTE o agent_id listado abaixo no campo "agent_id" do fluxo.
 
-**Ideação & Estratégia**: ${AVAILABLE_AGENTS.filter(a => a.category === "ideation").map(a => a.name).join(", ")}
-**Copywriting**: ${AVAILABLE_AGENTS.filter(a => a.category === "copywriting").map(a => a.name).join(", ")}
-**Conteúdo & Social**: ${AVAILABLE_AGENTS.filter(a => a.category === "content").map(a => a.name).join(", ")}
-**Produtos & Ofertas**: ${AVAILABLE_AGENTS.filter(a => a.category === "products").map(a => a.name).join(", ")}
-**Branding & Posicionamento**: ${AVAILABLE_AGENTS.filter(a => a.category === "branding").map(a => a.name).join(", ")}
+${buildAgentList()}
 
 ## COMO CRIAR FLUXOS
 Quando o usuário descrever um objetivo, analise e crie um FLUXO — uma sequência estratégica dos agentes acima.
@@ -111,10 +116,10 @@ REGRAS PARA FLUXOS:
 - Quando o usuário completar uma etapa, parabenize e oriente sobre a próxima
 - Pode criar múltiplos fluxos alternativos se fizer sentido
 
-## EXEMPLOS DE OBJETIVOS → FLUXOS
-- "Quero lançar um produto digital" → ICP → Ideias Low Ticket → Gerador de Produto → Oferta → Página de Vendas → Anúncios
-- "Quero criar conteúdo que vende" → Brand Voice → Calendário de Conteúdo → Carrosséis → Legendas → Stories
-- "Quero escalar meus anúncios" → Raio-X de Marketing → Ângulos de Anúncios → Funil de Anúncios → Gerador de Anúncios`;
+## EXEMPLOS DE OBJETIVOS → FLUXOS (use os agent_ids exatos)
+- "Quero lançar um produto digital" → \`icp-profile\` → \`low-ticket-ideas\` → \`low-ticket-product\` → \`offer-generator\` → \`sales-page\` → \`ad-generator\`
+- "Quero criar conteúdo que vende" → \`brand-voice\` → \`content-calendar\` → \`carousel-creator\` → \`post-captions\` → \`instagram-stories\`
+- "Quero escalar meus anúncios" → \`marketing-xray\` → \`ad-angles\` → \`ad-funnel\` → \`ad-generator\``;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
