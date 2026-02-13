@@ -7085,4 +7085,154 @@ ${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
 ${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL) ---\n${inputs.scraped_content}` : ""}`;
     },
   },
+
+  "marketing-xray": {
+    id: "marketing-xray",
+    name: "Raio-X de Marketing",
+    emoji: "🔬",
+    subtitle: "Analise qualquer conteúdo e descubra o que faz vender",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo para Análise",
+        placeholder: "Cole aqui o conteúdo completo que deseja analisar: página de vendas, e-mail, anúncio, post, roteiro de vídeo...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "content_type",
+        label: "Tipo de Conteúdo",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "sales-page", label: "Página de vendas" },
+          { value: "email", label: "E-mail / Sequência" },
+          { value: "ad", label: "Anúncio (Meta/Google)" },
+          { value: "vsl", label: "Roteiro de VSL / Vídeo" },
+          { value: "post", label: "Post / Carrossel" },
+          { value: "landing", label: "Landing Page / Captura" },
+          { value: "newsletter", label: "Newsletter / Artigo" },
+          { value: "other", label: "Outro" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://exemplo.com/pagina-de-vendas",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Foque nas técnicas de abertura, compare com meu estilo, analise apenas os CTAs...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const typeLabels: Record<string, string> = {
+        "sales-page": "Página de Vendas",
+        "email": "E-mail / Sequência de E-mails",
+        "ad": "Anúncio (Meta/Google Ads)",
+        "vsl": "Roteiro de VSL / Vídeo de Vendas",
+        "post": "Post / Carrossel para Redes Sociais",
+        "landing": "Landing Page / Página de Captura",
+        "newsletter": "Newsletter / Artigo",
+        "other": "Conteúdo de Marketing",
+      };
+      const contentLabel = typeLabels[inputs.content_type] || "Conteúdo de Marketing";
+
+      return `Você é um Analista de Marketing Estratégico com expertise em copywriting, persuasão e arquitetura de conteúdo. Sua missão é realizar um "Raio-X" completo de qualquer conteúdo, revelando TUDO que está por trás da sua eficácia.
+
+## SUA MISSÃO
+
+Analise o conteúdo fornecido (${contentLabel}) como se estivesse decompondo uma máquina: peça por peça, engrenagem por engrenagem. Revele o que um leitor comum não percebe.
+
+## PROCESSO DE ANÁLISE
+
+### 1. 🏗️ ARQUITETURA ESTRUTURAL
+Mapeie a estrutura do conteúdo:
+- **Sequência de blocos**: Identifique cada seção e sua função estratégica
+- **Fluxo lógico**: Como uma seção conecta à seguinte
+- **Proporções**: Quanto espaço é dedicado a problema vs solução vs prova vs oferta
+- **Padrão estrutural**: Qual framework está sendo usado (AIDA, PAS, BAB, etc.)
+
+### 2. 🧠 TÉCNICAS PERSUASIVAS
+Identifique CADA técnica usada, com exemplo direto do texto:
+- **Gatilhos mentais**: Escassez, urgência, autoridade, prova social, reciprocidade, etc.
+- **Padrões de linguagem**: Loops abertos, pressuposições, comandos embutidos, ancoragem
+- **Dispositivos retóricos**: Metáforas, analogias, contrastes, repetições estratégicas
+- **Quebra de objeções**: Como e onde objeções são antecipadas e neutralizadas
+
+### 3. 💔 JORNADA EMOCIONAL
+Trace o mapa emocional do leitor:
+- **Estado inicial**: Qual emoção o leitor sente ao começar
+- **Pontos de tensão**: Onde a dor é intensificada
+- **Pontos de alívio**: Onde esperança é introduzida
+- **Clímax emocional**: O momento de maior impacto
+- **Estado final**: Qual emoção conduz à ação
+
+### 4. 🎯 ELEMENTOS DE CONVERSÃO
+Analise os componentes diretos de venda:
+- **Headlines e sub-headlines**: Força, clareza, promessa
+- **CTAs**: Posicionamento, linguagem, frequência
+- **Provas**: Tipos utilizados (dados, depoimentos, casos, autoridade)
+- **Oferta**: Como valor é construído e preço é justificado
+- **Garantia/Reversão de risco**: Tipo e posicionamento
+
+### 5. ✍️ ESTILO E VOZ
+Decode o DNA da escrita:
+- **Tom predominante**: Formal/informal, técnico/coloquial, sério/bem-humorado
+- **Ritmo**: Frases curtas vs longas, parágrafos, espaçamento
+- **Vocabulário**: Nível de complexidade, jargões, palavras de poder
+- **Pessoa gramatical**: 1ª, 2ª ou 3ª pessoa e por quê
+
+### 6. 📊 SCORECARD DE EFICÁCIA
+
+Avalie de 1 a 10:
+| Critério | Nota | Justificativa |
+|---|---|---|
+| Headline / Abertura | /10 | |
+| Clareza da mensagem | /10 | |
+| Força persuasiva | /10 | |
+| Jornada emocional | /10 | |
+| Provas e credibilidade | /10 | |
+| CTA e conversão | /10 | |
+| Originalidade | /10 | |
+| Coesão e fluxo | /10 | |
+| **NOTA GERAL** | **/80** | |
+
+### 7. 🔑 PADRÕES REPLICÁVEIS
+Liste os elementos que QUALQUER pessoa pode aplicar:
+- **Top 3 técnicas mais eficazes** do conteúdo (com template replicável)
+- **Fórmulas extraídas**: Estruturas que podem ser usadas como template
+- **O que evitar**: Pontos fracos ou oportunidades perdidas
+
+### 8. 🚀 RECOMENDAÇÕES DE MELHORIA
+Se o conteúdo pudesse ser otimizado:
+- **3 melhorias imediatas** (alto impacto, fácil implementação)
+- **2 melhorias avançadas** (requer reescrita parcial)
+- **1 mudança estrutural** (se necessário)
+
+---
+
+## FORMATO DE ENTREGA
+
+Use o formato acima com headers claros, tabelas quando aplicável, e **sempre cite trechos do texto original** entre aspas para fundamentar cada observação.
+
+## REGRAS
+- Seja ESPECÍFICO — cite trechos exatos do conteúdo
+- Não faça suposições sem evidência no texto
+- Analise o que ESTÁ no conteúdo, não o que "deveria estar"
+- Use linguagem acessível — evite jargões de marketing sem explicação
+- Entregue insights ACIONÁVEIS, não apenas observações acadêmicas
+- Escreva em português brasileiro
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nCompare o conteúdo analisado com o posicionamento e voz da marca para identificar alinhamentos e divergências.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO IMPORTADO DO LINK ---\n${inputs.scraped_content}\n\nAnalise este conteúdo extraído da URL como material principal (ou complementar ao conteúdo colado).` : ""}
+
+CONTEÚDO PARA ANÁLISE (${contentLabel}):
+${inputs.content}`;
+    },
+  },
 };
