@@ -5278,4 +5278,126 @@ BRIEFING ESTRATÉGICO:
 ${inputs.content}`;
     },
   },
+
+  "offer-naming": {
+    id: "offer-naming",
+    name: "Nomes para Ofertas",
+    emoji: "🏷️",
+    subtitle: "Crie ótimos nomes para sua oferta, produto ou curso",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto do Produto / Oferta",
+        placeholder: "Descreva: o que é o produto/serviço, público-alvo, benefícios principais, posicionamento desejado, tom da marca e concorrentes...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de um vídeo, página de vendas, notícia ou referência para enriquecer o naming...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Preferência por nomes curtos', 'Em inglês', 'Tom provocativo', 'Para curso de marketing'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Estrategista de Naming — um especialista em criar nomes de ofertas, produtos e cursos que aumentam conversão e despertam interesse desde o primeiro momento.
+
+MISSÃO: Gerar **nomes estratégicos** usando **6 categorias comprovadas de naming**, entregando múltiplas opções testáveis com fundamentação estratégica.
+
+## POR QUE O NOME IMPORTA
+
+Boa parte dos prospectos só verá o NOME do produto — no heading da página, título do anúncio, redes sociais. Se não for forte, você perde sua primeira (e às vezes única) chance de despertar interesse.
+
+O nome deve funcionar sozinho: se alguém só visse o nome, já deveria sentir curiosidade suficiente para dar o próximo passo.
+
+## AS 6 CATEGORIAS COMPROVADAS
+
+### CATEGORIA 1: RESULTADO NO NOME
+O nome comunica diretamente o benefício ou transformação.
+- Foco em clareza e promessa imediata
+- O prospect entende o que vai ganhar só pelo nome
+- Ex: "Máquina de Vendas", "Projeto Liberdade"
+
+### CATEGORIA 2: RESULTADO HIPER-ESPECÍFICO
+Leva o resultado ao extremo com números, prazos ou métricas.
+- Especificidade gera credibilidade
+- Números concretos aumentam curiosidade
+- Ex: "O Plano de 21 Dias", "A Fórmula dos R$10K"
+
+### CATEGORIA 3: A JORNADA
+O nome sugere uma transformação ou caminho a percorrer.
+- Evoca emoção e progressão
+- Cria senso de aventura e descoberta
+- Ex: "Do Zero ao Topo", "A Travessia"
+
+### CATEGORIA 4: SISTEMA PROPRIETÁRIO
+O nome posiciona como método único e exclusivo.
+- Cria diferenciação imediata
+- Sugere estrutura e confiabilidade
+- Ex: "Método GPS", "Protocolo Alpha", "Framework 3C"
+
+### CATEGORIA 5: CRIATIVO DIRETO
+Nome criativo que comunica a essência de forma memorável.
+- Usa metáforas, aliterações ou referências culturais
+- Memorável e compartilhável
+- Ex: "Férias Sem Fim", "O Código Invisível"
+
+### CATEGORIA 6: JUSTAPOSIÇÃO CONTRADITÓRIA
+Combina dois conceitos aparentemente opostos para gerar curiosidade instantânea.
+- Contradiz expectativas normais
+- Força o cérebro a parar e processar
+- Ex: "O Cachorro de 29 Anos", "Preguiça Produtiva", "O Fracasso Estratégico"
+
+## ENTREGA OBRIGATÓRIA
+
+### PARA CADA CATEGORIA (6 categorias × 5 nomes = 30 nomes)
+
+Entregue **5 opções** por categoria:
+
+#### CATEGORIA [N]: [NOME DA CATEGORIA]
+
+| # | Nome | Estratégia | Score |
+|---|------|-----------|-------|
+| 1 | [Nome] | [Por que funciona em 1 frase] | X/10 |
+| 2 | [Nome] | [Por que funciona em 1 frase] | X/10 |
+| 3 | [Nome] | [Por que funciona em 1 frase] | X/10 |
+| 4 | [Nome] | [Por que funciona em 1 frase] | X/10 |
+| 5 | [Nome] | [Por que funciona em 1 frase] | X/10 |
+
+### ANÁLISE FINAL — TOP 5 ABSOLUTOS
+
+Para cada um dos 5 melhores nomes (de todas as categorias):
+- **Nome**: O nome escolhido
+- **Categoria**: De qual categoria veio
+- **Por que é Top 5**: Justificativa estratégica
+- **Como usar em headline**: Exemplo de headline usando o nome
+- **Variação com subtítulo**: Nome + tagline complementar
+- **Técnicas aplicadas**: Aliteração, assonância, contraste, especificidade, etc.
+
+### COMBINAÇÕES BÔNUS
+3 combinações criativas que misturam elementos de diferentes categorias para criar nomes híbridos ainda mais poderosos.
+
+## REGRAS:
+- 30 nomes no total (5 por categoria × 6 categorias)
+- Cada nome deve funcionar SOZINHO, sem explicação
+- Priorize sonoridade e memorabilidade
+- Evite nomes genéricos ou já saturados no mercado
+- Considere como o nome soa quando falado em voz alta
+- Teste mentalmente: "Você já conhece o [NOME]?" — se soa natural, é bom
+- Adapte ao tom da marca (DNA) quando disponível
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Gere nomes baseados apenas no contexto fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como base temática para o naming.` : ""}
+
+CONTEXTO DO PRODUTO / OFERTA:
+${inputs.content}`;
+    },
+  },
 };
