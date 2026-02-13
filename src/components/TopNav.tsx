@@ -2,7 +2,8 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FolderOpen, Plus, LogOut, BarChart3, ArrowLeft, Globe, Dna, Bot } from "lucide-react";
+import { Dock, DockItem, DockIcon, DockLabel } from "@/components/ui/dock";
+import { FolderOpen, Plus, LogOut, Globe, Dna, Bot, Brain, ArrowLeft, BarChart3 } from "lucide-react";
 
 export function TopNav({ projectName }: { projectName?: string }) {
   const navigate = useNavigate();
@@ -27,11 +28,20 @@ export function TopNav({ projectName }: { projectName?: string }) {
     navigate(`/project/${data.id}`);
   };
 
+  const isActive = (path: string) => location.pathname === path;
+
+  const iconClass = (active: boolean) =>
+    `flex items-center justify-center w-full h-full rounded-xl transition-colors ${
+      active
+        ? "bg-primary/20 text-primary"
+        : "text-muted-foreground hover:text-foreground"
+    }`;
+
   return (
     <nav className="sticky top-0 z-50 glass-header">
-      <div className="container flex items-center justify-between h-14 px-4">
+      <div className="flex items-center justify-between h-14 px-4">
         {/* Left: branding + breadcrumb */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 w-48 shrink-0">
           <button
             onClick={() => navigate("/")}
             className="text-sm font-bold gradient-text shrink-0 hover:opacity-80 transition-opacity"
@@ -42,7 +52,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
           {isProjectPage && projectName && (
             <>
               <span className="text-muted-foreground/40 text-xs">/</span>
-              <span className="text-sm text-foreground/70 truncate max-w-[200px]">
+              <span className="text-sm text-foreground/70 truncate max-w-[140px]">
                 {projectName}
               </span>
               {isSummaryPage && (
@@ -55,70 +65,94 @@ export function TopNav({ projectName }: { projectName?: string }) {
           )}
         </div>
 
-        {/* Right: actions */}
-        <div className="flex items-center gap-1">
-          {isProjectPage && !isSummaryPage && id && (
-            <button
-              onClick={() => navigate(`/project/${id}/summary`)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            >
-              <BarChart3 className="h-3.5 w-3.5" />
-              Resumo
-            </button>
-          )}
-
-          {isProjectPage && isSummaryPage && id && (
-            <button
-              onClick={() => navigate(`/project/${id}`)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Editar
-            </button>
-          )}
-
-          {!isProjectPage && (
-            <button
-              onClick={handleCreate}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Novo
-            </button>
-          )}
-
-          <button
-            onClick={() => navigate("/brand-profiles")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+        {/* Center: Dock navigation */}
+        <div className="flex-1 flex justify-center">
+          <Dock
+            magnification={60}
+            distance={100}
+            panelHeight={44}
+            className="shadow-[0_4px_20px_-4px_hsl(228_12%_4%/0.5),0_0_40px_-12px_hsl(var(--glow)/0.1)]"
           >
-            <Dna className="h-3.5 w-3.5" />
-            DNA de Marca
-          </button>
+            <DockItem>
+              <DockLabel>Projetos</DockLabel>
+              <DockIcon>
+                <button onClick={() => navigate("/")} className={iconClass(isActive("/"))}>
+                  <FolderOpen className="w-full h-full p-1" />
+                </button>
+              </DockIcon>
+            </DockItem>
 
-          <button
-            onClick={() => navigate("/agents")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-          >
-            <Bot className="h-3.5 w-3.5" />
-            Agentes
-          </button>
+            <DockItem>
+              <DockLabel>Novo Projeto</DockLabel>
+              <DockIcon>
+                <button onClick={handleCreate} className={iconClass(false)}>
+                  <Plus className="w-full h-full p-1" />
+                </button>
+              </DockIcon>
+            </DockItem>
 
-          <button
-            onClick={() => navigate("/landing-builder")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-          >
-            <Globe className="h-3.5 w-3.5" />
-            Landing Builder
-          </button>
+            <DockItem>
+              <DockLabel>Agentes IA</DockLabel>
+              <DockIcon>
+                <button onClick={() => navigate("/agents")} className={iconClass(isActive("/agents"))}>
+                  <Bot className="w-full h-full p-1" />
+                </button>
+              </DockIcon>
+            </DockItem>
 
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-          >
-            <FolderOpen className="h-3.5 w-3.5" />
-            Projetos
-          </button>
+            <DockItem>
+              <DockLabel>Mentor de Riqueza</DockLabel>
+              <DockIcon>
+                <button onClick={() => navigate("/mentor")} className={iconClass(isActive("/mentor"))}>
+                  <Brain className="w-full h-full p-1" />
+                </button>
+              </DockIcon>
+            </DockItem>
 
+            <DockItem>
+              <DockLabel>DNA de Marca</DockLabel>
+              <DockIcon>
+                <button onClick={() => navigate("/brand-profiles")} className={iconClass(isActive("/brand-profiles"))}>
+                  <Dna className="w-full h-full p-1" />
+                </button>
+              </DockIcon>
+            </DockItem>
+
+            <DockItem>
+              <DockLabel>Landing Builder</DockLabel>
+              <DockIcon>
+                <button onClick={() => navigate("/landing-builder")} className={iconClass(isActive("/landing-builder"))}>
+                  <Globe className="w-full h-full p-1" />
+                </button>
+              </DockIcon>
+            </DockItem>
+
+            {isProjectPage && !isSummaryPage && id && (
+              <DockItem>
+                <DockLabel>Resumo</DockLabel>
+                <DockIcon>
+                  <button onClick={() => navigate(`/project/${id}/summary`)} className={iconClass(false)}>
+                    <BarChart3 className="w-full h-full p-1" />
+                  </button>
+                </DockIcon>
+              </DockItem>
+            )}
+
+            {isProjectPage && isSummaryPage && id && (
+              <DockItem>
+                <DockLabel>Voltar ao Editor</DockLabel>
+                <DockIcon>
+                  <button onClick={() => navigate(`/project/${id}`)} className={iconClass(false)}>
+                    <ArrowLeft className="w-full h-full p-1" />
+                  </button>
+                </DockIcon>
+              </DockItem>
+            )}
+          </Dock>
+        </div>
+
+        {/* Right: logout */}
+        <div className="w-48 shrink-0 flex justify-end">
           <button
             onClick={signOut}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
