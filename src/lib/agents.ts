@@ -109,6 +109,16 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
 
+  {
+    id: "thank-you-page",
+    name: "Página de Obrigado",
+    emoji: "🎉",
+    role: "Especialista em Páginas de Obrigado Pós-Compra",
+    description: "Cria páginas de obrigado estratégicas que direcionam o cliente para o email de acesso e iniciam o relacionamento pós-compra.",
+    category: "copywriting",
+    available: true,
+  },
+
   // ── Copywriting ──
   {
     id: "sales-page",
