@@ -567,4 +567,13 @@ export const AGENTS: AgentDef[] = [
     category: "copywriting",
     available: true,
   },
+  {
+    id: "email-reviewer",
+    name: "Revisor de E-mails",
+    emoji: "📬",
+    role: "Especialista em Revisão de E-mails e Newsletters",
+    description: "Revisa e-mails e newsletters com sugestões 'antes → depois' para corrigir erros, melhorar fluidez e aumentar conversão.",
+    category: "copywriting",
+    available: true,
+  },
 ];

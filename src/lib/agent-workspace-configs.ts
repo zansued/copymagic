@@ -7421,4 +7421,199 @@ COPY PARA REVISÃO:
 ${inputs.content}`;
     },
   },
+
+  "email-reviewer": {
+    id: "email-reviewer",
+    name: "Revisor de E-mails",
+    emoji: "📬",
+    subtitle: "Revise e-mails com sugestões 'antes → depois'",
+    inputs: [
+      {
+        key: "email_type",
+        label: "Tipo de Conteúdo",
+        type: "select",
+        placeholder: "",
+        required: true,
+        options: [
+          { value: "email", label: "Email (vendas, lançamento, follow-up)" },
+          { value: "newsletter", label: "Newsletter (conteúdo educativo/relacionamento)" },
+        ],
+      },
+      {
+        key: "content",
+        label: "Texto do Email / Newsletter",
+        placeholder: "Cole aqui o email ou newsletter completo que deseja revisar...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://exemplo.com/newsletter",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Específicas (opcional)",
+        placeholder: "Ex: Manter tom informal, focar na abertura, o objetivo é vender o curso X...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const isNewsletter = inputs.email_type === "newsletter";
+      const typeLabel = isNewsletter ? "Newsletter" : "Email";
+
+      const emailCriteria = `
+### Critérios Específicos para EMAIL:
+- **Assunto**: Clareza, curiosidade, comprimento ideal (30-50 caracteres)
+- **Preheader**: Complementa o assunto sem repetir
+- **Abertura**: Prende nos primeiros 2 segundos (sem "Olá, tudo bem?")
+- **Corpo**: Uma ideia principal, fluxo lógico, escaneabilidade
+- **CTA**: Claro, único, urgente, visível
+- **PS**: Reforço estratégico ou segundo gancho
+- **Comprimento**: Adequado ao objetivo (vendas = mais longo, clique = mais curto)`;
+
+      const newsletterCriteria = `
+### Critérios Específicos para NEWSLETTER:
+- **Assunto**: Promessa de valor + curiosidade
+- **Abertura**: Hook narrativo que puxa para a leitura
+- **Estrutura**: Seções claras com subtítulos, escaneabilidade
+- **Conteúdo**: Profundidade, originalidade, insights acionáveis
+- **Voz do autor**: Personalidade, opinião, autenticidade
+- **Transições**: Fluidez entre seções
+- **CTA final**: Naturalidade, conexão com o conteúdo
+- **Formatação**: Parágrafos curtos, listas, destaques visuais`;
+
+      return `Você é um Editor Profissional especializado em e-mail marketing e newsletters. Sua missão é revisar o ${typeLabel.toLowerCase()} fornecido e entregar sugestões práticas no formato "antes → depois" que o autor pode implementar imediatamente.
+
+## PRINCÍPIOS DA REVISÃO
+
+1. **Preservar a voz**: Melhorar sem descaracterizar o estilo do autor
+2. **Ser específico**: Toda sugestão deve citar o trecho original
+3. **Formato "antes → depois"**: Mostrar exatamente o que mudar
+4. **Priorizar impacto**: Começar pelas mudanças que mais afetam o resultado
+
+${isNewsletter ? newsletterCriteria : emailCriteria}
+
+## PROCESSO DE REVISÃO
+
+### ETAPA 1: Visão Geral
+Identifique rapidamente:
+- Objetivo do ${typeLabel.toLowerCase()}
+- Público-alvo aparente
+- Tom e estilo predominante
+- Ação desejada
+
+### ETAPA 2: Revisão Detalhada
+Analise cada seção do ${typeLabel.toLowerCase()} e identifique:
+
+**📝 Clareza e Linguagem**
+- Frases confusas ou longas demais
+- Jargões desnecessários
+- Ambiguidades
+- Erros gramaticais ou de pontuação
+
+**🎯 Persuasão e Engajamento**
+- Abertura fraca ou genérica
+- Falta de gancho ou curiosidade
+- Argumentos sem prova
+- Momentos que perdem o leitor
+
+**📐 Estrutura e Fluidez**
+- Parágrafos longos demais
+- Transições abruptas
+- Falta de escaneabilidade
+- Ordem das ideias
+
+**⚡ Conversão e Ação**
+- CTA fraco, confuso ou ausente
+- Falta de urgência ou motivo para agir
+- Múltiplos CTAs competindo
+
+### ETAPA 3: Sugestões "Antes → Depois"
+
+## FORMATO DE ENTREGA
+
+---
+
+## 📋 DIAGNÓSTICO RÁPIDO
+
+| Elemento | Avaliação |
+|---|---|
+| **Tipo** | ${typeLabel} |
+| **Objetivo detectado** | [qual ação busca gerar] |
+| **Tom** | [formal/informal/urgente/educativo] |
+| **Extensão** | [curto/médio/longo — adequado?] |
+| **Impressão geral** | [1-2 frases] |
+
+---
+
+## ✏️ REVISÃO "ANTES → DEPOIS"
+
+Para cada melhoria sugerida:
+
+### Melhoria [N] — [Categoria: Clareza / Persuasão / Estrutura / Conversão]
+
+**🔴 Antes:**
+> "[trecho original exato]"
+
+**🟢 Depois:**
+> "[versão reescrita]"
+
+**💡 Por que é melhor**: [1 frase explicando o ganho]
+
+---
+
+_(Repita para cada sugestão — mínimo 5, máximo 12 sugestões)_
+
+---
+
+## 📊 SCORECARD
+
+| Critério | Nota | Comentário |
+|---|---|---|
+| **Assunto${isNewsletter ? " / Título" : ""}** | /10 | |
+| **Abertura** | /10 | |
+| **Clareza** | /10 | |
+| **Engajamento** | /10 | |
+| **${isNewsletter ? "Valor do conteúdo" : "Persuasão"}** | /10 | |
+| **CTA** | /10 | |
+| **Fluidez geral** | /10 | |
+| **NOTA GERAL** | **/70** | |
+
+---
+
+## ✅ O QUE ESTÁ BOM (manter!)
+
+1. [Ponto forte 1 — com citação]
+2. [Ponto forte 2 — com citação]
+3. [Ponto forte 3 — com citação]
+
+---
+
+## 🚀 TOP 3 AÇÕES PRIORITÁRIAS
+
+1. **[Ação mais impactante]**: [instrução direta]
+2. **[Segunda ação]**: [instrução direta]
+3. **[Terceira ação]**: [instrução direta]
+
+---
+
+## REGRAS
+- SEMPRE cite o trecho original antes de sugerir mudança
+- TODA sugestão deve ter versão reescrita pronta para uso
+- Preserve o tom e estilo do autor — melhore, não reescreva do zero
+- Priorize por impacto: o que mais afeta abertura/clique/conversão vem primeiro
+- Reconheça o que funciona bem — não seja apenas crítico
+- Mínimo 5 sugestões "antes → depois", máximo 12
+- Escreva em português brasileiro
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nUse o DNA para avaliar se o ${typeLabel.toLowerCase()} está alinhado com a voz, tom e posicionamento da marca.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES ESPECÍFICAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO IMPORTADO DO LINK ---\n${inputs.scraped_content}\n\nUse como o conteúdo principal para revisão.` : ""}
+
+${typeLabel.toUpperCase()} PARA REVISÃO:
+${inputs.content}`;
+    },
+  },
 };
