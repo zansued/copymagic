@@ -2524,4 +2524,180 @@ CONTEÚDO BASE:
 ${inputs.content}`;
     },
   },
+
+  "email-generator": {
+    id: "email-generator",
+    name: "Gerador de Email",
+    emoji: "💌",
+    subtitle: "Crie e-mails de marketing e vendas de alta conversão",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto e Instruções",
+        placeholder: "Descreva o contexto do e-mail: produto, oferta, situação do cliente, objetivo específico. Quanto mais detalhes, melhor o resultado.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Link de Referência (opcional)",
+        placeholder: "https://exemplo.com — conteúdo será extraído automaticamente",
+        type: "input",
+      },
+      {
+        key: "mission",
+        label: "Missão do E-mail",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "cart-recovery", label: "🛒 Recuperação de Carrinho Abandonado" },
+          { value: "purchase-confirmation", label: "✅ Confirmação de Compra Premium" },
+          { value: "launch-hype", label: "🚀 Aquecimento de Lançamento" },
+          { value: "nurture", label: "💡 Nutrição e Valor" },
+          { value: "reengagement", label: "🔄 Reengajamento de Inativos" },
+          { value: "upsell", label: "💎 Upsell / Cross-sell" },
+          { value: "cold-outreach", label: "❄️ Prospecção Fria (B2B)" },
+          { value: "event-invite", label: "📅 Convite para Evento / Webinário" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Tom mais urgente', 'Incluir depoimento', 'Desconto de 30%', 'Nome do cliente: {nome}'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const missionMap: Record<string, { name: string; instructions: string }> = {
+        "cart-recovery": {
+          name: "Recuperação de Carrinho Abandonado",
+          instructions: `Crie um e-mail que resgata a venda perdida:
+- **Assunto**: Curioso e pessoal (sem parecer spam)
+- **Abertura**: Lembrete sutil e empático sobre o que deixaram para trás
+- **Corpo**: Reforce o valor, elimine objeções, crie urgência leve
+- **Prova social**: Inclua resultado ou depoimento rápido
+- **CTA**: Direto para finalizar a compra
+- **P.S.**: Escassez ou bônus exclusivo para quem voltar agora
+- Use placeholder {nome_cliente} para personalização`,
+        },
+        "purchase-confirmation": {
+          name: "Confirmação de Compra Premium",
+          instructions: `Crie um e-mail que transforma a confirmação em experiência memorável:
+- **Assunto**: Celebratório e empolgante
+- **Abertura**: Parabéns genuíno pela decisão inteligente
+- **Corpo**: Reforce que fez a escolha certa (elimine arrependimento do comprador)
+- **Próximos passos**: O que esperar agora (acesso, entrega, onboarding)
+- **Surpresa**: Um bônus inesperado ou recurso extra
+- **CTA**: Primeiro passo concreto para começar
+- Use placeholder {nome_cliente} e {nome_produto}`,
+        },
+        "launch-hype": {
+          name: "Aquecimento de Lançamento",
+          instructions: `Crie um e-mail que constrói antecipação para o lançamento:
+- **Assunto**: Crie curiosidade e FOMO
+- **Abertura**: Revelação parcial — algo grande está vindo
+- **Corpo**: Eduque sobre o problema que será resolvido (sem revelar a solução)
+- **Prova**: Bastidores, números ou teaser do que está por vir
+- **Urgência**: Data específica + benefício de estar entre os primeiros
+- **CTA**: Lista de espera ou "responda este e-mail"`,
+        },
+        nurture: {
+          name: "Nutrição e Valor",
+          instructions: `Crie um e-mail que entrega valor genuíno e fortalece o relacionamento:
+- **Assunto**: Promessa de insight específico
+- **Abertura**: História, dado surpreendente ou pergunta provocativa
+- **Corpo**: Ensine algo aplicável imediatamente (framework, dica, perspectiva)
+- **Conexão**: Relacione o aprendizado com a jornada do leitor
+- **CTA**: Suave — responder, refletir ou aplicar
+- Tom conversacional, como um mentor generoso`,
+        },
+        reengagement: {
+          name: "Reengajamento de Inativos",
+          instructions: `Crie um e-mail que reconecta com quem sumiu:
+- **Assunto**: Pessoal e intrigante (quebre o padrão dos e-mails ignorados)
+- **Abertura**: Reconheça a ausência com empatia (sem culpa)
+- **Corpo**: Mostre o que mudou / o que estão perdendo
+- **Oferta**: Incentivo exclusivo para voltar (desconto, bônus, conteúdo)
+- **CTA**: Fácil e de baixo compromisso
+- **Alternativa**: Opção de sair da lista (mostra respeito)`,
+        },
+        upsell: {
+          name: "Upsell / Cross-sell",
+          instructions: `Crie um e-mail que expande o valor para clientes existentes:
+- **Assunto**: Baseado no resultado que já obtiveram
+- **Abertura**: Reconheça o progresso do cliente
+- **Corpo**: Apresente o próximo nível como evolução natural
+- **Valor**: Stack de benefícios adicionais
+- **Prova**: Cases de quem fez o upgrade
+- **CTA**: Oferta exclusiva para clientes (preço ou condição especial)
+- Use {nome_cliente} e {produto_atual}`,
+        },
+        "cold-outreach": {
+          name: "Prospecção Fria (B2B)",
+          instructions: `Crie um e-mail de prospecção que gera respostas:
+- **Assunto**: Curto, específico e sem parecer template (máx. 6 palavras)
+- **Abertura**: Mostre que pesquisou sobre a empresa/pessoa (1 linha)
+- **Corpo**: Identifique um problema específico + como você resolve (3-4 linhas)
+- **Prova**: Um resultado com empresa similar (1 linha)
+- **CTA**: Pergunta simples que facilita a resposta (não peça reunião direto)
+- Máximo 120 palavras no total
+- Use {nome_prospect}, {empresa} e {cargo}`,
+        },
+        "event-invite": {
+          name: "Convite para Evento / Webinário",
+          instructions: `Crie um e-mail de convite irresistível:
+- **Assunto**: Promessa específica + urgência
+- **Abertura**: O que o participante vai SAIR sabendo/fazendo
+- **Corpo**: Agenda ou tópicos principais (bullet points)
+- **Credibilidade**: Quem vai apresentar e por que importa
+- **Urgência**: Vagas limitadas ou bônus para quem se inscrever agora
+- **CTA**: Botão claro "Garantir minha vaga"
+- Use {nome_cliente}, {data_evento} e {link_inscricao}`,
+        },
+      };
+
+      const mission = missionMap[inputs.mission] || missionMap["cart-recovery"];
+
+      return `Você é um Gerador de E-mails de elite — copywriter especializado em criar e-mails de marketing e vendas que geram resultados mensuráveis.
+
+MISSÃO: Criar um e-mail de **${mission.name}**.
+
+${mission.instructions}
+
+## ENTREGA OBRIGATÓRIA
+
+### 1. ASSUNTOS (5 variações)
+Crie 5 linhas de assunto diferentes:
+1. **Curiosidade**: Cria um loop aberto
+2. **Benefício direto**: Promessa clara
+3. **Pessoal**: Como se fosse de um amigo
+4. **Urgência**: Razão para abrir agora
+5. **Contraintuitivo**: Desafia expectativa
+
+### 2. PREHEADER
+Texto complementar que aparece ao lado do assunto (máx. 90 caracteres)
+
+### 3. CORPO DO E-MAIL
+E-mail completo e pronto para uso, seguindo as instruções da missão acima.
+
+### 4. P.S.
+Pós-escrito estratégico que reforça o CTA principal ou adiciona urgência.
+
+## REGRAS DE E-MAIL
+- Parágrafos curtos (1-3 linhas) — escaneabilidade é crucial
+- Uma ideia por parágrafo
+- Use **negrito** para destacar frases-chave
+- Tom conversacional — como se escrevesse para UMA pessoa
+- Placeholders entre chaves: {nome_cliente}, {nome_produto}, etc.
+- Evite palavras que ativam filtros de spam (grátis, promoção, clique aqui)
+- CTA como link em texto, não como botão (melhor entregabilidade)
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}` : ""}
+
+CONTEXTO:
+${inputs.content}`;
+    },
+  },
 };
