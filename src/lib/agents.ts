@@ -129,6 +129,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "short-vsl",
+    name: "Short VSL [1-3 Min]",
+    emoji: "🎯",
+    role: "Especialista em VSLs Curtas para Ads",
+    description: "Cria roteiros de VSL curta (1-3 min) focados em ganchos e curiosidade, perfeitos para anúncios in-feed e aquecimento de audiência.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "mini-vsl",
     name: "Mini VSL [3-7 Min]",
     emoji: "⚡",
