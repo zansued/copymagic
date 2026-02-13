@@ -3319,4 +3319,151 @@ IDEIA DO PRODUTO:
 ${inputs.content}`;
     },
   },
+
+  "google-ads-search": {
+    id: "google-ads-search",
+    name: "Google Ads Rede de Pesquisa",
+    emoji: "🔎",
+    subtitle: "Crie campanhas otimizadas para Google Ads com 3 temas distintos",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto e Instruções",
+        placeholder: "Descreva seu produto, oferta e os principais pontos que deseja comunicar nos anúncios...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (Landing Page)",
+        placeholder: "https://suapagina.com — URL da landing page para alinhar a copy com a página de destino",
+        type: "input",
+      },
+      {
+        key: "funnel_stage",
+        label: "Estágio do Funil",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "capture", label: "🌐 Captação (awareness + tráfego)" },
+          { value: "consideration", label: "🎯 Consideração (comparação + autoridade)" },
+          { value: "conversion", label: "🔥 Conversão (venda direta + ação)" },
+          { value: "balanced", label: "⚖️ Balanceado (mix estratégico)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foco em preço competitivo', 'Público B2B', 'Destacar garantia de 30 dias'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const funnelMap: Record<string, string> = {
+        capture: "CAPTAÇÃO — Foco em awareness e volume de tráfego. Títulos informativos e educativos. CTAs de descoberta.",
+        consideration: "CONSIDERAÇÃO — Foco em comparação e autoridade. Títulos com diferenciais e provas. CTAs de avaliação.",
+        conversion: "CONVERSÃO — Foco em venda direta. Títulos com oferta e urgência. CTAs de ação imediata.",
+        balanced: "BALANCEADO — Mix estratégico cobrindo diferentes intenções de busca.",
+      };
+
+      return `Você é um Especialista em Google Ads Search — domina a criação de campanhas para Rede de Pesquisa com foco em Quality Score, CTR e conversões.
+
+MISSÃO: Criar 3 TEMAS DE CAMPANHA distintos e otimizados para Google Ads Rede de Pesquisa.
+
+ESTÁGIO DO FUNIL: ${funnelMap[inputs.funnel_stage] || funnelMap.balanced}
+
+## ENTREGA OBRIGATÓRIA — 3 TEMAS DE CAMPANHA
+
+Para CADA tema (3 no total), entregue:
+
+---
+
+### 🎯 TEMA [N]: [NOME DO TEMA] — [ÂNGULO ESTRATÉGICO]
+
+**Ângulo**: Breve explicação do ângulo (ex: Foco no Problema, Foco na Solução, Foco no Benefício)
+
+#### 1. PALAVRAS-CHAVE (10-15 por tema)
+
+**Exatas [exact match]:**
+- [palavra-chave 1]
+- [palavra-chave 2]
+- ... (5-7 keywords)
+
+**Frase "phrase match":**
+- "palavra-chave 1"
+- "palavra-chave 2"
+- ... (3-5 keywords)
+
+**Negativas:**
+- -palavra1
+- -palavra2
+- ... (3-5 keywords para excluir)
+
+#### 2. ANÚNCIO RESPONSIVO (RSA)
+
+**Títulos (15 títulos, máx. 30 caracteres cada):**
+1. [Título com keyword principal]
+2. [Título com benefício]
+3. [Título com CTA]
+4. [Título com número/dado]
+5. [Título com urgência]
+6-15. [Variações adicionais]
+
+**Pinning sugerido:**
+- Posição 1: Títulos X e Y (keyword + relevância)
+- Posição 2: Títulos X e Y (benefício + diferencial)
+- Posição 3: Títulos X e Y (CTA + urgência)
+
+**Descrições (4 descrições, máx. 90 caracteres cada):**
+1. [Descrição com proposta de valor + CTA]
+2. [Descrição com benefícios + prova]
+3. [Descrição com diferencial + urgência]
+4. [Descrição com oferta + garantia]
+
+#### 3. EXTENSÕES DE ANÚNCIO
+
+**Sitelinks (4):**
+Para cada: Título (máx. 25 chars) + Descrição 1 + Descrição 2
+
+**Callouts (4-6):**
+Frases curtas de destaque (máx. 25 chars cada)
+
+**Snippets estruturados:**
+Categoria + 3-4 valores
+
+**Extensão de chamada para ação:**
+Texto do CTA principal
+
+---
+
+## ESTRATÉGIA GERAL
+
+### Recomendações de Implementação
+- **Estrutura de conta**: Como organizar os 3 temas (campanhas separadas ou grupos de anúncios)
+- **Budget sugerido**: Distribuição entre os temas para fase de teste
+- **Métricas-alvo**: CTR, CPC e Quality Score esperados
+- **Ordem de teste**: Qual tema testar primeiro e por quê
+- **Otimização**: Critérios para pausar ou escalar cada tema
+
+### Alinhamento com Landing Page
+${inputs.scraped_content ? "Análise da landing page fornecida e recomendações de alinhamento keyword-anúncio-página." : "Recomendações gerais de alinhamento."}
+
+## REGRAS DO GOOGLE ADS
+- Títulos: MÁXIMO 30 caracteres (incluindo espaços)
+- Descrições: MÁXIMO 90 caracteres (incluindo espaços)
+- Sitelinks: MÁXIMO 25 caracteres no título
+- Inclua a keyword principal no Título 1 de cada tema
+- Varie os CTAs entre os temas
+- Use números e dados quando possível
+- Evite superlativos proibidos ("o melhor", "o maior")
+- Cada tema deve ter um ângulo REALMENTE diferente
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DA LANDING PAGE ---\n${inputs.scraped_content}` : ""}
+
+CONTEXTO:
+${inputs.content}`;
+    },
+  },
 };
