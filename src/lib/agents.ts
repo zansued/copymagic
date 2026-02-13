@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "headlines",
+    name: "Headlines (Títulos)",
+    emoji: "🔥",
+    role: "Especialista em Headlines de Alta Conversão",
+    description: "Gera títulos irresistíveis para YouTube, Instagram, TikTok, LinkedIn, E-mails e mais — o elemento 20/80 de toda copy.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "google-my-business",
     name: "Google Meu Negócio",
     emoji: "📍",
