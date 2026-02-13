@@ -540,4 +540,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "unique-selling-proposition",
+    name: "Proposta Única de Vendas",
+    emoji: "⚡",
+    role: "Especialista em PUV de Alto Impacto",
+    description: "Transforma diferenciais do seu negócio em Propostas Únicas de Vendas claras e memoráveis usando fórmulas clássicas da publicidade.",
+    category: "products",
+    available: true,
+  },
 ];
