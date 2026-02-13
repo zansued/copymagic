@@ -549,4 +549,13 @@ export const AGENTS: AgentDef[] = [
     category: "products",
     available: true,
   },
+  {
+    id: "marketing-xray",
+    name: "Raio-X de Marketing",
+    emoji: "🔬",
+    role: "Analista de Estratégias de Comunicação",
+    description: "Analisa qualquer conteúdo escrito revelando estratégias ocultas, técnicas persuasivas e estruturas replicáveis que fazem vender mais.",
+    category: "ideation",
+    available: true,
+  },
 ];
