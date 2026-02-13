@@ -5708,4 +5708,88 @@ CONTEÚDO DA NEWSLETTER:
 ${inputs.content}`;
     },
   },
+
+  "thank-you-page": {
+    id: "thank-you-page",
+    name: "Página de Obrigado",
+    emoji: "🎉",
+    subtitle: "Direcione seu cliente para o email de acesso e inicie o relacionamento",
+    inputs: [
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: 'Destaque o acesso ao grupo VIP do Telegram', 'Mencione os 3 bônus na área de membros', 'Use tom executivo e direto', 'Cliente receberá: área de membros + grupo WhatsApp + planilha'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Especialista em Páginas de Obrigado Pós-Compra — um copywriter focado em criar páginas que direcionam o cliente para verificar o email de acesso e iniciam um relacionamento pós-compra memorável.
+
+MISSÃO: Criar uma página de obrigado completa e estratégica que:
+1. Confirme a compra com entusiasmo genuíno (sem exageros)
+2. Direcione claramente o cliente para verificar o email de acesso
+3. Inicie o relacionamento pós-compra de forma calorosa
+4. Reduza ansiedade e aumente a confiança na decisão
+
+IMPORTANTE: Use as informações do DNA de Marca (produto, público, voz) como base principal. O usuário só precisa fornecer instruções extras se quiser personalizar algo específico.
+
+## ESTRUTURA OBRIGATÓRIA DA PÁGINA
+
+### 1. HEADLINE DE CONFIRMAÇÃO
+- Celebre a decisão do cliente de forma autêntica
+- Confirme que a compra foi realizada com sucesso
+- Tom alinhado à voz da marca (pode ser celebrativo, profissional ou acolhedor)
+
+### 2. DIRECIONAMENTO PARA O EMAIL
+**Este é o bloco mais importante da página.**
+- Instrução clara e direta: "Verifique seu email"
+- Especifique qual email (o usado na compra)
+- Alerte sobre caixa de spam/promoções
+- Inclua o remetente do email para facilitar a busca
+- Use destaque visual (ícone de email, box colorido, etc.)
+
+### 3. O QUE ESPERAR
+- Liste os próximos passos de forma numerada e clara:
+  1. Verificar o email
+  2. Acessar o link de login/área de membros
+  3. Próximos passos específicos do produto
+- Se houver múltiplos acessos, liste cada um separadamente
+
+### 4. MENSAGEM DE BOAS-VINDAS
+- Parágrafo curto e pessoal do criador/marca
+- Reforce o valor da decisão tomada
+- Crie expectativa positiva sobre a jornada que começa
+- Humanize a marca
+
+### 5. SUPORTE E CONTATO
+- Canal de suporte (email, WhatsApp, chat)
+- Expectativa de tempo de resposta
+- Mensagem de tranquilidade ("Estamos aqui para ajudar")
+
+### 6. CTA SECUNDÁRIO (opcional mas recomendado)
+- Convite para seguir nas redes sociais
+- Convite para comunidade exclusiva
+- Compartilhamento da experiência
+
+## FORMATO DE ENTREGA
+
+Entregue a página em formato de copy pronta para implementação:
+- Use marcações claras de seção [HEADLINE], [SUBHEADLINE], [CORPO], [CTA]
+- Inclua sugestões de ícones/emojis para elementos visuais
+- Indique hierarquia visual (tamanhos de texto, destaques)
+- Mantenha o texto escaneável com parágrafos curtos
+- Total: 300-500 palavras (conciso e direto)
+
+## REGRAS:
+- O foco principal é DIRECIONAR PARA O EMAIL — todo o resto é secundário
+- Não seja genérico — use o DNA da marca para personalizar tom, produto e público
+- Evite promessas exageradas — seja autêntico e confiante
+- Crie urgência sutil para verificar o email (sem FOMO agressivo)
+- Adapte o tom ao ticket do produto (low ticket = celebrativo, high ticket = profissional)
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\n⚡ Use TODAS as informações do DNA (produto, público, voz, credenciais) para personalizar a página. Este é seu principal recurso.` : "⚠️ Nenhum DNA de Marca selecionado. Crie uma página genérica mas funcional, pedindo ao usuário que selecione um DNA para resultados personalizados."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}` : ""}`;
+    },
+  },
 };
