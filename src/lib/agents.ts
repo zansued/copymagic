@@ -504,4 +504,13 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: true,
   },
+  {
+    id: "monetization-plan",
+    name: "Plano de Monetização",
+    emoji: "💸",
+    role: "Estrategista de Monetização de Perfil",
+    description: "Transforma engajamento em receita com auditoria de perfil, projeção financeira e plano de lançamento baseado em dados reais.",
+    category: "ideation",
+    available: true,
+  },
 ];
