@@ -8414,4 +8414,165 @@ PRODUTO / SERVIÇO / CONTEXTO:
 ${inputs.content}`;
     },
   },
+
+  "story-launch": {
+    id: "story-launch",
+    name: "Story Launch de 14 Dias",
+    emoji: "📲",
+    subtitle: "Sequência de stories para lançamentos em 14 dias",
+    inputs: [
+      {
+        key: "content",
+        label: "Informações do Lançamento",
+        placeholder: "Descreva:\n• Produto/Oferta (o que é, para quem)\n• Transformação que entrega\n• Objeções conhecidas do público\n• Prova social (depoimentos, resultados)\n• Detalhes da oferta (preço, bônus, garantia, prazo)",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "launch_phase",
+        label: "Fase do Lançamento",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "full", label: "Sequência Completa (14 dias)" },
+          { value: "warmup", label: "Aquecimento (Dias 1-3)" },
+          { value: "prelaunch", label: "Pré-lançamento (Dias 4-9)" },
+          { value: "cart-open", label: "Carrinho Aberto (Dias 10-14)" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "https://exemplo.com/pagina-do-produto",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Público é majoritariamente feminino 25-40, tom descontraído, já fiz 2 lançamentos anteriores...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const phaseLabels: Record<string, string> = {
+        "full": "Sequência Completa (14 dias)",
+        "warmup": "Aquecimento (Dias 1-3)",
+        "prelaunch": "Pré-lançamento (Dias 4-9)",
+        "cart-open": "Carrinho Aberto (Dias 10-14)",
+      };
+      const phaseLabel = phaseLabels[inputs.launch_phase] || phaseLabels["full"];
+      const isFullSequence = !inputs.launch_phase || inputs.launch_phase === "full";
+
+      const phaseInstructions: Record<string, string> = {
+        "full": "Gere a sequência COMPLETA de 14 dias, cobrindo todas as 3 fases.",
+        "warmup": `Gere stories APENAS para a FASE 1 — AQUECIMENTO (Dias 1 a 3).
+Foco: Construir autoridade, gerar curiosidade, criar conexão.
+Gatilhos: Autoridade, reciprocidade, curiosidade.`,
+        "prelaunch": `Gere stories APENAS para a FASE 2 — PRÉ-LANÇAMENTO (Dias 4 a 9).
+Foco: Educação, desejo, quebra de objeções, antecipação.
+Gatilhos: Prova social, antecipação, escassez de informação, comunidade.`,
+        "cart-open": `Gere stories APENAS para a FASE 3 — CARRINHO ABERTO (Dias 10 a 14).
+Foco: Conversão, urgência, últimas objeções, fechamento.
+Gatilhos: Escassez, urgência, prova social de compradores, FOMO.`,
+      };
+
+      return `Você é um Estrategista de Lançamentos especializado em sequências de stories do Instagram. Sua missão é criar uma narrativa de lançamento em 14 dias que conduz o público do desconhecimento à compra, usando gatilhos mentais estratégicos em cada fase.
+
+## METODOLOGIA DE 14 DIAS
+
+### FASE 1 — AQUECIMENTO (Dias 1-3)
+**Objetivo**: Construir autoridade e gerar curiosidade
+**Gatilhos**: Autoridade, reciprocidade, curiosidade
+- Dia 1: Posicionamento + problema do público
+- Dia 2: Bastidores + autoridade
+- Dia 3: Gancho de curiosidade ("algo grande vem aí")
+
+### FASE 2 — PRÉ-LANÇAMENTO (Dias 4-9)
+**Objetivo**: Educar, criar desejo e quebrar objeções
+**Gatilhos**: Prova social, antecipação, comunidade
+- Dia 4: Conteúdo de valor profundo (reciprocidade)
+- Dia 5: Storytelling pessoal (conexão emocional)
+- Dia 6: Prova social forte (resultados de alunos/clientes)
+- Dia 7: Quebra de objeção principal
+- Dia 8: Revelação parcial do produto (antecipação)
+- Dia 9: Contagem regressiva + expectativa máxima
+
+### FASE 3 — CARRINHO ABERTO (Dias 10-14)
+**Objetivo**: Converter com urgência e escassez reais
+**Gatilhos**: Escassez, urgência, FOMO, prova social de compradores
+- Dia 10: Abertura do carrinho (revelação completa + oferta)
+- Dia 11: Prova social de primeiros compradores
+- Dia 12: Quebra das últimas objeções + bônus
+- Dia 13: Últimas vagas / penúltimo dia
+- Dia 14: Fechamento do carrinho (urgência máxima)
+
+## FASE SELECIONADA
+${phaseInstructions[inputs.launch_phase] || phaseInstructions["full"]}
+
+## FORMATO DE ENTREGA
+
+Para CADA DIA, entregue:
+
+---
+
+### 📅 DIA [N] — [Título do Dia]
+**Fase**: [Aquecimento / Pré-lançamento / Carrinho Aberto]
+**Gatilho principal**: [qual gatilho mental domina]
+**Objetivo do dia**: [o que queremos que o público sinta/faça]
+**Quantidade de stories**: [X stories]
+
+---
+
+**Story [N/total]**
+
+📱 **Formato**: [Texto sobre fundo / Selfie-vídeo / Foto + texto / Enquete / Caixa de perguntas / Contagem regressiva / Compartilhamento]
+
+🪝 **Hook** (texto ou fala de abertura):
+> "[gancho que prende nos primeiros 2 segundos]"
+
+📝 **Conteúdo**:
+> "[texto completo do story OU roteiro do que falar]"
+
+🎯 **CTA / Interação**:
+> "[ação que o espectador deve tomar]"
+
+🎨 **Sugestão visual**:
+> [dica de fundo, fonte, sticker, cor, ferramenta do Instagram a usar]
+
+---
+
+_(Repita para cada story do dia — entre 5 a 10 stories por dia)_
+
+---
+
+### 📊 Resumo do Dia [N]
+| Métrica | Meta |
+|---|---|
+| **Stories totais** | [X] |
+| **Interações esperadas** | [enquetes, caixas, etc.] |
+| **Gatilhos usados** | [lista] |
+| **Link/CTA principal** | [se aplicável] |
+
+---
+
+## REGRAS GERAIS
+- Cada dia deve ter entre 5 e 10 stories
+- Stories devem ser CURTOS (máx 3-4 linhas de texto por story)
+- Alterne formatos: texto, vídeo selfie, enquete, caixa de perguntas, compartilhamento
+- Use ferramentas nativas do Instagram (enquete, quiz, slider de emoji, contagem regressiva, caixa de perguntas)
+- O primeiro story de cada dia é o HOOK — deve prender imediatamente
+- O último story de cada dia deve ter CTA claro
+- Mantenha consistência narrativa entre os dias (fio condutor)
+- Crie loops abertos entre dias ("amanhã vou revelar...")
+- Escreva em português brasileiro
+- Tom conversacional e autêntico (como se falasse com um amigo)
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nAdapte tom, vocabulário e estilo aos padrões da marca.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL) ---\n${inputs.scraped_content}\n\nUse como contexto sobre o produto/oferta.` : ""}
+
+INFORMAÇÕES DO LANÇAMENTO:
+${inputs.content}`;
+    },
+  },
 };
