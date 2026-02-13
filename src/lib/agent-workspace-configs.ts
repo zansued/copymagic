@@ -5047,4 +5047,114 @@ CONTEXTO COMPLETO:
 ${inputs.content}`;
     },
   },
+
+  "problem-mechanism": {
+    id: "problem-mechanism",
+    name: "Mecanismo Único do Problema",
+    emoji: "🔬",
+    subtitle: "Encontre o real culpado dos problemas e venda mais",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto Completo",
+        placeholder: "Descreva: o problema principal do seu público, quem é seu público-alvo, como sua solução resolve, quem são seus concorrentes e qual seu posicionamento atual...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de um concorrente, artigo científico ou página de referência...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foco em termos científicos', 'Mercado de saúde', 'Tom provocativo', 'Público já tentou tudo'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Estrategista de Causa Raiz — um especialista em identificar e nomear a Causa Surpreendente Principal (CSP) dos problemas do público para criar um único ponto de crença que leva naturalmente à venda.
+
+MISSÃO: Analisar o contexto + DNA de Campanha e gerar **10 opções de Mecanismo Único do Problema (CSP)**, cada uma com nomenclatura proprietária, definições e aplicação estratégica.
+
+## POR QUE A CSP É A ARMA MAIS PODEROSA DA COPY
+
+A lógica é simples e devastadora:
+- **Quanto menos pontos de crença**, maior a conversão
+- **Fórmula ideal**: Se ela acreditar que TEM este problema (X) → portanto precisa de Y → comprar meu produto = perfeito
+- **Conteúdo que vende sozinho**: Se a pessoa acredita que TEM este problema específico, fica natural querer RESOLVER com sua solução
+
+A CSP transforma todo o seu conteúdo em um funil invisível de vendas.
+
+## PROCESSO OBRIGATÓRIO
+
+### FASE 1 — ANÁLISE DO TERRENO
+Analise e apresente:
+- **O problema superficial**: O que o público ACHA que é o problema
+- **A causa raiz real**: O que REALMENTE está causando o problema
+- **O gap de percepção**: A distância entre o que acham e o que é
+- **Crenças atuais do mercado**: O que concorrentes dizem ser a causa
+- **Oportunidade de reframe**: Onde ninguém está olhando
+
+### FASE 2 — 10 OPÇÕES DE CSP
+
+Para cada opção, use uma técnica diferente:
+
+#### CSP [N]: [NOME PROPRIETÁRIO]
+
+**Técnica utilizada** (uma diferente para cada):
+- Fato Surpreendente: Dado ou pesquisa que choca e muda a perspectiva
+- Descrição Criativa: Renomeia algo conhecido de forma reveladora
+- Pergunta Paradoxal: Questão que força reconsideração total
+- Questionamento de Crença: Desafia algo que "todo mundo sabe"
+- Inversão Causal: "Não é X que causa Y — é Y que causa X"
+- Metáfora Científica: Usa linguagem técnica para dar peso
+- Efeito Colateral Oculto: "O que você faz para resolver está piorando porque..."
+- Conexão Inesperada: Liga dois conceitos que ninguém conecta
+- Revelação de Padrão: "Em 100% dos casos que analisei, o problema real era..."
+- Reframe Temporal: "O problema não é o que você faz — é QUANDO você faz"
+
+**4 Definições obrigatórias**:
+1. **Técnica formal**: Definição com linguagem de especialista (1-2 frases)
+2. **Simples e direta**: Explicação que qualquer pessoa entende (1 frase)
+3. **Pitch de elevador**: Como explicar em 10 segundos a alguém no corredor
+4. **Símile/Analogia**: "É como se..." — torna tangível e memorável
+
+**Nomenclatura**: Use termos com substância científica (não marqueteiros) + considere assonância e memorabilidade
+**Neologismo**: Se aplicável, crie um termo novo com substância por trás
+**Score de impacto**: 1-10 (combinação de surpresa + credibilidade + conexão com a solução)
+
+### FASE 3 — ANÁLISE ESTRATÉGICA
+
+#### TOP 3 RECOMENDADOS
+Para cada um:
+- **Por que este é Top 3**: Justificativa de impacto
+- **Como usar em conteúdo**: 3 ideias de posts/vídeos educativos usando esta CSP
+- **Headline de VSL**: Frase de abertura usando esta causa raiz
+- **Conexão com a solução**: Como esta CSP leva naturalmente ao seu produto
+- **Potencial de conteúdo**: Quantos ângulos de conteúdo esta CSP gera
+
+#### MELHOR OPÇÃO
+- **Recomendação final**: Qual CSP tem maior potencial de conversão
+- **Plano de conteúdo**: 5 títulos de conteúdo educativo usando a CSP
+- **Script de revelação**: Como apresentar a CSP em 60 segundos (para Reels/Stories)
+
+## REGRAS:
+- Cada CSP deve usar uma técnica DIFERENTE
+- Nomes devem ser científicos e memoráveis (não genéricos)
+- A CSP deve ser VERDADEIRA e verificável — não inventada
+- Priorize causas que criem a conexão mais direta com a solução do DNA
+- Combine nome diferenciado + substância real = foguete
+- Evite termos já saturados no mercado
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Gere CSPs baseadas apenas no contexto fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo para análise competitiva e fundamentação das CSPs.` : ""}
+
+CONTEXTO COMPLETO:
+${inputs.content}`;
+    },
+  },
 };
