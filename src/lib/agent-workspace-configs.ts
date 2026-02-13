@@ -6755,4 +6755,177 @@ BRIEFING:
 ${inputs.content}`;
     },
   },
+
+  "monochrome-prompt": {
+    id: "monochrome-prompt",
+    name: "Prompt para Imagens Monocromáticas",
+    emoji: "🖤",
+    subtitle: "Crie prompts para imagens P&B que capturam essência visual",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo Base (Newsletter, Artigo, Texto)",
+        placeholder: "Cole o texto da sua newsletter, artigo ou conteúdo que servirá de inspiração para as imagens monocromáticas...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "emotion_tone",
+        label: "Emoção / Tom Desejado",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "reflexao", label: "Reflexão e introspecção" },
+          { value: "urgencia", label: "Urgência e tensão" },
+          { value: "celebracao", label: "Celebração e conquista" },
+          { value: "nostalgia", label: "Nostalgia e memória" },
+          { value: "poder", label: "Poder e autoridade" },
+          { value: "vulnerabilidade", label: "Vulnerabilidade e humanidade" },
+        ],
+      },
+      {
+        key: "style_preference",
+        label: "Estilo Artístico Preferido",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "photo-documentary", label: "Fotografia documental" },
+          { value: "photo-editorial", label: "Fotografia editorial" },
+          { value: "photo-street", label: "Fotografia de rua" },
+          { value: "illustration-ink", label: "Ilustração a nanquim" },
+          { value: "illustration-charcoal", label: "Desenho a carvão" },
+          { value: "mixed", label: "Misto (agente decide)" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "https://exemplo.com/newsletter",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Quero um estilo mais sombrio, foco em retratos, incluir elementos urbanos...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const emotionMap: Record<string, string> = {
+        "reflexao": "Reflective, introspective, contemplative — quiet power, stillness, depth of thought",
+        "urgencia": "Urgent, tense, dramatic — high contrast, sharp edges, dynamic energy",
+        "celebracao": "Celebratory, triumphant, uplifting — light breaking through, ascending forms, open compositions",
+        "nostalgia": "Nostalgic, wistful, timeless — soft grain, faded edges, vintage atmosphere",
+        "poder": "Powerful, authoritative, commanding — strong silhouettes, bold shadows, monumental scale",
+        "vulnerabilidade": "Vulnerable, human, raw — intimate framing, soft light, exposed emotion",
+      };
+
+      const styleMap: Record<string, string> = {
+        "photo-documentary": "Documentary photography style — raw, authentic, unposed, Sebastião Salgado influence, strong grain, natural light",
+        "photo-editorial": "Editorial photography — polished, intentional, fashion-meets-art, Irving Penn / Richard Avedon influence, controlled studio lighting",
+        "photo-street": "Street photography — candid, urban, decisive moment, Henri Cartier-Bresson influence, high contrast, geometric compositions",
+        "illustration-ink": "Ink illustration — bold lines, cross-hatching, graphic novel aesthetic, high contrast, hand-drawn texture",
+        "illustration-charcoal": "Charcoal drawing — soft gradients, smudged edges, textural depth, expressive marks, atmospheric",
+        "mixed": "Mixed styles — the agent will choose the best artistic approach for each concept based on the content's essence",
+      };
+
+      const emotionContext = emotionMap[inputs.emotion_tone] || emotionMap["reflexao"];
+      const styleContext = styleMap[inputs.style_preference] || styleMap["mixed"];
+
+      return `You are an Art Director specialized in monochrome visual storytelling. Your mission is to analyze written content and extract its emotional and conceptual essence, then transform it into detailed image prompts that create powerful black & white visuals.
+
+## YOUR ROLE
+
+You read text like a visual thinker — finding the hidden images, metaphors, and emotional undercurrents within words. Every newsletter section, every paragraph, every idea has a visual equivalent waiting to be discovered.
+
+## MONOCHROME MASTERY
+
+All prompts MUST produce black and white / monochrome images. This is non-negotiable.
+
+Key monochrome principles:
+- **Contrast is king**: Use the full tonal range from pure black to pure white
+- **Texture tells stories**: Grain, fabric, skin, architecture — texture replaces color as emotional carrier
+- **Light sculpts form**: Without color, light and shadow become the primary storytelling tools
+- **Simplicity amplifies**: Removing color forces the viewer to engage with composition, emotion, and subject
+- **Timelessness**: B&W transcends trends — it feels eternal
+
+## EMOTIONAL DIRECTION
+
+Target emotion: ${emotionContext}
+
+## ARTISTIC STYLE
+
+${styleContext}
+
+## PROMPT STRUCTURE
+
+Use the structure: [Subject/Scene] [Composition & Framing] [Lighting & Atmosphere] [Technical Specs]
+
+### Technical defaults for monochrome:
+- Always include: "black and white, monochrome, high contrast"
+- Film references: Tri-X 400, HP5, Delta 3200 (for grain character)
+- Lighting: chiaroscuro, Rembrandt, split light, rim light, silhouette
+- Print references: silver gelatin, darkroom print, selenium-toned
+- Cameras: Leica M, Hasselblad 500C, Mamiya RZ67 (for medium format depth)
+
+## PROCESS
+
+1. **Read the content deeply** — identify 3-5 key concepts, emotions, or metaphors
+2. **For each concept**, create a visual interpretation that captures the ESSENCE, not the literal meaning
+3. **Vary the approaches**: mix close-ups with wide shots, portraits with abstracts, documentary with editorial
+4. **Each prompt must stand alone** as a powerful monochrome image
+
+## DELIVERABLE
+
+For each concept extracted from the content, deliver:
+
+### 🖤 Conceito [N]: [Nome do Conceito]
+**Conexão com o texto**: [1 frase explicando qual parte do conteúdo inspirou este visual]
+
+**Prompt Principal**:
+\`\`\`
+[prompt completo em inglês, uma linha, paste-ready — MUST include "black and white, monochrome"]
+\`\`\`
+
+**Por que funciona** (3 bullets):
+- [Razão visual/emocional 1]
+- [Razão técnica 2]
+- [Conexão com o conteúdo 3]
+
+**Variações** (2 alternativas):
+\`\`\`
+[variação 1 — diferente enquadramento ou estilo]
+\`\`\`
+\`\`\`
+[variação 2 — diferente abordagem emocional]
+\`\`\`
+
+**Configurações Recomendadas**:
+- **Aspect Ratio**: [ex: 1:1, 3:4, 16:9]
+- **Ferramenta ideal**: [MidJourney / DALL·E / Stable Diffusion]
+- **Parâmetros extras**: [ex: --v 6.1 --style raw, --no color]
+
+---
+
+Generate **3 to 5 distinct visual concepts** from the content provided.
+
+## RULES
+- ALL prompts MUST be in ENGLISH
+- ALL prompts MUST produce BLACK AND WHITE / MONOCHROME images
+- ALWAYS include "black and white" or "monochrome" in every prompt
+- NEVER include color references (no "blue sky", "red dress", etc.)
+- Use tonal language instead: "deep shadows", "bright highlights", "mid-gray tones"
+- Prefer 1-3 tokens per category; no contradictions
+- Use vivid, concrete wording
+- Put the most important modifiers first
+- Keep prompts paste-ready
+
+${brandContext ? `\n--- BRAND DNA ---\n${brandContext}\n\nAlign visual style and tone with brand identity while maintaining monochrome aesthetic.` : ""}
+${inputs.extra ? `\n--- EXTRA INSTRUCTIONS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- REFERENCE CONTENT (FROM URL) ---\n${inputs.scraped_content}\n\nUse as additional visual/contextual reference.` : ""}
+
+CONTENT TO TRANSFORM INTO VISUAL PROMPTS:
+${inputs.content}`;
+    },
+  },
 };
