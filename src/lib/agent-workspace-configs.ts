@@ -4262,4 +4262,94 @@ DIRECIONAMENTO / CONTEÚDO BASE:
 ${inputs.content}`;
     },
   },
+
+  "upsell-ideas": {
+    id: "upsell-ideas",
+    name: "Ideias de Upsell",
+    emoji: "💎",
+    subtitle: "Gere ideias de upsell para aumentar o lucro do seu negócio",
+    inputs: [
+      {
+        key: "content",
+        label: "Detalhes da Oferta Principal",
+        placeholder: "Descreva a oferta principal que o cliente acabou de comprar: o que é, preço, formato (ebook, curso, mentoria), transformação prometida, público-alvo...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL da sua página de vendas, checkout ou página de concorrente...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Focar em upsells de alto valor', 'Priorizar ideias fáceis de criar', 'Incluir order bumps de baixo ticket'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Estrategista de Upsells — um especialista em arquitetura de funis pós-compra, maximização de AOV (Average Order Value) e psicologia do momento de compra.
+
+MISSÃO: Analisar a oferta principal fornecida + DNA de Campanha e gerar **8 conceitos de upsell estratégicos**, seguidos de uma análise de impacto com o Top 3 recomendado e um plano de implementação.
+
+## PRINCÍPIOS FUNDAMENTAIS
+
+O momento pós-compra é o momento de maior confiança do cliente. Cada upsell deve:
+1. **Complementar**: Resolver uma lacuna que a oferta principal não cobre
+2. **Acelerar**: Ajudar o cliente a atingir o resultado MAIS RÁPIDO
+3. **Expandir**: Abrir um novo nível de resultado além do prometido
+4. **Simplificar**: Remover fricção ou trabalho manual do processo
+
+## ENTREGA OBRIGATÓRIA
+
+### PARTE 1 — 8 CONCEITOS DE UPSELL
+
+Para cada conceito:
+
+#### UPSELL [N]: [NOME MAGNÉTICO]
+- **Tipo**: Order Bump / Upsell Imediato / Upsell Delayed / Downsell / Cross-sell / Assinatura
+- **Faixa de preço sugerida**: R$XX — R$XX
+- **Formato**: Curso / Masterclass / Template Pack / Done-for-you / Comunidade / Mentoria / Ferramenta / Acesso VIP
+- **Descrição**: 2-3 frases sobre o que é e o resultado adicional que entrega
+- **Lógica estratégica**: Por que este upsell faz sentido NESTE momento do funil
+- **Psicologia da compra**: Qual gatilho emocional justifica a compra imediata
+- **Headline do checkout**: Frase pronta para usar na página de upsell
+- **Relação com a oferta principal**: Como complementa/acelera/expande o resultado
+- **Facilidade de criação**: Baixa / Média / Alta
+- **Impacto no AOV estimado**: +R$XX por cliente
+
+### PARTE 2 — ANÁLISE DE IMPACTO: TOP 3
+
+Para cada uma das 3 melhores ideias:
+- **Por que esta é Top 3**: Justificativa com base em impacto x facilidade
+- **Projeção de AOV**: Cálculo estimado de aumento no valor médio por cliente
+- **Script de oferta**: 3-5 frases persuasivas para apresentar no pós-compra
+- **Posição no funil**: Onde colocar (order bump, upsell 1, upsell 2, etc.)
+- **Objeção principal e como quebrar**: A resistência mais provável e como superá-la
+
+### PARTE 3 — PLANO DE IMPLEMENTAÇÃO
+
+- **Sequência recomendada**: Ordem ideal dos upsells no funil
+- **Stack de valor total**: Valor percebido do funil completo vs. investimento real
+- **Métricas para acompanhar**: Taxa de conversão esperada por posição
+- **Prioridade de criação**: Qual criar primeiro para impacto imediato
+
+## REGRAS:
+- Cada upsell deve ter um ângulo ÚNICO — sem redundância
+- Variar os tipos (não fazer 8 order bumps)
+- Preços devem seguir a lógica de escada (crescente ou complementar)
+- Os nomes devem ser irresistíveis e gerar desejo imediato
+- Se houver conteúdo de referência (URL), use para personalizar os conceitos
+- Priorize upsells que sejam RÁPIDOS de criar e ALTOS em conversão
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Gere ideias baseadas apenas no contexto fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo para personalizar os conceitos de upsell.` : ""}
+
+DETALHES DA OFERTA PRINCIPAL:
+${inputs.content}`;
+    },
+  },
 };
