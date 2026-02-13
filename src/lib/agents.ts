@@ -117,6 +117,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "low-ticket-ideas",
+    name: "Ideias de Produto Low Ticket",
+    emoji: "💡",
+    role: "Estrategista de Produtos Low Ticket",
+    description: "Gera 10 ideias de produtos low ticket pelo Framework de Guerra com 8 filtros de validação e Top 3 estratégico.",
+    category: "branding",
+    available: true,
+  },
+  {
     id: "low-ticket-product",
     name: "Gerador de Produto Low Ticket",
     emoji: "📦",

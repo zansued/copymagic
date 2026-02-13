@@ -4089,6 +4089,94 @@ ${inputs.content ? `CONTEXTO / DIRECIONAMENTO:\n${inputs.content}` : "Use exclus
     },
   },
 
+  "low-ticket-ideas": {
+    id: "low-ticket-ideas",
+    name: "Ideias de Produto Low Ticket",
+    emoji: "💡",
+    subtitle: "Gere ideias de produtos low ticket pelo Framework de Guerra",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto / Direcionamento",
+        placeholder: "Descreva seu público e o problema mais urgente, cole um conteúdo seu (transcrição, artigo) para transformar em produto, ou apresente uma ideia bruta para validar...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de um post, vídeo, página de concorrente para enriquecer a análise...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foco em nicho fitness', 'Preço-alvo R$27-47', 'Explore lacunas do concorrente'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Estrategista de Produtos Low Ticket — um especialista em criar conceitos de produtos digitais de baixo custo que funcionam como "iscas armadas" para ofertas de maior valor.
+
+MISSÃO: Gerar **10 ideias de produtos low ticket** validadas pelo **Framework de Guerra** (8 filtros), seguidas de uma análise estratégica com o Top 3 recomendado.
+
+## FRAMEWORK DE GUERRA — 8 FILTROS DE VALIDAÇÃO
+
+Cada ideia DEVE passar por estes 8 filtros:
+
+1. **FILTRO DA DOR URGENTE**: Resolve um problema que o público sente AGORA (não daqui a 6 meses)?
+2. **FILTRO DA VITÓRIA RÁPIDA**: Entrega um resultado tangível em menos de 48h de consumo?
+3. **FILTRO DO "NO-BRAINER"**: O preço é tão baixo vs. valor percebido que a decisão é impulsiva (R$19-97)?
+4. **FILTRO DA ESCADA**: Cria uma ponte lógica e irresistível para a oferta premium?
+5. **FILTRO DA PRODUÇÃO**: Pode ser criado em 3-7 dias com recursos existentes?
+6. **FILTRO DO BOCA-A-BOCA**: É tão bom que o comprador vai querer recomendar?
+7. **FILTRO DA AUTORIDADE**: Posiciona o criador como especialista confiável no assunto?
+8. **FILTRO DA RECOMPRA**: Cria desejo por mais produtos do mesmo criador?
+
+## ENTREGA OBRIGATÓRIA
+
+### PARTE 1 — 10 IDEIAS DE PRODUTOS LOW TICKET
+
+Para cada ideia:
+
+#### PRODUTO [N]: [NOME MAGNÉTICO DO PRODUTO]
+- **Formato**: Mini Curso / Guia / Pack de Scripts / Templates / Workshop Gravado / Toolkit / Planilha / Swipe File / Diagnóstico / Plano de Ação
+- **Preço sugerido**: R$XX
+- **Descrição**: 2-3 frases sobre o que é e o resultado que entrega
+- **Dor urgente que resolve**: O problema específico que ataca
+- **Vitória rápida**: O resultado tangível em até 48h
+- **Puxador para o premium**: Como conecta à oferta de maior valor
+- **Complexidade de produção**: Baixa / Média / Alta
+- **Score Framework de Guerra**: X/8 filtros aprovados
+
+### PARTE 2 — ANÁLISE ESTRATÉGICA: TOP 3
+
+Para cada uma das 3 melhores ideias:
+- **Por que esta é Top 3**: Justificativa estratégica com base nos 8 filtros
+- **Potencial de venda imediata**: Por que vai vender RÁPIDO
+- **Estratégia de lançamento**: Como colocar no mercado em 7 dias
+- **Headline para a página de vendas**: Pronta para usar
+- **Isca para o premium**: Como criar a escada lógica para o produto principal
+- **Sugestão de bônus**: Um bônus que aumenta o valor percebido sem custo extra
+
+## REGRAS:
+- Cada produto deve ser ÚNICO em formato e ângulo — sem repetição
+- Variar os formatos (não fazer 10 mini cursos)
+- Todos devem ser produzíveis em 3-7 dias
+- Os nomes devem ser magnéticos e impossíveis de ignorar
+- Se houver conteúdo de referência (URL), use como inspiração para 3 das 10 ideias
+- Priorize produtos que criem a MAIOR ponte para a oferta principal do DNA
+- Score mínimo aceitável: 6/8 filtros
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Gere ideias baseadas apenas no contexto fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como inspiração para pelo menos 3 das 10 ideias.` : ""}
+
+CONTEXTO / DIRECIONAMENTO:
+${inputs.content}`;
+    },
+  },
+
   "lead-magnet-ideas": {
     id: "lead-magnet-ideas",
     name: "Ideias de Isca Digital",
