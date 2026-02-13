@@ -384,6 +384,15 @@ export const AGENTS: AgentDef[] = [
     category: "products",
     available: true,
   },
+  {
+    id: "unique-mechanism",
+    name: "Mecanismo Único da Solução",
+    emoji: "⚙️",
+    role: "Especialista em Diferenciação Estratégica",
+    description: "Cria 10 opções de mecanismo único que diferenciam sua solução de todos os concorrentes, usando justaposição contraditória e análise competitiva.",
+    category: "products",
+    available: true,
+  },
 
   // ── Branding & Posicionamento ──
   {
