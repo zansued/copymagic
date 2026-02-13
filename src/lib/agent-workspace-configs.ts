@@ -5792,4 +5792,168 @@ ${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
 ${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}` : ""}`;
     },
   },
+
+  "icp-profile": {
+    id: "icp-profile",
+    name: "Perfil do Cliente Ideal (ICP)",
+    emoji: "🎯",
+    subtitle: "Entenda seu cliente ideal melhor do que ele mesmo se entende",
+    inputs: [
+      {
+        key: "content",
+        label: "Dados do Público / Avatar",
+        placeholder: "Descreva seu público-alvo com o máximo de detalhes: quem são, o que fazem, dores, desejos, objeções comuns, pesquisas realizadas, conversas com clientes, observações...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Link de pesquisa, página de vendas do concorrente, comunidade do público...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Gerais (opcional)",
+        placeholder: "Ex: 'Foque em mulheres 30-45 que querem emagrecer', 'Meu público são donos de agência', 'Use dados da pesquisa abaixo'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Especialista em Mapeamento de Cliente Ideal — um estrategista de elite que cria perfis tão precisos que o cliente pensa: "Esse cara tirou as palavras da minha boca."
+
+MISSÃO: Criar um Perfil do Cliente Ideal (ICP) completo e profundo, seguindo o Axioma 41-39-20 (41% lista/público, 39% oferta, 20% copy) — porque conhecer o público é o fator #1 de sucesso.
+
+PROCESSO OBRIGATÓRIO:
+
+## 1. IDENTIDADE DEMOGRÁFICA
+
+- **Nome fictício representativo**: Um nome que personifica o avatar
+- **Idade / Faixa etária**: Específica
+- **Gênero**: Se relevante
+- **Localização**: Onde vive (tipo de cidade, região)
+- **Profissão / Ocupação**: O que faz no dia a dia
+- **Renda mensal estimada**: Faixa de renda
+- **Nível educacional**: Formação
+- **Estado civil / Família**: Contexto familiar
+- **Rotina típica**: Como é o dia a dia dessa pessoa
+
+## 2. MAPEAMENTO PSICOLÓGICO PROFUNDO
+
+### Dores (Top 5)
+Para cada dor, detalhe:
+- A dor em si (como o cliente a descreveria)
+- A consequência emocional dessa dor
+- Como essa dor se manifesta no dia a dia
+- Há quanto tempo convive com isso
+
+### Desejos (Top 5)
+Para cada desejo:
+- O que realmente quer (desejo superficial)
+- O que está por trás (desejo profundo)
+- Como seria a vida se conseguisse
+- O que já tentou para alcançar
+
+### Medos (Top 5)
+- Medos declarados (o que admite)
+- Medos ocultos (o que não diz mas sente)
+- O que acontece se não agir
+
+### Objeções (Top 5)
+Para cada objeção:
+- A objeção verbalizada
+- A crença por trás
+- Como quebrá-la
+
+## 3. O SEGREDO EJACA
+
+Mapeie cada elemento com frases específicas:
+
+### E — Encoraja seus Sonhos
+- 3 frases que encorajam os sonhos do avatar
+- O sonho principal que ele tem mas tem vergonha de admitir
+
+### J — Justifica seus Erros
+- 3 frases que justificam os erros que ele cometeu
+- Por que não é culpa dele (até agora)
+
+### A — Alivia seus Medos
+- 3 frases que aliviam seus maiores medos
+- A garantia emocional que ele precisa ouvir
+
+### C — Confirma suas Suspeitas
+- 3 frases que confirmam o que ele já desconfia
+- A "verdade inconveniente" que ele sente mas ninguém fala
+
+### A — Aponta os Culpados
+- 3 frases que apontam o verdadeiro culpado
+- O inimigo comum (pessoa, sistema, crença, método)
+
+## 4. LINGUAGEM E COMUNICAÇÃO
+
+### Frases que o Avatar USA (Top 10)
+Frases literais que essa pessoa diria em conversas, posts, desabafos:
+1. "[frase exata]"
+2. "[frase exata]"
+... (10 frases)
+
+### Palavras-gatilho (Top 10)
+Palavras que ativam atenção imediata desse público.
+
+### Palavras a EVITAR (Top 5)
+Termos que geram rejeição ou desconfiança.
+
+### Tom de comunicação ideal
+- Formal vs. Informal
+- Técnico vs. Simples
+- Urgente vs. Calmo
+- Provocativo vs. Acolhedor
+
+## 5. COMPORTAMENTO DE COMPRA
+
+- **Como pesquisa soluções**: Google, YouTube, Instagram, indicação?
+- **O que já comprou antes**: Produtos/serviços similares
+- **Por que não funcionou**: Razões do fracasso anterior
+- **Gatilhos de decisão**: O que faz ele agir AGORA
+- **Ciclo de decisão**: Impulso vs. Consideração longa
+- **Ticket aceitável**: Quanto está disposto a investir
+- **Influenciadores de decisão**: Quem ele consulta antes de comprar
+
+## 6. CANAIS E CONSUMO DE CONTEÚDO
+
+- **Redes sociais principais**: Onde passa mais tempo
+- **Tipo de conteúdo que consome**: Vídeo, texto, podcast, carrossel
+- **Criadores/marcas que segue**: Referências no mercado
+- **Horários de maior atividade**: Quando está online
+- **Comunidades**: Grupos, fóruns, eventos que participa
+
+## 7. SÍNTESE ESTRATÉGICA
+
+### Resumo do ICP (1 parágrafo)
+Parágrafo de 3-5 frases que resume quem é essa pessoa, o que quer e o que a impede.
+
+### Mensagem-chave (1 frase)
+A frase que, se ele lesse, pensaria: "Isso foi escrito para mim."
+
+### Ângulos de Abordagem (Top 3)
+Os 3 melhores ângulos para se comunicar com esse avatar, em ordem de efetividade.
+
+### Conexão com Oferta
+Como usar este ICP para criar ofertas, copy e conteúdo que convertem.
+
+REGRAS:
+- Seja ESPECÍFICO — nada de generalidades como "quer ter sucesso" ou "busca qualidade de vida"
+- Use linguagem do AVATAR, não linguagem de marketing
+- Cada seção deve ter exemplos concretos e aplicáveis
+- O perfil deve ser tão detalhado que qualquer copywriter consiga escrever para esse público
+- Priorize profundidade sobre extensão — melhor 5 dores profundas do que 20 superficiais
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\n⚡ Use o DNA de marca para contextualizar o ICP ao produto/serviço específico.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como fonte de dados sobre o público.` : ""}
+
+DADOS DO PÚBLICO / AVATAR:
+${inputs.content}`;
+    },
+  },
 };
