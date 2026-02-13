@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "google-my-business",
+    name: "Google Meu Negócio",
+    emoji: "📍",
+    role: "Especialista em Google Meu Negócio",
+    description: "Otimiza perfis e cria conteúdo estratégico para Google Meu Negócio: posts, descrições, Q&A e respostas a avaliações.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "google-ads-search",
     name: "Google Ads Rede de Pesquisa",
     emoji: "🔎",

@@ -3320,6 +3320,186 @@ ${inputs.content}`;
     },
   },
 
+  "google-my-business": {
+    id: "google-my-business",
+    name: "Google Meu Negócio",
+    emoji: "📍",
+    subtitle: "Otimize seu perfil e crie conteúdo para Google Meu Negócio",
+    inputs: [
+      {
+        key: "objective",
+        label: "Qual seu objetivo com o GMN hoje?",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "profile-optimization", label: "🏪 Otimização Geral do Perfil" },
+          { value: "post-creation", label: "📝 Criação de Post" },
+          { value: "product-description", label: "📦 Descrição de Produto/Serviço" },
+          { value: "qa", label: "❓ Perguntas & Respostas (Q&A)" },
+          { value: "review-response", label: "⭐ Resposta a Avaliação" },
+        ],
+        required: true,
+      },
+      {
+        key: "content",
+        label: "Contexto e Instruções para o Agente",
+        placeholder: "Forneça as informações necessárias para o objetivo selecionado...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "Cole a URL de um concorrente, notícia ou conteúdo para usar como referência...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Tom mais informal', 'Foco em promoção sazonal', 'Inclua emojis'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const objectiveMap: Record<string, { role: string; instructions: string }> = {
+        "profile-optimization": {
+          role: "Especialista em Otimização de Perfil GMN",
+          instructions: `Crie uma otimização completa do perfil do Google Meu Negócio:
+
+## 1. DESCRIÇÃO DO NEGÓCIO (máx. 750 caracteres)
+- Inclua palavras-chave locais relevantes naturalmente
+- Destaque diferenciais e proposta de valor
+- Inclua call-to-action sutil
+
+## 2. CATEGORIA E SUBCATEGORIAS
+- Categoria principal recomendada
+- Até 9 subcategorias relevantes
+
+## 3. POSTS INICIAIS (3 posts)
+Para cada: Título + Texto (máx. 1500 chars) + CTA sugerido + Tipo (Novidade/Oferta/Evento)
+
+## 4. PERGUNTAS FREQUENTES (5 Q&As)
+As 5 perguntas que clientes mais fazem, com respostas otimizadas
+
+## 5. CHECKLIST DE OTIMIZAÇÃO
+- Horário de funcionamento, atributos, fotos recomendadas
+- Palavras-chave locais prioritárias (10-15)
+- Dicas de fotos e vídeos para o perfil`,
+        },
+        "post-creation": {
+          role: "Especialista em Posts para GMN",
+          instructions: `Crie posts otimizados para Google Meu Negócio:
+
+Para CADA post (gere 3 variações), entregue:
+
+### POST [N]: [TIPO]
+- **Tipo**: Novidade / Oferta / Evento / Produto
+- **Título**: Chamada principal (se aplicável)
+- **Texto** (máx. 1500 caracteres):
+  - Abertura com gancho local
+  - Corpo com benefício claro e palavras-chave
+  - CTA direto
+- **CTA Button**: Saiba mais / Ligar / Reservar / Comprar
+- **Imagem sugerida**: Descrição da imagem ideal
+- **Hashtags locais**: 3-5 hashtags com localização
+
+REGRAS:
+- Use palavras-chave locais naturalmente
+- Inclua nome do bairro/cidade quando relevante
+- Posts de Oferta: inclua valor, condições e validade
+- Posts de Evento: inclua data, horário e local
+- Linguagem acessível e direta`,
+        },
+        "product-description": {
+          role: "Especialista em Catálogo GMN",
+          instructions: `Crie descrições otimizadas de produtos/serviços para o catálogo do Google Meu Negócio:
+
+Para CADA item, entregue:
+
+### [NOME DO PRODUTO/SERVIÇO]
+- **Nome otimizado** (com keyword relevante)
+- **Categoria** no GMN
+- **Descrição** (máx. 1000 caracteres):
+  - O que é / o que inclui
+  - Principal benefício
+  - Diferencial competitivo
+  - Palavra-chave local integrada
+- **Faixa de preço** (se aplicável)
+- **CTA sugerido**
+
+REGRAS:
+- Use linguagem de busca local (como clientes pesquisam)
+- Destaque benefícios sobre características
+- Inclua termos de busca relevantes naturalmente
+- Se possível, mencione localização/área de atendimento`,
+        },
+        "qa": {
+          role: "Especialista em Q&A para GMN",
+          instructions: `Crie perguntas e respostas estratégicas para a seção Q&A do Google Meu Negócio:
+
+Gere 10 Q&As organizadas por categoria:
+
+### CATEGORIA: [Ex: Funcionamento / Serviços / Preços / Localização]
+
+**P: [Pergunta como um cliente real faria]**
+**R:** [Resposta completa, profissional e otimizada]
+
+REGRAS PARA PERGUNTAS:
+- Simule linguagem real de cliente (natural, às vezes informal)
+- Inclua variações de busca local
+- Cubra: horários, preços, estacionamento, formas de pagamento, diferenciais, localização, agendamento
+
+REGRAS PARA RESPOSTAS:
+- Tom profissional mas acolhedor
+- Inclua informações práticas (endereço, telefone, link)
+- Finalize com CTA suave quando possível
+- Máximo 2-3 parágrafos por resposta
+- Inclua palavras-chave naturalmente`,
+        },
+        "review-response": {
+          role: "Especialista em Gestão de Avaliações GMN",
+          instructions: `Crie respostas profissionais para avaliações do Google Meu Negócio:
+
+Analise o contexto fornecido e gere respostas para diferentes cenários:
+
+### AVALIAÇÃO POSITIVA (5 estrelas)
+- 3 variações de resposta (curta, média, detalhada)
+- Tom: gratidão genuína + reforço do ponto elogiado + convite para retorno
+
+### AVALIAÇÃO NEUTRA (3 estrelas)
+- 3 variações de resposta
+- Tom: agradecimento + reconhecimento + compromisso de melhoria + convite para nova experiência
+
+### AVALIAÇÃO NEGATIVA (1-2 estrelas)
+- 3 variações de resposta
+- Tom: empatia + pedido de desculpas profissional + solução concreta + convite para contato privado
+
+REGRAS:
+- NUNCA seja defensivo ou confrontacional
+- Personalize com nome do cliente (quando disponível)
+- Inclua nome do negócio na resposta
+- Mencione ações concretas de melhoria
+- Máximo 3-4 linhas por resposta
+- Mantenha a voz da marca consistente
+- Em negativas: ofereça canal de contato direto`,
+        },
+      };
+
+      const selected = objectiveMap[inputs.objective] || objectiveMap["profile-optimization"];
+
+      return `Você é o ${selected.role} — um profissional de marketing local com domínio total do Google Meu Negócio e SEO local.
+
+MISSÃO: ${selected.instructions}
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Use as informações fornecidas no contexto."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (extraído do link) ---\n${inputs.scraped_content}` : ""}
+
+CONTEXTO E INFORMAÇÕES:
+${inputs.content}`;
+    },
+  },
+
   "google-ads-search": {
     id: "google-ads-search",
     name: "Google Ads Rede de Pesquisa",
