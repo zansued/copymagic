@@ -215,6 +215,15 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "hooks",
+    name: "Hooks",
+    emoji: "🪝",
+    role: "Especialista em Ganchos de Atenção",
+    description: "Cria hooks de 6 segundos que garantem atenção máxima — virais, de anúncio e de vendas — para qualquer plataforma.",
+    category: "content",
+    available: true,
+  },
   // Branding & Strategy
   {
     id: "brand-voice",

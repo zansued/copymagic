@@ -3784,4 +3784,122 @@ CONTEXTO:
 ${inputs.content}`;
     },
   },
+
+  "hooks": {
+    id: "hooks",
+    name: "Hooks",
+    emoji: "🪝",
+    subtitle: "Crie hooks de 6 segundos que garantem atenção máxima",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto / Ideia Principal",
+        placeholder: "Descreva o conteúdo, produto ou ideia para o qual você precisa de hooks. Ex: 'Vídeo sobre como IA lê PDFs em 5 minutos', 'Anúncio de curso de copywriting para iniciantes'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "hook_type",
+        label: "Tipo de Hook",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "viral", label: "🚀 Viral (conteúdo orgânico)" },
+          { value: "ad", label: "📣 Anúncio (tráfego pago)" },
+          { value: "sales", label: "💰 Vendas (VSL/página)" },
+          { value: "all", label: "🔥 Todos (mix completo)" },
+        ],
+      },
+      {
+        key: "platform",
+        label: "Plataforma",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "reels", label: "📱 Reels / TikTok / Shorts" },
+          { value: "youtube", label: "▶️ YouTube (vídeo longo)" },
+          { value: "text", label: "✍️ Texto (e-mail / post / copy)" },
+          { value: "ads", label: "📣 Anúncios (Meta/Google)" },
+          { value: "all", label: "🌐 Multiplataforma" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "Cole a URL de um criativo existente para gerar novos hooks baseados nele (ideal para reviver ads comprovados)",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Foque em polêmica", "Tom humorístico", "Público feminino 30-45", "Reviver este ad antigo com novos hooks"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const typeMap: Record<string, string> = {
+        viral: "HOOKS VIRAIS — otimizados para parar o scroll e gerar compartilhamentos em conteúdo orgânico",
+        ad: "HOOKS DE ANÚNCIO — otimizados para capturar atenção nos primeiros 3 segundos de ads pagos e maximizar hook rate",
+        sales: "HOOKS DE VENDAS — otimizados para abrir VSLs, páginas de vendas e e-mails com máxima retenção",
+        all: "MIX COMPLETO — hooks virais, de anúncio e de vendas, cobrindo todas as frentes",
+      };
+      const platformMap: Record<string, string> = {
+        reels: "Reels / TikTok / Shorts (máx. 6 segundos, linguagem oral, impacto visual)",
+        youtube: "YouTube (primeiros 30 segundos, curiosidade + promessa + pattern interrupt)",
+        text: "Texto escrito (primeira linha de e-mail, post, legenda ou copy)",
+        ads: "Anúncios pagos (Meta Ads / Google Ads — foco em CTR e hook rate)",
+        all: "Multiplataforma (adaptar para vídeo curto, vídeo longo, texto e ads)",
+      };
+
+      return `Você é o Especialista em Hooks — um mestre em criar as primeiras palavras, frases e segundos que determinam se alguém vai prestar atenção ou seguir em frente. Você domina a regra 20/80: os primeiros 20% do criativo determinam 80% do resultado.
+
+MISSÃO: Gerar hooks de altíssimo impacto que capturam atenção instantânea e criam um loop de curiosidade impossível de ignorar.
+
+TIPO: ${typeMap[inputs.hook_type] || typeMap.all}
+PLATAFORMA: ${platformMap[inputs.platform] || platformMap.all}
+
+## ENTREGA OBRIGATÓRIA
+
+### CATEGORIA 1 — HOOKS DE CURIOSIDADE (5 hooks)
+Criam uma lacuna de conhecimento que só fecha ao continuar consumindo.
+Frameworks: "O segredo que...", "Ninguém te conta que...", "Descobri por acidente..."
+
+### CATEGORIA 2 — HOOKS DE POLÊMICA (5 hooks)
+Desafiam crenças estabelecidas e provocam reação emocional.
+Frameworks: "Pare de...", "Tudo que te ensinaram sobre X está errado", "[Autoridade] admite..."
+
+### CATEGORIA 3 — HOOKS DE PROVA (5 hooks)
+Abrem com resultado concreto, dado ou transformação verificável.
+Frameworks: "De X para Y em Z dias", "[Número] pessoas já...", "Gastei R$X testando..."
+
+### CATEGORIA 4 — HOOKS DE IDENTIFICAÇÃO (5 hooks)
+Fazem o avatar se sentir visto e compreendido nos primeiros segundos.
+Frameworks: "Se você [situação específica]...", "Isso é para quem...", "Você já [dor específica]?"
+
+### CATEGORIA 5 — HOOKS DE PADRÃO INTERROMPIDO (5 hooks)
+Quebram expectativas com algo inesperado, bizarro ou contraintuitivo.
+Frameworks: Metáforas inusitadas, aberturas absurdas com twist lógico, declarações chocantes
+
+## PARA CADA HOOK ENTREGUE:
+1. **O hook** — a frase/script exato (máx. 2 linhas)
+2. **Formato sugerido** — como gravar/apresentar (texto na tela, talking head, b-roll, etc.)
+3. **Score de Impacto** — de 1 a 10, com justificativa de 1 linha
+4. **Variação textual** — uma versão alternativa do mesmo hook
+
+## REGRAS:
+- Cada hook deve funcionar SOZINHO, sem contexto adicional
+- Máximo de 6 segundos falados ou 2 linhas escritas
+- Nenhum hook genérico — todos devem ser específicos ao contexto fornecido
+- Priorize emoção > lógica nos primeiros segundos
+- Inclua ao menos 3 hooks que funcionem como "pattern interrupt"
+- Se houver conteúdo de referência (URL importada), gere 5 hooks extras especificamente para REVIVER esse criativo com novas aberturas
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ BÔNUS: Gere 5 hooks adicionais especificamente para REVIVER este criativo com novas aberturas.` : ""}
+
+CONTEXTO / IDEIA PRINCIPAL:
+${inputs.content}`;
+    },
+  },
 };
