@@ -594,4 +594,13 @@ export const AGENTS: AgentDef[] = [
     category: "products",
     available: true,
   },
+  {
+    id: "story-launch",
+    name: "Story Launch de 14 Dias",
+    emoji: "📲",
+    role: "Estrategista de Lançamentos via Stories",
+    description: "Cria sequências completas de stories do Instagram para lançamentos em 14 dias, do aquecimento ao fechamento do carrinho.",
+    category: "content",
+    available: true,
+  },
 ];
