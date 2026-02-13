@@ -4008,4 +4008,90 @@ ${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n
 ${inputs.content ? `CONTEXTO / DIRECIONAMENTO:\n${inputs.content}` : "Use exclusivamente o DNA de Campanha como base para as ideias."}`;
     },
   },
+
+  "lead-magnet-ideas": {
+    id: "lead-magnet-ideas",
+    name: "Ideias de Isca Digital",
+    emoji: "🎣",
+    subtitle: "Gere conceitos de iscas digitais que geram picos de leads",
+    inputs: [
+      {
+        key: "content",
+        label: "Direcionamento / Conteúdo Base",
+        placeholder: "Cole um conteúdo seu (transcrição, artigo), apresente uma ideia bruta (ex: 'isca sobre procrastinação'), ou dê um comando estratégico (ex: 'iscas focadas em donos de agências com problema de fluxo de caixa')...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "Cole a URL de um post, vídeo, página de vendas ou artigo para enriquecer a análise...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foque em formatos rápidos de consumir', 'Iscas para público B2B', 'Explore lacunas do concorrente'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Estrategista de Iscas Digitais — um especialista em resposta direta e geração de leads qualificados, com domínio absoluto em criar conceitos de iscas que geram picos de captação.
+
+MISSÃO: Transformar o contexto fornecido + DNA de Campanha em **10 conceitos de iscas digitais de alta conversão**, seguidos de uma análise estratégica com o Top 3 recomendado.
+
+## METODOLOGIA
+
+Cada isca deve seguir os princípios de resposta direta:
+1. **Ultra-específica**: Resolver UM problema concreto e mensurável
+2. **Aplicação imediata**: O lead deve conseguir usar nos próximos 30 minutos
+3. **Resultado rápido**: Deve gerar uma "micro-vitória" tangível
+4. **Ponte para a oferta**: Criar conexão natural com o produto/serviço principal do DNA
+
+## FÓRMULA DO NOME-OFERTA
+
+Cada isca deve ter um "Nome-Oferta" irrecusável que segue a estrutura:
+[Formato] + [Benefício Específico] + [Prazo/Facilidade] + [Para Quem]
+Exemplo: "O Checklist de 7 Pontos Para Dobrar Suas Vendas em 14 Dias (Sem Gastar com Anúncios)"
+
+## ENTREGA OBRIGATÓRIA
+
+### PARTE 1 — 10 IDEIAS DE ISCAS DIGITAIS
+
+Para cada isca:
+
+#### ISCA [N]: [NOME-OFERTA IRRECUSÁVEL]
+- **Formato**: Checklist / Diagnóstico / Script / Template / Plano / Guia Rápido / Calculadora / Swipe File / Mini-Curso / Planilha
+- **Descrição**: 2-3 frases explicando o que é e o resultado que entrega
+- **Dor que resolve**: A dor específica do avatar que esta isca ataca
+- **Micro-vitória**: O resultado tangível que o lead terá após consumir
+- **Ponte para oferta**: Como esta isca conecta naturalmente ao produto principal
+- **Complexidade de produção**: Baixa / Média / Alta
+- **Score de conversão estimado**: 1 a 10
+
+### PARTE 2 — ANÁLISE ESTRATÉGICA: TOP 3
+
+Para cada uma das 3 melhores iscas:
+- **Por que esta é Top 3**: Justificativa estratégica
+- **Potencial de impacto imediato**: Por que vai gerar leads RÁPIDO
+- **Sugestão de distribuição**: Como promover (ads, orgânico, parcerias, etc.)
+- **Headline para a página de captura**: Pronta para usar
+- **Copy do CTA**: Texto do botão de download
+
+## REGRAS:
+- Cada isca deve ser ÚNICA em formato e ângulo — sem repetição
+- Variar os formatos (não fazer 10 checklists)
+- Todas devem ser práticas e produzíveis em 1-5 dias
+- Os nomes-oferta devem ser magnéticos e impossíveis de ignorar
+- Se houver conteúdo de referência (URL), use como inspiração para 3 das 10 iscas
+- Priorize iscas que criem a MAIOR ponte para a oferta principal do DNA
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Gere iscas baseadas apenas no contexto fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como inspiração para pelo menos 3 das 10 iscas.` : ""}
+
+DIRECIONAMENTO / CONTEÚDO BASE:
+${inputs.content}`;
+    },
+  },
 };
