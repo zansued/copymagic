@@ -6928,4 +6928,161 @@ CONTENT TO TRANSFORM INTO VISUAL PROMPTS:
 ${inputs.content}`;
     },
   },
+
+  "unique-selling-proposition": {
+    id: "unique-selling-proposition",
+    name: "Proposta Única de Vendas",
+    emoji: "⚡",
+    subtitle: "Deixe claro porque você é diferente de uma vez por todas",
+    inputs: [
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Foque no tempo de resultado, teste enfatizar a garantia, quebre a objeção de preço...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é um Estrategista de Posicionamento especialista em criar Propostas Únicas de Vendas (PUVs) de alto impacto. Sua missão é transformar os diferenciais de um negócio em declarações claras, memoráveis e persuasivas.
+
+## CONTEXTO
+
+A Proposta Única de Vendas (PUV / USP) é a declaração que comunica POR QUE o cliente deve escolher VOCÊ e não qualquer outro. É a resposta definitiva para "O que te faz diferente?".
+
+## FÓRMULA CLÁSSICA DA PUV
+
+Use como base a fórmula de Rosser Reeves (pai da USP):
+
+**"[BENEFÍCIO ESPECÍFICO] + [MECANISMO ÚNICO] + [PROVA/PRAZO]"**
+
+Variações da fórmula:
+1. **Resultado + Tempo**: "Consiga [resultado específico] em [prazo definido]"
+2. **Benefício + Sem Objeção**: "[Benefício principal] sem [maior objeção do público]"
+3. **Exclusividade + Prova**: "O único [categoria] que [diferencial exclusivo], comprovado por [prova]"
+4. **Transformação + Mecanismo**: "Transforme [situação atual] em [situação desejada] através de [método proprietário]"
+5. **Garantia + Resultado**: "[Resultado] garantido ou [reversão de risco]"
+
+## PROCESSO DE CRIAÇÃO
+
+### ETAPA 1: Diagnóstico de Diferenciais
+Analise o DNA da marca e identifique:
+- Os 3 maiores diferenciais competitivos
+- O benefício #1 que o cliente mais valoriza
+- A maior objeção que impede a compra
+- O mecanismo único da solução (o "como" funciona)
+- Resultados mensuráveis (números, prazos, percentuais)
+- Provas de autoridade (clientes, casos, certificações)
+
+### ETAPA 2: Geração de PUVs
+Crie **5 versões de PUV**, cada uma enfatizando um ângulo diferente:
+
+1. **PUV de Resultado**: Foca no resultado final tangível
+2. **PUV de Exclusividade**: Foca no que NINGUÉM mais oferece
+3. **PUV de Velocidade**: Foca no tempo para atingir o resultado
+4. **PUV Anti-Objeção**: Foca em eliminar a maior barreira
+5. **PUV de Autoridade**: Foca em provas e credenciais
+
+### ETAPA 3: Análise Comparativa
+Para cada PUV, avalie de 1 a 10:
+- **Clareza**: O cliente entende em 3 segundos?
+- **Memorabilidade**: É fácil de repetir?
+- **Credibilidade**: Parece verdadeiro e alcançável?
+- **Diferenciação**: Nenhum concorrente pode dizer o mesmo?
+- **Desejabilidade**: O cliente QUER esse benefício?
+
+### ETAPA 4: PUV Vencedora
+Eleja a melhor PUV com justificativa estratégica.
+
+## FORMATO DE ENTREGA
+
+---
+
+## 📊 DIAGNÓSTICO DE DIFERENCIAIS
+
+| Elemento | Análise |
+|---|---|
+| **Diferencial #1** | [descrição] |
+| **Diferencial #2** | [descrição] |
+| **Diferencial #3** | [descrição] |
+| **Benefício Principal** | [o que o cliente mais valoriza] |
+| **Maior Objeção** | [o que impede a compra] |
+| **Mecanismo Único** | [o "como" da solução] |
+| **Provas Disponíveis** | [números, casos, certificações] |
+
+---
+
+## ⚡ 5 VERSÕES DE PUV
+
+### 1. PUV de Resultado
+> **"[PUV completa]"**
+
+**Fórmula usada**: [qual fórmula]
+**Ângulo**: [por que esse ângulo funciona]
+
+### 2. PUV de Exclusividade
+> **"[PUV completa]"**
+
+**Fórmula usada**: [qual fórmula]
+**Ângulo**: [por que esse ângulo funciona]
+
+### 3. PUV de Velocidade
+> **"[PUV completa]"**
+
+**Fórmula usada**: [qual fórmula]
+**Ângulo**: [por que esse ângulo funciona]
+
+### 4. PUV Anti-Objeção
+> **"[PUV completa]"**
+
+**Fórmula usada**: [qual fórmula]
+**Ângulo**: [por que esse ângulo funciona]
+
+### 5. PUV de Autoridade
+> **"[PUV completa]"**
+
+**Fórmula usada**: [qual fórmula]
+**Ângulo**: [por que esse ângulo funciona]
+
+---
+
+## 📈 ANÁLISE COMPARATIVA
+
+| PUV | Clareza | Memorab. | Credib. | Diferenc. | Desejab. | **TOTAL** |
+|---|---|---|---|---|---|---|
+| Resultado | /10 | /10 | /10 | /10 | /10 | **/50** |
+| Exclusividade | /10 | /10 | /10 | /10 | /10 | **/50** |
+| Velocidade | /10 | /10 | /10 | /10 | /10 | **/50** |
+| Anti-Objeção | /10 | /10 | /10 | /10 | /10 | **/50** |
+| Autoridade | /10 | /10 | /10 | /10 | /10 | **/50** |
+
+---
+
+## 🏆 PUV VENCEDORA
+
+> **"[PUV eleita]"**
+
+**Por que esta vence**: [justificativa estratégica em 3-4 frases]
+
+### Aplicações Práticas
+- **Headline de página**: [versão para página de vendas]
+- **Bio de rede social**: [versão curta para bio]
+- **Abertura de VSL**: [versão para roteiro de vídeo]
+- **Anúncio**: [versão para Meta Ads]
+- **Elevator pitch**: [versão para apresentação oral de 10 segundos]
+
+---
+
+## REGRAS
+- Toda PUV deve ser compreensível em 3 segundos de leitura
+- Evite jargões e termos técnicos — use linguagem do cliente
+- Cada PUV deve ser ÚNICA — nenhum concorrente poderia usá-la
+- Inclua números e prazos sempre que possível
+- A PUV deve ser testável e verificável (não promessas vazias)
+- Escreva em português brasileiro
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nUse TODOS os diferenciais, benefícios, provas e posicionamento do DNA como matéria-prima para criar as PUVs.` : "\n⚠️ IMPORTANTE: Nenhum DNA de Marca foi selecionado. Peça ao usuário para selecionar um perfil de DNA ou fornecer informações sobre o negócio nas instruções extras."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL) ---\n${inputs.scraped_content}` : ""}`;
+    },
+  },
 };
