@@ -603,4 +603,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "instagram-stories",
+    name: "Story para Instagram",
+    emoji: "📱",
+    role: "Especialista em Stories de Alta Performance",
+    description: "Cria sequências de stories para vendas ou construção de autoridade no Instagram, com hooks, CTAs e sugestões visuais.",
+    category: "content",
+    available: true,
+  },
 ];

@@ -8575,4 +8575,194 @@ INFORMAÇÕES DO LANÇAMENTO:
 ${inputs.content}`;
     },
   },
+
+  "instagram-stories": {
+    id: "instagram-stories",
+    name: "Story para Instagram",
+    emoji: "📱",
+    subtitle: "Sequências de stories para vendas ou autoridade",
+    inputs: [
+      {
+        key: "story_goal",
+        label: "Tipo de Story",
+        type: "select",
+        placeholder: "",
+        required: true,
+        options: [
+          { value: "sales", label: "Stories para Vendas (converter)" },
+          { value: "connection", label: "Stories para Conexão (autoridade)" },
+        ],
+      },
+      {
+        key: "content",
+        label: "Conteúdo Base / Ideia",
+        placeholder: "Cole o texto, ideia, post ou conteúdo que será transformado em stories...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "cta_desired",
+        label: "CTA Desejado (opcional)",
+        placeholder: "Ex: Clicar no link da bio, responder a enquete, mandar DM, comprar o produto...",
+        type: "input",
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://exemplo.com/post-ou-video",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Tom mais descontraído, público feminino 25-35, usar bastidores...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const isSales = inputs.story_goal === "sales";
+      const goalLabel = isSales ? "Vendas" : "Conexão / Autoridade";
+
+      const salesFrameworks = `## FRAMEWORKS PARA STORIES DE VENDAS
+
+Escolha automaticamente o framework mais adequado ao conteúdo:
+
+### 1. PAS (Problema → Agitação → Solução)
+- Story 1-2: Apresente o problema (identificação)
+- Story 3-4: Agite a dor (consequências de não resolver)
+- Story 5-6: Apresente a solução (seu produto)
+- Story 7-8: Prova social + CTA
+
+### 2. AIDA (Atenção → Interesse → Desejo → Ação)
+- Story 1: Hook de atenção (pare o scroll)
+- Story 2-3: Gere interesse (dados, curiosidade)
+- Story 4-5: Crie desejo (benefícios, resultados)
+- Story 6-7: Prova social
+- Story 8: CTA direto
+
+### 3. Storytelling de Vendas
+- Story 1: Hook com situação real
+- Story 2-3: A jornada/história
+- Story 4: A virada (descoberta da solução)
+- Story 5-6: Resultado + prova
+- Story 7: Oferta
+- Story 8: CTA + urgência
+
+### 4. Objeção Killer
+- Story 1: Hook com a objeção ("Você acha que [objeção]?")
+- Story 2-3: Destrua a objeção com lógica/provas
+- Story 4-5: Mostre quem também pensava assim e mudou
+- Story 6: Reframe da situação
+- Story 7-8: Oferta + CTA`;
+
+      const connectionFrameworks = `## FRAMEWORKS PARA STORIES DE CONEXÃO
+
+Escolha automaticamente o framework mais adequado ao conteúdo:
+
+### 1. Bastidores + Valor
+- Story 1: Hook de bastidor ("Deixa eu te mostrar algo...")
+- Story 2-3: O processo/bastidor real
+- Story 4-5: Insight ou lição extraída
+- Story 6: Reflexão + pergunta para audiência
+
+### 2. Micro-Aula
+- Story 1: Hook educativo ("X coisa que ninguém te conta sobre...")
+- Story 2-4: Ensine o conceito em blocos curtos
+- Story 5: Exemplo prático
+- Story 6-7: Aplicação + interação (enquete/pergunta)
+
+### 3. Storytelling Pessoal
+- Story 1: Hook emocional
+- Story 2-3: A história (vulnerabilidade real)
+- Story 4: O aprendizado
+- Story 5-6: Conexão com o público + reflexão
+
+### 4. Curadoria + Opinião
+- Story 1: Hook de conteúdo curado ("Vi algo que preciso compartilhar...")
+- Story 2-3: O conteúdo/dado/notícia
+- Story 4-5: Sua opinião/análise única
+- Story 6: Pergunta para gerar debate`;
+
+      return `Você é um Especialista em Stories do Instagram focado em criar sequências de alta performance para ${goalLabel.toLowerCase()}. Sua missão é transformar o conteúdo fornecido em stories prontos para publicação.
+
+## OBJETIVO: STORIES PARA ${goalLabel.toUpperCase()}
+
+${isSales ? salesFrameworks : connectionFrameworks}
+
+## FORMATO DE ENTREGA
+
+---
+
+## 📱 SEQUÊNCIA DE STORIES — ${goalLabel.toUpperCase()}
+
+**Framework escolhido**: [qual framework e por quê]
+**Total de stories**: [X stories]
+**Tempo estimado**: [X minutos de conteúdo]
+${inputs.cta_desired ? `**CTA principal**: ${inputs.cta_desired}` : ""}
+
+---
+
+Para cada story:
+
+### Story [N/total]
+
+📱 **Formato**: [Texto sobre fundo / Selfie-vídeo / Foto + texto / Enquete / Quiz / Slider / Caixa de perguntas / Contagem regressiva / Compartilhamento de post]
+
+🪝 **Hook/Abertura**:
+> "[texto ou fala de abertura — máx 2 linhas]"
+
+📝 **Conteúdo**:
+> "[texto completo do story OU roteiro do que falar]"
+
+🎯 **Interação/CTA**:
+> "[ação do espectador: votar, responder, arrastar, clicar]"
+
+🎨 **Visual**:
+> [sugestão de fundo, fonte, sticker, cor, ferramenta do Instagram]
+
+💡 **Nota estratégica**: [por que esse story funciona nessa posição]
+
+---
+
+_(Repita para cada story — entre 6 e 10 stories por sequência)_
+
+---
+
+## 📊 RESUMO DA SEQUÊNCIA
+
+| Elemento | Detalhe |
+|---|---|
+| **Framework** | [qual] |
+| **Stories totais** | [X] |
+| **Formatos usados** | [lista] |
+| **Interações** | [enquetes, caixas, etc.] |
+| **Gatilhos mentais** | [lista dos gatilhos usados] |
+| **CTA final** | [ação principal] |
+
+---
+
+## 🔄 VARIAÇÃO ALTERNATIVA
+
+Ofereça 1 sequência alternativa resumida (apenas hooks de cada story) usando um framework diferente, para o autor escolher.
+
+---
+
+## REGRAS
+- Cada story deve ter no MÁXIMO 3-4 linhas de texto (stories são visuais)
+- O primeiro story é o HOOK — deve parar o scroll
+- Alterne formatos (não faça 8 stories de texto seguidos)
+- Use ferramentas nativas: enquete, quiz, slider de emoji, caixa de perguntas, contagem regressiva
+- ${isSales ? "O CTA de venda deve aparecer apenas nos últimos 2-3 stories (não venda cedo demais)" : "Não inclua CTA de venda — foque em engajamento e valor"}
+- Crie transições naturais entre stories ("e aí...", "mas olha isso...")
+- Tom conversacional e autêntico
+- Escreva em português brasileiro
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nAdapte tom, vocabulário e estilo à voz da marca.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL) ---\n${inputs.scraped_content}\n\nUse como fonte principal para construir os stories.` : ""}
+
+CONTEÚDO BASE:
+${inputs.content}`;
+    },
+  },
 };
