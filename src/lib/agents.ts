@@ -286,12 +286,12 @@ export const AGENTS: AgentDef[] = [
   },
   {
     id: "video-script",
-    name: "Roteirista de Reels",
+    name: "Roteiro de Vídeos Verticais",
     emoji: "🎥",
-    role: "Especialista em Vídeos Curtos",
-    description: "Produz scripts para Reels, TikTok e Shorts com ganchos nos primeiros 3 segundos.",
+    role: "Especialista em Roteiros para Reels, Shorts e TikTok",
+    description: "Transforma qualquer conteúdo em roteiros de alta performance para vídeos verticais, com 4 frameworks: Narrativa Viral, Engenharia Viral, Quebra de Mito e Lo-fi.",
     category: "content",
-    available: false,
+    available: true,
   },
   {
     id: "newsletter-writer",

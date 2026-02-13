@@ -7616,4 +7616,269 @@ ${typeLabel.toUpperCase()} PARA REVISÃO:
 ${inputs.content}`;
     },
   },
+
+  "video-script": {
+    id: "video-script",
+    name: "Roteiro de Vídeos Verticais",
+    emoji: "🎥",
+    subtitle: "Roteiros para Reels, Shorts e TikTok",
+    inputs: [
+      {
+        key: "script_type",
+        label: "Tipo de Roteiro",
+        type: "select",
+        placeholder: "",
+        required: true,
+        options: [
+          { value: "narrative-viral", label: "Narrativa Viral (até 60s)" },
+          { value: "engineering-viral", label: "Engenharia Viral (até 60s)" },
+          { value: "myth-breaker", label: "Quebra de Mito (até 60s)" },
+          { value: "lofi", label: "Lo-fi / Monólogo Autêntico (+60s)" },
+        ],
+      },
+      {
+        key: "content",
+        label: "Conteúdo Base / Ideia",
+        placeholder: "Descreva sua ideia, cole um texto de referência ou dê direcionamentos para o roteiro...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://exemplo.com/artigo-ou-noticia",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Tom mais descontraído, incluir dados estatísticos, focar no público feminino 25-35...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const frameworks: Record<string, string> = {
+        "narrative-viral": `## FRAMEWORK: NARRATIVA VIRAL (até 60s)
+
+Objetivo: Usar storytelling para criar vídeos que viralizam naturalmente.
+
+### ESTRUTURA:
+
+**HOOK (0-3s)** — Pare o scroll
+- Frase de impacto que gera curiosidade imediata
+- Pode ser: pergunta chocante, afirmação controversa, revelação inesperada
+- TOM: Urgente, como se estivesse contando um segredo
+
+**CONTEXTO (3-10s)** — Situe o espectador
+- Estabeleça rapidamente o cenário ou personagem
+- Use "Eu estava..." / "Isso aconteceu quando..." / "Ninguém fala sobre isso, mas..."
+- Crie empatia imediata
+
+**TENSÃO (10-30s)** — Construa o conflito
+- Apresente o problema, desafio ou obstáculo
+- Aumente progressivamente a tensão
+- Use pausas dramáticas e mudanças de ritmo
+- Mantenha loops abertos ("e aí aconteceu algo que mudou tudo...")
+
+**VIRADA (30-45s)** — O momento "AHA"
+- Revelação surpreendente ou insight poderoso
+- Deve ser genuinamente útil ou impactante
+- Conecte emoção com lógica
+
+**FECHAMENTO (45-60s)** — Ação + Retenção
+- CTA claro e natural
+- Gancho para próximo conteúdo OU pergunta que gera comentários
+- Frase final memorável`,
+
+        "engineering-viral": `## FRAMEWORK: ENGENHARIA VIRAL (até 60s)
+
+Objetivo: Transformar conteúdo técnico, dados ou informações densas em vídeos virais e acessíveis.
+
+### ESTRUTURA:
+
+**HOOK TÉCNICO (0-3s)** — Dado surpreendente
+- Abra com estatística chocante, fato contraintuitivo ou resultado inesperado
+- Ex: "97% das pessoas fazem [X] errado" / "Esse dado vai mudar como você pensa sobre [Y]"
+- TOM: Confiante, como um professor que sabe algo que ninguém sabe
+
+**SIMPLIFICAÇÃO (3-15s)** — Traduza o complexo
+- Pegue o conceito técnico e use UMA analogia poderosa
+- "Imagine que [conceito complexo] é como [algo do dia a dia]"
+- Elimine TODO jargão — se uma criança de 12 anos não entende, simplifique mais
+
+**DEMONSTRAÇÃO (15-35s)** — Prove visualmente
+- Mostre o conceito em ação com exemplo prático
+- Use "antes vs depois" ou "certo vs errado"
+- Inclua sugestões visuais (texto na tela, gestos, objetos)
+
+**INSIGHT APLICÁVEL (35-50s)** — O "e daí?"
+- Transforme o conhecimento em AÇÃO imediata
+- "Então da próxima vez que você [situação], faça [ação específica]"
+- Dê um passo concreto que o espectador pode aplicar HOJE
+
+**FECHAMENTO VIRAL (50-60s)** — Compartilhamento
+- Gatilho de compartilhamento: "Manda isso pra alguém que precisa saber"
+- OU pergunta que gera debate nos comentários
+- OU promessa de parte 2`,
+
+        "myth-breaker": `## FRAMEWORK: QUEBRA DE MITO (até 60s)
+
+Objetivo: Desafiar uma crença popular, gerar autoridade e engajamento via polêmica construtiva.
+
+### ESTRUTURA:
+
+**HOOK POLÊMICO (0-3s)** — Desafie a crença
+- Abra negando algo que "todo mundo acredita"
+- Ex: "Isso que te ensinaram sobre [X] é mentira" / "[Crença popular]? Completamente errado."
+- TOM: Direto, assertivo, sem medo de discordar
+
+**O MITO (3-12s)** — Apresente a crença
+- Explique o que a maioria das pessoas acredita e por quê
+- Mostre que é uma crença lógica (não trate o espectador como burro)
+- "Faz sentido pensar assim, porque..."
+
+**A EVIDÊNCIA (12-30s)** — Destrua com fatos
+- Apresente dados, estudos, exemplos reais ou lógica irrefutável
+- Use 2-3 argumentos fortes (não mais)
+- Cada argumento deve ser um golpe progressivamente mais forte
+- "Mas o que realmente acontece é..."
+
+**A VERDADE (30-45s)** — Reconstrua
+- Apresente a visão correta/alternativa
+- Seja específico e prático
+- "O que funciona de verdade é..."
+- Dê o framework ou método correto
+
+**FECHAMENTO AUTORITÁRIO (45-60s)**
+- Reforce sua posição com confiança
+- CTA de engajamento: "Concorda ou discorda? Comenta aí"
+- Posicione-se como alguém que fala verdades difíceis`,
+
+        "lofi": `## FRAMEWORK: LO-FI / MONÓLOGO AUTÊNTICO (+60s)
+
+Objetivo: Converter ideias em monólogos autênticos, diretos e pessoais. Formato "falando para a câmera" sem produção excessiva.
+
+### ESTRUTURA:
+
+**ABERTURA PESSOAL (0-5s)** — Conexão imediata
+- Comece como se estivesse no meio de uma conversa
+- Ex: "Preciso te contar uma coisa..." / "Tava pensando sobre isso e..."
+- TOM: Íntimo, como se falasse com um amigo próximo
+- Sem intro, sem vinheta, sem "fala pessoal"
+
+**CONTEXTO DA REFLEXÃO (5-20s)** — Por que isso importa
+- O que te fez pensar nisso? Qual foi o gatilho?
+- Pode ser: uma situação real, uma conversa, algo que leu/viu
+- Crie identificação: "Talvez você já tenha passado por isso..."
+
+**DESENVOLVIMENTO (20s-2min)** — O conteúdo principal
+- Desenvolva sua ideia em blocos curtos
+- Alterne entre: opinião pessoal + exemplo + insight
+- Use pausas naturais (não fale sem parar)
+- Mantenha o tom conversacional — como se pensasse em voz alta
+- Pode incluir: "Não sei se faz sentido, mas..." (autenticidade)
+- Cada bloco deve ter no máximo 20 segundos antes de uma transição
+
+**MOMENTO DE VULNERABILIDADE (2-2:30min)** — Profundidade
+- Compartilhe algo pessoal, uma falha, um aprendizado difícil
+- Isso é o que diferencia lo-fi de conteúdo genérico
+- "Vou ser honesto com vocês..."
+
+**FECHAMENTO REFLEXIVO (últimos 15-30s)**
+- Não force CTA de vendas — mantenha autenticidade
+- Termine com reflexão aberta ou pergunta genuína
+- "Me conta nos comentários se você pensa diferente"
+- OU feche com frase de impacto que resume tudo`,
+      };
+
+      const selectedFramework = frameworks[inputs.script_type] || frameworks["narrative-viral"];
+      const typeLabels: Record<string, string> = {
+        "narrative-viral": "Narrativa Viral",
+        "engineering-viral": "Engenharia Viral",
+        "myth-breaker": "Quebra de Mito",
+        "lofi": "Lo-fi / Monólogo Autêntico",
+      };
+      const typeLabel = typeLabels[inputs.script_type] || "Narrativa Viral";
+
+      return `Você é um Roteirista Especialista em vídeos verticais de alta performance para Instagram Reels, YouTube Shorts e TikTok. Sua missão é transformar qualquer conteúdo em um roteiro pronto para gravar usando o framework "${typeLabel}".
+
+${selectedFramework}
+
+## FORMATO DE ENTREGA
+
+---
+
+## 🎬 ROTEIRO: ${typeLabel.toUpperCase()}
+
+**Plataformas**: Instagram Reels | YouTube Shorts | TikTok
+**Duração estimada**: [Xs - Xs]
+**Tom**: [descreva o tom ideal]
+
+---
+
+### 🎙️ ROTEIRO COMPLETO
+
+Para cada seção do framework, entregue:
+
+**[NOME DA SEÇÃO] — [Xs a Xs]**
+
+📢 **Fala:**
+> "[texto exato que a pessoa deve falar, natural e conversacional]"
+
+📱 **Visual / Ação:**
+> [o que aparece na tela, gestos, movimentos, texto overlay]
+
+💡 **Dica de execução:**
+> [tom de voz, velocidade, expressão facial, energia]
+
+---
+
+_(Repita para cada seção do framework)_
+
+---
+
+## 📝 TEXTO PARA LEGENDA
+
+> [legenda otimizada para a plataforma, com hashtags estratégicas]
+
+---
+
+## 🎯 VARIAÇÕES DE HOOK
+
+Além do hook principal, ofereça 3 alternativas:
+1. **Hook de curiosidade**: "[alternativa 1]"
+2. **Hook de polêmica**: "[alternativa 2]"
+3. **Hook de identificação**: "[alternativa 3]"
+
+---
+
+## 📋 CHECKLIST DE GRAVAÇÃO
+
+- [ ] Hook nos primeiros 3 segundos
+- [ ] Enquadramento vertical (9:16)
+- [ ] Áudio claro (microfone de lapela recomendado)
+- [ ] Texto na tela nos momentos-chave
+- [ ] Energia e ritmo adequados ao framework
+- [ ] CTA natural no fechamento
+
+---
+
+## REGRAS
+- O roteiro deve soar NATURAL — como uma pessoa falando, não lendo
+- Use frases curtas e diretas (máximo 15 palavras por frase)
+- Inclua pausas dramáticas onde indicado [PAUSA]
+- Sugira texto na tela (overlay) nos momentos de impacto
+- O hook DEVE funcionar sem contexto — alguém scrollando deve parar
+- Adapte o comprimento ao framework escolhido
+- Escreva em português brasileiro
+- Use linguagem do dia a dia, não linguagem de livro
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nAdapte o tom, vocabulário e estilo do roteiro à voz da marca.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL) ---\n${inputs.scraped_content}\n\nUse como fonte principal de informação para construir o roteiro.` : ""}
+
+CONTEÚDO BASE / IDEIA:
+${inputs.content}`;
+    },
+  },
 };
