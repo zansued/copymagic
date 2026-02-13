@@ -4352,4 +4352,138 @@ DETALHES DA OFERTA PRINCIPAL:
 ${inputs.content}`;
     },
   },
+
+  "mini-vsl": {
+    id: "mini-vsl",
+    name: "Mini VSL [3-7 Min]",
+    emoji: "⚡",
+    subtitle: "Crie roteiros de Mini VSL com múltiplos hooks para conversão rápida",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto da Oferta / Roteiro Base",
+        placeholder: "Descreva sua oferta (produto, transformação, público), cole a PRIMEIRA METADE de um roteiro longo (promessa + mecanismo, SEM revelar o produto), ou descreva o problema que resolve...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "objective",
+        label: "Objetivo da Mini VSL",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "click", label: "🔗 Gerar clique (levar para vídeo longo ou página)" },
+          { value: "warm", label: "🔥 Aquecer audiência (anúncio in-feed)" },
+          { value: "low-ticket", label: "💰 Venda direta low-ticket (R$7-97)" },
+          { value: "booking", label: "📅 Agendamento (call/consulta)" },
+        ],
+      },
+      {
+        key: "duration",
+        label: "Duração",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "3min", label: "⚡ 3 minutos (~450 palavras)" },
+          { value: "5min", label: "🎯 5 minutos (~750 palavras)" },
+          { value: "7min", label: "🎬 7 minutos (~1.050 palavras)" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de referência (vídeo, página, post) para enriquecer o roteiro...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Não revelar o nome do produto', 'Tom provocativo', 'Público feminino 30-45', 'Focar em urgência'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const objMap: Record<string, string> = {
+        click: "GERAR CLIQUE — levar o espectador para um vídeo mais longo, página de vendas ou landing page. NÃO revele o produto, apenas promessa + mecanismo único.",
+        warm: "AQUECER AUDIÊNCIA — funcionar como anúncio in-feed que educa e gera curiosidade. Preparar mentalmente para a próxima etapa do funil.",
+        "low-ticket": "VENDA DIRETA LOW-TICKET — converter diretamente para um produto de R$7-97. Incluir CTA de compra com urgência.",
+        booking: "AGENDAMENTO — levar o espectador a agendar uma call, consulta ou demonstração. Focar em qualificação e desejo.",
+      };
+      const durationMap: Record<string, string> = {
+        "3min": "3 minutos (~450 palavras)",
+        "5min": "5 minutos (~750 palavras)",
+        "7min": "7 minutos (~1.050 palavras)",
+      };
+
+      return `Você é o Roteirista de Mini VSL — um especialista em criar vídeos de vendas curtos (3-7 minutos) carregados de hooks que prendem, educam e convertem em tempo recorde.
+
+MISSÃO: Criar um roteiro completo de Mini VSL de ${durationMap[inputs.duration] || "5 minutos (~750 palavras)"}.
+
+OBJETIVO: ${objMap[inputs.objective] || objMap.click}
+
+## PRINCÍPIOS DA MINI VSL
+
+A Mini VSL é fundamentalmente diferente de uma VSL longa. As regras são:
+
+1. **MÚLTIPLOS HOOKS**: Nos primeiros 30 segundos, use 3-5 ganchos em sequência rápida. Não confie em um só.
+2. **ZERO ENROLAÇÃO**: Vá direto ao ponto. Cada frase deve carregar peso.
+3. **HISTÓRIA COMPRIMIDA**: Resuma credibilidade em 1-2 frases, não em 5 minutos.
+4. **MECANISMO ÚNICO EM FOCO**: Explique rapidamente a solução sem revelar todos os detalhes.
+5. **PROMESSA CLARA E ÓBVIA**: O que a pessoa vai ganhar deve ficar cristalino.
+6. **CTA DIRETO COM URGÊNCIA**: Sem rodeios no fechamento.
+
+## ESTRUTURA OBRIGATÓRIA DO ROTEIRO
+
+### [HOOK STACK — 0:00 a 0:30]
+**3-5 ganchos em sequência rápida.** Cada um ataca um ângulo diferente:
+- Hook de Curiosidade: Uma pergunta ou afirmação que para o scroll
+- Hook de Resultado: Um número, dado ou resultado concreto
+- Hook de Dor: Identificação com o problema do avatar
+- Hook de Contraste: "Todo mundo faz X, mas os que conseguem resultados fazem Y"
+- Hook de Urgência: Por que prestar atenção AGORA
+
+Entregue **3 versões alternativas** do bloco de hooks para teste A/B.
+
+### [IDENTIFICAÇÃO + PROMESSA — 0:30 a 1:30]
+- "Se você é [avatar específico] que [situação/dor]..."
+- Promessa clara: o que vai aprender/descobrir neste vídeo
+- Credibilidade comprimida em 1 frase ("Depois de [prova], descobri que...")
+- Transição para o conteúdo
+
+### [PROBLEMA REAL — 1:30 a 2:30]
+- O problema que ninguém fala (mudança de perspectiva)
+- Por que as soluções convencionais falham
+- A consequência de continuar no caminho errado
+- Emoção: frustração, medo, cansaço
+
+### [MECANISMO ÚNICO — 2:30 a 4:00]
+- A descoberta/método/sistema que muda tudo
+- Explicação simples e visual (analogias, metáforas)
+- 1-2 provas rápidas (resultado, dado, caso)
+- **NÃO revele o produto completo** se o objetivo é gerar clique
+
+### [CTA + URGÊNCIA — últimos 30-60 segundos]
+- Resumo da promessa em 1 frase
+- O que acontece quando clicar/comprar/agendar
+- Urgência real (não falsa)
+- CTA claro e direto
+- Reforço emocional final
+
+## REGRAS DE OURO:
+- Cada frase deve ser CURTA e de ALTO IMPACTO
+- Use pattern interrupts visuais: [ZOOM], [CORTE], [TEXTO NA TELA], [B-ROLL]
+- Marque os timestamps de cada seção
+- Escreva como se estivesse falando, não escrevendo
+- Ritmo: rápido no início, levemente mais lento no mecanismo, urgente no final
+- Se o objetivo é gerar clique: NÃO mencione nome do produto, ingredientes ou solução completa
+- Inclua direções de cena e marcações de edição
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Adapte o roteiro de forma genérica."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como base para o roteiro. IMPORTANTE: Se for uma transcrição, use apenas a parte de promessa e mecanismo, NÃO inclua revelação do produto.` : ""}
+
+CONTEXTO DA OFERTA / ROTEIRO BASE:
+${inputs.content}`;
+    },
+  },
 };
