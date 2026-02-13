@@ -449,4 +449,13 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: true,
   },
+  {
+    id: "linkedin-optimizer",
+    name: "Otimização de LinkedIn",
+    emoji: "💼",
+    role: "Especialista em Perfis Profissionais de LinkedIn",
+    description: "Reescreve seu perfil do LinkedIn para gerar autoridade e atrair oportunidades, com diagnóstico completo, 3 opções de headline e seções otimizadas.",
+    category: "branding",
+    available: true,
+  },
 ];
