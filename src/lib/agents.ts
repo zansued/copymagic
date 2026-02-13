@@ -585,4 +585,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "spin-selling",
+    name: "SPIN Selling",
+    emoji: "🔄",
+    role: "Especialista em Vendas Consultivas — Método SPIN",
+    description: "Gera perguntas estratégicas nos 4 estágios do SPIN Selling (Situação, Problema, Implicação, Necessidade) para vendas complexas.",
+    category: "products",
+    available: true,
+  },
 ];
