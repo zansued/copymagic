@@ -612,4 +612,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "youtube-thumbnails",
+    name: "Thumbnails para YouTube",
+    emoji: "🖼️",
+    role: "Especialista em Thumbnails de Alto CTR",
+    description: "Gera textos virais e conceitos visuais completos para thumbnails de YouTube que maximizam CTR mantendo autenticidade.",
+    category: "content",
+    available: true,
+  },
 ];
