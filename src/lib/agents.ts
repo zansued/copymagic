@@ -558,4 +558,13 @@ export const AGENTS: AgentDef[] = [
     category: "ideation",
     available: true,
   },
+  {
+    id: "copy-reviewer-cub",
+    name: "Revisor de Copy (CUB)",
+    emoji: "🩺",
+    role: "Consultor de Copywriting — Método CUB",
+    description: "Analisa sua copy pelo método CUB (Confuso, Inacreditável, Chato) e entrega um plano de ação para transformá-la em versão de alta conversão.",
+    category: "copywriting",
+    available: true,
+  },
 ];
