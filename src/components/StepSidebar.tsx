@@ -10,14 +10,14 @@ interface StepSidebarProps {
 
 const STEP_GLOW_COLORS = [
   "#a78bfa", // avatar - purple
-  "#facc15", // usp - yellow
   "#fb923c", // oferta - orange
+  "#facc15", // usp - yellow
   "#38bdf8", // pagina_vendas - sky
   "#f87171", // upsells - red
-  "#e879f9", // pagina_upsell - fuchsia
   "#34d399", // anuncios - emerald
-  "#f472b6", // vsl_upsell - pink
   "#60a5fa", // vsl_longa - blue
+  "#e879f9", // pagina_upsell - fuchsia
+  "#f472b6", // vsl_upsell - pink
 ];
 
 function hexToRgba(hex: string, alpha: number = 1): string {
