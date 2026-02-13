@@ -486,4 +486,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "instagram-profile",
+    name: "Perfil do Instagram",
+    emoji: "📸",
+    role: "Especialista em Perfis de Instagram",
+    description: "Cria perfis completos do Instagram: @, bio magnética, destaques persuasivos e posicionamento claro para atrair clientes ideais.",
+    category: "branding",
+    available: true,
+  },
 ];

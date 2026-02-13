@@ -5956,4 +5956,151 @@ DADOS DO PÚBLICO / AVATAR:
 ${inputs.content}`;
     },
   },
+
+  "instagram-profile": {
+    id: "instagram-profile",
+    name: "Perfil do Instagram",
+    emoji: "📸",
+    subtitle: "Defina @, bio e destaques para um perfil magnético",
+    inputs: [
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Link do seu perfil atual ou de um perfil de referência que admira...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: 'Sou nutricionista focada em emagrecimento feminino', 'Quero um tom mais descontraído', 'Meu nome é João e minha marca é X'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Especialista em Perfis de Instagram — um estrategista de presença digital que transforma perfis genéricos em vitrines profissionais magnéticas.
+
+MISSÃO: Criar um perfil completo e otimizado do Instagram que converte visitantes em seguidores e seguidores em clientes, usando o método "Perfil Padrão Ouro".
+
+IMPORTANTE: Use as informações do DNA de Marca como base principal. O perfil deve refletir identidade, voz, público e produto do DNA.
+
+## PROCESSO OBRIGATÓRIO
+
+### 1. SUGESTÕES DE @ (USERNAME) — 8 opções
+
+Crie 8 variações organizadas por estratégia:
+
+| # | @ | Estratégia | Memorabilidade | Disponibilidade* |
+|---|---|-----------|---------------|-----------------|
+| 1 | @[username] | Nome pessoal | ⭐⭐⭐⭐⭐ | Verificar |
+| 2 | @[username] | Nome + nicho | ⭐⭐⭐⭐ | Verificar |
+| 3 | @[username] | Marca | ⭐⭐⭐⭐ | Verificar |
+| ... | ... | ... | ... | ... |
+
+*Nota: Disponibilidade deve ser verificada pelo usuário.
+
+Regras para @:
+- Fácil de digitar e soletrar
+- Sem números aleatórios ou underscores desnecessários
+- Memorável quando falado em voz alta ("Me segue no @...")
+- Coerente com a marca/identidade
+
+### 2. NOME DO PERFIL — 5 opções
+
+O nome que aparece em negrito (diferente do @):
+
+| # | Nome | Estratégia | Caracteres |
+|---|------|-----------|-----------|
+| 1 | [Nome] | Nome + Cargo/Nicho | XX/64 |
+| 2 | [Nome] | Nome + Resultado | XX/64 |
+| 3 | [Nome] | Nome + Autoridade | XX/64 |
+| 4 | [Nome] | Marca + Proposta | XX/64 |
+| 5 | [Nome] | Nome + Emoji + Nicho | XX/64 |
+
+Regras:
+- Máximo 64 caracteres
+- Inclua palavras-chave buscáveis (SEO do Instagram)
+- Combine identidade pessoal com posicionamento profissional
+
+### 3. BIO — 3 VERSÕES COMPLETAS
+
+#### Versão 1: Texto Único (fluido)
+Uma bio em formato de parágrafo contínuo, concisa e impactante.
+
+#### Versão 2: Parágrafos Estruturados
+Bio com quebras de linha estratégicas, cada linha com uma função:
+- Linha 1: Quem você é / O que faz
+- Linha 2: Para quem / Resultado que entrega
+- Linha 3: Prova social ou credencial
+- Linha 4: CTA + link
+
+#### Versão 3: Emojis & Tópicos
+Bio visual com emojis como marcadores:
+- 🎯 [Proposta de valor]
+- 💰 [Resultado/benefício]
+- 📩 [CTA]
+
+Para cada versão:
+- Máximo 150 caracteres
+- Inclua proposta de valor clara
+- Tenha um CTA (chamada para ação)
+- Comunique quem você é e por que seguir
+
+**Recomendação**: Indique qual versão é melhor para o perfil estratégico do DNA.
+
+### 4. DESTAQUES (STORIES HIGHLIGHTS) — 4 a 6 destaques
+
+Para cada destaque:
+
+#### 📌 Destaque [N]: [TÍTULO]
+- **Título**: Máx. 10 caracteres (aparece cortado)
+- **Emoji de capa**: Sugestão de emoji ou ícone
+- **Objetivo**: Por que este destaque existe
+- **Sequência de Stories** (5-8 stories):
+  1. [Story 1]: [Descrição do conteúdo + texto sugerido]
+  2. [Story 2]: [Descrição do conteúdo + texto sugerido]
+  ... 
+
+Destaques sugeridos (adapte ao nicho):
+- Sobre Mim / Quem Sou
+- Resultados / Cases
+- Produto / Serviço principal
+- Depoimentos / Provas
+- Bastidores / Processo
+- FAQ / Dúvidas
+
+### 5. DICAS DE FOTO — MÉTODO PERFIL PADRÃO OURO
+
+#### Foto de Perfil:
+- **Enquadramento**: Rosto centralizado, do peito para cima
+- **Expressão**: Sorriso confiante ou olhar direto
+- **Fundo**: Limpo ou com contraste (cor sólida > ambiente bagunçado)
+- **Iluminação**: Luz natural frontal ou ring light
+- **Roupa**: Alinhada ao posicionamento (casual profissional vs. formal)
+- **Cores**: Que contrastem com o fundo do Instagram
+
+#### Feed Visual (primeiras 9 fotos):
+- Paleta de cores coerente com a marca
+- Mix de formatos: carrosséis, reels, imagem estática
+- Proporção sugerida: 40% educativo, 30% autoridade, 20% bastidores, 10% CTA
+
+### 6. POSICIONAMENTO GERAL
+
+- **Frase de posicionamento**: "Eu ajudo [público] a [resultado] através de [método/produto]"
+- **Diferencial competitivo**: O que torna este perfil único
+- **Tom de comunicação**: Como falar nos posts e stories
+- **Hashtags fixas**: 5-10 hashtags de marca/nicho para usar sempre
+- **Frequência ideal**: Quantos posts, stories e reels por semana
+
+REGRAS:
+- Tudo deve funcionar de forma INTEGRADA — @, nome, bio e destaques contam a mesma história
+- Priorize clareza sobre criatividade — o visitante tem 3 segundos para decidir
+- Adapte ao tom do DNA de marca
+- Evite clichés ("apaixonado por...", "transformando vidas", "conteúdo de valor")
+- Cada elemento deve responder: "Por que devo seguir esta pessoa?"
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\n⚡ Use TODAS as informações do DNA para criar um perfil coerente com a marca.` : "⚠️ Nenhum DNA de Marca selecionado. Crie sugestões genéricas mas peça ao usuário para selecionar um DNA para resultados personalizados."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL/PERFIL IMPORTADO) ---\n${inputs.scraped_content}\n\n⚡ Analise este perfil/conteúdo como referência para as sugestões.` : ""}`;
+    },
+  },
 };
