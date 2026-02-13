@@ -7881,4 +7881,348 @@ CONTEÚDO BASE / IDEIA:
 ${inputs.content}`;
     },
   },
+
+  "youtube-script": {
+    id: "youtube-script",
+    name: "Roteiro de YouTube",
+    emoji: "🎬",
+    subtitle: "Transforme qualquer ideia em um roteiro de YouTube estruturado",
+    inputs: [
+      {
+        key: "script_framework",
+        label: "Framework de Roteiro",
+        type: "select",
+        placeholder: "",
+        required: true,
+        options: [
+          { value: "hook-story-offer", label: "Hook → Story → Offer (Vendas)" },
+          { value: "tutorial", label: "Tutorial / Passo a Passo" },
+          { value: "listicle", label: "Listicle (Top X / X Formas)" },
+          { value: "myth-busting", label: "Derrubando Mitos" },
+          { value: "storytelling", label: "Storytelling / Narrativa" },
+          { value: "debate", label: "Opinião / Debate" },
+        ],
+      },
+      {
+        key: "content",
+        label: "Tema / Ideia do Vídeo",
+        placeholder: "Descreva o tema central, cole um texto de referência ou dê direcionamentos para o roteiro...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "video_duration",
+        label: "Duração do Vídeo (opcional)",
+        placeholder: "Ex: 8 minutos, 15 minutos... Deixe em branco para sugestão automática",
+        type: "input",
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://exemplo.com/artigo-ou-video",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Tom descontraído, incluir storytelling pessoal, focar em iniciantes...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const frameworks: Record<string, string> = {
+        "hook-story-offer": `## FRAMEWORK: HOOK → STORY → OFFER
+
+### HOOK (0-30s)
+- Promessa clara do que o espectador vai aprender/ganhar
+- Dado surpreendente ou pergunta que gera curiosidade
+- "Neste vídeo você vai descobrir..."
+- Estabeleça URGÊNCIA: por que assistir AGORA
+
+### SETUP / CONTEXTO (30s-2min)
+- Contextualize o problema que será resolvido
+- Crie identificação: "Se você já tentou [X] e não funcionou..."
+- Estabeleça sua autoridade brevemente
+- Preview do que vem a seguir (retenção)
+
+### HISTÓRIA / CONTEÚDO PRINCIPAL (2min-70%)
+- Conte a história ou apresente o conteúdo em blocos
+- Cada bloco: Ponto → Exemplo → Insight
+- Use transições que mantêm curiosidade
+- Inclua "pattern interrupts" a cada 2-3 minutos
+- Alterne entre ensinar e entreter
+
+### VIRADA / REVELAÇÃO (70-85%)
+- O momento "aha" principal
+- Conecte todos os pontos apresentados
+- Mostre o resultado ou transformação
+
+### OFERTA / CTA (85-100%)
+- Resuma o valor entregue
+- CTA principal (inscreva-se, link, produto)
+- Gancho para próximo vídeo
+- CTA de engajamento (like, comentário)`,
+
+        "tutorial": `## FRAMEWORK: TUTORIAL / PASSO A PASSO
+
+### HOOK + RESULTADO (0-30s)
+- Mostre o RESULTADO FINAL primeiro
+- "Ao final deste vídeo, você vai saber exatamente como..."
+- Demonstre visualmente o antes/depois se possível
+
+### CONTEXTO + PRÉ-REQUISITOS (30s-1:30min)
+- Para quem é este tutorial
+- O que você precisa ter/saber antes
+- Visão geral dos passos (roadmap)
+
+### PASSO A PASSO (1:30min-80%)
+- Divida em passos claros e numerados
+- Cada passo: O que fazer → Como fazer → Por que fazer assim
+- Antecipe erros comuns: "Cuidado para não..."
+- Use marcadores de progresso: "Passo 3 de 7..."
+- Inclua atalhos e dicas bônus
+
+### RESULTADO + TROUBLESHOOTING (80-90%)
+- Mostre o resultado final completo
+- Problemas comuns e soluções
+- Variações possíveis
+
+### FECHAMENTO (90-100%)
+- Recapitulação dos passos principais
+- Recurso complementar (download, link)
+- CTA: "Comenta qual passo foi mais útil"
+- Próximo tutorial sugerido`,
+
+        "listicle": `## FRAMEWORK: LISTICLE (TOP X / X FORMAS)
+
+### HOOK NUMÉRICO (0-20s)
+- Abra com o número e a promessa
+- "X [coisas] que vão [resultado desejado]"
+- Tease o item mais impactante: "O número [X] é o que muda tudo"
+
+### CONTEXTO RÁPIDO (20s-1min)
+- Por que esta lista importa
+- Como foi curada/selecionada
+- O que esperar do vídeo
+
+### ITENS DA LISTA (1min-85%)
+- Apresente do menos ao mais impactante (ordem crescente de valor)
+- Cada item: Nome → Explicação → Exemplo prático → Aplicação
+- Use transições numéricas claras
+- A cada 3-4 itens, inclua um "pattern interrupt"
+- O último item deve ser o mais valioso (recompensa por assistir até o final)
+
+### ITEM BÔNUS (85-92%)
+- Surpreenda com um item extra não prometido
+- "E aqui vai um bônus que eu não ia incluir..."
+
+### FECHAMENTO (92-100%)
+- Qual item é o mais importante na sua opinião
+- CTA: "Qual foi o seu favorito? Comenta o número"
+- Sugestão de vídeo complementar`,
+
+        "myth-busting": `## FRAMEWORK: DERRUBANDO MITOS
+
+### HOOK POLÊMICO (0-20s)
+- Desafie uma crença popular sobre o tema
+- "Tudo que te ensinaram sobre [X] está errado"
+- Crie tensão e curiosidade
+
+### O PROBLEMA (20s-1:30min)
+- Explique por que esses mitos são prejudiciais
+- Mostre as consequências de acreditar neles
+- Crie urgência para saber a verdade
+
+### MITO POR MITO (1:30min-80%)
+Para cada mito:
+- **O Mito**: Apresente a crença popular
+- **Por que parece verdade**: Valide o raciocínio (não trate como burrice)
+- **A Evidência**: Dados, estudos ou lógica que desmontam
+- **A Verdade**: O que realmente funciona
+- **Aplicação**: Como usar a verdade na prática
+
+### A GRANDE VERDADE (80-90%)
+- Conecte todos os mitos desfeitos em UMA grande lição
+- O insight que muda a perspectiva do espectador
+
+### FECHAMENTO (90-100%)
+- Desafie o espectador a repensar
+- CTA: "Qual mito te surpreendeu mais?"
+- Sugira vídeo complementar`,
+
+        "storytelling": `## FRAMEWORK: STORYTELLING / NARRATIVA
+
+### HOOK IN MEDIA RES (0-20s)
+- Comece no meio da ação ou no momento de maior tensão
+- "Era 3 da manhã e eu estava prestes a..."
+- Não contextualize ainda — deixe a curiosidade puxar
+
+### FLASHBACK / SETUP (20s-2min)
+- Volte ao início da história
+- Apresente o personagem (você ou alguém) e o contexto
+- Estabeleça o "mundo normal" antes da mudança
+- Crie empatia e identificação
+
+### CONFLITO / JORNADA (2min-60%)
+- Os obstáculos, falhas e desafios enfrentados
+- Mostre vulnerabilidade real
+- Aumente a tensão progressivamente
+- Use diálogos e detalhes sensoriais
+
+### CLÍMAX (60-75%)
+- O momento decisivo / a virada
+- O insight ou descoberta que mudou tudo
+- Máximo impacto emocional
+
+### RESOLUÇÃO + LIÇÃO (75-90%)
+- O resultado da jornada
+- A lição universal extraída
+- Como o espectador pode aplicar isso
+
+### FECHAMENTO (90-100%)
+- Conecte a história com o espectador
+- "E você, já passou por algo assim?"
+- CTA emocional e natural`,
+
+        "debate": `## FRAMEWORK: OPINIÃO / DEBATE
+
+### HOOK CONTROVERSO (0-20s)
+- Posicione-se claramente sobre um tema polêmico
+- "Vou falar algo que muita gente vai discordar..."
+- Estabeleça que há um debate e você tem uma posição
+
+### CONTEXTO DO DEBATE (20s-1:30min)
+- Apresente os dois (ou mais) lados
+- Seja justo na apresentação (steelman, não strawman)
+- Explique por que isso importa agora
+
+### ARGUMENTO POR ARGUMENTO (1:30min-70%)
+- Apresente seus argumentos do mais fraco ao mais forte
+- Para cada um: Ponto → Evidência → Contra-argumento antecipado → Refutação
+- Use exemplos concretos e dados
+- Reconheça pontos válidos do outro lado
+
+### SEU VEREDITO (70-85%)
+- Conclusão clara e assertiva
+- O argumento mais forte resumido
+- Nuance: em que cenários sua posição poderia mudar
+
+### ABERTURA PARA DIÁLOGO (85-100%)
+- Convide discordância respeitosa
+- "Se você pensa diferente, me convence nos comentários"
+- CTA forte de engajamento
+- Sugira vídeo que aprofunda o tema`,
+      };
+
+      const selectedFramework = frameworks[inputs.script_framework] || frameworks["hook-story-offer"];
+      const typeLabels: Record<string, string> = {
+        "hook-story-offer": "Hook → Story → Offer",
+        "tutorial": "Tutorial / Passo a Passo",
+        "listicle": "Listicle",
+        "myth-busting": "Derrubando Mitos",
+        "storytelling": "Storytelling / Narrativa",
+        "debate": "Opinião / Debate",
+      };
+      const typeLabel = typeLabels[inputs.script_framework] || "Hook → Story → Offer";
+      const durationNote = inputs.video_duration
+        ? `O roteiro deve ser adaptado para uma duração de **${inputs.video_duration}**.`
+        : "Sugira a duração ideal com base no conteúdo e framework escolhido.";
+
+      return `Você é um Roteirista Profissional de YouTube especializado em criar vídeos que maximizam retenção, engajamento e conversão. Sua missão é transformar a ideia fornecida em um roteiro completo usando o framework "${typeLabel}".
+
+${durationNote}
+
+${selectedFramework}
+
+## FORMATO DE ENTREGA
+
+---
+
+## 🎬 ROTEIRO DE YOUTUBE — ${typeLabel.toUpperCase()}
+
+| Elemento | Detalhe |
+|---|---|
+| **Framework** | ${typeLabel} |
+| **Duração estimada** | [X minutos] |
+| **Tom** | [descreva] |
+| **Público-alvo** | [quem vai assistir] |
+
+---
+
+### 📌 TÍTULO + THUMBNAIL
+
+**3 Opções de Título** (otimizados para CTR):
+1. "[título 1]"
+2. "[título 2]"
+3. "[título 3]"
+
+**Conceito de Thumbnail**:
+> [descrição visual da thumbnail ideal — texto, expressão, elementos]
+
+---
+
+### 🎙️ ROTEIRO COMPLETO
+
+Para cada seção do framework:
+
+**[SEÇÃO] — [Xmin a Xmin]**
+
+📢 **Fala:**
+> "[texto natural, como se estivesse falando — NÃO lendo]"
+
+📱 **Visual / B-Roll:**
+> [sugestões de cortes, imagens, gráficos na tela]
+
+💡 **Nota de direção:**
+> [tom de voz, energia, ritmo, pausas]
+
+---
+
+_(Repita para cada seção)_
+
+---
+
+### 📝 DESCRIÇÃO DO VÍDEO
+
+> [descrição otimizada para SEO, com timestamps, links e hashtags]
+
+**Timestamps:**
+- 0:00 — [seção]
+- X:XX — [seção]
+...
+
+---
+
+### 🏷️ TAGS SUGERIDAS
+
+> [10-15 tags relevantes separadas por vírgula]
+
+---
+
+### 🔗 CARDS E TELAS FINAIS
+
+- **Card 1** (em [X:XX]): [sugestão de vídeo/playlist relacionada]
+- **Card 2** (em [X:XX]): [sugestão]
+- **Tela final**: [vídeo sugerido + inscrição]
+
+---
+
+## REGRAS
+- O roteiro deve soar NATURAL — como uma pessoa falando para a câmera
+- Inclua "pattern interrupts" a cada 2-3 minutos para manter retenção
+- Cada seção deve ter indicação de tempo
+- Sugira momentos de B-Roll e texto na tela
+- O hook nos primeiros 30 segundos é CRÍTICO — dedique atenção máxima
+- Adapte vocabulário e profundidade ao público-alvo
+- Inclua timestamps na descrição
+- Escreva em português brasileiro
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nAdapte tom, vocabulário e estilo à voz da marca.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL) ---\n${inputs.scraped_content}\n\nUse como fonte principal de informação para o roteiro.` : ""}
+
+TEMA / IDEIA DO VÍDEO:
+${inputs.content}`;
+    },
+  },
 };
