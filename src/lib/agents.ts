@@ -393,6 +393,15 @@ export const AGENTS: AgentDef[] = [
     category: "products",
     available: true,
   },
+  {
+    id: "problem-mechanism",
+    name: "Mecanismo Único do Problema",
+    emoji: "🔬",
+    role: "Especialista em Causa Surpreendente Principal",
+    description: "Identifica e nomeia a causa raiz dos problemas do seu público (CSP) para criar um único ponto de crença que leva naturalmente à venda.",
+    category: "products",
+    available: true,
+  },
 
   // ── Branding & Posicionamento ──
   {
