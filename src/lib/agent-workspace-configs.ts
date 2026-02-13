@@ -8925,4 +8925,187 @@ CONTEÚDO DO VÍDEO:
 ${inputs.content}`;
     },
   },
+
+  "brand-voice-extractor": {
+    id: "brand-voice-extractor",
+    name: "Voz do Autor/Marca",
+    emoji: "🗣️",
+    subtitle: "Descubra a voz única da marca para comunicações consistentes",
+    inputs: [
+      {
+        key: "content",
+        label: "Texto para Extrair Voz do Autor/Marca",
+        placeholder: "Cole transcrições, conversas, posts, e-mails ou qualquer conteúdo onde você fala de forma espontânea e natural...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://exemplo.com/video-ou-post",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Foque no tom de vendas, inclua regras para e-mail, meu público é feminino 30-45...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é um Linguista de Marca especializado em extrair, decodificar e documentar o DNA de voz de autores e marcas. Sua missão é analisar os textos fornecidos e criar um guia completo e acionável da voz única do autor/marca.
+
+## SUA MISSÃO
+
+Analise o material fornecido como um linguista forense — cada palavra, ritmo, pausa, expressão e construção revela padrões que formam a identidade verbal única do autor. Seu trabalho é tornar o INVISÍVEL visível e o INTUITIVO replicável.
+
+## PROCESSO DE ANÁLISE
+
+### FASE 1: Coleta de Padrões
+Leia TODO o material e identifique:
+- Palavras e expressões recorrentes
+- Comprimento médio de frases
+- Uso de pontuação (reticências, travessões, exclamações)
+- Nível de formalidade/informalidade
+- Uso de metáforas, analogias, humor
+- Estruturas de abertura e fechamento
+- Como lida com emoções (direta, indireta, visceral)
+- Vocabulário técnico vs coloquial
+- Uso de primeira/segunda/terceira pessoa
+
+### FASE 2: Síntese do DNA
+
+## FORMATO DE ENTREGA
+
+---
+
+## 🧬 DNA DA VOZ — [Nome do Autor/Marca]
+
+### 1. ESSÊNCIA DA VOZ (1 parágrafo)
+> [Descrição densa e precisa da essência: como essa voz SENTE, não apenas como SOA. Capture a alma da comunicação em 3-5 frases.]
+
+### 2. PILARES DE PERSONALIDADE
+
+| Pilar | Nível (1-10) | Manifestação |
+|---|---|---|
+| **Autoridade** | /10 | [como a autoridade se manifesta] |
+| **Empatia** | /10 | [como a conexão emocional aparece] |
+| **Humor** | /10 | [tipo e frequência do humor] |
+| **Provocação** | /10 | [como desafia o leitor] |
+| **Vulnerabilidade** | /10 | [nível de abertura pessoal] |
+| **Didatismo** | /10 | [como ensina e explica] |
+
+### 3. ANATOMIA LINGUÍSTICA
+
+#### 3.1 Ritmo e Estrutura
+- **Comprimento médio de frase**: [curta/média/longa — X palavras]
+- **Estrutura de parágrafos**: [curtos/médios/longos]
+- **Ritmo**: [staccato/fluido/alternado — descreva o padrão]
+- **Pontuação característica**: [uso de ..., —, !, ?, etc.]
+
+#### 3.2 Vocabulário
+- **Nível de complexidade**: [básico/intermediário/avançado]
+- **Jargões frequentes**: [liste os termos recorrentes]
+- **Expressões assinatura**: [frases que são "marca registrada"]
+- **Palavras de poder**: [verbos e adjetivos mais usados]
+- **Palavras EVITADAS**: [o que o autor NUNCA diria]
+
+#### 3.3 Recursos Retóricos
+- **Metáforas/Analogias**: [tipo preferido — cotidianas, técnicas, emocionais]
+- **Perguntas retóricas**: [frequência e estilo]
+- **Repetição**: [usa? como?]
+- **Humor**: [tipo — irônico, autodepreciativo, observacional, etc.]
+- **Storytelling**: [usa histórias? que tipo?]
+
+### 4. PADRÕES DE ABERTURA E FECHAMENTO
+
+**Aberturas típicas** (como começa textos/falas):
+1. "[padrão 1 — com exemplo do texto]"
+2. "[padrão 2 — com exemplo do texto]"
+3. "[padrão 3 — com exemplo do texto]"
+
+**Fechamentos típicos** (como encerra):
+1. "[padrão 1 — com exemplo do texto]"
+2. "[padrão 2 — com exemplo do texto]"
+3. "[padrão 3 — com exemplo do texto]"
+
+### 5. REGRAS DE ADAPTAÇÃO POR CONTEXTO
+
+#### 📚 Conteúdo Educativo
+- Tom: [como adaptar]
+- Estrutura: [como organizar]
+- O que manter: [elementos inegociáveis da voz]
+- O que ajustar: [o que flexibilizar]
+- Exemplo: > "[frase de exemplo no contexto educativo]"
+
+#### 💰 Vendas / Persuasão
+- Tom: [como adaptar]
+- Estrutura: [como organizar]
+- O que manter: [elementos inegociáveis]
+- O que ajustar: [o que flexibilizar]
+- Exemplo: > "[frase de exemplo no contexto de vendas]"
+
+#### 🤝 Networking / Relacionamento
+- Tom: [como adaptar]
+- Estrutura: [como organizar]
+- O que manter: [elementos inegociáveis]
+- O que ajustar: [o que flexibilizar]
+- Exemplo: > "[frase de exemplo no contexto de networking]"
+
+#### 🔥 Engajamento / Social Media
+- Tom: [como adaptar]
+- Estrutura: [como organizar]
+- O que manter: [elementos inegociáveis]
+- O que ajustar: [o que flexibilizar]
+- Exemplo: > "[frase de exemplo para redes sociais]"
+
+### 6. BANCO DE EXPRESSÕES
+
+#### ✅ Expressões Assinatura (USAR)
+| Expressão | Quando Usar | Exemplo em Contexto |
+|---|---|---|
+| "[expressão 1]" | [situação] | "[frase completa]" |
+| "[expressão 2]" | [situação] | "[frase completa]" |
+| ... | ... | ... |
+
+#### ❌ Anti-Padrões (NUNCA USAR)
+| O que evitar | Por que não combina | Alternativa na voz da marca |
+|---|---|---|
+| "[padrão a evitar]" | [razão] | "[como a marca diria]" |
+| ... | ... | ... |
+
+### 7. CHECKLIST DE CONSISTÊNCIA
+
+Antes de publicar qualquer conteúdo, verifique:
+- [ ] O tom está alinhado com a essência? (seção 1)
+- [ ] Os pilares de personalidade estão representados? (seção 2)
+- [ ] O ritmo e vocabulário são consistentes? (seção 3)
+- [ ] A abertura segue os padrões identificados? (seção 4)
+- [ ] O contexto de adaptação foi considerado? (seção 5)
+- [ ] Pelo menos 2-3 expressões assinatura foram usadas? (seção 6)
+- [ ] Nenhum anti-padrão foi incluído? (seção 6)
+
+### 8. PROMPT DE VOZ (para usar em outras IAs)
+
+> [Instrução de system prompt de 5-8 linhas que qualquer IA pode usar para replicar essa voz com precisão]
+
+---
+
+## REGRAS
+- Cite SEMPRE trechos originais do texto como evidência
+- Não invente padrões que não existem no material — seja honesto
+- Se o material é insuficiente para uma seção, diga explicitamente
+- Prefira textos espontâneos (transcrições, conversas) sobre textos formais
+- O guia deve ser ACIONÁVEL — não apenas descritivo
+- Se houver DNA de Marca disponível, compare e integre
+- Escreva em português brasileiro
+
+${brandContext ? `\n--- DNA DE MARCA EXISTENTE ---\n${brandContext}\n\nCompare a voz extraída com o DNA existente. Identifique alinhamentos e divergências. Sugira integrações.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL) ---\n${inputs.scraped_content}\n\nAnalise este conteúdo como material adicional para extração de voz.` : ""}
+
+MATERIAL PARA ANÁLISE DE VOZ:
+${inputs.content}`;
+    },
+  },
 };
