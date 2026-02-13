@@ -3902,4 +3902,110 @@ CONTEXTO / IDEIA PRINCIPAL:
 ${inputs.content}`;
     },
   },
+
+  "content-ideas": {
+    id: "content-ideas",
+    name: "Ideias de Conteúdos",
+    emoji: "🧠",
+    subtitle: "Crie ideias de conteúdo estratégicas para cada etapa do funil",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto / Instruções",
+        placeholder: "Descreva temas que deseja explorar, direcionamentos específicos ou deixe em branco para ideias baseadas no DNA de Campanha...",
+        type: "textarea",
+      },
+      {
+        key: "idea_type",
+        label: "Tipo de Ideia",
+        type: "select",
+        placeholder: "",
+        required: true,
+        options: [
+          { value: "viral", label: "🚀 Ideias Virais (Captação)" },
+          { value: "strategic", label: "🎓 Conteúdo Estratégico (Consideração)" },
+          { value: "sales", label: "💰 Conteúdos que Vendem (Conversão)" },
+          { value: "all", label: "🔥 Mix Completo (todas as etapas)" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "Cole a URL de um vídeo, post ou artigo para usar como inspiração",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: 'Ex: "Foque em dores do público", "Ideias para formato Reels", "Nicho de saúde feminina"...',
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const typeMap: Record<string, string> = {
+        viral: `IDEIAS VIRAIS (CAPTAÇÃO — TOPO DE FUNIL)
+Foco: Máximo alcance, compartilhamento e atração de público frio.
+Princípios: Curiosidade extrema, polêmica controlada, identificação instantânea, pattern interrupt, conteúdo "compartilhável".
+O público NÃO conhece você — precisa parar o scroll e criar desejo de seguir/salvar.`,
+        strategic: `CONTEÚDO ESTRATÉGICO (CONSIDERAÇÃO — MEIO DE FUNIL)
+Foco: Educar, construir autoridade e nutrir quem já te conhece mas ainda não está pronto para comprar.
+Princípios: Frameworks ensinados, micro-transformações, demonstração de expertise, destruição de objeções via conteúdo.
+O público CONHECE você — precisa confiar e ver que você domina o assunto.`,
+        sales: `CONTEÚDOS QUE VENDEM (CONVERSÃO — FUNDO DE FUNIL)
+Foco: Levar público aquecido à ação. Provas, urgência, ofertas, cases e demonstrações de resultado.
+Princípios: Prova social, antes/depois, bastidores de resultados, escassez natural, CTAs diretos.
+O público CONFIA em você — precisa de um empurrão final para agir.`,
+        all: `MIX COMPLETO (TODAS AS ETAPAS DO FUNIL)
+Gere ideias balanceadas para Captação (viral), Consideração (autoridade) e Conversão (vendas), claramente separadas por seção.`,
+      };
+
+      return `Você é o Estrategista de Conteúdo — um especialista em criar ideias de conteúdo que combinam metodologias comprovadas de viralização e conversão com o DNA da marca do usuário.
+
+MISSÃO: Gerar ideias de conteúdo altamente personalizadas, estratégicas e prontas para produção.
+
+TIPO SOLICITADO:
+${typeMap[inputs.idea_type] || typeMap.all}
+
+## ENTREGA OBRIGATÓRIA
+
+Para cada ideia, entregue:
+
+### IDEIA [N]: [TÍTULO DA IDEIA]
+- **Formato recomendado**: Reels / Carrossel / Vídeo longo / Story / Post / Thread / Newsletter
+- **Plataforma ideal**: Instagram / YouTube / TikTok / LinkedIn / Twitter/X / Newsletter
+- **Hook sugerido**: A primeira frase/gancho que abre o conteúdo
+- **Resumo da ideia**: 2-3 frases explicando o conteúdo e o ângulo
+- **Por que funciona**: Justificativa estratégica (qual gatilho, qual emoção, qual princípio de viralização)
+- **Etapa do funil**: Captação / Consideração / Conversão
+- **Score de potencial**: 1 a 10
+
+## QUANTIDADE
+- Gere **15 ideias** no total
+- Se o tipo for "Mix Completo", distribua: 5 Captação + 5 Consideração + 5 Conversão
+- Se for um tipo específico, gere 15 ideias daquele tipo
+
+## FRAMEWORKS DE VIRALIZAÇÃO QUE VOCÊ DOMINA:
+- **Polêmica controlada**: Desafiar crença popular sem ser ofensivo
+- **Curiosidade gap**: Criar lacuna que só fecha ao consumir o conteúdo
+- **Identificação visceral**: "Isso é sobre MIM" — o público se vê na ideia
+- **Prova chocante**: Dados ou resultados que quebram expectativas
+- **Contraintuitivo**: O oposto do que todo mundo ensina
+- **Storytelling**: Narrativa com tensão, virada e resolução
+- **Tutorial escondido**: Ensinar algo valioso dentro de entretenimento
+- **Tendência + Nicho**: Surfar trend com ângulo do nicho
+
+## REGRAS:
+- Cada ideia deve ser ESPECÍFICA ao contexto/DNA fornecido — nada genérico
+- Variar os formatos e plataformas nas sugestões
+- Incluir ao menos 3 ideias com potencial de viralização acima de 8
+- Os hooks sugeridos devem ser prontos para uso (não placeholder)
+- Se houver conteúdo de referência (URL), gerar 5 ideias extras INSPIRADAS naquele conteúdo adaptadas ao DNA
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ BÔNUS: Gere 5 ideias adicionais INSPIRADAS neste conteúdo, adaptadas ao DNA de Campanha.` : ""}
+
+${inputs.content ? `CONTEXTO / DIRECIONAMENTO:\n${inputs.content}` : "Use exclusivamente o DNA de Campanha como base para as ideias."}`;
+    },
+  },
 };

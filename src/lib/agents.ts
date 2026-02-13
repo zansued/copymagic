@@ -224,6 +224,15 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "content-ideas",
+    name: "Ideias de Conteúdos",
+    emoji: "🧠",
+    role: "Especialista em Ideação Estratégica de Conteúdo",
+    description: "Cria ideias de conteúdo estratégicas para captação, consideração e conversão, combinando viralização e DNA de marca.",
+    category: "content",
+    available: true,
+  },
   // Branding & Strategy
   {
     id: "brand-voice",
