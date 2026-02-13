@@ -129,6 +129,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "landing-page-copy",
+    name: "Landing Pages",
+    emoji: "🌐",
+    role: "Especialista em Copy para Landing Pages",
+    description: "Cria páginas de alta conversão com 13 blocos essenciais, do headline à FAQ, otimizadas para mobile e escaneabilidade.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "short-vsl",
     name: "Short VSL [1-3 Min]",
     emoji: "🎯",
