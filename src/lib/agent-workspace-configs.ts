@@ -5400,4 +5400,169 @@ CONTEXTO DO PRODUTO / OFERTA:
 ${inputs.content}`;
     },
   },
+
+  "linkedin-optimizer": {
+    id: "linkedin-optimizer",
+    name: "Otimização de LinkedIn",
+    emoji: "💼",
+    subtitle: "Reescreva seu perfil do LinkedIn para gerar autoridade",
+    inputs: [
+      {
+        key: "linkedin_goal",
+        label: "Objetivo no LinkedIn",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "negocios", label: "💰 Gerar negócios e clientes" },
+          { value: "recrutadores", label: "🎯 Atrair recrutadores e oportunidades" },
+          { value: "marca-pessoal", label: "🌟 Fortalecer marca pessoal" },
+          { value: "networking", label: "🤝 Networking estratégico" },
+        ],
+        required: true,
+      },
+      {
+        key: "strategic_profile",
+        label: "Perfil Estratégico",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "marca-pessoal", label: "🌟 Fortalecimento de Marca Pessoal" },
+          { value: "oportunidades", label: "🎯 Busca por Novas Oportunidades" },
+          { value: "transicao", label: "🔄 Transição de Carreira" },
+          { value: "autoridade", label: "👑 Posicionamento como Autoridade" },
+        ],
+        required: true,
+      },
+      {
+        key: "current_role",
+        label: "Cargo Atual ou Desejado",
+        placeholder: "Ex: Head de Marketing Digital, Consultor de Vendas B2B, Product Manager...",
+        type: "input",
+        required: true,
+      },
+      {
+        key: "content",
+        label: "Conteúdo Atual do Perfil",
+        placeholder: "Cole aqui o texto completo do seu perfil: Sobre, Experiência, Formação, Certificações, etc. Quanto mais completo, melhor o resultado.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Link de um perfil de referência, artigo ou página para inspiração...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Gerais (opcional)",
+        placeholder: "Ex: 'Destaque minha experiência com gestão de times', 'Tom mais sênior e direto', 'Fui premiado no evento X em 2024'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const goalMap: Record<string, string> = {
+        negocios: "gerar negócios, atrair clientes e fechar contratos através do LinkedIn",
+        recrutadores: "atrair recrutadores, headhunters e oportunidades de emprego qualificadas",
+        "marca-pessoal": "fortalecer marca pessoal e ser reconhecido como referência no setor",
+        networking: "expandir rede estratégica e criar conexões de alto valor",
+      };
+      const profileMap: Record<string, string> = {
+        "marca-pessoal": "Fortalecimento de Marca Pessoal — comunicação que posiciona como referência e thought leader",
+        oportunidades: "Busca por Novas Oportunidades — perfil otimizado para ser encontrado por recrutadores e decisores",
+        transicao: "Transição de Carreira — narrativa que conecta experiência passada ao novo posicionamento desejado",
+        autoridade: "Posicionamento como Autoridade — perfil que demonstra expertise e gera confiança imediata",
+      };
+
+      return `Você é o Especialista em Otimização de LinkedIn — um profissional de elite em personal branding e posicionamento profissional na maior rede B2B do mundo.
+
+MISSÃO: Analisar o perfil fornecido e reescrevê-lo completamente para ${goalMap[inputs.linkedin_goal] || "gerar autoridade e atrair oportunidades"}.
+
+CARGO BASE: ${inputs.current_role}
+PERFIL ESTRATÉGICO: ${profileMap[inputs.strategic_profile] || "Fortalecimento de Marca Pessoal"}
+
+PROCESSO OBRIGATÓRIO:
+
+## 1. DIAGNÓSTICO DO PERFIL ATUAL
+
+Analise criticamente o perfil fornecido e apresente:
+- **Pontos Fortes**: O que já funciona bem (seja específico)
+- **Gaps Críticos**: O que está faltando ou prejudicando o perfil
+- **Oportunidades**: O que pode ser explorado e não está sendo
+- **Score Atual**: Nota de 1-10 com justificativa
+- **Score Projetado**: Nota esperada após otimização
+
+## 2. HEADLINE — 3 OPÇÕES ESTRATÉGICAS
+
+Crie 3 opções de headline profissional, cada uma com abordagem diferente:
+
+| # | Headline | Abordagem | Por que funciona |
+|---|----------|-----------|-----------------|
+| 1 | [Headline] | [Resultado / Autoridade / Especialização] | [Justificativa] |
+| 2 | [Headline] | [Diferente da anterior] | [Justificativa] |
+| 3 | [Headline] | [Diferente das anteriores] | [Justificativa] |
+
+**Recomendação**: Indique qual das 3 é a melhor para o objetivo "${goalMap[inputs.linkedin_goal] || "gerar autoridade"}" e por quê.
+
+Regras para headlines:
+- Máximo 220 caracteres
+- Inclua o cargo "${inputs.current_role}" de forma estratégica
+- Combine identidade profissional + proposta de valor + resultado
+- Evite buzzwords vazias (apaixonado, inovador, visionário)
+- Use separadores visuais (|, •, ➜) para escaneabilidade
+
+## 3. SEÇÃO "SOBRE" REESCRITA
+
+Reescreva a seção Sobre com esta estrutura:
+
+1. **Gancho** (1ª frase): Declaração de impacto que prende a atenção
+2. **Proposta de Valor** (2-3 frases): O que você faz, para quem e qual resultado entrega
+3. **Trajetória** (2-3 frases): Resumo da jornada que sustenta a credibilidade
+4. **Resultados** (2-3 frases com números): Realizações mensuráveis e cases
+5. **Especialidades** (lista): 5-8 competências-chave em formato de lista
+6. **CTA** (1 frase final): Convite claro para o próximo passo
+
+Regras:
+- Escreva em primeira pessoa
+- Use parágrafos curtos (máx. 3 linhas)
+- Inclua quebras de linha para escaneabilidade
+- Tom alinhado ao perfil estratégico selecionado
+- Entre 1500-2000 caracteres
+
+## 4. EXPERIÊNCIAS REESCRITAS
+
+Para cada experiência mencionada no perfil, reescreva com:
+
+### [Cargo] — [Empresa]
+- **Resumo** (2 frases): O que fez e o impacto geral
+- **Realizações-chave** (3-5 bullets):
+  - Comece cada bullet com verbo de ação forte (Liderou, Implementou, Escalou, Reduziu, Aumentou)
+  - Inclua métricas e resultados mensuráveis sempre que possível
+  - Formato: [Verbo] + [Ação] + [Resultado quantificado]
+
+## 5. FORMAÇÃO E CERTIFICAÇÕES
+
+Reorganize estrategicamente a formação:
+- Priorize certificações relevantes para o cargo "${inputs.current_role}"
+- Sugira ordem de exibição por relevância (não cronológica)
+- Recomende certificações adicionais que agregariam valor
+
+## 6. RECOMENDAÇÕES EXTRAS
+
+### Otimizações Adicionais:
+- **Foto de Perfil**: Diretrizes para foto profissional ideal
+- **Banner**: Sugestão de conceito para imagem de capa
+- **URL Personalizada**: Sugestão de URL customizada
+- **Skills (Competências)**: Top 10 skills para adicionar por relevância
+- **Palavras-chave SEO**: 10 termos que devem aparecer no perfil para ser encontrado em buscas
+- **Atividade Recomendada**: Frequência e tipo de posts para manter o perfil ativo
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nUse o DNA de marca para alinhar o tom de voz, valores e posicionamento do perfil.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como inspiração para o perfil otimizado.` : ""}
+
+CONTEÚDO ATUAL DO PERFIL:
+${inputs.content}`;
+    },
+  },
 };
