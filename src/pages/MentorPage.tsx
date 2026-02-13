@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, MessageSquare, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
@@ -34,7 +35,7 @@ export default function MentorPage() {
   const [showSidebar, setShowSidebar] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Inline agent execution
+  // Dialog-based agent execution
   const [executingStep, setExecutingStep] = useState<{ flowId: string; stepId: string; agentId: string; title: string } | null>(null);
 
   // Load conversations
@@ -165,7 +166,6 @@ export default function MentorPage() {
       if (!convId) return;
     }
 
-    // Save user message
     const { data: userMsg } = await supabase
       .from("mentor_messages")
       .insert({ conversation_id: convId, role: "user", content })
@@ -175,14 +175,12 @@ export default function MentorPage() {
     const newUserMsg: Message = { id: userMsg?.id || crypto.randomUUID(), role: "user", content };
     setMessages((prev) => [...prev, newUserMsg]);
 
-    // Update conversation title from first message
     if (messages.length === 0) {
       const title = content.slice(0, 60) + (content.length > 60 ? "..." : "");
       await supabase.from("mentor_conversations").update({ title }).eq("id", convId);
       setConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, title } : c)));
     }
 
-    // Stream AI response
     setIsGenerating(true);
     setStreamingContent("");
     abortRef.current = new AbortController();
@@ -237,7 +235,6 @@ export default function MentorPage() {
         }
       }
 
-      // Save assistant message
       const { data: assistantMsg } = await supabase
         .from("mentor_messages")
         .insert({ conversation_id: convId, role: "assistant", content: accumulated })
@@ -249,7 +246,6 @@ export default function MentorPage() {
       setStreamingContent("");
       setIsGenerating(false);
 
-      // Parse flow if present
       await parseFlowFromResponse(accumulated, convId);
     } catch (err: any) {
       if (err.name !== "AbortError") {
@@ -306,43 +302,29 @@ export default function MentorPage() {
     }
   };
 
-  // If executing inline agent
-  if (executingStep) {
-    return (
-      <div className="h-screen bg-background">
-        <MentorAgentExecutor
-          agentId={executingStep.agentId}
-          stepTitle={executingStep.title}
-          onClose={() => setExecutingStep(null)}
-          onComplete={handleStepComplete}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="h-screen bg-background flex">
       {/* Left sidebar - Conversations */}
       {showSidebar && (
-        <div className="w-64 border-r border-border flex flex-col bg-sidebar-background">
-          <div className="p-4 border-b border-border flex items-center justify-between">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/agents")} className="h-8 w-8">
+        <div className="w-64 border-r border-border/50 flex flex-col bg-card/30">
+          <div className="p-4 border-b border-border/50 flex items-center justify-between">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/agents")} className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h2 className="text-sm font-semibold text-foreground">🧠 Mentor</h2>
-            <Button variant="ghost" size="icon" onClick={() => createConversation()} className="h-8 w-8">
+            <h2 className="text-sm font-semibold gradient-text font-[Space_Grotesk]">🧠 Mentor</h2>
+            <Button variant="ghost" size="icon" onClick={() => createConversation()} className="h-8 w-8 text-muted-foreground hover:text-foreground">
               <Plus className="h-4 w-4" />
             </Button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
             {conversations.map((conv) => (
               <div
                 key={conv.id}
-                className={`group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors text-sm ${
+                className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 text-sm ${
                   activeConversationId === conv.id
-                    ? "bg-primary/10 text-foreground"
-                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                    ? "bg-primary/10 text-foreground border border-primary/20"
+                    : "text-muted-foreground hover:bg-secondary/30 hover:text-foreground border border-transparent"
                 }`}
                 onClick={() => setActiveConversationId(conv.id)}
               >
@@ -378,13 +360,27 @@ export default function MentorPage() {
       </div>
 
       {/* Right - Flow Panel */}
-      <div className="w-80 border-l border-border hidden lg:block">
+      <div className="w-80 border-l border-border/50 hidden lg:flex flex-col bg-card/20">
         <MentorFlowPanel
           flows={flows}
           onExecuteStep={handleExecuteStep}
           activeStepId={executingStep?.stepId || null}
         />
       </div>
+
+      {/* Agent Executor Dialog */}
+      <Dialog open={!!executingStep} onOpenChange={(open) => { if (!open) setExecutingStep(null); }}>
+        <DialogContent className="max-w-5xl h-[85vh] p-0 gap-0 overflow-hidden border-border/50 bg-background">
+          {executingStep && (
+            <MentorAgentExecutor
+              agentId={executingStep.agentId}
+              stepTitle={executingStep.title}
+              onClose={() => setExecutingStep(null)}
+              onComplete={handleStepComplete}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
