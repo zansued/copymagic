@@ -4614,4 +4614,188 @@ CONTEXTO / ROTEIRO BASE:
 ${inputs.content}`;
     },
   },
+
+  "landing-page-copy": {
+    id: "landing-page-copy",
+    name: "Landing Pages",
+    emoji: "🌐",
+    subtitle: "Crie páginas de alta conversão com 13 blocos essenciais",
+    inputs: [
+      {
+        key: "content",
+        label: "Sobre a Oferta / Produto",
+        placeholder: "Descreva sua oferta em detalhes: o que é, para quem, qual a transformação, preço, garantia, bônus, método proprietário, história de origem...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "page_style",
+        label: "Estilo da Página",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "direct", label: "💰 Venda Direta (produto/curso)" },
+          { value: "webinar", label: "🎥 Registro de Webinar/Evento" },
+          { value: "lead", label: "🧲 Captura de Leads (isca digital)" },
+          { value: "waitlist", label: "⏳ Lista de Espera / Lançamento" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de uma página de referência, concorrente ou conteúdo base...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Mobile first', 'Tom empático', 'Incluir 5 depoimentos', 'Preço R$497 com parcelamento'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const styleMap: Record<string, string> = {
+        direct: "VENDA DIRETA — página focada em converter visitantes em compradores. Inclua preço, bônus, garantia e múltiplos CTAs de compra.",
+        webinar: "REGISTRO DE WEBINAR/EVENTO — página focada em inscrição. Destaque data/hora, o que vai aprender, quem apresenta e CTA de registro.",
+        lead: "CAPTURA DE LEADS — página focada em download de isca digital. Destaque o valor gratuito, o resultado rápido e CTA de download.",
+        waitlist: "LISTA DE ESPERA / LANÇAMENTO — página focada em gerar antecipação. Destaque a exclusividade, o que está por vir e CTA de inscrição.",
+      };
+
+      return `Você é o Arquiteto de Landing Pages — um especialista em criar copy completa para páginas de alta conversão, seguindo uma estrutura de 13 blocos essenciais validada internacionalmente.
+
+MISSÃO: Criar a copy COMPLETA de uma landing page com os 13 blocos abaixo, otimizada para mobile e escaneabilidade.
+
+TIPO DE PÁGINA: ${styleMap[inputs.page_style] || styleMap.direct}
+
+## PRINCÍPIOS FUNDAMENTAIS
+
+1. **Mobile First**: 90-95% do tráfego vem do mobile. Textos curtos, escaneáveis.
+2. **Pessoas escaneiam, não leem**: Use bullets, negritos, frases curtas e visuais.
+3. **Cada bloco tem uma função**: Nenhum bloco é decorativo — todos avançam a venda.
+4. **CTAs distribuídos**: Mínimo 4 botões de ação espalhados pela página.
+
+## OS 13 BLOCOS ESSENCIAIS
+
+Para cada bloco, entregue a copy COMPLETA e pronta para uso:
+
+---
+
+### BLOCO 1: A CHAMADA PRINCIPAL (Hero)
+- **Headline**: A promessa principal em 1 frase poderosa (máx. 12 palavras)
+- **Sub-headline**: Expansão da promessa com especificidade
+- **Parágrafo de suporte**: 2-3 frases que contextualizam e criam desejo
+- **CTA Principal**: Texto do botão + micro-copy abaixo do botão
+- **Elementos visuais sugeridos**: O que colocar como imagem/vídeo
+
+---
+
+### BLOCO 2: O PROBLEMA PRIMÁRIO
+- **Título da seção**: Frase que nomeia a dor
+- **Descrição do problema**: 3-5 bullets ou parágrafos curtos que descrevem a situação atual do avatar
+- **Conexão emocional**: Frase que mostra que você entende profundamente
+
+---
+
+### BLOCO 3: A OPORTUNIDADE
+- **Título**: Frase de transição (do problema para a solução)
+- **Por que desta vez é diferente**: 2-3 pontos que diferenciam sua abordagem
+- **O "segredo" (Mecanismo Único)**: Apresentação inicial do seu método
+
+---
+
+### BLOCO 4: PÚBLICO-ALVO
+- **Título**: "Para quem é isso?"
+- **Lista de personas**: 5-7 bullets com "É para você se..." 
+- **Opcional — Para quem NÃO é**: 2-3 bullets de exclusão (aumenta percepção de exclusividade)
+
+---
+
+### BLOCO 5: PROPOSTA DE VALOR
+- **3 benefícios principais**: Cada um com título + descrição de 1-2 frases
+- **Foco no resultado final**, não na funcionalidade
+- **Sugestão de ícone/visual** para cada benefício
+
+---
+
+### BLOCO 6: PROVAS E DEPOIMENTOS
+- **Título da seção**: Frase de prova social
+- **3-5 depoimentos**: Cada um com nome, contexto, resultado específico e citação direta
+- **Elementos de autoridade**: Números, logos, certificações, mídia
+- **Nota**: Crie depoimentos realistas baseados na transformação prometida
+
+---
+
+### BLOCO 7: HISTÓRIA DE ORIGEM
+- **Título narrativo**: Frase que abre a história
+- **A história**: 4-6 parágrafos curtos contando como a solução surgiu
+- **Conexão pessoal**: Por que VOCÊ criou isso
+- **Transição**: Como isso se conecta ao produto
+
+---
+
+### BLOCO 8: DETALHAMENTO DO PRODUTO
+- **Título**: Nome do método/produto
+- **Método proprietário**: Passos ou fases do seu sistema
+- **Para cada módulo/fase**: Título + o que o cliente aprende/conquista
+- **Elementos visuais sugeridos**: Mockups, screenshots, diagramas
+
+---
+
+### BLOCO 9: A OFERTA E VALORES
+- **Título de ancoragem**: Frase que contextualiza o valor
+- **Stack de valor**: Lista de tudo que está incluso com valor individual
+- **Valor total vs. preço real**: Ancoragem de preço
+- **Bônus**: 2-3 bônus com nome magnético, descrição e valor
+- **Preço final**: Com opções de pagamento
+- **CTA de compra**: Botão + micro-copy de segurança
+
+---
+
+### BLOCO 10: GARANTIA
+- **Título**: Frase que elimina risco
+- **Termos claros**: Duração e condições
+- **Como funciona na prática**: Processo simples de reembolso
+- **Frase de confiança**: Por que você oferece essa garantia
+
+---
+
+### BLOCO 11: O FUTURO PRESUMIDO
+- **Título**: Frase aspiracional
+- **Visão do futuro**: 4-6 bullets "Imagine..." ou "Daqui a X dias..."
+- **Contraste**: Vida com vs. sem a solução
+- **CTA emocional**: Botão com copy aspiracional
+
+---
+
+### BLOCO 12: OBJEÇÕES PRINCIPAIS
+- **4-6 objeções comuns**: Cada uma com a objeção + resposta persuasiva
+- **Categorias**: Tempo, dinheiro, confiança, capacidade
+- **Tom**: Empático, não defensivo
+
+---
+
+### BLOCO 13: PERGUNTAS & RESPOSTAS (FAQ)
+- **8-10 perguntas**: As dúvidas mais comuns
+- **Respostas**: Claras, diretas e que reforçam benefícios
+- **Inclua perguntas sobre**: Garantia, acesso, suporte, resultados esperados
+
+---
+
+## REGRAS DE OURO:
+- Copy COMPLETA e pronta para uso — não entregue resumos ou placeholders
+- Frases curtas e escaneáveis (máx. 20 palavras por frase)
+- Use negritos, bullets e espaçamento generoso
+- Mínimo 4 CTAs distribuídos (após blocos 1, 6, 9 e 11)
+- Tom adaptado ao DNA da marca (se disponível)
+- Textos longos de vendas — não resuma, expanda
+- Cada bloco deve funcionar sozinho E como parte do fluxo
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Crie a copy baseada apenas no contexto fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como base para a copy da landing page.` : ""}
+
+SOBRE A OFERTA / PRODUTO:
+${inputs.content}`;
+    },
+  },
 };
