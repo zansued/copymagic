@@ -576,4 +576,13 @@ export const AGENTS: AgentDef[] = [
     category: "copywriting",
     available: true,
   },
+  {
+    id: "youtube-script",
+    name: "Roteiro de YouTube",
+    emoji: "🎬",
+    role: "Roteirista Estratégico de YouTube",
+    description: "Transforma qualquer ideia em roteiros completos para YouTube com frameworks narrativos validados, hooks, estrutura e CTAs.",
+    category: "content",
+    available: true,
+  },
 ];
