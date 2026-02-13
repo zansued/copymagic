@@ -531,4 +531,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "monochrome-prompt",
+    name: "Prompt para Imagens Monocromáticas",
+    emoji: "🖤",
+    role: "Diretor de Arte Monocromático",
+    description: "Transforma conteúdo de newsletters e artigos em prompts detalhados para imagens monocromáticas com forte apelo visual e emocional.",
+    category: "content",
+    available: true,
+  },
 ];
