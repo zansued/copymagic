@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "carousel-generator",
+    name: "Gerador de Carrossel",
+    emoji: "🎨",
+    role: "Especialista em Carrosséis com Scripts Validados",
+    description: "Transforma qualquer conteúdo em carrosséis envolventes usando scripts de conteúdo validados e adaptados ao estágio do funil.",
+    category: "content",
+    available: true,
+  },
+  {
     id: "presentation-generator",
     name: "Gerador de Apresentação",
     emoji: "🎤",

@@ -2335,4 +2335,193 @@ CONTEÚDO BASE:
 ${inputs.content}`;
     },
   },
+
+  "carousel-generator": {
+    id: "carousel-generator",
+    name: "Gerador de Carrossel",
+    emoji: "🎨",
+    subtitle: "Transforme qualquer conteúdo em carrosséis envolventes com scripts validados",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo Base / Instruções",
+        placeholder: "Cole texto bruto, ideia, artigo, post ou instruções específicas. Ex: 'Gere 5 cards com tom humorado', 'Foque nos erros comuns de iniciantes'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://exemplo.com/artigo — o conteúdo será extraído automaticamente",
+        type: "input",
+      },
+      {
+        key: "cta",
+        label: "CTA (opcional)",
+        placeholder: "Ex: 'Comentar', 'Salvar para depois', 'Link na bio', 'Compartilhar com um amigo'...",
+        type: "input",
+      },
+      {
+        key: "script",
+        label: "Script de Conteúdo",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "listicle", label: "📋 Listicle — X coisas que..." },
+          { value: "myth-busting", label: "🔨 Mitos vs. Verdades" },
+          { value: "step-by-step", label: "📍 Passo a Passo" },
+          { value: "before-after", label: "🔄 Antes vs. Depois" },
+          { value: "mistakes", label: "❌ Erros Comuns" },
+          { value: "contrarian", label: "🤯 Opinião Contraintuitiva" },
+          { value: "storytelling", label: "📖 Micro-História" },
+          { value: "framework", label: "🧠 Framework / Método" },
+          { value: "comparison", label: "⚖️ Comparativo" },
+          { value: "data-driven", label: "📊 Baseado em Dados" },
+        ],
+      },
+      {
+        key: "funnel_stage",
+        label: "Estágio do Funil",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "tofu", label: "🌐 Topo — Alcance e Descoberta" },
+          { value: "mofu", label: "🎯 Meio — Consideração e Autoridade" },
+          { value: "bofu", label: "🔥 Fundo — Conversão e Venda" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Tom mais técnico', 'Público feminino 25-35', 'Incluir dados estatísticos'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const scriptMap: Record<string, { name: string; structure: string }> = {
+        listicle: {
+          name: "Listicle (X coisas que...)",
+          structure: `SLIDE 1: Hook numérico — "X [coisas/erros/segredos] que [resultado desejado]"
+SLIDES 2-N: Um item por slide com título curto + insight específico
+SLIDE FINAL: CTA + resumo visual`,
+        },
+        "myth-busting": {
+          name: "Mitos vs. Verdades",
+          structure: `SLIDE 1: Hook — "Pare de acreditar nisso" ou "X mitos sobre [tema]"
+SLIDES 2-N: Cada slide = 1 mito (riscado/vermelho) + verdade (verde/destaque)
+SLIDE FINAL: A verdade que muda tudo + CTA`,
+        },
+        "step-by-step": {
+          name: "Passo a Passo",
+          structure: `SLIDE 1: Hook — "Como [resultado] em X passos"
+SLIDES 2-N: Cada slide = 1 passo numerado com ação clara e breve explicação
+SLIDE FINAL: Resultado esperado + CTA`,
+        },
+        "before-after": {
+          name: "Antes vs. Depois",
+          structure: `SLIDE 1: Hook visual — "A diferença entre [amador] e [profissional]"
+SLIDES 2-N: Cada slide mostra um contraste (antes ❌ vs. depois ✅)
+SLIDE FINAL: Como chegar no "depois" + CTA`,
+        },
+        mistakes: {
+          name: "Erros Comuns",
+          structure: `SLIDE 1: Hook provocativo — "Você está fazendo [tema] errado"
+SLIDES 2-N: Cada slide = 1 erro + correção + por que importa
+SLIDE FINAL: O caminho certo resumido + CTA`,
+        },
+        contrarian: {
+          name: "Opinião Contraintuitiva",
+          structure: `SLIDE 1: Hook polêmico — afirmação que desafia o senso comum
+SLIDE 2: Contexto — por que todo mundo acredita no contrário
+SLIDES 3-N: Argumentos que sustentam a nova visão
+SLIDE FINAL: Conclusão provocativa + CTA de debate`,
+        },
+        storytelling: {
+          name: "Micro-História",
+          structure: `SLIDE 1: Hook narrativo — cena, personagem ou frase de impacto
+SLIDES 2-3: Contexto e conflito
+SLIDES 4-5: Virada e descoberta
+SLIDE 6: Lição / moral aplicável
+SLIDE FINAL: CTA emocional`,
+        },
+        framework: {
+          name: "Framework / Método",
+          structure: `SLIDE 1: Hook — "O método [nome] para [resultado]"
+SLIDE 2: Visão geral do framework (diagrama mental)
+SLIDES 3-N: Cada slide detalha uma etapa/pilar do framework
+SLIDE FINAL: Como aplicar hoje + CTA`,
+        },
+        comparison: {
+          name: "Comparativo",
+          structure: `SLIDE 1: Hook — "[Opção A] vs. [Opção B]: qual escolher?"
+SLIDES 2-N: Cada slide compara um aspecto (preço, resultado, tempo, etc.)
+SLIDE PENÚLTIMO: Veredicto com recomendação
+SLIDE FINAL: CTA baseado na escolha`,
+        },
+        "data-driven": {
+          name: "Baseado em Dados",
+          structure: `SLIDE 1: Hook com dado impactante — número ou estatística surpreendente
+SLIDES 2-N: Cada slide revela um dado + insight + implicação prática
+SLIDE FINAL: O que fazer com essa informação + CTA`,
+        },
+      };
+
+      const funnelMap: Record<string, string> = {
+        tofu: "TOPO DE FUNIL — Foco em alcance, descoberta e viralização. Tom educativo e acessível. Sem venda direta. CTA: salvar, compartilhar, seguir.",
+        mofu: "MEIO DE FUNIL — Foco em autoridade e consideração. Tom especialista. Aprofundar valor. CTA: comentar experiência, salvar, engajar.",
+        bofu: "FUNDO DE FUNIL — Foco em conversão. Tom direto e persuasivo. Conectar com oferta. CTA: link na bio, DM, comprar.",
+      };
+
+      const script = scriptMap[inputs.script] || scriptMap.listicle;
+
+      return `Você é um Gerador de Carrosséis de elite — especialista em criar conteúdo visual para redes sociais usando scripts de conteúdo validados.
+
+MISSÃO: Criar um carrossel completo usando o script **${script.name}**.
+
+## ESTÁGIO DO FUNIL
+${funnelMap[inputs.funnel_stage] || funnelMap.tofu}
+
+## ESTRUTURA DO SCRIPT
+${script.structure}
+
+## ENTREGA OBRIGATÓRIA — SLIDE A SLIDE
+
+Para CADA slide, entregue:
+
+### 🖼️ SLIDE [N]
+- **Título/Headline**: Frase curta e impactante (máx. 8 palavras)
+- **Texto de apoio**: 1-2 linhas complementares (se necessário)
+- **Nota de design**: Sugestão visual (cor, ícone, layout, emoji)
+
+### REGRAS VISUAIS
+1. **SLIDE 1 = HOOK**: Deve parar o scroll em 1.5 segundos. Use números, provocações ou promessas específicas
+2. **Máximo 20 palavras por slide** — escaneabilidade é tudo
+3. **Hierarquia visual**: Título grande → texto de apoio menor → elemento visual
+4. **Consistência**: Manter estilo visual coeso em todos os slides
+5. **Último slide = CTA**: Claro, direto e alinhado ao estágio do funil
+
+## EXTRAS OBRIGATÓRIOS
+
+### LEGENDA (Caption)
+Crie uma legenda completa com:
+- Gancho de abertura (primeira linha visível)
+- Corpo com valor adicional
+- CTA na legenda
+- 5-8 hashtags relevantes
+${inputs.cta ? `\n### CTA DEFINIDO PELO USUÁRIO: "${inputs.cta}" — adapte o último slide e a legenda para esta ação.` : ""}
+
+REGRAS:
+- Linguagem natural e conversacional
+- Zero frases genéricas — cada palavra deve ter propósito
+- Adaptar complexidade ao estágio do funil
+- 7-10 slides é o ideal (ajustar conforme script)
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}` : ""}
+
+CONTEÚDO BASE:
+${inputs.content}`;
+    },
+  },
 };
