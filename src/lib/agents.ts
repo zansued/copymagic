@@ -99,6 +99,15 @@ export const AGENTS: AgentDef[] = [
     category: "ideation",
     available: true,
   },
+  {
+    id: "upsell-ideas",
+    name: "Ideias de Upsell",
+    emoji: "💎",
+    role: "Estrategista de Upsells e AOV",
+    description: "Gera conceitos de upsell estratégicos para aumentar o Valor Médio por Cliente (AOV) com plano de ação e análise de impacto.",
+    category: "ideation",
+    available: true,
+  },
 
   // ── Copywriting ──
   {
