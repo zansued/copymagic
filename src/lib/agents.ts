@@ -495,4 +495,13 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: true,
   },
+  {
+    id: "buyer-profiles",
+    name: "Perfis de Compra",
+    emoji: "🧠",
+    role: "Especialista em Arquétipos de Compra",
+    description: "Mapeia arquétipos de compra com gatilhos, medos e conflitos internos que influenciam decisões — transformando tensões em persuasão.",
+    category: "branding",
+    available: true,
+  },
 ];

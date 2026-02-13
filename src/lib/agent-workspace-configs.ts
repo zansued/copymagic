@@ -6103,4 +6103,160 @@ ${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
 ${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL/PERFIL IMPORTADO) ---\n${inputs.scraped_content}\n\n⚡ Analise este perfil/conteúdo como referência para as sugestões.` : ""}`;
     },
   },
+
+  "buyer-profiles": {
+    id: "buyer-profiles",
+    name: "Perfis de Compra",
+    emoji: "🧠",
+    subtitle: "Entenda gatilhos que aumentam chances de fechar vendas",
+    inputs: [
+      {
+        key: "content",
+        label: "Dados do Cliente / Público",
+        placeholder: "Descreva seu público-alvo com detalhes: quem são, o que compram, dores, desejos, comportamentos observados, pesquisas, conversas com clientes...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Link de pesquisa, página de vendas, comunidade do público...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Gerais (opcional)",
+        placeholder: "Ex: 'Foque em mulheres empreendedoras', 'Meu produto é mentoria de vendas B2B', 'Considere que já tentaram outros cursos'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Especialista em Arquétipos de Compra — um psicólogo do consumo que mapeia os perfis dominantes de compra dos clientes através de análise psicológica profunda.
+
+MISSÃO: Identificar os 3 arquétipos de compra dominantes do público fornecido, com porcentagens específicas, revelando motivações, medos, conflitos internos e direcionamentos práticos para campanhas.
+
+PROCESSO OBRIGATÓRIO:
+
+## 1. ANÁLISE INICIAL DO PÚBLICO
+
+Antes de identificar arquétipos, apresente:
+- **Perfil geral**: Resumo do público em 3-5 frases
+- **Nível de consciência predominante**: (Inconsciente / Consciente do Problema / Consciente da Solução / Consciente do Produto / Mais Consciente)
+- **Estágio da jornada de compra**: Onde a maioria se encontra
+- **Tensão central**: O conflito principal que impede a ação
+
+## 2. OS 3 ARQUÉTIPOS DOMINANTES
+
+Para cada arquétipo, entregue uma análise completa:
+
+---
+
+### 🏆 ARQUÉTIPO 1: [NOME DO ARQUÉTIPO] — [XX]%
+
+**Descrição**: Quem é essa pessoa em 2-3 frases.
+
+#### Traços de Personalidade (Top 5)
+1. [Traço] — como se manifesta no comportamento de compra
+2. [Traço] — como se manifesta
+3. [Traço] — como se manifesta
+4. [Traço] — como se manifesta
+5. [Traço] — como se manifesta
+
+#### Valores Centrais (Top 3)
+- **[Valor 1]**: O que significa para essa pessoa e como impacta decisões
+- **[Valor 2]**: Como se conecta ao produto/serviço
+- **[Valor 3]**: Como usar na comunicação
+
+#### Motivações-chave (Top 5)
+Para cada motivação:
+- A motivação em si
+- O que está por trás (motivação profunda)
+- Frase que ativa essa motivação
+
+#### Medos Principais (Top 5)
+Para cada medo:
+- O medo declarado
+- O medo oculto por trás
+- Como abordar sem ativar resistência
+
+#### Gatilhos de Decisão
+- **O que faz comprar AGORA**: Gatilho de urgência
+- **O que faz hesitar**: Ponto de fricção
+- **O que faz desistir**: Deal breaker
+- **Prova que precisa ver**: Tipo de evidência que convence
+
+#### Linguagem que Ressoa
+- 3 frases que esse arquétipo amaria ouvir
+- 3 palavras-gatilho que ativam atenção
+- 3 frases que causariam REJEIÇÃO
+
+#### Direcionamento para Campanha
+- **Ângulo ideal**: Como abordar esse arquétipo
+- **Formato preferido**: Tipo de conteúdo que mais engaja
+- **CTA mais efetivo**: Chamada para ação que funciona
+- **Objeção principal**: E como quebrá-la
+
+---
+
+(Repita a mesma estrutura para os Arquétipos 2 e 3)
+
+## 3. MAPA DE CONFLITOS ENTRE ARQUÉTIPOS
+
+### Conflitos Internos (OURO PURO para persuasão)
+
+Para cada par de arquétipos, identifique:
+
+| Arquétipo A | vs. | Arquétipo B | Conflito | Oportunidade |
+|------------|-----|------------|---------|-------------|
+| [Nome] | ↔ | [Nome] | [Tensão entre os dois] | [Como usar na copy] |
+
+### Como Explorar os Conflitos
+Para cada conflito identificado:
+- **A tensão**: O que puxa para um lado vs. outro
+- **Frase-ponte**: Uma frase que resolve a tensão e direciona para a compra
+- **Exemplo de copy**: Parágrafo que usa esse conflito como gatilho
+
+## 4. ESTRATÉGIA INTEGRADA
+
+### Mensagem Universal
+Uma mensagem que fala com os 3 arquétipos simultaneamente (a interseção dos 3).
+
+### Sequência de Comunicação
+1. **Primeiro contato**: Qual arquétipo abordar primeiro e por quê
+2. **Nurturing**: Como nutrir cada perfil de forma diferente
+3. **Conversão**: Qual gatilho final usar para cada um
+
+### Aplicação Prática por Canal
+- **Anúncios**: Qual arquétipo priorizar e qual ângulo usar
+- **E-mail**: Como segmentar a comunicação por arquétipo
+- **Página de vendas**: Como estruturar para falar com os 3
+- **Conteúdo**: Que tipo de conteúdo engaja cada arquétipo
+
+## 5. RESUMO EXECUTIVO
+
+| Arquétipo | % | Motivação #1 | Medo #1 | Gatilho #1 |
+|-----------|---|-------------|---------|-----------|
+| [Nome] | XX% | [motivação] | [medo] | [gatilho] |
+| [Nome] | XX% | [motivação] | [medo] | [gatilho] |
+| [Nome] | XX% | [motivação] | [medo] | [gatilho] |
+
+### Insight Final
+Parágrafo de 3-5 frases com o insight mais valioso da análise — o que, se aplicado, terá maior impacto nas conversões.
+
+REGRAS:
+- As porcentagens dos 3 arquétipos devem somar 100%
+- Seja ESPECÍFICO — nada de generalidades como "busca qualidade"
+- Use linguagem do CLIENTE, não jargão de marketing
+- Os conflitos entre arquétipos são a parte mais valiosa — dedique atenção especial
+- Cada direcionamento deve ser APLICÁVEL imediatamente
+- Nomeie os arquétipos de forma memorável e descritiva
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\n⚡ Use o DNA para contextualizar os arquétipos ao produto/serviço específico.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use como fonte de dados sobre o público.` : ""}
+
+DADOS DO CLIENTE / PÚBLICO:
+${inputs.content}`;
+    },
+  },
 };
