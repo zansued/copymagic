@@ -257,6 +257,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "post-captions",
+    name: "Legendas para Posts",
+    emoji: "📝",
+    role: "Especialista em Legendas Estratégicas",
+    description: "Cria legendas otimizadas para Instagram, TikTok e LinkedIn que maximizam engajamento e conversão.",
+    category: "content",
+    available: true,
+  },
+  {
     id: "video-script",
     name: "Roteirista de Reels",
     emoji: "🎥",

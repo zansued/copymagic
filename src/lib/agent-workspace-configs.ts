@@ -4798,4 +4798,149 @@ SOBRE A OFERTA / PRODUTO:
 ${inputs.content}`;
     },
   },
+
+  "post-captions": {
+    id: "post-captions",
+    name: "Legendas para Posts",
+    emoji: "📝",
+    subtitle: "Crie legendas estratégicas para Instagram, TikTok e LinkedIn",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo do Post",
+        placeholder: "Cole o texto do seu post, transcrição do vídeo, ou descreva o material visual que você criou. Quanto mais contexto, melhor a legenda...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "platform",
+        label: "Plataforma",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "instagram", label: "📸 Instagram" },
+          { value: "tiktok", label: "🎵 TikTok" },
+          { value: "linkedin", label: "💼 LinkedIn" },
+        ],
+      },
+      {
+        key: "cta_goal",
+        label: "CTA Desejado",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "comment", label: "💬 Comentar (palavra-chave ou opinião)" },
+          { value: "save-share", label: "🔖 Salvar / Compartilhar" },
+          { value: "follow", label: "➕ Seguir o perfil" },
+          { value: "link", label: "🔗 Clicar no link (bio/stories)" },
+          { value: "dm", label: "📩 Enviar DM (palavra-chave)" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de referência (post, vídeo, página) para contexto adicional...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Legenda viral', 'Tom narrativo', 'Incluir emojis', 'Legenda curta (2-3 linhas)', 'Usar storytelling'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const platformMap: Record<string, { name: string; rules: string }> = {
+        instagram: {
+          name: "Instagram",
+          rules: `- Máximo 2.200 caracteres (ideal: 300-800 para feed, 100-200 para Reels)
+- Use quebras de linha para escaneabilidade
+- Emojis estratégicos (não excessivos)
+- Hashtags: 5-15 relevantes ao final (misture grandes e nichadas)
+- Primeira linha = gancho que faz expandir o "...mais"
+- Tom: conversacional, pessoal, visual`,
+        },
+        tiktok: {
+          name: "TikTok",
+          rules: `- Máximo 2.200 caracteres (ideal: 50-150 para vídeos, até 300 para storytelling)
+- Curta e direta — o vídeo faz o trabalho pesado
+- Hashtags: 3-5 estratégicas (mix de trending + nicho)
+- Pode usar humor, ironia e linguagem casual
+- Primeira frase = hook complementar ao vídeo
+- Tom: autêntico, descontraído, nativo da plataforma`,
+        },
+        linkedin: {
+          name: "LinkedIn",
+          rules: `- Máximo 3.000 caracteres (ideal: 800-1.500 para máximo engajamento)
+- Primeira linha = hook profissional que gera clique em "ver mais"
+- Use quebras de linha curtas (1-2 frases por parágrafo)
+- Sem hashtags no meio do texto — 3-5 ao final
+- Tom: autoridade com vulnerabilidade estratégica
+- Evite: emojis em excesso, tom de vendas direto, links no corpo (algoritmo penaliza)`,
+        },
+      };
+
+      const ctaMap: Record<string, string> = {
+        comment: "COMENTAR — Incentive o público a deixar um comentário específico (palavra-chave, opinião, experiência). Crie uma pergunta ou desafio irresistível.",
+        "save-share": "SALVAR / COMPARTILHAR — Crie conteúdo tão valioso que a pessoa PRECISA guardar. Use frases como 'Salva esse post' ou 'Manda pra alguém que precisa'.",
+        follow: "SEGUIR — Incentive novos seguidores mostrando o valor contínuo do perfil. Use 'Segue pra não perder' com contexto de valor.",
+        link: "CLICAR NO LINK — Direcione para link na bio ou stories. Crie urgência ou curiosidade sobre o que está do outro lado.",
+        dm: "ENVIAR DM — Incentive o público a enviar uma palavra-chave no direct. Crie exclusividade e facilidade.",
+      };
+
+      const platform = platformMap[inputs.platform] || platformMap.instagram;
+
+      return `Você é o Estrategista de Legendas — um especialista em criar legendas que maximizam engajamento e conversão em redes sociais, dominando a psicologia de cada plataforma.
+
+MISSÃO: Analisar o conteúdo fornecido e criar legendas estratégicas otimizadas para **${platform.name}**.
+
+## ANÁLISE INTELIGENTE DO CONTEÚDO
+
+Antes de escrever, analise silenciosamente:
+1. **Tipo de conteúdo**: É um carrossel, Reel, imagem estática, foto, stories?
+2. **Estratégia ideal**: A legenda deve despertar CURIOSIDADE para ver o conteúdo OU adicionar VALOR ao que já está visível?
+3. **Estágio do funil**: Captação (awareness), Consideração (educação) ou Conversão (venda)?
+
+## REGRAS DA PLATAFORMA: ${platform.name}
+${platform.rules}
+
+## CTA PRINCIPAL: ${ctaMap[inputs.cta_goal] || ctaMap.comment}
+
+## ENTREGA OBRIGATÓRIA
+
+### LEGENDA PRINCIPAL
+A legenda completa, pronta para copiar e colar, com:
+- **Linha 1 (Hook)**: A frase que faz a pessoa parar e clicar em "mais"
+- **Corpo**: Conteúdo que educa, emociona ou provoca
+- **CTA**: Chamada para ação alinhada ao objetivo
+- **Hashtags**: Organizadas ao final (quantidade e tipo conforme plataforma)
+
+### VARIAÇÃO 1 — ESTILO DIFERENTE
+Uma versão alternativa com abordagem diferente:
+- Se a principal é narrativa, esta é direta
+- Se a principal é longa, esta é curta
+- Se a principal é emocional, esta é provocativa
+
+### VARIAÇÃO 2 — HOOK ALTERNATIVO
+Mesma estrutura da principal, mas com um gancho completamente diferente na primeira linha.
+
+### 5 HOOKS EXTRAS PARA TESTE
+5 primeiras linhas alternativas que podem substituir o hook da legenda principal.
+
+## REGRAS DE OURO:
+- A primeira linha é 80% do sucesso — invista nela
+- Escreva como fala, não como escreve
+- Cada frase deve carregar peso — zero enchimento
+- Adapte o tom ao DNA da marca (se disponível)
+- Quebre o texto em blocos curtos para mobile
+- O CTA deve parecer natural, não forçado
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Adapte o tom de forma genérica."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como contexto adicional para a legenda.` : ""}
+
+CONTEÚDO DO POST:
+${inputs.content}`;
+    },
+  },
 };
