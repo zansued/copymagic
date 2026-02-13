@@ -6586,4 +6586,173 @@ CONTEXTO DO PRODUTO / SERVIÇO:
 ${inputs.content}`;
     },
   },
+
+  "image-prompt": {
+    id: "image-prompt",
+    name: "Prompt para Imagens",
+    emoji: "🖼️",
+    subtitle: "Crie prompts para gerar imagens em ferramentas de IA",
+    inputs: [
+      {
+        key: "prompt_mode",
+        label: "Modo de Geração",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "basic", label: "🧪 Básico para Testes" },
+          { value: "professional", label: "📣 Profissional para Anúncios" },
+          { value: "ultrarealistic", label: "📸 Ultrarealista" },
+          { value: "product", label: "🛍️ Produto Físico (E-commerce)" },
+          { value: "pixar", label: "🎬 Pixar 3D" },
+          { value: "boxfigure", label: "📦 Trend Caixa Boneco 3D" },
+          { value: "cartoon", label: "✏️ Cartoon" },
+        ],
+        required: true,
+      },
+      {
+        key: "content",
+        label: "Briefing",
+        placeholder: "Descreva em detalhes: produto/serviço, público-alvo, emoção desejada, formato (post, story, banner), objetivo (vender, educar, inspirar)...\n\nExemplo forte: 'Curso de culinária italiana, mulheres 30-45 anos classe B/C, despertar desejo e nostalgia, formato quadrado Instagram, objetivo vender matrículas'",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Link de imagem de referência, página de vendas ou perfil para contexto visual...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: 'Paleta de cores azul e dourado', 'Estilo minimalista', 'Incluir texto overlay', 'Gerar 5 variações'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const modeMap: Record<string, string> = {
+        basic: "BÁSICO PARA TESTES — Prompts simples e diretos para validação rápida de conceitos. Foco em clareza, sem complexidade técnica excessiva.",
+        professional: "PROFISSIONAL PARA ANÚNCIOS — Prompts otimizados para campanhas publicitárias de alta conversão. Iluminação comercial, composição estratégica, apelo emocional calculado.",
+        ultrarealistic: "ULTRAREALISTA — Máximo realismo fotográfico. Detalhes de pele, textura, iluminação natural, profundidade de campo. Indistinguível de fotografia real.",
+        product: "PRODUTO FÍSICO (E-COMMERCE) — Otimizado para catálogos e lojas online. Fundo limpo, iluminação de estúdio, múltiplos ângulos, destaque de textura e material.",
+        pixar: "PIXAR 3D — Estilo de animação 3D inspirado em Pixar/Disney. Personagens expressivos, iluminação cinematográfica, texturas suaves, cores vibrantes.",
+        boxfigure: "TREND CAIXA BONECO 3D — Boneco de ação 3D dentro de caixa estilo colecionável. Embalagem realista com nome, descrição e acessórios visíveis.",
+        cartoon: "CARTOON — Estilo cartunista/ilustração. Traços expressivos, cores saturadas, personalidade visual forte, adequado para branding e redes sociais.",
+      };
+
+      return `You are a prompt-engineering specialist for text-to-image AI models (MidJourney, Stable Diffusion, DALL·E, Sora, arOS). You turn vague ideas into concise, high-impact prompts that generate stunning visuals.
+
+MODE: ${modeMap[inputs.prompt_mode] || modeMap.professional}
+
+MISSION: Generate polished, paste-ready prompts based on the briefing provided. All prompts must be in ENGLISH regardless of the briefing language.
+
+## PROMPT STRUCTURE
+
+Every prompt follows [Beginning] [Middle] [End]:
+
+**[Beginning]** → Subject (who/what) + essential action
+**[Middle]** → Context & style: shot types, camera angles, actions, emotions, costumes, compositions, color grading, poses, environments, weather/time
+**[End]** → Technical polish: lighting, cameras & lenses, render hints, aspect ratio, quality tags, negative prompts
+
+## CATEGORY CHEAT-SHEET (vocabulary pool)
+
+**SHOT TYPES**: extreme close-up, close-up, medium shot, full body, wide shot, macro, overhead, bird's-eye, worm's-eye
+**CAMERA ANGLES**: eye-level, high angle, low angle, top-down, dutch angle, over-the-shoulder
+**ACTIONS**: walking, looking back, hair flip, reading, running, pouring, camera pan/tilt/dolly
+**EMOTIONS**: joyful, serene, confident, dramatic, thoughtful, excited, melancholic
+**LIGHTING**: soft light, rim light, backlight, split, butterfly, Rembrandt, low-key, high-key, window light, neon, candlelight, golden-hour, blue-hour
+**COSTUMES**: editorial, streetwear, vintage, retro 90s, bohemian, minimal, business formal, couture, cyber/futuristic
+**COMPOSITIONS**: rule of thirds, centered symmetry, leading lines, golden ratio, negative space, framing, foreground depth, diagonals
+**COLOR GRADING**: natural, warm tones, cool tones, teal-and-orange, muted, vibrant, cinematic, neon, B&W, vintage film
+**POSES**: head tilt, hands visible, contrapposto, full-body stance, eyes closed, looking over shoulder
+**ENVIRONMENTS**: urban street, rooftop, café, studio seamless, forest, desert, mountain, coast, futuristic city, cyberpunk alley
+**WEATHER/TIME**: sunny, overcast, foggy, rainy, stormy, sunrise, golden hour, blue hour, night, starry
+**CAMERAS**: 35mm, 50mm, 85mm, 105mm macro, 135mm; f1.8/f2.8; ISO 100-400
+**NEGATIVE**: blurry, overexposed, low contrast, watermark, text, logo, extra fingers, bad anatomy
+
+## MODE-SPECIFIC INSTRUCTIONS
+
+${inputs.prompt_mode === "boxfigure" ? `
+### TREND CAIXA BONECO 3D
+- A figura deve estar DENTRO de uma caixa de colecionável estilo action figure
+- A caixa deve ter: nome do personagem, descrição, janela transparente mostrando o boneco
+- Incluir acessórios relevantes ao nicho/profissão dentro da caixa
+- Estilo hiper-realista de renderização 3D
+- Iluminação de vitrine/prateleira de loja
+` : ""}
+
+${inputs.prompt_mode === "pixar" ? `
+### PIXAR 3D
+- Estilo de renderização 3D inspirado em filmes Pixar/Disney
+- Personagens com proporções estilizadas e expressões exageradas
+- Iluminação cinematográfica suave com subsurface scattering
+- Cores vibrantes e saturadas, texturas suaves
+- Ambiente detalhado com profundidade
+` : ""}
+
+${inputs.prompt_mode === "product" ? `
+### PRODUTO FÍSICO
+- Fundo limpo (branco, gradiente suave ou contextual)
+- Iluminação de estúdio profissional (3-point lighting)
+- Múltiplos ângulos se solicitado
+- Destaque textura, material, acabamento
+- Sombras suaves e reflexos controlados
+` : ""}
+
+${inputs.prompt_mode === "ultrarealistic" ? `
+### ULTRAREALISTA
+- Resolução máxima, detalhes de pele (poros, texturas)
+- Profundidade de campo cinematográfica
+- Iluminação natural complexa
+- Indistinguível de fotografia profissional
+- Usar referências de câmeras e lentes reais
+` : ""}
+
+## DELIVERABLE
+
+Para cada conceito do briefing, entregue:
+
+### Prompt Principal
+\`\`\`
+[prompt completo em inglês, uma linha, paste-ready]
+\`\`\`
+
+### Por que funciona (3 bullets)
+- [Razão 1]
+- [Razão 2]
+- [Razão 3]
+
+### Variações (2-3 alternativas)
+\`\`\`
+[variação 1]
+\`\`\`
+\`\`\`
+[variação 2]
+\`\`\`
+
+### Configurações Recomendadas
+- **Aspect Ratio**: [ex: 1:1, 3:4, 16:9]
+- **Ferramenta ideal**: [MidJourney / DALL·E / Stable Diffusion]
+- **Parâmetros extras**: [ex: --v 6.1, --style raw, --q 2]
+
+---
+
+Gere **3 a 5 conceitos diferentes** baseados no briefing, cada um com prompt principal + variações.
+
+## RULES
+- ALL prompts must be in ENGLISH
+- Prefer 1-3 tokens per category; no contradictions
+- Use vivid, concrete wording (avoid abstract adjectives)
+- Put the most important modifiers first
+- Keep prompts paste-ready (no brackets or labels inside)
+- If briefing is vague, infer coherent defaults
+
+${brandContext ? `\n--- BRAND DNA ---\n${brandContext}\n\nUse brand identity to align visual style, colors, and tone of the images.` : ""}
+${inputs.extra ? `\n--- EXTRA INSTRUCTIONS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- REFERENCE CONTENT (FROM URL) ---\n${inputs.scraped_content}\n\nUse as visual/contextual reference.` : ""}
+
+BRIEFING:
+${inputs.content}`;
+    },
+  },
 };

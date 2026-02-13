@@ -522,4 +522,13 @@ export const AGENTS: AgentDef[] = [
     category: "products",
     available: true,
   },
+  {
+    id: "image-prompt",
+    name: "Prompt para Imagens",
+    emoji: "🖼️",
+    role: "Especialista em Prompt Engineering para IA de Imagens",
+    description: "Cria prompts técnicos para gerar imagens publicitárias em MidJourney, DALL·E, Stable Diffusion e outras ferramentas de IA.",
+    category: "content",
+    available: true,
+  },
 ];
