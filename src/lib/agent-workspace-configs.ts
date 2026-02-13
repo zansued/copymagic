@@ -2968,6 +2968,86 @@ ${inputs.extra ? `\n--- CONTEXTO ADICIONAL ---\n${inputs.extra}` : ""}`;
     },
   },
 
+  "high-ticket-ideas": {
+    id: "high-ticket-ideas",
+    name: "Ideias de Produto High Ticket",
+    emoji: "🏆",
+    subtitle: "Transforme sua autoridade em ideias estratégicas de ofertas premium",
+    inputs: [
+      {
+        key: "content",
+        label: "Foco Estratégico (opcional)",
+        placeholder: "Dê um direcionamento: um problema específico, um sub-nicho, um objetivo, ou uma ideia bruta para validar. Se deixar em branco, o agente usará apenas seu DNA.",
+        type: "textarea",
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "https://exemplo.com — página de concorrente, artigo, referência...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foque em mentorias presenciais', 'Ticket mínimo R$5.000', 'Explore o mercado de tecnologia'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const parts = [`Você é um Estrategista de Ofertas Premium de elite — especialista em identificar oportunidades de alto valor a partir do posicionamento, autoridade e expertise de um profissional ou marca.
+
+MISSÃO: Cruzar o DNA de Marca com o foco estratégico fornecido e entregar **3 CONCEITOS DE OFERTAS HIGH TICKET** completos, detalhados e prontos para validação.
+
+## ENTREGA OBRIGATÓRIA
+
+### PARTE 1 — 3 CONCEITOS DE OFERTAS PREMIUM
+
+Para CADA conceito, entregue:
+
+#### CONCEITO [N]: [NOME DA OFERTA]
+
+1. **Nome da Oferta**: Um nome magnético que comunica transformação e exclusividade
+2. **Tagline**: Frase que resume a promessa em uma linha
+3. **Formato**: Mentoria 1:1, Mastermind, Consultoria, Programa, Serviço Premium, Híbrido, etc.
+4. **Problema Central**: O problema de alto impacto que esta oferta resolve
+5. **Público Ideal**: Perfil exato de quem é o cliente perfeito (e quem NÃO é)
+6. **Transformação Prometida**: O "antes e depois" concreto do cliente
+7. **Mecanismo Único**: O que torna esta abordagem diferente de tudo no mercado
+8. **Diferencial Competitivo**: Por que esta oferta vence a concorrência
+9. **Faixa de Preço Sugerida**: Com justificativa baseada no valor da transformação
+10. **Estrutura Resumida**: Visão geral da entrega (fases, duração, formato)
+11. **Ponte para o DNA**: Como esta oferta se conecta à autoridade e expertise da marca
+12. **Potencial de Escala**: De 1 a 5, quão escalável é este modelo (com justificativa)
+
+### PARTE 2 — MELHOR OPORTUNIDADE
+
+Selecione o conceito com MAIOR potencial e apresente:
+
+- **Conceito Recomendado**: Qual e por quê
+- **Justificativa Estratégica**: Análise de 3-5 pontos que sustentam a recomendação (alinhamento com DNA, demanda de mercado, margem, escalabilidade, diferenciação)
+- **Próximo Passo Imediato**: A ação concreta #1 para começar a validar esta oferta
+- **Risco Principal**: O maior desafio e como mitigá-lo
+- **Timeline Sugerida**: Prazo estimado para lançamento mínimo viável
+
+REGRAS:
+- Os 3 conceitos devem ser GENUINAMENTE diferentes entre si (formatos, públicos ou ângulos distintos)
+- Cada conceito deve ser viável e executável com a expertise atual da marca
+- Foque em TRANSFORMAÇÃO DE ALTO VALOR, não em volume
+- Os nomes devem ser proprietários e memoráveis (não genéricos)
+- A análise deve ser honesta — se um conceito tem riscos, aponte-os
+- Toda a entrega deve ser em formato pronto para apresentação`];
+
+      if (brandContext) parts.push(`\n--- DNA DE MARCA ---\n${brandContext}`);
+      else parts.push("\n⚠️ Sem DNA selecionado. Crie conceitos baseados apenas nas instruções do usuário.");
+      if (inputs.extra) parts.push(`\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}`);
+      if (inputs.scraped_content) parts.push(`\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}`);
+      if (inputs.content) parts.push(`\nFOCO ESTRATÉGICO:\n${inputs.content}`);
+      else parts.push("\nNenhum foco específico fornecido. Use o DNA de Marca como base principal para gerar os conceitos.");
+
+      return parts.join("\n");
+    },
+  },
+
   "high-ticket-product": {
     id: "high-ticket-product",
     name: "Gerador de Produto High Ticket",

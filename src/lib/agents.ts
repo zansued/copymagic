@@ -126,6 +126,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "high-ticket-ideas",
+    name: "Ideias de Produto High Ticket",
+    emoji: "🏆",
+    role: "Estrategista de Ofertas Premium",
+    description: "Transforma sua autoridade em 3 conceitos estratégicos de ofertas premium (high-ticket), com análise e recomendação da melhor oportunidade.",
+    category: "branding",
+    available: true,
+  },
+  {
     id: "high-ticket-product",
     name: "Gerador de Produto High Ticket",
     emoji: "🏆",
