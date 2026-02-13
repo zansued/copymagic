@@ -513,4 +513,13 @@ export const AGENTS: AgentDef[] = [
     category: "ideation",
     available: true,
   },
+  {
+    id: "problem-promise",
+    name: "Problema & Promessa",
+    emoji: "🎯",
+    role: "Especialista em Posicionamento Estratégico",
+    description: "Define o problema específico e a promessa clara usando as metodologias D.O.R.E.S e M.O.E.D.A para criar posicionamentos magnéticos.",
+    category: "products",
+    available: true,
+  },
 ];
