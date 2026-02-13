@@ -28,8 +28,10 @@ interface MentorAgentExecutorProps {
 }
 
 export default function MentorAgentExecutor({ agentId, stepTitle, onClose, onComplete }: MentorAgentExecutorProps) {
-  const config = AGENT_WORKSPACE_CONFIGS[agentId];
-  const agent = AGENTS.find((a) => a.id === agentId);
+  // Try direct lookup first, then fallback by name match
+  const config = AGENT_WORKSPACE_CONFIGS[agentId] 
+    || Object.values(AGENT_WORKSPACE_CONFIGS).find((c) => c.name.toLowerCase() === agentId.toLowerCase());
+  const agent = AGENTS.find((a) => a.id === (config?.id || agentId));
   const { user } = useAuth();
 
   const [inputs, setInputs] = useState<Record<string, string>>({});

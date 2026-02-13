@@ -9108,4 +9108,70 @@ MATERIAL PARA ANÁLISE DE VOZ:
 ${inputs.content}`;
     },
   },
+
+  "storytelling-adapter": {
+    id: "storytelling-adapter",
+    name: "Adaptador de Storytelling",
+    emoji: "📖",
+    subtitle: "Transforme qualquer conteúdo em narrativa persuasiva",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo Original",
+        placeholder: "Cole aqui o conteúdo que deseja transformar em uma narrativa mais poderosa (copy, post, artigo, roteiro, etc.)...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "framework",
+        label: "Framework de Storytelling",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "heros-journey", label: "🦸 Jornada do Herói" },
+          { value: "before-after-bridge", label: "🌉 Before-After-Bridge" },
+          { value: "pas", label: "⚡ PAS (Problema-Agitação-Solução)" },
+          { value: "star-story-solution", label: "⭐ Star-Story-Solution" },
+          { value: "auto", label: "🤖 Automático (melhor framework)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Tom emocional', 'Para VSL', 'Foque na transformação do cliente'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const frameworkMap: Record<string, string> = {
+        "heros-journey": "Jornada do Herói — chamado à aventura, provações, transformação e retorno",
+        "before-after-bridge": "Before-After-Bridge — situação atual, visão do futuro desejado, ponte (solução)",
+        "pas": "PAS — identifique o problema, agite as consequências, apresente a solução",
+        "star-story-solution": "Star-Story-Solution — apresente o protagonista, conte a história, revele a solução",
+        "auto": "Analise o conteúdo e escolha o framework mais adequado automaticamente",
+      };
+
+      return `Você é o Adaptador de Storytelling — um mestre em transformar qualquer conteúdo em narrativas persuasivas e envolventes usando frameworks clássicos de storytelling.
+
+MISSÃO: Reescrever o conteúdo fornecido usando o framework ${frameworkMap[inputs.framework] || frameworkMap.auto}.
+
+PROCESSO:
+1. Analise o conteúdo original: tipo, tom, mensagem central, público
+2. Identifique os elementos narrativos já presentes
+3. Reescreva aplicando o framework escolhido, mantendo a mensagem central
+4. Entregue o conteúdo PRONTO PARA USO
+
+REGRAS:
+- Mantenha a essência e mensagem do conteúdo original
+- Adapte o tom ao framework (mais emocional, mais estruturado, etc.)
+- Entregue o resultado formatado e pronto para publicação
+- Inclua notas sobre as escolhas narrativas feitas
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+CONTEÚDO ORIGINAL:
+${inputs.content}`;
+    },
+  },
 };
