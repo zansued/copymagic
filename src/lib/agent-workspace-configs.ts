@@ -2967,4 +2967,138 @@ ${inputs.content ? `\n--- DIRECIONAMENTOS DO USUÁRIO ---\n${inputs.content}` : 
 ${inputs.extra ? `\n--- CONTEXTO ADICIONAL ---\n${inputs.extra}` : ""}`;
     },
   },
+
+  "high-ticket-product": {
+    id: "high-ticket-product",
+    name: "Gerador de Produto High Ticket",
+    emoji: "🏆",
+    subtitle: "Transforme uma ideia em um plano de entrega detalhado",
+    inputs: [
+      {
+        key: "content",
+        label: "Ideia do Produto",
+        placeholder: "Cole a ideia completa do produto (idealmente gerada pelo agente 'Ideias de Produto High Ticket'). Inclua: problema, transformação, diferencial, público...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "https://exemplo.com — página do produto, Google Docs, etc.",
+        type: "input",
+      },
+      {
+        key: "format",
+        label: "Formato do Produto",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "mentoria", label: "🎯 Mentoria 1:1" },
+          { value: "grupo", label: "👥 Mentoria em Grupo / Mastermind" },
+          { value: "consultoria", label: "💼 Consultoria / Done-For-You" },
+          { value: "programa", label: "📚 Programa Online (curso + suporte)" },
+          { value: "servico", label: "⚙️ Serviço Premium / Agência" },
+          { value: "hibrido", label: "🔄 Híbrido (online + presencial)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Duração de 12 semanas', 'Preço-alvo R$5.000', 'Incluir componente presencial', 'Foco em escala'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const formatMap: Record<string, string> = {
+        mentoria: "Mentoria 1:1 — acompanhamento individual e personalizado",
+        grupo: "Mentoria em Grupo / Mastermind — experiência coletiva com curadoria",
+        consultoria: "Consultoria / Done-For-You — execução feita para o cliente",
+        programa: "Programa Online — curso estruturado com suporte ativo",
+        servico: "Serviço Premium / Agência — entrega profissional completa",
+        hibrido: "Híbrido — combinação de online e presencial",
+      };
+
+      return `Você é um Arquiteto de Produtos High Ticket de elite — especialista em transformar conceitos em planos de entrega completos, detalhados e vendáveis.
+
+MISSÃO: Criar um PLANO DE ENTREGA COMPLETO para um produto high ticket no formato **${formatMap[inputs.format] || formatMap.mentoria}**.
+
+## ENTREGA OBRIGATÓRIA — FICHA TÉCNICA DO PRODUTO
+
+### 1. 🏷️ IDENTIDADE DO PRODUTO
+- **Nome do Produto** (3 opções): Nomes que comunicam transformação e exclusividade
+- **Tagline**: Frase que resume a promessa em uma linha
+- **Posicionamento**: Em uma frase, por que este produto é diferente de tudo no mercado
+- **Público ideal**: Perfil exato de quem é o cliente perfeito (e quem NÃO é)
+
+### 2. 🧭 MÉTODO PROPRIETÁRIO
+Crie um método com nome próprio que seja a espinha dorsal do produto:
+- **Nome do Método**: Batize com algo memorável e proprietário
+- **Acrônimo ou Framework Visual**: Como representar visualmente
+- **Pilares/Fases** (3-5): Para cada pilar:
+  - Nome do pilar
+  - Objetivo específico
+  - Transformação que entrega
+  - Duração estimada
+- **Jornada do Cliente**: Como o cliente progride do pilar 1 ao último
+
+### 3. 📋 ESTRUTURA DE ENTREGA
+Detalhe semana a semana ou fase a fase:
+
+**FASE [N]: [NOME DA FASE]** (Semanas X-Y)
+- **Objetivo da fase**: O que será conquistado
+- **Sessões/Encontros**: Formato, duração e frequência
+- **Conteúdo/Atividades**: O que acontece em cada sessão
+- **Entregável do cliente**: O que o cliente produz/conquista
+- **Checkpoint de progresso**: Como medir se está no caminho certo
+- **Materiais de apoio**: Templates, frameworks, ferramentas
+
+### 4. 🛠️ ECOSSISTEMA DE SUPORTE
+- **Canais de comunicação**: Como o cliente acessa suporte (Telegram, Slack, etc.)
+- **Tempo de resposta**: SLA de atendimento
+- **Materiais complementares**: Biblioteca de recursos, templates, swipe files
+- **Comunidade**: Se houver componente de grupo, como funciona
+- **Tecnologia**: Plataformas e ferramentas utilizadas
+
+### 5. 🎁 ENTREGÁVEIS PREMIUM
+Para cada entregável principal:
+- **Nome atrativo** (não genérico)
+- **O que é**: Descrição concreta
+- **Como é entregue**: Formato e acesso
+- **Valor percebido**: Se vendido separadamente
+- **Transformação específica**: O que muda na vida do cliente
+
+### 6. 📊 MÉTRICAS DE SUCESSO
+- **KPIs do cliente**: Como o cliente mede seu progresso
+- **Marcos de transformação**: Checkpoints de vitória ao longo da jornada
+- **Resultado esperado**: O que o cliente terá ao final do programa
+- **Timeline realista**: Prazo para primeiros resultados e resultado completo
+
+### 7. 🔄 OPERACIONAL
+- **Capacidade máxima**: Quantos clientes simultâneos
+- **Equipe necessária**: Quem precisa estar envolvido na entrega
+- **Ferramentas**: Stack tecnológico para operação
+- **Onboarding**: Processo de boas-vindas do novo cliente
+- **Offboarding**: Como encerrar o ciclo e gerar renovação/indicação
+
+### 8. 💰 ESTRATÉGIA DE PREÇO
+- **Faixa de preço sugerida**: Com justificativa baseada em valor
+- **Opções de pagamento**: À vista, parcelado, recorrente
+- **Comparativo de mercado**: Como se posiciona vs. concorrentes
+- **ROI para o cliente**: Retorno esperado vs. investimento
+
+REGRAS:
+- Cada fase deve ter ações CONCRETAS, não genéricas
+- O método proprietário deve ser único e memorável
+- Toda a estrutura deve ser vendável — pense em como cada seção apareceria numa página de vendas
+- Equilibre profundidade com praticidade
+- O plano deve ser executável por uma equipe enxuta
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Sem DNA selecionado. Use as informações fornecidas pelo usuário."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}` : ""}
+
+IDEIA DO PRODUTO:
+${inputs.content}`;
+    },
+  },
 };
