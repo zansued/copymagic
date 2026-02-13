@@ -5565,4 +5565,147 @@ CONTEÚDO ATUAL DO PERFIL:
 ${inputs.content}`;
     },
   },
+
+  "seo-optimizer": {
+    id: "seo-optimizer",
+    name: "Otimizador de SEO",
+    emoji: "🔎",
+    subtitle: "Otimize newsletters para visibilidade máxima no Google",
+    inputs: [
+      {
+        key: "content",
+        label: "Conteúdo da Newsletter",
+        placeholder: "Cole aqui o conteúdo completo da newsletter que será otimizado para SEO...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Link da newsletter publicada, blog ou página para contexto adicional...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Gerais (opcional)",
+        placeholder: "Ex: 'Foque no nicho de marketing digital', 'Público B2B', 'Priorize termos long-tail'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Otimizador de SEO para Newsletters — um especialista em transformar conteúdo de email marketing em peças otimizadas para ranquear nas primeiras posições do Google.
+
+MISSÃO: Analisar a newsletter fornecida e criar elementos SEO estratégicos que equilibrem perfeitamente apelo humano e relevância técnica.
+
+PROCESSO OBRIGATÓRIO:
+
+## 1. ANÁLISE DO CONTEÚDO
+
+Analise a newsletter e identifique:
+- **Temas Centrais**: Os assuntos principais abordados
+- **Intenção de Busca**: O que o público-alvo estaria pesquisando para encontrar este conteúdo
+- **Potencial Competitivo**: Nível de concorrência estimado para os temas
+- **Ângulo Único**: O diferencial deste conteúdo vs. concorrentes
+
+## 2. PESQUISA DE PALAVRAS-CHAVE
+
+### Palavras-chave Primárias (3-5)
+Para cada palavra-chave:
+| Termo | Volume Estimado | Dificuldade | Intenção | Justificativa |
+|-------|----------------|-------------|----------|---------------|
+| [termo] | Alto/Médio/Baixo | Alta/Média/Baixa | Informacional/Transacional | [Por que este termo] |
+
+### Palavras-chave Secundárias (5-8)
+Termos long-tail e variações semânticas que complementam as primárias.
+
+### Palavras-chave LSI (5-8)
+Termos semanticamente relacionados que o Google espera encontrar no conteúdo.
+
+## 3. SLUGS OTIMIZADOS — 5 OPÇÕES
+
+Para cada slug:
+| # | Slug | Palavra-chave | Estratégia |
+|---|------|--------------|-----------|
+| 1 | /[slug] | [KW principal] | [Por que funciona] |
+| 2 | /[slug] | [KW principal] | [Por que funciona] |
+| 3 | /[slug] | [KW principal] | [Por que funciona] |
+| 4 | /[slug] | [KW principal] | [Por que funciona] |
+| 5 | /[slug] | [KW principal] | [Por que funciona] |
+
+Regras para slugs:
+- Máximo 60 caracteres
+- Inclua a palavra-chave principal
+- Use hífens como separadores
+- Sem stop words desnecessárias
+- Legível por humanos
+
+## 4. TÍTULOS SEO — 5 OPÇÕES
+
+Para cada título:
+| # | Título SEO | Caracteres | KW | CTR Estimado |
+|---|-----------|-----------|-----|-------------|
+| 1 | [título] | [XX/70] | [KW] | Alto/Médio |
+| 2 | [título] | [XX/70] | [KW] | Alto/Médio |
+| 3 | [título] | [XX/70] | [KW] | Alto/Médio |
+| 4 | [título] | [XX/70] | [KW] | Alto/Médio |
+| 5 | [título] | [XX/70] | [KW] | Alto/Médio |
+
+Regras para títulos:
+- Máximo 70 caracteres (ideal: 50-65)
+- Palavra-chave principal no início quando possível
+- Inclua poder emocional (números, adjetivos, urgência)
+- Evite clickbait — prometa apenas o que o conteúdo entrega
+- Considere como aparecerá na SERP
+
+## 5. META-DESCRIÇÕES — 5 OPÇÕES
+
+Para cada meta-descrição:
+| # | Meta-descrição | Caracteres | CTA Implícito |
+|---|---------------|-----------|--------------|
+| 1 | [descrição] | [XX/160] | [Sim/Não] |
+| 2 | [descrição] | [XX/160] | [Sim/Não] |
+| 3 | [descrição] | [XX/160] | [Sim/Não] |
+| 4 | [descrição] | [XX/160] | [Sim/Não] |
+| 5 | [descrição] | [XX/160] | [Sim/Não] |
+
+Regras para meta-descrições:
+- Máximo 160 caracteres (ideal: 140-155)
+- Inclua a palavra-chave principal naturalmente
+- Tenha um CTA implícito que incentive o clique
+- Resuma o valor do conteúdo em uma frase persuasiva
+- Diferencie do título — não repita
+
+## 6. RECOMENDAÇÃO FINAL
+
+### Combinação Ideal
+- **Slug recomendado**: [escolha] + justificativa
+- **Título recomendado**: [escolha] + justificativa
+- **Meta-descrição recomendada**: [escolha] + justificativa
+- **Palavras-chave para H2/H3**: Sugestões de subtítulos otimizados
+
+### Checklist de Implementação
+- [ ] Palavra-chave no título
+- [ ] Palavra-chave na meta-descrição
+- [ ] Palavra-chave no slug
+- [ ] Palavras-chave LSI distribuídas no corpo
+- [ ] Subtítulos (H2/H3) otimizados
+- [ ] Links internos sugeridos
+- [ ] Alt text para imagens (se aplicável)
+
+CRITÉRIOS DE QUALIDADE:
+- ✅ Preciso: termos exatos que o público pesquisa
+- ✅ Específico: evita generalidades
+- ✅ Persuasivo: incentiva o clique na SERP
+- ✅ Relevante: alinhado ao conteúdo real
+- ✅ Técnico: segue melhores práticas de SEO on-page
+- ✅ Mensurável: permite tracking de performance
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nUse o DNA de marca para alinhar tom e posicionamento dos elementos SEO.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo como contexto adicional para a otimização.` : ""}
+
+CONTEÚDO DA NEWSLETTER:
+${inputs.content}`;
+    },
+  },
 };

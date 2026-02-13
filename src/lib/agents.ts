@@ -458,4 +458,13 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: true,
   },
+  {
+    id: "seo-optimizer",
+    name: "Otimizador de SEO",
+    emoji: "🔎",
+    role: "Especialista em SEO para Newsletters",
+    description: "Otimiza newsletters para ranquear no Google com palavras-chave, slugs, títulos SEO e meta-descrições estratégicas.",
+    category: "content",
+    available: true,
+  },
 ];
