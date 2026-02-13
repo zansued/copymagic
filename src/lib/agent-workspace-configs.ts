@@ -2853,4 +2853,118 @@ IDEIA DA ISCA:
 ${inputs.content}`;
     },
   },
+
+  "offer-generator": {
+    id: "offer-generator",
+    name: "Gerador de Ofertas",
+    emoji: "💰",
+    subtitle: "Crie ofertas tão boas que pessoas se sintam estúpidas negando",
+    inputs: [
+      {
+        key: "content",
+        label: "Direcionamentos (opcional)",
+        placeholder: "Instruções específicas para a oferta. Ex: 'Versão para Black Friday', 'Destrua a objeção de preço', 'Destaque economia de tempo'. Deixe em branco para gerar com base no DNA.",
+        type: "textarea",
+      },
+      {
+        key: "offer_type",
+        label: "Tipo de Oferta",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "main", label: "🎯 Oferta Principal (produto core)" },
+          { value: "tripwire", label: "⚡ Tripwire (entrada de baixo ticket)" },
+          { value: "high-ticket", label: "💎 High Ticket (premium/mentoria)" },
+          { value: "launch", label: "🚀 Oferta de Lançamento (tempo limitado)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Contexto Adicional",
+        placeholder: "Informações extras: preço atual, objeções conhecidas, concorrentes, sazonalidade...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const typeMap: Record<string, string> = {
+        main: "Oferta Principal — o produto core do negócio, posicionamento central",
+        tripwire: "Tripwire — oferta de entrada de baixo ticket que inicia o relacionamento e qualifica",
+        "high-ticket": "High Ticket — oferta premium com alto valor percebido, mentoria ou serviço exclusivo",
+        launch: "Oferta de Lançamento — tempo limitado, com urgência e escassez reais",
+      };
+
+      return `Você é um Arquiteto de Ofertas de elite — especialista em criar blueprints de ofertas irresistíveis que combinam psicologia da persuasão, lógica de valor e estratégia de mercado.
+
+MISSÃO: Criar um BLUEPRINT COMPLETO de oferta do tipo **${typeMap[inputs.offer_type] || typeMap.main}**.
+
+PRINCÍPIO FUNDAMENTAL — AXIOMA 41-39-20:
+- 41% do sucesso = PÚBLICO certo
+- 39% do sucesso = OFERTA irresistível ← ESTE É O SEU FOCO
+- 20% do sucesso = Copy e criativo
+
+## ENTREGA OBRIGATÓRIA
+
+### 1. 🏷️ NOMES MAGNÉTICOS (3 opções)
+Para cada nome, entregue:
+- O nome em si
+- Por que funciona (psicologia por trás)
+- Tagline complementar
+
+### 2. 💎 PROMESSA CENTRAL
+- **A Grande Promessa**: Resultado específico e mensurável
+- **Prazo**: Em quanto tempo o resultado é alcançável
+- **Mecanismo Único**: O COMO diferenciado (o que torna sua solução única)
+- **Nova Categoria**: Posicione o produto em uma categoria que você domina
+
+### 3. 📦 ENTREGÁVEIS DO PRODUTO
+Para cada entregável principal:
+- **Nome atrativo** (não genérico)
+- **Descrição persuasiva** (2-3 linhas focadas em transformação, não features)
+- **Valor percebido**: Quanto valeria se vendido separadamente
+- **Resultado específico**: O que o cliente conquista com este entregável
+
+### 4. 🎁 BÔNUS ESTRATÉGICOS (3-5 bônus)
+Cada bônus deve DESTRUIR uma objeção específica:
+- **Bônus [N]**: [Nome atrativo]
+- **Objeção que destrói**: Qual hesitação este bônus elimina
+- **Descrição**: O que é e por que é valioso (2-3 linhas)
+- **Valor percebido**: Preço se vendido separadamente
+- **Por que é bônus**: Justificativa estratégica
+
+### 5. 🛡️ SISTEMA DE GARANTIAS
+- **Garantia Principal**: Tipo (incondicional, condicional, dupla) + prazo + condições
+- **Garantia Reversa** (opcional): "Se não [resultado], eu [compensação]"
+- **Nome da Garantia**: Batize com um nome memorável
+- **Racional**: Por que você pode oferecer esta garantia (gera confiança)
+
+### 6. 💲 LÓGICA DE VALOR (Ancoragem)
+- **Stack de valor total**: Soma de todos os entregáveis + bônus
+- **Valor real de mercado**: Comparação com alternativas
+- **Preço da oferta**: Posicionamento estratégico
+- **Economia percebida**: "Você leva R$X por apenas R$Y"
+- **Custo da inação**: Quanto custa NÃO resolver o problema (por mês/ano)
+- **ROI projetado**: Retorno esperado vs. investimento
+
+### 7. ⚡ URGÊNCIA E ESCASSEZ (se aplicável)
+- **Elementos de escassez**: Vagas, tempo, bônus limitados
+- **Justificativa real**: Por que a escassez é legítima
+- **Deadline**: Data ou condição de encerramento
+
+### 8. 📋 RESUMO EXECUTIVO
+- Visão geral da oferta em 1 parágrafo
+- Pitch de elevador em 2 frases
+- Os 3 argumentos mais fortes para fechar a venda
+
+REGRAS:
+- Tudo deve ser ESPECÍFICO — zero promessas vagas
+- Bônus devem ser estratégicos, não lixo de volume
+- A lógica de valor deve ser matematicamente convincente
+- O blueprint deve funcionar como documento estratégico para guiar toda a campanha
+- Adapte ao tipo de oferta selecionado
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}\n\nIMPORTANTE: Use TODAS as informações do DNA como fundação. O público, problema, solução, credenciais e posicionamento devem guiar cada decisão da oferta.` : "⚠️ Nenhum DNA selecionado. Peça informações básicas sobre produto, público e preço para construir a oferta."}
+${inputs.content ? `\n--- DIRECIONAMENTOS DO USUÁRIO ---\n${inputs.content}` : ""}
+${inputs.extra ? `\n--- CONTEXTO ADICIONAL ---\n${inputs.extra}` : ""}`;
+    },
+  },
 };

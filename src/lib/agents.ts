@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "offer-generator",
+    name: "Gerador de Ofertas",
+    emoji: "💰",
+    role: "Especialista em Arquitetura de Ofertas",
+    description: "Cria blueprints completos de ofertas irresistíveis com nomes magnéticos, bônus estratégicos, garantias e lógica de valor.",
+    category: "branding",
+    available: true,
+  },
+  {
     id: "lead-magnet-generator",
     name: "Gerador de Isca Digital",
     emoji: "🧲",
