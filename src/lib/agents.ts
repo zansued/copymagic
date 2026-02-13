@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "google-ads-search",
+    name: "Google Ads Rede de Pesquisa",
+    emoji: "🔎",
+    role: "Especialista em Google Ads Search",
+    description: "Cria 3 temas de campanha otimizados para Google Ads com títulos, descrições, palavras-chave e extensões prontos para uso.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "low-ticket-product",
     name: "Gerador de Produto Low Ticket",
     emoji: "📦",
