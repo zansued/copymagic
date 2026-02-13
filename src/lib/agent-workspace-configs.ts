@@ -8765,4 +8765,164 @@ CONTEÚDO BASE:
 ${inputs.content}`;
     },
   },
+
+  "youtube-thumbnails": {
+    id: "youtube-thumbnails",
+    name: "Thumbnails para YouTube",
+    emoji: "🖼️",
+    subtitle: "Textos virais e conceitos visuais para thumbnails",
+    inputs: [
+      {
+        key: "thumb_mode",
+        label: "Objetivo",
+        type: "select",
+        placeholder: "",
+        required: true,
+        options: [
+          { value: "text", label: "Textos para Thumbnail (15-20 hooks)" },
+          { value: "design", label: "Orientação para Design (3 conceitos visuais)" },
+        ],
+      },
+      {
+        key: "content",
+        label: "Conteúdo do Vídeo",
+        placeholder: "Descreva o vídeo, cole a transcrição, roteiro ou resumo do que será abordado...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://youtube.com/watch?v=...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras (opcional)",
+        placeholder: "Ex: Foque em números, tom mais polêmico, público é masculino 25-40...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const isTextMode = inputs.thumb_mode === "text";
+
+      const textPrompt = `## MODO: TEXTOS PARA THUMBNAIL
+
+Gere **15 a 20 opções de texto** para a thumbnail, organizados por categoria de padrão linguístico.
+
+### PADRÕES COMPROVADOS DE ALTO CTR
+
+Use estes padrões (validados em vídeos com 2M+ views):
+
+1. **Afirmação Chocante**: Declaração forte que gera reação imediata
+2. **Pergunta Provocativa**: Questão que o espectador PRECISA responder
+3. **Número + Resultado**: Dados específicos que geram curiosidade
+4. **Negação/Contraste**: "Não faça X" / "X vs Y"
+5. **Urgência/Temporal**: "Antes que..." / "Agora..." / "Em 2025..."
+6. **Autoridade/Revelação**: "O que [experts] não contam" / "A verdade sobre..."
+7. **Identificação**: Frases que o público pensa mas não fala
+8. **Condicional/Futuro**: "Pode..." / "Vai..." (para afirmações não 100% confirmadas)
+
+### FORMATO DE ENTREGA
+
+Para cada categoria, entregue 2-3 opções:
+
+#### [Categoria do Padrão]
+1. **"[texto da thumbnail]"** — [por que funciona em 1 frase]
+2. **"[texto da thumbnail]"** — [por que funciona em 1 frase]
+
+### REGRAS PARA TEXTOS
+- Máximo 5-7 palavras por texto (thumbnails são VISUAIS)
+- Palavras curtas e impactantes
+- Evite artigos desnecessários (o, a, os, as)
+- Use CAPS para 1-2 palavras de destaque (não tudo)
+- Se uma afirmação não é 100% precisa, use: "aspas", forma de pergunta, ou condicional
+- Cada texto deve funcionar SOZINHO (sem contexto do título)
+
+### TOP 3 RECOMENDADOS
+Ao final, destaque os 3 textos com maior potencial de CTR e justifique.`;
+
+      const designPrompt = `## MODO: ORIENTAÇÃO PARA DESIGN
+
+Gere **3 conceitos visuais completos** para a thumbnail, cada um com orientações detalhadas para um designer executar.
+
+### PRINCÍPIOS DE THUMBNAILS DE ALTO CTR
+
+1. **Contraste**: Elementos que se destacam no feed (fundo escuro + texto claro ou vice-versa)
+2. **Simplicidade**: Máximo 3 elementos visuais (rosto + texto + 1 elemento)
+3. **Emoção facial**: Expressões genuínas (surpresa, raiva, alegria) aumentam CTR em até 30%
+4. **Hierarquia visual**: O olho deve seguir: Rosto → Texto → Elemento de contexto
+5. **Legibilidade**: Texto deve ser legível em telas de celular (480px)
+
+### FORMATO DE ENTREGA
+
+Para cada conceito:
+
+---
+
+### 🎨 Conceito [N]: [Nome do Conceito]
+
+**Estilo visual**: [minimalista / bold / cinematográfico / editorial / meme-style]
+
+**Layout**:
+> [Descrição detalhada da composição — onde fica cada elemento, proporções, alinhamento]
+
+**Texto na Thumbnail**:
+> **"[texto exato]"**
+> - Fonte sugerida: [tipo de fonte — bold sans-serif, condensed, etc.]
+> - Cor: [cor do texto + cor do contorno/sombra]
+> - Posição: [onde na imagem]
+> - Tamanho: [proporção em relação à imagem]
+
+**Elemento Principal** (rosto/objeto):
+> - [Descrição: expressão facial, pose, objeto em destaque]
+> - Posição: [esquerda/centro/direita, proporção]
+> - Tratamento: [recorte, sombra, brilho, etc.]
+
+**Fundo**:
+> - Cor/Gradiente: [especificação]
+> - Elementos de apoio: [ícones, setas, emojis, gráficos]
+
+**Paleta de Cores**:
+> - Primária: [hex]
+> - Secundária: [hex]
+> - Destaque: [hex]
+> - Texto: [hex]
+
+**Referência de estilo**: [canal do YouTube ou criador com estilo similar]
+
+**Por que funciona**: [2-3 frases sobre a psicologia visual deste conceito]
+
+---
+
+### REGRAS PARA DESIGN
+- Resolução: 1280x720px (16:9)
+- Funcionar em tela pequena de celular
+- Máximo 2 blocos de texto (5-7 palavras total)
+- Rosto humano sempre que possível (aumenta CTR)
+- Evitar excesso de elementos (máx 3-4 elementos visuais)
+- Cores saturadas performam melhor que pastel`;
+
+      return `Você é um Especialista em Thumbnails de YouTube focado em maximizar CTR (taxa de clique) sem clickbait enganoso. Sua missão é criar ${isTextMode ? "textos virais" : "conceitos visuais completos"} para thumbnails baseados no conteúdo do vídeo.
+
+## PRINCÍPIO FUNDAMENTAL
+A thumbnail deve PROMETER algo que o vídeo ENTREGA. CTR alto + retenção baixa = morte do canal. CTR alto + retenção alta = crescimento exponencial.
+
+${isTextMode ? textPrompt : designPrompt}
+
+## REGRAS GERAIS
+- NUNCA sugira clickbait mentiroso — apenas amplificação honesta
+- Considere que a thumbnail compete com DEZENAS de outras no feed
+- O texto da thumbnail deve complementar o título (não repetir)
+- Pense em mobile first — 70%+ dos views vêm do celular
+- Escreva em português brasileiro
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}\n\nAlinhe o estilo visual e tom dos textos com a identidade da marca.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DO VÍDEO (URL) ---\n${inputs.scraped_content}\n\nUse como fonte principal para criar a thumbnail.` : ""}
+
+CONTEÚDO DO VÍDEO:
+${inputs.content}`;
+    },
+  },
 };
