@@ -153,6 +153,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "lead-magnet-ideas",
+    name: "Ideias de Isca Digital",
+    emoji: "🎣",
+    role: "Especialista em Conceitos de Iscas de Alta Conversão",
+    description: "Gera 10 conceitos de iscas digitais de alta conversão com análise estratégica e Top 3 recomendados.",
+    category: "branding",
+    available: true,
+  },
+  {
     id: "email-generator",
     name: "Gerador de Email",
     emoji: "💌",
