@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "email-generator",
+    name: "Gerador de Email",
+    emoji: "💌",
+    role: "Especialista em E-mails de Marketing e Vendas",
+    description: "Cria e-mails de alta conversão para recuperação de vendas, confirmação de compra e mais, com a voz da sua marca.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "carousel-generator",
     name: "Gerador de Carrossel",
     emoji: "🎨",
