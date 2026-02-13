@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Circle, Play, ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, Play, ChevronDown, ChevronUp, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AGENTS } from "@/lib/agents";
 import { motion, AnimatePresence } from "motion/react";
@@ -31,15 +30,19 @@ interface MentorFlowPanelProps {
 
 export default function MentorFlowPanel({ flows, onExecuteStep, activeStepId }: MentorFlowPanelProps) {
   const [expandedFlow, setExpandedFlow] = useState<string | null>(flows[0]?.id || null);
-  const navigate = useNavigate();
 
   if (flows.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center space-y-4 p-8">
-        <span className="text-5xl opacity-30">🗺️</span>
-        <p className="text-sm text-muted-foreground">
-          Seus fluxos aparecerão aqui quando o Mentor criar um plano para você.
-        </p>
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/10 flex items-center justify-center">
+          <Zap className="h-6 w-6 text-primary/40" />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-sm font-medium text-foreground/60">Seus Fluxos</p>
+          <p className="text-xs text-muted-foreground max-w-[200px]">
+            Os planos de ação aparecerão aqui quando o Mentor criar um para você.
+          </p>
+        </div>
       </div>
     );
   }
@@ -49,105 +52,125 @@ export default function MentorFlowPanel({ flows, onExecuteStep, activeStepId }: 
   const statusIcon = (status: FlowStep["status"], stepId: string) => {
     if (activeStepId === stepId) return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
     switch (status) {
-      case "completed": return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
+      case "completed": return <CheckCircle2 className="h-4 w-4 text-emerald-400" />;
       case "in_progress": return <Play className="h-4 w-4 text-primary" />;
-      default: return <Circle className="h-4 w-4 text-muted-foreground" />;
+      default: return <Circle className="h-4 w-4 text-muted-foreground/40" />;
     }
   };
 
   return (
-    <div className="space-y-3 p-4 overflow-y-auto h-full">
-      <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-        🗺️ Seus Fluxos
-      </h3>
+    <div className="flex flex-col h-full">
+      <div className="p-4 border-b border-border/50">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <Zap className="h-4 w-4 text-primary" />
+          Seus Fluxos
+        </h3>
+      </div>
 
-      {flows.map((flow) => {
-        const completed = flow.steps.filter((s) => s.status === "completed").length;
-        const total = flow.steps.length;
-        const isExpanded = expandedFlow === flow.id;
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {flows.map((flow) => {
+          const completed = flow.steps.filter((s) => s.status === "completed").length;
+          const total = flow.steps.length;
+          const isExpanded = expandedFlow === flow.id;
+          const progress = (completed / total) * 100;
 
-        return (
-          <div key={flow.id} className="premium-card overflow-hidden">
-            <button
-              onClick={() => setExpandedFlow(isExpanded ? null : flow.id)}
-              className="w-full p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors"
-            >
-              <div className="text-left">
-                <p className="text-sm font-medium text-foreground">{flow.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {completed}/{total} etapas completas
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-16 h-1.5 rounded-full bg-secondary overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-primary to-accent-foreground transition-all"
-                    style={{ width: `${(completed / total) * 100}%` }}
-                  />
-                </div>
-                {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-              </div>
-            </button>
-
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="px-4 pb-4 space-y-2">
-                    {flow.steps
-                      .sort((a, b) => a.step_order - b.step_order)
-                      .map((step, idx) => {
-                        const agent = getAgent(step.agent_id);
-                        const isActive = activeStepId === step.id;
-
-                        return (
-                          <div
-                            key={step.id}
-                            className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
-                              isActive
-                                ? "border-primary/50 bg-primary/5"
-                                : step.status === "completed"
-                                ? "border-emerald-500/20 bg-emerald-500/5"
-                                : "border-border bg-background/50"
-                            }`}
-                          >
-                            <div className="mt-0.5">{statusIcon(step.status, step.id)}</div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">#{idx + 1}</span>
-                                {agent && <span className="text-sm">{agent.emoji}</span>}
-                                <p className="text-sm font-medium text-foreground truncate">{step.title}</p>
-                              </div>
-                              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{step.description}</p>
-                              {step.status !== "completed" && !isActive && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="mt-2 h-7 text-xs gap-1 text-primary hover:text-primary"
-                                  onClick={() => onExecuteStep(flow.id, step.id)}
-                                >
-                                  <Play className="h-3 w-3" /> Executar com {agent?.name || step.agent_id}
-                                </Button>
-                              )}
-                              {step.status === "completed" && step.output && (
-                                <p className="text-xs text-emerald-400 mt-1">✓ Concluído</p>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+          return (
+            <div key={flow.id} className="rounded-xl border border-border/50 bg-card/50 overflow-hidden">
+              <button
+                onClick={() => setExpandedFlow(isExpanded ? null : flow.id)}
+                className="w-full p-4 flex items-center justify-between hover:bg-secondary/20 transition-colors"
+              >
+                <div className="text-left flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{flow.title}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1 h-1.5 rounded-full bg-secondary/50 overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full bg-gradient-to-r from-primary to-accent-foreground"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-medium shrink-0">
+                      {completed}/{total}
+                    </span>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
+                </div>
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground ml-3 shrink-0" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground ml-3 shrink-0" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-3 pb-3 space-y-1.5">
+                      {flow.steps
+                        .sort((a, b) => a.step_order - b.step_order)
+                        .map((step, idx) => {
+                          const agent = getAgent(step.agent_id);
+                          const isActive = activeStepId === step.id;
+
+                          return (
+                            <motion.div
+                              key={step.id}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              className={`relative p-3 rounded-lg transition-all duration-200 ${
+                                isActive
+                                  ? "bg-primary/8 border border-primary/30"
+                                  : step.status === "completed"
+                                  ? "bg-emerald-500/5 border border-emerald-500/15"
+                                  : "bg-background/30 border border-transparent hover:border-border/50 hover:bg-secondary/20"
+                              }`}
+                            >
+                              <div className="flex items-start gap-2.5">
+                                <div className="mt-0.5">{statusIcon(step.status, step.id)}</div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] text-muted-foreground font-mono">#{idx + 1}</span>
+                                    <p className="text-xs font-medium text-foreground truncate">{step.title}</p>
+                                  </div>
+                                  <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                                    {step.description}
+                                  </p>
+                                  {step.status !== "completed" && !isActive && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="mt-1.5 h-6 text-[10px] gap-1 text-primary hover:text-primary px-2"
+                                      onClick={() => onExecuteStep(flow.id, step.id)}
+                                    >
+                                      <Play className="h-2.5 w-2.5" /> Executar com {agent?.name || step.agent_id}
+                                    </Button>
+                                  )}
+                                  {step.status === "completed" && (
+                                    <p className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">
+                                      <CheckCircle2 className="h-3 w-3" /> Concluído
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
