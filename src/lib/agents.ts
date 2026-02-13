@@ -621,4 +621,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "brand-voice-extractor",
+    name: "Voz do Autor/Marca",
+    emoji: "🗣️",
+    role: "Especialista em Extração de DNA de Voz",
+    description: "Analisa textos autênticos para criar o DNA completo da voz de marca, com regras de adaptação para diferentes contextos de comunicação.",
+    category: "branding",
+    available: true,
+  },
 ];
