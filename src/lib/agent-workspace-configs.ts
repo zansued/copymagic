@@ -4943,4 +4943,108 @@ CONTEÚDO DO POST:
 ${inputs.content}`;
     },
   },
+
+  "unique-mechanism": {
+    id: "unique-mechanism",
+    name: "Mecanismo Único da Solução",
+    emoji: "⚙️",
+    subtitle: "Crie um mecanismo único que diferencia sua solução de todos os concorrentes",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto Completo",
+        placeholder: "Descreva: seu produto/método, o problema que resolve, seu público-alvo, como sua solução funciona, e quem são seus principais concorrentes (diretos e indiretos)...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de um concorrente, sua página de vendas ou conteúdo de referência...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foque em nomenclatura de Protocolo', 'Tom científico', 'Público B2B', 'Mercado de saúde'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Estrategista de Diferenciação — um especialista em criar Mecanismos Únicos de Solução que respondem à pergunta crucial: "Por que escolher VOCÊ ao invés de todos os outros?"
+
+MISSÃO: Analisar o contexto + DNA de Campanha e gerar **10 opções de Mecanismo Único** validadas, com justificativa estratégica e recomendação final.
+
+## O QUE É UM MECANISMO ÚNICO DA SOLUÇÃO
+
+É a Solução Primária Única — o diferencial fundamental que:
+- **Solução**: Não é apenas um rótulo, é uma abordagem genuinamente diferente
+- **Primária**: É o pilar central da sua oferta, não um detalhe secundário
+- **Única**: Não pode ser confundida com nenhum concorrente
+
+Funciona contra 3 inimigos:
+1. **Concorrentes diretos**: Quem vende algo parecido
+2. **Concorrentes indiretos**: Alternativas que o cliente considera
+3. **Inércia**: O maior inimigo — o cliente decidir não fazer nada
+
+## PROCESSO OBRIGATÓRIO
+
+### FASE 1 — ANÁLISE COMPETITIVA
+Analise silenciosamente e apresente:
+- **Mercado**: Qual o cenário competitivo atual
+- **Abordagens comuns**: O que todos os concorrentes dizem/fazem de similar
+- **Gaps de diferenciação**: Onde ninguém está se posicionando
+- **Linguagem saturada**: Termos e promessas já desgastados no mercado
+
+### FASE 2 — 10 OPÇÕES DE MECANISMO ÚNICO
+
+Para cada opção, use uma técnica diferente:
+
+#### MECANISMO [N]: [NOME DO MECANISMO]
+- **Nomenclatura**: O nome proprietário (Sistema, Protocolo, Método, Estrutura, Framework, Gatilho, Estratégia, Matriz, Código, Mapa)
+- **Técnica utilizada**: Qual técnica de diferenciação sustenta este mecanismo:
+  - Justaposição Contraditória ("O método que [faz o oposto do esperado]")
+  - Inversão de Crença ("Tudo que te ensinaram sobre X está errado porque...")
+  - Nova Categoria ("Não é [categoria conhecida], é [nova categoria]")
+  - Reframe Científico ("Baseado em [princípio/estudo] que prova...")
+  - Metáfora Proprietária ("Funciona como [analogia única]...")
+  - Exclusão Estratégica ("O único método que NÃO usa [prática comum]")
+  - Combinação Inédita ("[Elemento A] + [Elemento B] = resultado impossível sozinhos")
+  - Sequência Proprietária ("[N] passos/fases que [resultado] em [prazo]")
+  - Descoberta Acidental ("Descobri isso quando [contexto inesperado]")
+  - Antagonista Claro ("Enquanto [todos fazem X], nós [fazemos Y] porque...")
+- **Declaração de Posicionamento**: 1-2 frases que comunicam o mecanismo ao público
+- **Por que diferencia**: Como se destaca dos concorrentes diretos, indiretos E da inércia
+- **Força de diferenciação**: Score 1-10
+
+### FASE 3 — ANÁLISE E RECOMENDAÇÃO
+
+#### TOP 3 RECOMENDADOS
+Para cada um dos 3 melhores:
+- **Por que este é Top 3**: Justificativa estratégica
+- **Como usar em copy**: Onde e como inserir na página de vendas, VSL e anúncios
+- **Sinergia com USP**: Como complementa a Proposta Única de Vendas
+- **Frase de elevador**: Pitch de 1 frase usando o mecanismo
+
+#### MELHOR OPÇÃO
+- **Recomendação final**: Qual dos 10 tem maior potencial
+- **Plano de implementação**: Como integrar na comunicação (nome, visual, narrativa)
+- **Variações de headline**: 3 headlines usando o mecanismo escolhido
+
+## REGRAS:
+- Cada mecanismo deve usar uma técnica DIFERENTE — sem repetição
+- Nomes devem ser memoráveis, proprietários e impossíveis de copiar
+- Evite termos genéricos (sistema de sucesso, método revolucionário)
+- Teste nomenclaturas variadas (Protocolo, Framework, Matriz, Código, etc.)
+- O mecanismo deve ser VERDADEIRO e sustentável — não um truque de marketing
+- Priorize diferenciação real sobre criatividade vazia
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Gere mecanismos baseados apenas no contexto fornecido."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use este conteúdo para análise competitiva e personalização dos mecanismos.` : ""}
+
+CONTEXTO COMPLETO:
+${inputs.content}`;
+    },
+  },
 };
