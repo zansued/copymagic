@@ -2700,4 +2700,157 @@ CONTEXTO:
 ${inputs.content}`;
     },
   },
+
+  "lead-magnet-generator": {
+    id: "lead-magnet-generator",
+    name: "Gerador de Isca Digital",
+    emoji: "🧲",
+    subtitle: "Transforma ideias em iscas digitais práticas que geram leads",
+    inputs: [
+      {
+        key: "content",
+        label: "Descreva a Sua Ideia",
+        placeholder: "Descreva a isca digital que quer criar. Ex: 'Checklist para lançar um produto digital em 30 dias', 'Diagnóstico de saúde financeira para autônomos'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "https://exemplo.com — conteúdo será extraído como base para a isca",
+        type: "input",
+      },
+      {
+        key: "format",
+        label: "Formato da Isca",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "checklist", label: "✅ Checklist de Execução" },
+          { value: "diagnostic", label: "🔍 Diagnóstico Rápido" },
+          { value: "scripts", label: "📝 Scripts Prontos (copia e cola)" },
+          { value: "template", label: "📋 Template de Conteúdo" },
+          { value: "action-plan", label: "🗓️ Plano de Ação" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Para iniciantes', 'Nicho fitness', 'Incluir exemplos reais', 'Tom mais técnico'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const formatMap: Record<string, { name: string; instructions: string }> = {
+        checklist: {
+          name: "Checklist de Execução",
+          instructions: `Crie uma CHECKLIST prática e executável:
+
+## ESTRUTURA
+- **Título magnético**: Nome da checklist que comunica o resultado
+- **Introdução** (2-3 linhas): Por que esta checklist existe e qual resultado entrega
+- **Itens da checklist** (10-20 itens): Cada item deve ser uma ação específica e verificável
+  - Use ☐ para cada item
+  - Agrupe em categorias/fases lógicas
+  - Cada item = verbo de ação + objeto específico
+  - Adicione dica rápida em itens complexos
+- **Seção bônus**: 3-5 erros comuns a evitar
+- **CTA final**: Próximo passo após completar a checklist`,
+        },
+        diagnostic: {
+          name: "Diagnóstico Rápido",
+          instructions: `Crie um DIAGNÓSTICO interativo de autoavaliação:
+
+## ESTRUTURA
+- **Título**: "Descubra [resultado] em X minutos"
+- **Introdução**: Por que fazer este diagnóstico e o que vai revelar
+- **Perguntas** (8-12 perguntas): Cada pergunta com 3-4 opções de resposta
+  - Opções de A a D com pontuações implícitas
+  - Perguntas que revelam gaps reais, não óbvias
+  - Misture perguntas comportamentais e técnicas
+- **Sistema de pontuação**: Faixas claras (Ex: 0-20, 21-40, 41-60, 61-80, 81-100)
+- **Resultados por faixa**: Para cada faixa, entregue:
+  - Diagnóstico específico
+  - 3 ações prioritárias
+  - Recurso recomendado (conectado ao produto/serviço)
+- **CTA**: Baseado no resultado — quanto pior o diagnóstico, mais urgente o CTA`,
+        },
+        scripts: {
+          name: "Scripts Prontos (Copia e Cola)",
+          instructions: `Crie uma coleção de SCRIPTS prontos para uso:
+
+## ESTRUTURA
+- **Título**: "X Scripts Prontos para [resultado]"
+- **Introdução**: Como usar os scripts e quando aplicar cada um
+- **Scripts** (5-8 scripts): Cada script com:
+  - Nome/situação de uso
+  - O script completo entre aspas (pronto para copiar)
+  - Placeholders em {chaves} para personalização
+  - Nota de contexto: quando usar e como adaptar
+  - Variação alternativa
+- **Guia de personalização**: Como adaptar os scripts ao contexto específico
+- **Erros a evitar**: O que NÃO fazer ao usar os scripts
+- **CTA**: Próximo nível de domínio (conectado ao produto)`,
+        },
+        template: {
+          name: "Template de Conteúdo",
+          instructions: `Crie um TEMPLATE estruturado e reutilizável:
+
+## ESTRUTURA
+- **Título**: "Template: [resultado que o template entrega]"
+- **Instruções de uso** (3-5 passos): Como preencher o template
+- **O Template em si**: Estrutura completa com:
+  - Seções claramente demarcadas
+  - Campos para preencher marcados com [PREENCHER: instrução]
+  - Exemplos preenchidos em itálico para referência
+  - Notas explicativas em cada seção
+- **Exemplo completo**: O template preenchido com um caso real
+- **Dicas de otimização**: Como tirar o máximo do template
+- **CTA**: Ferramenta ou serviço que potencializa o template`,
+        },
+        "action-plan": {
+          name: "Plano de Ação",
+          instructions: `Crie um PLANO DE AÇÃO cronológico e executável:
+
+## ESTRUTURA
+- **Título**: "Plano de X Dias/Semanas para [resultado]"
+- **Visão geral**: O que será alcançado e em quanto tempo
+- **Pré-requisitos**: O que o lead precisa ter antes de começar
+- **Cronograma detalhado**: Para cada dia/semana:
+  - **Dia/Semana X**: Título da fase
+  - **Objetivo**: O que será alcançado nesta fase
+  - **Tarefas** (3-5 por fase): Ações específicas e mensuráveis
+  - **Entregável**: O que deve estar pronto ao final
+  - **Checkpoint**: Como saber se está no caminho certo
+- **Métricas de sucesso**: Como medir o progresso geral
+- **Plano B**: O que fazer se atrasar ou travar
+- **CTA**: Acelerador ou suporte profissional`,
+        },
+      };
+
+      const format = formatMap[inputs.format] || formatMap.checklist;
+
+      return `Você é um Gerador de Iscas Digitais de elite — especialista em criar ferramentas de marketing que geram leads qualificados e demonstram autoridade.
+
+MISSÃO: Criar uma isca digital no formato **${format.name}**, completa e pronta para ser entregue ao lead.
+
+${format.instructions}
+
+## REGRAS GERAIS PARA ISCAS DIGITAIS
+1. **Valor imediato**: O lead deve conseguir aplicar ALGO nos primeiros 5 minutos
+2. **Especificidade**: Zero conselhos genéricos — cada item deve ser acionável
+3. **Design-friendly**: Estruture para fácil diagramação (títulos, bullets, boxes)
+4. **Quick wins**: Inclua pelo menos 2-3 vitórias rápidas no início
+5. **Progressão**: Do simples ao complexo, do urgente ao importante
+6. **Conexão com oferta**: A isca deve naturalmente apontar para o produto/serviço principal
+7. **Formatação markdown**: Use headers, bullets, checkboxes, negrito e itálico
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}` : ""}
+
+IDEIA DA ISCA:
+${inputs.content}`;
+    },
+  },
 };

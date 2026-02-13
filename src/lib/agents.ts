@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "lead-magnet-generator",
+    name: "Gerador de Isca Digital",
+    emoji: "🧲",
+    role: "Especialista em Criação de Iscas Digitais",
+    description: "Transforma ideias em iscas digitais práticas (checklists, diagnósticos, scripts, templates, planos) que geram leads qualificados.",
+    category: "branding",
+    available: true,
+  },
+  {
     id: "email-generator",
     name: "Gerador de Email",
     emoji: "💌",
