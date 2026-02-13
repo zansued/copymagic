@@ -3320,6 +3320,144 @@ ${inputs.content}`;
     },
   },
 
+  "headlines": {
+    id: "headlines",
+    name: "Headlines (Títulos)",
+    emoji: "🔥",
+    subtitle: "Gere títulos irresistíveis para qualquer plataforma",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto da Oferta / Produto",
+        placeholder: "Descreva seu produto, oferta, público-alvo e a transformação principal. Quanto mais contexto, melhores os títulos gerados...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "platform",
+        label: "Plataforma / Formato",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "youtube", label: "▶️ YouTube (Títulos de vídeo)" },
+          { value: "instagram", label: "📸 Instagram (Reels / Posts)" },
+          { value: "tiktok", label: "🎵 TikTok (Vídeos curtos)" },
+          { value: "linkedin", label: "💼 LinkedIn (Posts / Artigos)" },
+          { value: "email", label: "📧 E-mail (Assuntos)" },
+          { value: "ads", label: "📣 Anúncios (Headlines de ads)" },
+          { value: "sales-page", label: "🏗️ Página de Vendas (Headlines)" },
+          { value: "all", label: "🔄 Todas as plataformas" },
+        ],
+      },
+      {
+        key: "angle",
+        label: "Ângulo Principal",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "curiosity", label: "🧲 Curiosidade (loop aberto)" },
+          { value: "controversy", label: "⚡ Polêmica / Contraintuitivo" },
+          { value: "proof", label: "📊 Prova / Números" },
+          { value: "secret", label: "🔑 Segredo Revelado" },
+          { value: "mixed", label: "🎯 Mix de ângulos" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "Importar do Link (opcional)",
+        placeholder: "Cole a URL de um conteúdo, vídeo ou página para extrair contexto...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foco em dor emocional', 'Público feminino 30-45', 'Tom provocativo', 'Nicho: emagrecimento'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const platformMap: Record<string, string> = {
+        youtube: "YouTube — títulos otimizados para CTR, curiosidade e busca. Máximo 60-70 caracteres ideais.",
+        instagram: "Instagram — headlines para Reels e carrosséis. Curtas, impactantes, com emojis quando adequado.",
+        tiktok: "TikTok — ganchos de texto na tela nos primeiros 1-2 segundos. Ultra-diretos e provocativos.",
+        linkedin: "LinkedIn — títulos de posts e artigos. Tom profissional mas instigante, geram debate.",
+        email: "E-mail — linhas de assunto que disparam taxa de abertura. Máximo 50 caracteres ideais. Inclua preheaders.",
+        ads: "Anúncios — headlines para Meta Ads e Google Ads. Curtas, diretas, com benefício claro.",
+        "sales-page": "Página de Vendas — headlines principais (H1) e sub-headlines. Big promise + mecanismo único.",
+        all: "Todas as plataformas — adapte para YouTube, Instagram, TikTok, LinkedIn, E-mail, Ads e Páginas de Vendas.",
+      };
+
+      const angleMap: Record<string, string> = {
+        curiosity: "CURIOSIDADE — crie loops abertos irresistíveis que obrigam o clique. Use incompletude, mistério e revelações parciais.",
+        controversy: "POLÊMICA — desafie crenças, quebre padrões, use contrastes chocantes. Títulos que provocam reação visceral.",
+        proof: "PROVA E NÚMEROS — use dados específicos, percentuais, timeframes e resultados concretos. Credibilidade instantânea.",
+        secret: "SEGREDO REVELADO — posicione como informação privilegiada, descobertas ocultas, métodos que 'eles' não querem que você saiba.",
+        mixed: "MIX DE ÂNGULOS — combine curiosidade, polêmica, prova e segredo. Varie entre os frameworks.",
+      };
+
+      const platform = inputs.platform || "all";
+      const angle = inputs.angle || "mixed";
+
+      return `Você é o Headline Architect — o maior especialista em títulos de alta conversão do mercado. Títulos são o elemento 20/80 da copy: se falhar aqui, nada mais importa.
+
+MISSÃO: Gerar 20+ headlines devastadoramente eficazes, organizadas por categoria.
+
+PLATAFORMA: ${platformMap[platform]}
+ÂNGULO: ${angleMap[angle]}
+
+## ESTRUTURA DE ENTREGA
+
+### 🧲 HEADLINES DE CURIOSIDADE (5 títulos)
+Use loops abertos, incompletude e mistério. O leitor PRECISA clicar para fechar o loop.
+
+### ⚡ HEADLINES CONTRAINTUITIVAS (5 títulos)
+Quebre expectativas, desafie crenças comuns, use contrastes chocantes.
+
+### 📊 HEADLINES COM PROVA (5 títulos)
+Números específicos, percentuais, timeframes, resultados concretos.
+
+### 🔑 HEADLINES DE SEGREDO (5 títulos)
+Informação privilegiada, descobertas, métodos ocultos.
+
+### 🏆 TOP 5 — HEADLINES COMBINADAS
+As 5 melhores que combinam múltiplos elementos (curiosidade + prova, polêmica + segredo, etc.)
+
+## PARA CADA HEADLINE, INCLUA:
+- O título em si (formatado em negrito)
+- **Framework usado**: qual técnica persuasiva sustenta o título
+- **Por que funciona**: 1 linha explicando o gatilho psicológico ativado
+- **Score de impacto**: 🔥 a 🔥🔥🔥🔥🔥
+
+## FRAMEWORKS OBRIGATÓRIOS (use ao longo das headlines):
+- **Número + Adjetivo + Keyword + Promessa** ("7 Gatilhos Silenciosos Que Triplicam Suas Vendas")
+- **Como [resultado] sem [objeção]** ("Como Emagrecer 12kg Sem Cortar Carboidratos")
+- **Segredo de [autoridade]** ("O Segredo Que Cirurgiões Plásticos Não Contam")
+- **[Número]% das pessoas [erro] — Você é uma delas?**
+- **A Verdade Sobre [crença popular]**
+- **Por Que [coisa boa] Está [prejudicando] Você**
+- **[Resultado chocante] Em [Timeframe curto]**
+- **[Pessoa improvável] Revela [Descoberta]**
+- **Pare de [erro comum] (Faça Isso Em Vez)**
+- **O Método [Nome] Que [Resultado] Em [Tempo]**
+
+## REGRAS DE OURO:
+1. Cada título deve provocar uma REAÇÃO VISCERAL — surpresa, curiosidade ou indignação
+2. Use números ESPECÍFICOS (não "muitos" → "147"; não "rápido" → "em 11 dias")
+3. Inclua CONTRASTES ("Sem experiência... R$47 mil em 30 dias")
+4. Evite títulos genéricos ou que soem como IA
+5. Cada título deve funcionar SOZINHO — sem contexto adicional
+6. Marketing efetivo é instigante e polarizador — não tenha medo de provocar
+7. ${platform === "email" ? "Para e-mails: gere também 3 preheaders para cada assunto" : "Adapte o comprimento ao formato da plataforma"}
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA ---\n${inputs.scraped_content}` : ""}
+
+CONTEXTO DA OFERTA:
+${inputs.content}`;
+    },
+  },
+
   "google-my-business": {
     id: "google-my-business",
     name: "Google Meu Negócio",
