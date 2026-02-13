@@ -4486,4 +4486,132 @@ CONTEXTO DA OFERTA / ROTEIRO BASE:
 ${inputs.content}`;
     },
   },
+
+  "short-vsl": {
+    id: "short-vsl",
+    name: "Short VSL [1-3 Min]",
+    emoji: "🎯",
+    subtitle: "Crie roteiros de VSL curta focados em ganchos para ads e aquecimento",
+    inputs: [
+      {
+        key: "content",
+        label: "Contexto / Roteiro Base",
+        placeholder: "Descreva sua oferta e o problema que resolve, ou cole a PRIMEIRA METADE de um roteiro longo (promessa + mecanismo). NÃO inclua detalhes do produto — guarde para o vídeo longo...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "objective",
+        label: "Objetivo",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "click", label: "🔗 Gerar clique (levar para vídeo longo ou página)" },
+          { value: "warm", label: "🔥 Aquecer audiência (anúncio in-feed)" },
+          { value: "curiosity", label: "🧲 Gerar curiosidade (topo de funil)" },
+        ],
+      },
+      {
+        key: "duration",
+        label: "Duração",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "60s", label: "⚡ 60 segundos (~150 palavras)" },
+          { value: "90s", label: "🎯 90 segundos (~225 palavras)" },
+          { value: "2min", label: "🎬 2 minutos (~300 palavras)" },
+          { value: "3min", label: "📹 3 minutos (~450 palavras)" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "Cole a URL de referência (vídeo, post, página) para enriquecer o roteiro...",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Tom natural e orgânico', 'Não mencionar o produto', 'Público cold traffic', 'Estilo documentário'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const objMap: Record<string, string> = {
+        click: "GERAR CLIQUE — despertar curiosidade e levar o espectador para um vídeo mais longo ou página. NÃO revele o produto.",
+        warm: "AQUECER AUDIÊNCIA — funcionar como anúncio in-feed natural que educa e gera desejo. Parecer orgânico, não forçado.",
+        curiosity: "GERAR CURIOSIDADE (TOPO DE FUNIL) — captar atenção fria e criar interesse. Zero menção a produto ou venda.",
+      };
+      const durationMap: Record<string, string> = {
+        "60s": "60 segundos (~150 palavras)",
+        "90s": "90 segundos (~225 palavras)",
+        "2min": "2 minutos (~300 palavras)",
+        "3min": "3 minutos (~450 palavras)",
+      };
+
+      return `Você é o Roteirista de Short VSL — um especialista em criar vídeos de vendas ultra-curtos (1-3 minutos) que funcionam como anúncios de alta performance no feed.
+
+MISSÃO: Criar um roteiro completo de Short VSL de ${durationMap[inputs.duration] || "90 segundos (~225 palavras)"}.
+
+OBJETIVO: ${objMap[inputs.objective] || objMap.click}
+
+## FILOSOFIA DA SHORT VSL
+
+A Short VSL é basicamente um anúncio longo fortemente conectado ao gancho. As regras são:
+
+1. **O GANCHO É TUDO**: 80% do sucesso está nos primeiros 5-10 segundos
+2. **PAREÇA ORGÂNICO**: O vídeo deve parecer um conteúdo natural do feed, não um comercial
+3. **NÃO REVELE O PRODUTO**: Desperte curiosidade, não satisfaça. Guarde os detalhes para o próximo passo
+4. **HISTÓRIA EM 2 FRASES**: Comprima credibilidade ao mínimo absoluto
+5. **CTA SUAVE**: "Clique para saber mais" > "Compre agora"
+6. **SIMPLICIDADE BRUTAL**: Cada segundo conta. Zero gordura.
+
+## ESTRUTURA OBRIGATÓRIA
+
+### [HOOK STACK — 0:00 a 0:10]
+**5 ganchos alternativos** (entregue todos para teste A/B):
+Cada gancho deve funcionar sozinho nos primeiros 3-5 segundos.
+Tipos: Afirmação chocante / Pergunta provocativa / Resultado concreto / Contraste / Pattern interrupt
+
+Escolha o melhor como principal e liste os outros como variações.
+
+### [DOR + IDENTIFICAÇÃO — 0:10 a 0:25]
+- Identificação rápida com o avatar ("Se você já tentou X e não conseguiu...")
+- Agitação da dor em 2-3 frases curtas e diretas
+- Tom empático, não agressivo
+
+### [VIRADA + MECANISMO — 0:25 a 0:50]
+- "Até que eu descobri que o problema real era..."
+- Apresentação do mecanismo único em termos simples
+- 1 prova rápida (dado, resultado, analogia)
+- **NÃO nomeie o produto, método ou ingredientes**
+
+### [PROMESSA + CTA — 0:50 a fim]
+- Resumo da promessa em 1 frase poderosa
+- O que acontece no próximo passo (sem revelar tudo)
+- CTA suave e natural
+- Reforço emocional de 1 frase
+
+## DIREÇÕES DE PRODUÇÃO:
+- [TALKING HEAD]: Fale olhando para a câmera, natural
+- [B-ROLL]: Sugestões de imagens de cobertura
+- [TEXTO NA TELA]: Frases-chave para reforço visual
+- [CORTE RÁPIDO]: Marque onde cortar para manter ritmo
+
+## REGRAS DE OURO:
+- O roteiro deve parecer uma conversa, não um script lido
+- Frases CURTAS. Máximo 15 palavras por frase
+- Ritmo rápido e dinâmico — sem pausas longas
+- Se o objetivo é gerar clique: NÃO mencione nome do produto, ingredientes, preço ou solução completa
+- Inclua timestamps aproximados
+- Entregue 5 variações de hook para teste
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}` : "⚠️ Nenhum DNA de Campanha selecionado. Adapte o roteiro de forma genérica."}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO DE REFERÊNCIA (URL IMPORTADA) ---\n${inputs.scraped_content}\n\n⚡ Use como base. IMPORTANTE: Use apenas a parte de promessa e mecanismo. NÃO inclua revelação do produto.` : ""}
+
+CONTEXTO / ROTEIRO BASE:
+${inputs.content}`;
+    },
+  },
 };
