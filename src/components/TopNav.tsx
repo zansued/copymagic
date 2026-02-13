@@ -14,13 +14,6 @@ const menuItems = [
     iconColor: "text-primary",
   },
   {
-    icon: Plus,
-    label: "Novo",
-    path: "__create__",
-    gradient: "radial-gradient(circle, hsl(142 70% 45% / 0.15) 0%, transparent 70%)",
-    iconColor: "text-emerald-400",
-  },
-  {
     icon: Bot,
     label: "Agentes",
     path: "/agents",
