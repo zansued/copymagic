@@ -3101,4 +3101,222 @@ IDEIA DO PRODUTO:
 ${inputs.content}`;
     },
   },
+
+  "low-ticket-product": {
+    id: "low-ticket-product",
+    name: "Gerador de Produto Low Ticket",
+    emoji: "📦",
+    subtitle: "Transforme sua ideia em um produto digital completo e pronto para vender",
+    inputs: [
+      {
+        key: "content",
+        label: "Ideia do Produto",
+        placeholder: "Cole a ideia completa do produto (idealmente do agente 'Ideias para Produtos Low Ticket'). Inclua tema, público, transformação e diferencial...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "reference_url",
+        label: "Importar Link (opcional)",
+        placeholder: "https://exemplo.com — página do produto, Google Docs, etc.",
+        type: "input",
+      },
+      {
+        key: "format",
+        label: "Formato do Produto",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "mini-course", label: "🎓 Mini Curso (3-7 aulas)" },
+          { value: "guide", label: "📖 Guia Estratégico (e-book)" },
+          { value: "scripts", label: "📝 Pack de Scripts Prontos" },
+          { value: "templates", label: "📋 Pack de Templates" },
+          { value: "workshop", label: "🎬 Workshop Gravado" },
+          { value: "toolkit", label: "🧰 Toolkit / Caixa de Ferramentas" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Preço-alvo R$47', 'Incluir planilha como bônus', 'Tom mais casual', 'Nicho fitness'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const formatMap: Record<string, { name: string; structure: string }> = {
+        "mini-course": {
+          name: "Mini Curso (3-7 aulas)",
+          structure: `## PRODUTO PRINCIPAL — MINI CURSO
+
+### ESTRUTURA DO CURSO
+Para cada aula, entregue:
+
+**AULA [N]: [TÍTULO DA AULA]**
+- **Duração estimada**: X minutos
+- **Objetivo**: O que o aluno conquista ao final desta aula
+- **Roteiro completo**: Conteúdo detalhado da aula com:
+  - Abertura (gancho + promessa da aula)
+  - Conteúdo principal (conceitos + exemplos práticos)
+  - Exercício/Ação prática
+  - Transição para a próxima aula
+- **Material de apoio**: PDF, template ou checklist complementar
+
+### REGRAS DO MINI CURSO
+- 3-7 aulas de 10-20 minutos cada
+- Cada aula = 1 transformação específica
+- Progressão do simples ao avançado
+- Última aula = resultado tangível + isca para o premium`,
+        },
+        guide: {
+          name: "Guia Estratégico (E-book)",
+          structure: `## PRODUTO PRINCIPAL — GUIA ESTRATÉGICO
+
+### ESTRUTURA DO GUIA
+Para cada capítulo, entregue:
+
+**CAPÍTULO [N]: [TÍTULO]**
+- **Objetivo do capítulo**: Transformação específica
+- **Conteúdo completo**: Texto pronto para diagramação com:
+  - Abertura do capítulo (gancho narrativo)
+  - Conceito principal explicado com clareza
+  - Exemplos práticos e cases
+  - Framework ou método acionável
+  - Resumo + ação prática
+- **Elementos visuais**: Sugestões de gráficos, diagramas ou ilustrações
+
+### REGRAS DO GUIA
+- 5-8 capítulos substantivos
+- Tom entre mentoria e manual prático
+- Cada capítulo deve funcionar sozinho E como parte do todo
+- Inclua "Quick Wins" nos primeiros capítulos`,
+        },
+        scripts: {
+          name: "Pack de Scripts Prontos",
+          structure: `## PRODUTO PRINCIPAL — PACK DE SCRIPTS
+
+### ESTRUTURA DO PACK
+Organize por categorias de uso:
+
+**CATEGORIA [N]: [NOME DA CATEGORIA]**
+Para cada script:
+- **Script [N.X]: [NOME/SITUAÇÃO]**
+- **Quando usar**: Contexto ideal de aplicação
+- **O Script**: Texto completo pronto para copiar, com placeholders {entre chaves}
+- **Variação**: Versão alternativa com tom diferente
+- **Dica de uso**: Como personalizar para máximo resultado
+
+### REGRAS DO PACK
+- Mínimo 15 scripts organizados em 3-5 categorias
+- Cada script = pronto para copia e cola
+- Inclua guia rápido de personalização
+- Cubra cenários do básico ao avançado`,
+        },
+        templates: {
+          name: "Pack de Templates",
+          structure: `## PRODUTO PRINCIPAL — PACK DE TEMPLATES
+
+### ESTRUTURA DO PACK
+Para cada template:
+
+**TEMPLATE [N]: [NOME DO TEMPLATE]**
+- **Para que serve**: Problema que resolve
+- **Como usar** (3-5 passos): Instruções claras
+- **O Template**: Estrutura completa com campos [PREENCHER: instrução]
+- **Exemplo preenchido**: Versão completa para referência
+- **Dicas de otimização**: Como tirar o máximo
+
+### REGRAS DO PACK
+- Mínimo 8 templates em 2-3 categorias
+- Cada template = autoexplicativo
+- Inclua exemplos reais preenchidos
+- Formato pronto para Notion, Google Docs ou PDF`,
+        },
+        workshop: {
+          name: "Workshop Gravado",
+          structure: `## PRODUTO PRINCIPAL — WORKSHOP
+
+### ESTRUTURA DO WORKSHOP
+Divida em blocos:
+
+**BLOCO [N]: [TÍTULO]** (XX minutos)
+- **Objetivo do bloco**: Resultado específico
+- **Roteiro detalhado**:
+  - Introdução do bloco
+  - Conteúdo principal com exemplos ao vivo
+  - Demonstração prática / tela compartilhada
+  - Exercício em tempo real
+  - Q&A do bloco
+- **Material de apoio**: Slides, worksheets, templates
+
+### REGRAS DO WORKSHOP
+- 60-120 minutos no total, divididos em 3-5 blocos
+- Formato "mão na massa" — o aluno faz junto
+- Inclua pausas e exercícios práticos
+- Final = resultado tangível produzido durante o workshop`,
+        },
+        toolkit: {
+          name: "Toolkit / Caixa de Ferramentas",
+          structure: `## PRODUTO PRINCIPAL — TOOLKIT
+
+### ESTRUTURA DO TOOLKIT
+Organize por função:
+
+**FERRAMENTA [N]: [NOME]**
+- **Função**: O que resolve / para que serve
+- **Formato**: Planilha, checklist, template, guia, script, etc.
+- **Conteúdo completo**: A ferramenta pronta para uso
+- **Tutorial de uso** (3-5 passos): Como aplicar
+- **Caso de uso**: Exemplo real de aplicação
+
+### REGRAS DO TOOLKIT
+- Mínimo 5 ferramentas complementares
+- Cada ferramenta = resolução de 1 problema específico
+- Inclua "Guia de Início Rápido" (qual ferramenta usar primeiro)
+- Todas as ferramentas devem funcionar em conjunto`,
+        },
+      };
+
+      const format = formatMap[inputs.format] || formatMap["mini-course"];
+
+      return `Você é um Arquiteto de Produtos Digitais Low Ticket — especialista em criar produtos digitais completos, práticos e vendáveis a partir de uma ideia.
+
+MISSÃO: Criar o conteúdo COMPLETO de um produto low ticket no formato **${format.name}**, pronto para ser entregue ao cliente final.
+
+${format.structure}
+
+---
+
+## BÔNUS ESTRATÉGICO
+Além do produto principal, crie UM bônus de alto valor percebido:
+
+### 🎁 BÔNUS: [NOME ATRATIVO]
+- **Formato**: Checklist, template, guia rápido, planilha, etc.
+- **Valor percebido**: R$XX se vendido separadamente
+- **Conteúdo completo**: O bônus inteiro, pronto para uso
+- **Conexão com o produto**: Como complementa o conteúdo principal
+
+---
+
+## ISCA PARA O PREMIUM
+Na conclusão do produto, inclua uma transição estratégica:
+- Reconheça a conquista do cliente
+- Revele o "próximo nível" de resultado possível
+- Conecte naturalmente ao produto/serviço premium
+- Tom: generoso e genuíno, não forçado
+
+## REGRAS GERAIS
+- Todo conteúdo deve ser COMPLETO e pronto para uso/entrega
+- Linguagem acessível mas com profundidade
+- Quick wins nos primeiros minutos/páginas
+- Formatação markdown limpa para fácil diagramação
+- O produto deve valer 10x o preço cobrado
+
+${brandContext ? `\n--- DNA DE CAMPANHA ---\n${brandContext}\n\nIMPORTANTE: Use a voz e personalidade do DNA para escrever TODO o conteúdo do produto.` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}` : ""}
+
+IDEIA DO PRODUTO:
+${inputs.content}`;
+    },
+  },
 };

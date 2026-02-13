@@ -90,6 +90,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "low-ticket-product",
+    name: "Gerador de Produto Low Ticket",
+    emoji: "📦",
+    role: "Arquiteto de Produtos Digitais Low Ticket",
+    description: "Transforma ideias em produtos digitais low ticket completos e prontos para vender, com conteúdo principal e bônus estratégico.",
+    category: "branding",
+    available: true,
+  },
+  {
     id: "high-ticket-product",
     name: "Gerador de Produto High Ticket",
     emoji: "🏆",
