@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, BookOpen, Sparkles, Square, Copy, Check, ChevronDown } from "lucide-react";
+import { ArrowLeft, BookOpen, Sparkles, Square, Copy, Check, ChevronDown, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -176,6 +176,23 @@ export default function StorytellingAgent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleExportPdf = async () => {
+    if (!output || !outputRef.current) return;
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      await html2pdf().set({
+        margin: [12, 12, 12, 12],
+        filename: "storytelling-output.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#0f1117" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      }).from(outputRef.current).save();
+      toast({ title: "PDF exportado com sucesso!" });
+    } catch {
+      toast({ title: "Erro ao exportar PDF", variant: "destructive" });
+    }
+  };
+
   // Auto-scroll output
   useEffect(() => {
     if (isGenerating && outputRef.current) {
@@ -342,10 +359,15 @@ export default function StorytellingAgent() {
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-foreground">Resultado</h2>
               {output && !isGenerating && (
-                <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
-                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? "Copiado!" : "Copiar"}
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
+                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? "Copiado!" : "Copiar"}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleExportPdf} className="gap-1.5 text-xs">
+                    <FileDown className="h-3.5 w-3.5" /> PDF
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -354,7 +376,19 @@ export default function StorytellingAgent() {
               className="premium-card p-6 min-h-[600px] max-h-[80vh] overflow-y-auto"
             >
               {output ? (
-                <div className="prose prose-invert prose-sm max-w-none">
+                <div className="prose prose-invert prose-sm max-w-none
+                  prose-headings:font-bold prose-headings:tracking-tight
+                  prose-h1:text-xl prose-h1:bg-gradient-to-r prose-h1:from-primary prose-h1:to-accent-foreground prose-h1:bg-clip-text prose-h1:text-transparent prose-h1:mb-4 prose-h1:pb-2 prose-h1:border-b prose-h1:border-border
+                  prose-h2:text-lg prose-h2:text-primary prose-h2:mt-6 prose-h2:mb-3
+                  prose-h3:text-base prose-h3:text-foreground prose-h3:mt-4 prose-h3:mb-2
+                  prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-3
+                  prose-strong:text-foreground prose-strong:font-semibold
+                  prose-li:text-muted-foreground prose-li:leading-relaxed
+                  prose-ul:space-y-1 prose-ol:space-y-1
+                  prose-li:marker:text-primary
+                  prose-hr:border-border prose-hr:my-6
+                  prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:text-muted-foreground
+                ">
                   <ReactMarkdown>{output}</ReactMarkdown>
                 </div>
               ) : (
