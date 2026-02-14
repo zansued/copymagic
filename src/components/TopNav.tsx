@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MenuBar } from "@/components/ui/menu-bar";
-import { FolderOpen, Plus, LogOut, Globe, Dna, Bot, Brain } from "lucide-react";
+import { FolderOpen, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3 } from "lucide-react";
 
 const menuItems = [
   {
@@ -40,6 +40,13 @@ const menuItems = [
     path: "/landing-builder",
     gradient: "radial-gradient(circle, hsl(200 80% 50% / 0.15) 0%, transparent 70%)",
     iconColor: "text-cyan-400",
+  },
+  {
+    icon: BarChart3,
+    label: "Dashboard",
+    path: "/dashboard",
+    gradient: "radial-gradient(circle, hsl(160 60% 45% / 0.15) 0%, transparent 70%)",
+    iconColor: "text-emerald-400",
   },
 ];
 

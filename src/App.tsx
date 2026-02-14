@@ -17,6 +17,7 @@ import StorytellingAgent from "./pages/StorytellingAgent";
 import BrandProfiles from "./pages/BrandProfiles";
 import BrandProfileEdit from "./pages/BrandProfileEdit";
 import MentorPage from "./pages/MentorPage";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/agents/storytelling-adapter" element={<ProtectedRoute><StorytellingAgent /></ProtectedRoute>} />
             <Route path="/agents/:agentId" element={<ProtectedRoute><AgentWorkspace /></ProtectedRoute>} />
             <Route path="/mentor" element={<ProtectedRoute><MentorPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/brand-profiles" element={<ProtectedRoute><BrandProfiles /></ProtectedRoute>} />
             <Route path="/brand-profiles/:id" element={<ProtectedRoute><BrandProfileEdit /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
