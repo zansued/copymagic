@@ -135,88 +135,90 @@ export default function CampaignPlanning() {
     <div className="min-h-screen bg-background surface-gradient">
       <TopNav projectName={projectName} />
 
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-8">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(`/project/${id}`)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold gradient-text flex items-center gap-2">
-              🚀 Planejamento de Campanha
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {completedSteps.length} de {STEPS.length} etapas concluídas — Use os agentes abaixo para expandir sua campanha
-            </p>
+      <ScrollArea className="h-[calc(100vh-4rem)]">
+        <main className="max-w-6xl mx-auto px-4 py-6 space-y-8 pb-16">
+          {/* Header */}
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(`/project/${id}`)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold gradient-text flex items-center gap-2">
+                🚀 Planejamento de Campanha
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {completedSteps.length} de {STEPS.length} etapas concluídas — Todos os agentes recebem o conteúdo completo das suas copys
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Copy Summary */}
-        <Card className="border-primary/20">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                📋 Resumo das Copys do Projeto
-              </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setExpandedSummary(!expandedSummary)}
-              >
-                {expandedSummary ? "Recolher" : "Expandir"}
-              </Button>
-            </div>
-            <CardDescription>
-              Todas as copys geradas serão usadas como contexto estratégico pelos agentes abaixo
-            </CardDescription>
-          </CardHeader>
-          {expandedSummary && (
-            <div className="px-6 pb-6">
-              <ScrollArea className="max-h-[400px] rounded-lg border bg-muted/30 p-4">
-                <div className="prose prose-sm prose-invert max-w-none">
-                  <ReactMarkdown>{summaryText}</ReactMarkdown>
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-        </Card>
+          {/* Copy Context Info */}
+          <Card className="border-primary/20">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  📋 Contexto Completo do Projeto
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setExpandedSummary(!expandedSummary)}
+                >
+                  {expandedSummary ? "Recolher" : "Ver conteúdo"}
+                </Button>
+              </div>
+              <CardDescription>
+                Os agentes utilizam o conteúdo integral de todas as {completedSteps.length} etapas geradas — produto, avatar, oferta, USP, página de vendas e mais
+              </CardDescription>
+            </CardHeader>
+            {expandedSummary && (
+              <div className="px-6 pb-6">
+                <ScrollArea className="max-h-[500px] rounded-lg border bg-muted/30 p-4">
+                  <div className="prose prose-sm prose-invert max-w-none prose-premium">
+                    <ReactMarkdown>{summaryText}</ReactMarkdown>
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+          </Card>
 
-        {/* Agent Categories */}
-        {CAMPAIGN_CATEGORIES.map((category) => (
-          <div key={category.title} className="space-y-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              {category.emoji} {category.title}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {category.agents.map((agentId) => {
-                const config = AGENT_WORKSPACE_CONFIGS[agentId];
-                if (!config) return null;
-                return (
-                  <Card
-                    key={agentId}
-                    className={`cursor-pointer hover:border-primary/50 transition-all hover:shadow-lg bg-gradient-to-br ${category.gradient} border-border/50`}
-                    onClick={() => handleOpenAgent(agentId)}
-                  >
-                    <CardHeader className="p-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{config.emoji}</span>
-                        <div className="min-w-0">
-                          <CardTitle className="text-sm font-medium truncate">
-                            {config.name}
-                          </CardTitle>
-                          <CardDescription className="text-xs line-clamp-2">
-                            {config.subtitle}
-                          </CardDescription>
+          {/* Agent Categories */}
+          {CAMPAIGN_CATEGORIES.map((category) => (
+            <div key={category.title} className="space-y-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                {category.emoji} {category.title}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {category.agents.map((agentId) => {
+                  const config = AGENT_WORKSPACE_CONFIGS[agentId];
+                  if (!config) return null;
+                  return (
+                    <Card
+                      key={agentId}
+                      className={`cursor-pointer hover:border-primary/50 transition-all hover:shadow-lg bg-gradient-to-br ${category.gradient} border-border/50`}
+                      onClick={() => handleOpenAgent(agentId)}
+                    >
+                      <CardHeader className="p-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{config.emoji}</span>
+                          <div className="min-w-0">
+                            <CardTitle className="text-sm font-medium truncate">
+                              {config.name}
+                            </CardTitle>
+                            <CardDescription className="text-xs line-clamp-2">
+                              {config.subtitle}
+                            </CardDescription>
+                          </div>
                         </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                );
-              })}
+                      </CardHeader>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </main>
+          ))}
+        </main>
+      </ScrollArea>
     </div>
   );
 }
