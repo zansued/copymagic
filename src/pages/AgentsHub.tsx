@@ -46,24 +46,33 @@ const TOUR_STEPS: TourStep[] = [
   },
 ];
 
+interface DefaultProfile {
+  name: string;
+  personality_summary: string;
+  audience_summary: string;
+  product_summary: string;
+}
+
 export default function AgentsHub() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [config, setConfig] = useState<any>(null);
+  const [profile, setProfile] = useState<DefaultProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     supabase
-      .from("agent_configs")
-      .select("*")
+      .from("brand_profiles")
+      .select("name, personality_summary, audience_summary, product_summary, is_default")
       .eq("user_id", user.id)
+      .order("is_default", { ascending: false })
+      .limit(1)
       .maybeSingle()
       .then(({ data }) => {
-        if (!data || !data.brand_personality) {
+        if (!data) {
           navigate("/agents/setup");
         } else {
-          setConfig(data);
+          setProfile(data);
         }
         setLoading(false);
       });
@@ -96,32 +105,46 @@ export default function AgentsHub() {
           </div>
           <Button variant="outline" size="sm" onClick={() => navigate("/agents/setup")} className="gap-2">
             <Settings className="h-4 w-4" />
-            Configurar
+            Trocar DNA
           </Button>
         </div>
       </header>
 
       {/* Config summary */}
-      {config && (
+      {profile && (
         <div className="max-w-6xl mx-auto px-6 pt-6">
           <div className="premium-card p-4 flex flex-wrap gap-4 text-sm" data-tour="config-summary">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🎭</span>
-              <span className="text-muted-foreground">Personalidade:</span>
-              <span className="text-foreground font-medium truncate max-w-[200px]">{config.brand_personality.slice(0, 60)}...</span>
+              <span className="text-lg">🧬</span>
+              <span className="text-primary font-medium">{profile.name}</span>
             </div>
-            <div className="h-5 w-px bg-border hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🎯</span>
-              <span className="text-muted-foreground">Público:</span>
-              <span className="text-foreground font-medium truncate max-w-[200px]">{config.target_audience.slice(0, 60)}...</span>
-            </div>
-            <div className="h-5 w-px bg-border hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <span className="text-lg">📦</span>
-              <span className="text-muted-foreground">Produto:</span>
-              <span className="text-foreground font-medium truncate max-w-[200px]">{config.product_service.slice(0, 60)}...</span>
-            </div>
+            {profile.personality_summary && (
+              <>
+                <div className="h-5 w-px bg-border hidden sm:block" />
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🎭</span>
+                  <span className="text-foreground truncate max-w-[200px]">{profile.personality_summary.slice(0, 60)}...</span>
+                </div>
+              </>
+            )}
+            {profile.audience_summary && (
+              <>
+                <div className="h-5 w-px bg-border hidden sm:block" />
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🎯</span>
+                  <span className="text-foreground truncate max-w-[200px]">{profile.audience_summary.slice(0, 60)}...</span>
+                </div>
+              </>
+            )}
+            {profile.product_summary && (
+              <>
+                <div className="h-5 w-px bg-border hidden sm:block" />
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📦</span>
+                  <span className="text-foreground truncate max-w-[200px]">{profile.product_summary.slice(0, 60)}...</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
