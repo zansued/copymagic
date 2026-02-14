@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 /* Premium Dark Design System — All colors HSL */
+#lovable-badge {display: none !important;}   
 
 @layer base {
   :root {
