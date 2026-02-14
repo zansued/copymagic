@@ -44,6 +44,50 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_generations: {
+        Row: {
+          agent_id: string
+          agent_name: string
+          brand_profile_id: string | null
+          created_at: string
+          id: string
+          inputs: Json
+          output: string
+          provider: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          agent_name: string
+          brand_profile_id?: string | null
+          created_at?: string
+          id?: string
+          inputs?: Json
+          output?: string
+          provider?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          agent_name?: string
+          brand_profile_id?: string | null
+          created_at?: string
+          id?: string
+          inputs?: Json
+          output?: string
+          provider?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_generations_brand_profile_id_fkey"
+            columns: ["brand_profile_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_profiles: {
         Row: {
           audience_summary: string
