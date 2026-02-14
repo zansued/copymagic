@@ -173,11 +173,11 @@ export default function CampaignPlanning() {
             </CardHeader>
             {expandedSummary && (
               <div className="px-6 pb-6">
-                <ScrollArea className="max-h-[500px] rounded-lg border bg-muted/30 p-4">
+                <div className="h-[500px] overflow-y-auto rounded-lg border bg-muted/30 p-4 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent">
                   <div className="prose prose-sm prose-invert max-w-none prose-premium">
                     <ReactMarkdown>{summaryText}</ReactMarkdown>
                   </div>
-                </ScrollArea>
+                </div>
               </div>
             )}
           </Card>
