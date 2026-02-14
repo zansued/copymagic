@@ -498,6 +498,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          active_session_token: string | null
           agents_access: string
           brand_profiles_limit: number
           created_at: string
@@ -515,6 +516,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active_session_token?: string | null
           agents_access?: string
           brand_profiles_limit?: number
           created_at?: string
@@ -532,6 +534,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          active_session_token?: string | null
           agents_access?: string
           brand_profiles_limit?: number
           created_at?: string
