@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Save, Check } from "lucide-react";
+import { ArrowLeft, Save, Check, FileDown } from "lucide-react";
 import AiFillDialog from "@/components/brand/AiFillDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,9 @@ import {
   EMPTY_TARGET_AUDIENCE,
   EMPTY_PRODUCT_SERVICE,
   EMPTY_CREDENTIALS,
+  profileToPDF,
 } from "@/lib/brand-profile-types";
+import type { BrandProfileData } from "@/lib/brand-profile-types";
 
 const DEFAULTS: Record<string, any> = {
   brand_identity: EMPTY_BRAND_IDENTITY,
@@ -157,14 +159,24 @@ export default function BrandProfileEdit() {
               setSaved(false);
             }} />
           </div>
-          <Button
-            onClick={handleSave}
-            disabled={saving || saved}
-            className="gap-2 premium-button border-0 text-primary-foreground"
-          >
-            {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-            {saving ? "Salvando..." : saved ? "Salvo" : "Salvar"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Exportar PDF"
+              onClick={() => profileToPDF(name, sections as unknown as BrandProfileData)}
+            >
+              <FileDown className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={saving || saved}
+              className="gap-2 premium-button border-0 text-primary-foreground"
+            >
+              {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+              {saving ? "Salvando..." : saved ? "Salvo" : "Salvar"}
+            </Button>
+          </div>
         </div>
       </header>
 
