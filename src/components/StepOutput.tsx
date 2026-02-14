@@ -105,9 +105,12 @@ export function StepOutput({
       )}
 
       {!isGenerating && allCompleted && currentStepIndex === STEPS.length - 1 && (
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex justify-center gap-4">
           <GlowButton glowColor="#facc15" className="px-6 py-3 text-base" onClick={() => navigate(`/project/${id}/summary`)}>
             📊 Ver Resumo Completo →
+          </GlowButton>
+          <GlowButton glowColor="#8b5cf6" className="px-6 py-3 text-base" onClick={() => navigate(`/project/${id}/campaign`)}>
+            🚀 Planejamento de Campanha →
           </GlowButton>
         </div>
       )}

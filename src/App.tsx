@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
 import ProjectSummary from "./pages/ProjectSummary";
+import CampaignPlanning from "./pages/CampaignPlanning";
 import LandingBuilder from "./pages/LandingBuilder";
 import Auth from "./pages/Auth";
 import AgentsHub from "./pages/AgentsHub";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/project/:id" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
             <Route path="/project/:id/summary" element={<ProtectedRoute><ProjectSummary /></ProtectedRoute>} />
+            <Route path="/project/:id/campaign" element={<ProtectedRoute><CampaignPlanning /></ProtectedRoute>} />
             <Route path="/landing-builder" element={<ProtectedRoute><LandingBuilder /></ProtectedRoute>} />
             <Route path="/web-generator" element={<ProtectedRoute><LandingBuilder /></ProtectedRoute>} />
             <Route path="/agents" element={<ProtectedRoute><AgentsHub /></ProtectedRoute>} />
