@@ -331,9 +331,9 @@ export default function Pricing() {
 
                   <div className="flex flex-col items-center justify-center text-center space-y-4">
                     <div>
-                      <p className="text-sm text-muted-foreground line-through">R$ 3.564/ano</p>
+                      <p className="text-sm text-muted-foreground line-through">R$ 7.128/ano</p>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-foreground">R$ 1.297</span>
+                        <span className="text-4xl font-bold text-foreground">R$ 3.997</span>
                         <span className="text-sm text-muted-foreground">único</span>
                       </div>
                     </div>
