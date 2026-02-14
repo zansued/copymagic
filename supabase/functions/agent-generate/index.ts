@@ -30,6 +30,40 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const userId = claimsData.claims.sub;
+
+    // Check subscription limits
+    const { createClient: createAdminClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    const supabaseAdmin = createAdminClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    
+    const { data: sub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("generations_used, generations_limit, current_period_end")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const used = sub?.generations_used ?? 0;
+    const limit = sub?.generations_limit ?? 5;
+
+    // Reset usage if period expired
+    if (sub?.current_period_end && new Date(sub.current_period_end) < new Date()) {
+      await supabaseAdmin.from("subscriptions").update({
+        generations_used: 0,
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      }).eq("user_id", userId);
+    } else if (used >= limit) {
+      return new Response(JSON.stringify({ error: "Limite de gerações atingido. Faça upgrade do seu plano." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Increment usage
+    await supabaseAdmin.from("subscriptions").upsert({
+      user_id: userId,
+      generations_used: used + 1,
+    }, { onConflict: "user_id" });
 
     const { system_prompt, provider } = await req.json();
 

@@ -20,6 +20,7 @@ import MentorPage from "./pages/MentorPage";
 import Dashboard from "./pages/Dashboard";
 import SharedWithMe from "./pages/SharedWithMe";
 import SharedOutput from "./pages/SharedOutput";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/brand-profiles/:id" element={<ProtectedRoute><BrandProfileEdit /></ProtectedRoute>} />
             <Route path="/shared-with-me" element={<ProtectedRoute><SharedWithMe /></ProtectedRoute>} />
             <Route path="/shared/:token" element={<SharedOutput />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

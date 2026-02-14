@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MenuBar } from "@/components/ui/menu-bar";
-import { FolderOpen, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users } from "lucide-react";
+import { FolderOpen, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, CreditCard } from "lucide-react";
 
 const menuItems = [
   {
@@ -54,6 +54,13 @@ const menuItems = [
     path: "/shared-with-me",
     gradient: "radial-gradient(circle, hsl(40 80% 55% / 0.15) 0%, transparent 70%)",
     iconColor: "text-amber-400",
+  },
+  {
+    icon: CreditCard,
+    label: "Planos",
+    path: "/pricing",
+    gradient: "radial-gradient(circle, hsl(142 70% 45% / 0.15) 0%, transparent 70%)",
+    iconColor: "text-green-400",
   },
 ];
 
