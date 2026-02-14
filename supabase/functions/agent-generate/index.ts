@@ -119,7 +119,7 @@ serve(async (req) => {
         max_tokens: maxTokens,
         messages: [
           { role: "system", content: system_prompt },
-          { role: "user", content: "Entregue APENAS o resultado final pronto para uso. Sem introduções, sem explicações de contexto, sem comentários sobre o processo. Vá direto ao conteúdo solicitado." },
+          { role: "user", content: "Entregue APENAS o resultado final pronto para uso. Regras obrigatórias: 1) NÃO inclua fases, etapas ou diagnósticos intermediários (ex: 'FASE 1 — DIAGNÓSTICO', 'FASE 2 — ANÁLISE'). 2) NÃO inclua introduções, explicações de contexto ou comentários sobre o processo. 3) Vá DIRETO aos entregáveis finais (os ângulos, os hooks, as headlines, os roteiros, etc). 4) Comece imediatamente pelo primeiro item do resultado." },
         ],
       }),
     });
