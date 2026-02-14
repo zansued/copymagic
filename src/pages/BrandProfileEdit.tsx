@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Save, Check } from "lucide-react";
+import AiFillDialog from "@/components/brand/AiFillDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -145,6 +146,16 @@ export default function BrandProfileEdit() {
               onChange={(e) => { setName(e.target.value); setSaved(false); }}
               className="text-lg font-bold bg-transparent border-none focus-visible:ring-1 h-9 w-[260px]"
             />
+            <AiFillDialog onFill={(data) => {
+              setSections(prev => {
+                const merged: Record<string, Record<string, string>> = {};
+                for (const key of Object.keys(prev)) {
+                  merged[key] = { ...prev[key], ...(data[key] || {}) };
+                }
+                return merged;
+              });
+              setSaved(false);
+            }} />
           </div>
           <Button
             onClick={handleSave}
