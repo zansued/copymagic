@@ -472,6 +472,54 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          brand_profiles_limit: number
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          generations_limit: number
+          generations_used: number
+          id: string
+          mp_payer_email: string | null
+          mp_subscription_id: string | null
+          plan: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_profiles_limit?: number
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          generations_limit?: number
+          generations_used?: number
+          id?: string
+          mp_payer_email?: string | null
+          mp_subscription_id?: string | null
+          plan?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_profiles_limit?: number
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          generations_limit?: number
+          generations_used?: number
+          id?: string
+          mp_payer_email?: string | null
+          mp_subscription_id?: string | null
+          plan?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
