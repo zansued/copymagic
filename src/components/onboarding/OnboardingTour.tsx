@@ -45,27 +45,38 @@ export function OnboardingTour({ steps, storageKey, onComplete }: OnboardingTour
     if (!el) return;
 
     const rect = el.getBoundingClientRect();
-    const pos = step.position || "bottom";
+    let pos = step.position || "bottom";
     const gap = 14;
+    const pad = 16;
 
-    // Highlight the target
     el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Measure real tooltip dimensions (fallback to estimates on first render)
+    const tooltipEl = tooltipRef.current;
+    const tooltipW = tooltipEl ? tooltipEl.offsetWidth : 340;
+    const tooltipH = tooltipEl ? tooltipEl.offsetHeight : 200;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Auto-flip if not enough space
+    if (pos === "bottom" && rect.bottom + gap + tooltipH > vh - pad) pos = "top";
+    else if (pos === "top" && rect.top - gap - tooltipH < pad) pos = "bottom";
+    else if (pos === "right" && rect.right + gap + tooltipW > vw - pad) pos = "left";
+    else if (pos === "left" && rect.left - gap - tooltipW < pad) pos = "right";
 
     const style: React.CSSProperties = { position: "fixed", zIndex: 10001 };
     const arrow: React.CSSProperties = { position: "absolute" };
 
-    const tooltipW = 340;
-    const tooltipH = 180;
-
     if (pos === "bottom") {
       style.top = rect.bottom + gap;
-      style.left = Math.max(16, Math.min(rect.left + rect.width / 2 - tooltipW / 2, window.innerWidth - tooltipW - 16));
+      style.left = rect.left + rect.width / 2 - tooltipW / 2;
       arrow.top = -6;
       arrow.left = "50%";
       arrow.transform = "translateX(-50%) rotate(45deg)";
     } else if (pos === "top") {
       style.top = rect.top - tooltipH - gap;
-      style.left = Math.max(16, Math.min(rect.left + rect.width / 2 - tooltipW / 2, window.innerWidth - tooltipW - 16));
+      style.left = rect.left + rect.width / 2 - tooltipW / 2;
       arrow.bottom = -6;
       arrow.left = "50%";
       arrow.transform = "translateX(-50%) rotate(45deg)";
@@ -83,6 +94,10 @@ export function OnboardingTour({ steps, storageKey, onComplete }: OnboardingTour
       arrow.transform = "translateY(-50%) rotate(45deg)";
     }
 
+    // Clamp to viewport
+    style.top = Math.max(pad, Math.min(style.top as number, vh - tooltipH - pad));
+    style.left = Math.max(pad, Math.min(style.left as number, vw - tooltipW - pad));
+
     setTooltipStyle(style);
     setArrowStyle(arrow);
   }, [currentStep, steps]);
@@ -90,10 +105,13 @@ export function OnboardingTour({ steps, storageKey, onComplete }: OnboardingTour
   useEffect(() => {
     if (!active) return;
     positionTooltip();
+    // Recalculate after render so real tooltip dimensions are used
+    const raf = requestAnimationFrame(() => positionTooltip());
     const handler = () => positionTooltip();
     window.addEventListener("resize", handler);
     window.addEventListener("scroll", handler, true);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("resize", handler);
       window.removeEventListener("scroll", handler, true);
     };
