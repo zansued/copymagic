@@ -1016,6 +1016,24 @@ serve(async (req) => {
 
     const { product_input, step, previous_context, provider = "deepseek", continue_from, generation_context } = await req.json();
 
+    if (!product_input || typeof product_input !== "string" || product_input.length > 50000) {
+      return new Response(JSON.stringify({ error: "Entrada de produto inválida ou muito longa (máximo 50.000 caracteres)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (previous_context && typeof previous_context === "string" && previous_context.length > 200000) {
+      return new Response(JSON.stringify({ error: "Contexto anterior muito longo" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (provider && !["openai", "deepseek"].includes(provider)) {
+      return new Response(JSON.stringify({ error: "Provider inválido" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const genCtx = validateGenerationContext(generation_context);
     const culturalPrompt = buildCulturalSystemPrompt(genCtx);
 

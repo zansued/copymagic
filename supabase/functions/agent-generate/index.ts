@@ -74,6 +74,20 @@ serve(async (req) => {
       });
     }
 
+    if (system_prompt.length > 50000) {
+      return new Response(JSON.stringify({ error: "Prompt muito longo (máximo 50.000 caracteres)" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (provider && !["openai", "deepseek"].includes(provider)) {
+      return new Response(JSON.stringify({ error: "Provider inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const apiKey = provider === "openai"
       ? Deno.env.get("OPENAI_API_KEY")
       : Deno.env.get("DEEPSEEK_API_KEY");

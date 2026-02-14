@@ -40,6 +40,20 @@ serve(async (req) => {
       });
     }
 
+    if (original_content.length > 100000) {
+      return new Response(JSON.stringify({ error: "Conteúdo muito longo (máximo 100.000 caracteres)" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (provider && !["openai", "deepseek"].includes(provider)) {
+      return new Response(JSON.stringify({ error: "Provider inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const systemPrompt = buildSystemPrompt(framework_structure, framework_name, brand_context, extra_instructions);
 
     const apiKey = provider === "openai"
