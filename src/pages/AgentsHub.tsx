@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Settings, ArrowLeft, Lock } from "lucide-react";
+import { Settings, ArrowLeft, Lock, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { AGENTS, AGENT_CATEGORIES, type AgentDef } from "@/lib/agents";
+import { useSubscription } from "@/hooks/use-subscription";
+import { AGENTS, AGENT_CATEGORIES, FREE_AGENT_IDS, type AgentDef } from "@/lib/agents";
 import { OnboardingTour, type TourStep } from "@/components/onboarding/OnboardingTour";
 
 const TOUR_STEPS: TourStep[] = [
@@ -56,8 +57,11 @@ interface DefaultProfile {
 export default function AgentsHub() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { subscription } = useSubscription();
   const [profile, setProfile] = useState<DefaultProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const agentsAccess = subscription?.agents_access ?? "basic";
 
   useEffect(() => {
     if (!user) return;
@@ -170,14 +174,18 @@ export default function AgentsHub() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {catAgents.map((agent, ai) => (
-                  <AgentCard
-                    key={agent.id}
-                    agent={agent}
-                    index={ai}
-                    dataTour={isFirst && ai === 0 ? "first-agent" : undefined}
-                  />
-                ))}
+                {catAgents.map((agent, ai) => {
+                  const lockedByPlan = agentsAccess === "basic" && !FREE_AGENT_IDS.includes(agent.id);
+                  return (
+                    <AgentCard
+                      key={agent.id}
+                      agent={agent}
+                      index={ai}
+                      dataTour={isFirst && ai === 0 ? "first-agent" : undefined}
+                      lockedByPlan={lockedByPlan}
+                    />
+                  );
+                })}
               </div>
             </motion.section>
           );
@@ -187,24 +195,37 @@ export default function AgentsHub() {
   );
 }
 
-function AgentCard({ agent, index, dataTour }: { agent: AgentDef; index: number; dataTour?: string }) {
+function AgentCard({ agent, index, dataTour, lockedByPlan }: { agent: AgentDef; index: number; dataTour?: string; lockedByPlan?: boolean }) {
   const navigate = useNavigate();
+  const isLocked = !agent.available || lockedByPlan;
 
   return (
     <motion.button
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06 }}
-      onClick={() => agent.available && navigate(`/agents/${agent.id}`)}
-      disabled={!agent.available}
+      onClick={() => {
+        if (lockedByPlan) {
+          navigate("/pricing");
+        } else if (agent.available) {
+          navigate(`/agents/${agent.id}`);
+        }
+      }}
+      disabled={!agent.available && !lockedByPlan}
       data-tour={dataTour}
       className={`premium-card p-5 text-left w-full group relative transition-all ${
-        agent.available
-          ? "cursor-pointer hover:border-primary/30"
-          : "opacity-50 cursor-not-allowed"
+        isLocked
+          ? "opacity-60 cursor-pointer hover:border-amber-500/30"
+          : "cursor-pointer hover:border-primary/30"
       }`}
     >
-      {!agent.available && (
+      {lockedByPlan && (
+        <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium">
+          <Crown className="h-3 w-3" />
+          Pro
+        </div>
+      )}
+      {!agent.available && !lockedByPlan && (
         <div className="absolute top-3 right-3">
           <Lock className="h-4 w-4 text-muted-foreground" />
         </div>
@@ -221,7 +242,7 @@ function AgentCard({ agent, index, dataTour }: { agent: AgentDef; index: number;
         </div>
       </div>
 
-      {!agent.available && (
+      {!agent.available && !lockedByPlan && (
         <div className="mt-3 text-xs text-muted-foreground italic">Em breve</div>
       )}
     </motion.button>

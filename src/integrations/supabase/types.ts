@@ -177,6 +177,30 @@ export type Database = {
           },
         ]
       }
+      lifetime_slots: {
+        Row: {
+          created_at: string
+          id: string
+          slots_sold: number
+          total_slots: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          slots_sold?: number
+          total_slots?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          slots_sold?: number
+          total_slots?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mentor_conversations: {
         Row: {
           created_at: string
@@ -474,6 +498,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          agents_access: string
           brand_profiles_limit: number
           created_at: string
           current_period_end: string | null
@@ -484,11 +509,13 @@ export type Database = {
           mp_payer_email: string | null
           mp_subscription_id: string | null
           plan: string
+          projects_limit: number
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          agents_access?: string
           brand_profiles_limit?: number
           created_at?: string
           current_period_end?: string | null
@@ -499,11 +526,13 @@ export type Database = {
           mp_payer_email?: string | null
           mp_subscription_id?: string | null
           plan?: string
+          projects_limit?: number
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          agents_access?: string
           brand_profiles_limit?: number
           created_at?: string
           current_period_end?: string | null
@@ -514,6 +543,7 @@ export type Database = {
           mp_payer_email?: string | null
           mp_subscription_id?: string | null
           plan?: string
+          projects_limit?: number
           status?: string
           updated_at?: string
           user_id?: string

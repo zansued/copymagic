@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3, Share2 } from "lucide-react";
+import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3, Share2, Lock } from "lucide-react";
 import { ShareDialog } from "@/components/collaboration/ShareDialog";
 import { toast } from "sonner";
 import { TopNav } from "@/components/TopNav";
@@ -33,6 +34,7 @@ interface Project {
 
 export default function Projects() {
   const { user, signOut } = useAuth();
+  const { subscription } = useSubscription();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,8 @@ export default function Projects() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [shareProject, setShareProject] = useState<Project | null>(null);
+
+  const projectsLimit = subscription?.projects_limit ?? 1;
 
   const fetchProjects = async () => {
     const { data, error } = await supabase
@@ -59,6 +63,11 @@ export default function Projects() {
   useEffect(() => { fetchProjects(); }, []);
 
   const handleCreate = async () => {
+    if (projects.length >= projectsLimit) {
+      toast.error(`Limite de ${projectsLimit} projeto${projectsLimit > 1 ? "s" : ""} atingido. Faça upgrade do seu plano.`);
+      navigate("/pricing");
+      return;
+    }
     const { data, error } = await supabase
       .from("projects")
       .insert({ user_id: user!.id, name: "Nova Oferta" })

@@ -6,9 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PLANS: Record<string, { title: string; price: number; generations: number; profiles: number }> = {
-  pro: { title: "CopyMagic Pro", price: 97, generations: 100, profiles: 5 },
-  agency: { title: "CopyMagic Agency", price: 297, generations: 999999, profiles: 999 },
+const PLANS: Record<string, { title: string; price: number; generations: number; profiles: number; projects: number; agents_access: string; is_recurring: boolean }> = {
+  pro: { title: "CopyMagic Pro", price: 97, generations: 100, profiles: 5, projects: 10, agents_access: "full", is_recurring: true },
+  agency: { title: "CopyMagic Agency", price: 297, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: true },
+  lifetime: { title: "CopyMagic Vitalício", price: 1297, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: false },
 };
 
 serve(async (req) => {
@@ -58,6 +59,19 @@ serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Check lifetime slots availability
+    if (plan === "lifetime") {
+      const { createClient: createAdminClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      const supabaseAdmin = createAdminClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      const { data: slots } = await supabaseAdmin.from("lifetime_slots").select("*").limit(1).single();
+      if (slots && slots.slots_sold >= slots.total_slots) {
+        return new Response(JSON.stringify({ error: "Vagas vitalícias esgotadas!" }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const baseUrl = Deno.env.get("SITE_URL") || "https://copymagic.lovable.app";

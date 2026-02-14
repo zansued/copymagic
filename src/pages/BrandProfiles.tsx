@@ -5,6 +5,7 @@ import { Plus, ArrowLeft, MoreVertical, Star, Trash2, Copy, Download, FileText, 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 import { toast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -45,10 +46,13 @@ interface ProfileRow {
 export default function BrandProfiles() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { subscription } = useSubscription();
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteName, setDeleteName] = useState("");
+
+  const dnaLimit = subscription?.brand_profiles_limit ?? 1;
 
   const fetchProfiles = async () => {
     if (!user) return;
@@ -68,6 +72,11 @@ export default function BrandProfiles() {
 
   const handleCreate = async () => {
     if (!user) return;
+    if (profiles.length >= dnaLimit) {
+      toast({ title: `Limite de ${dnaLimit} perfil${dnaLimit > 1 ? "s" : ""} atingido`, description: "Faça upgrade para criar mais perfis.", variant: "destructive" });
+      navigate("/pricing");
+      return;
+    }
     const isFirst = profiles.length === 0;
     const { data, error } = await supabase
       .from("brand_profiles")

@@ -37,6 +37,7 @@ const PLAN_LIMITS: Record<string, number> = {
   free: 5,
   pro: 100,
   agency: 999999,
+  lifetime: 999999,
 };
 
 export default function AdminPanel() {
@@ -259,6 +260,7 @@ export default function AdminPanel() {
                             <SelectItem value="free">Free</SelectItem>
                             <SelectItem value="pro">Pro</SelectItem>
                             <SelectItem value="agency">Agency</SelectItem>
+                            <SelectItem value="lifetime">Vitalício</SelectItem>
                           </SelectContent>
                         </Select>
                       </td>

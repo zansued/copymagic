@@ -6,9 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PLAN_LIMITS: Record<string, { generations: number; profiles: number }> = {
-  pro: { generations: 100, profiles: 5 },
-  agency: { generations: 999999, profiles: 999 },
+const PLAN_LIMITS: Record<string, { generations: number; profiles: number; projects: number; agents_access: string }> = {
+  pro: { generations: 100, profiles: 5, projects: 10, agents_access: "full" },
+  agency: { generations: 999999, profiles: 999, projects: 999999, agents_access: "full" },
+  lifetime: { generations: 999999, profiles: 999, projects: 999999, agents_access: "full" },
 };
 
 async function verifyWebhookSignature(req: Request, body: any): Promise<boolean> {
@@ -145,7 +146,8 @@ serve(async (req) => {
     );
 
     const now = new Date();
-    const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const isLifetime = plan === "lifetime";
+    const periodEnd = isLifetime ? null : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     const { error: upsertError } = await supabaseAdmin
       .from("subscriptions")
@@ -159,8 +161,10 @@ serve(async (req) => {
           generations_used: 0,
           generations_limit: limits.generations,
           brand_profiles_limit: limits.profiles,
+          projects_limit: limits.projects,
+          agents_access: limits.agents_access,
           current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString(),
+          current_period_end: periodEnd ? periodEnd.toISOString() : null,
         },
         { onConflict: "user_id" }
       );
@@ -171,6 +175,16 @@ serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Decrement lifetime slots if applicable
+    if (isLifetime) {
+      await supabaseAdmin.rpc("decrement_lifetime_slot" as any);
+      // Fallback: direct update
+      const { data: slotData } = await supabaseAdmin.from("lifetime_slots").select("*").limit(1).single();
+      if (slotData) {
+        await supabaseAdmin.from("lifetime_slots").update({ slots_sold: slotData.slots_sold + 1 }).eq("id", slotData.id);
+      }
     }
 
     console.log(`Subscription updated: user=${user_id}, plan=${plan}`);
