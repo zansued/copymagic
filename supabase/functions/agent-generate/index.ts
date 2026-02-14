@@ -97,6 +97,7 @@ serve(async (req) => {
       : "https://api.deepseek.com/v1/chat/completions";
 
     const model = provider === "openai" ? "gpt-4o" : "deepseek-chat";
+    const maxTokens = provider === "openai" ? 16384 : 8192;
 
     if (!apiKey) {
       return new Response(JSON.stringify({ error: `API key para ${provider} não configurada` }), {
@@ -115,7 +116,7 @@ serve(async (req) => {
         model,
         stream: true,
         temperature: 0.7,
-        max_tokens: 12000,
+        max_tokens: maxTokens,
         messages: [
           { role: "system", content: system_prompt },
           { role: "user", content: "Gere o conteúdo completo conforme as instruções do system prompt. Entregue o resultado final pronto para uso." },
