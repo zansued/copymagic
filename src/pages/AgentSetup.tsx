@@ -1,111 +1,114 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Textarea } from "@/components/ui/textarea";
-import { GlowButton } from "@/components/ui/glow-button";
+import { Plus, ArrowLeft, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
+import { PROFILE_SECTIONS } from "@/lib/brand-profile-types";
 
-const STEPS = [
-  {
-    key: "brand_personality",
-    emoji: "🎭",
-    title: "Personalidade da Marca",
-    subtitle: "Como sua marca se comunica com o mundo?",
-    placeholder: `Descreva a personalidade da sua marca. Exemplos:\n\n• "Somos descontraídos, diretos e usamos humor inteligente. Falamos como um amigo que manja do assunto."\n• "Profissionais, confiáveis e empáticos. Transmitimos autoridade sem arrogância."\n• "Ousados, irreverentes e provocativos. Quebramos padrões e desafiamos o status quo."`,
-  },
-  {
-    key: "target_audience",
-    emoji: "🎯",
-    title: "Público-Alvo",
-    subtitle: "Para quem você está falando?",
-    placeholder: `Descreva seu público ideal. Exemplos:\n\n• "Empreendedores digitais entre 25-40 anos que já tentaram vender online mas não conseguiram escalar."\n• "Mulheres 30-50 que buscam equilíbrio entre carreira e saúde, dispostas a investir em bem-estar."\n• "Gestores de PMEs que precisam automatizar processos mas têm orçamento limitado."`,
-  },
-  {
-    key: "product_service",
-    emoji: "📦",
-    title: "Produto / Serviço",
-    subtitle: "O que você oferece ao mundo?",
-    placeholder: `Descreva seu produto ou serviço principal. Exemplos:\n\n• "Curso online de copywriting com 12 módulos + mentoria semanal. Foco em copy para lançamentos digitais."\n• "Consultoria de branding para startups. Entregamos naming, identidade visual e manual de marca em 30 dias."\n• "SaaS de automação de marketing para e-commerce. Planos a partir de R$97/mês."`,
-  },
-];
+interface ProfileOption {
+  id: string;
+  name: string;
+  is_default: boolean;
+  personality_summary: string;
+  audience_summary: string;
+  product_summary: string;
+  brand_identity: any;
+  brand_voice: any;
+  target_audience: any;
+  product_service: any;
+  credentials: any;
+  updated_at: string;
+}
 
 export default function AgentSetup() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [step, setStep] = useState(0);
-  const [values, setValues] = useState({
-    brand_personality: "",
-    target_audience: "",
-    product_service: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [profiles, setProfiles] = useState<ProfileOption[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     supabase
-      .from("agent_configs")
+      .from("brand_profiles")
       .select("*")
       .eq("user_id", user.id)
-      .maybeSingle()
+      .order("is_default", { ascending: false })
+      .order("updated_at", { ascending: false })
       .then(({ data }) => {
-        if (data) {
-          setValues({
-            brand_personality: data.brand_personality || "",
-            target_audience: data.target_audience || "",
-            product_service: data.product_service || "",
-          });
-        }
-        setInitialLoading(false);
+        setProfiles(data || []);
+        setLoading(false);
       });
   }, [user]);
 
-  const current = STEPS[step];
-  const currentValue = values[current.key as keyof typeof values];
-
-  const handleNext = () => {
-    if (step < STEPS.length - 1) {
-      setStep(step + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 0) setStep(step - 1);
-  };
-
-  const handleSave = async () => {
+  const handleSelect = async (profile: ProfileOption) => {
     if (!user) return;
-    setLoading(true);
-    try {
-      const { data: existing } = await supabase
-        .from("agent_configs")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
+    setSaving(true);
 
-      if (existing) {
-        await supabase
-          .from("agent_configs")
-          .update({ ...values })
-          .eq("user_id", user.id);
-      } else {
-        await supabase
-          .from("agent_configs")
-          .insert({ user_id: user.id, ...values });
-      }
+    // Set selected as default, unset others
+    await supabase.from("brand_profiles").update({ is_default: false }).eq("user_id", user.id);
+    await supabase.from("brand_profiles").update({ is_default: true }).eq("id", profile.id);
 
-      toast({ title: "Configuração salva!", description: "Seus agentes estão prontos." });
-      navigate("/agents");
-    } catch {
-      toast({ title: "Erro ao salvar", variant: "destructive" });
-    } finally {
-      setLoading(false);
+    // Sync to agent_configs for backward compatibility
+    const personality = [
+      profile.personality_summary,
+      profile.brand_voice?.voice_essence,
+      profile.brand_voice?.brand_persona,
+    ].filter(Boolean).join(". ").slice(0, 500) || "Perfil configurado via DNA";
+
+    const audience = [
+      profile.audience_summary,
+      profile.target_audience?.demographics,
+      profile.target_audience?.central_problem,
+    ].filter(Boolean).join(". ").slice(0, 500) || "Público configurado via DNA";
+
+    const product = [
+      profile.product_summary,
+      profile.product_service?.offer_name,
+      profile.product_service?.main_promise,
+    ].filter(Boolean).join(". ").slice(0, 500) || "Produto configurado via DNA";
+
+    const { data: existing } = await supabase
+      .from("agent_configs")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from("agent_configs").update({
+        brand_personality: personality,
+        target_audience: audience,
+        product_service: product,
+      }).eq("user_id", user.id);
+    } else {
+      await supabase.from("agent_configs").insert({
+        user_id: user.id,
+        brand_personality: personality,
+        target_audience: audience,
+        product_service: product,
+      });
     }
+
+    toast({ title: "✅ Perfil selecionado!", description: "Seus agentes estão prontos." });
+    navigate("/agents");
   };
 
-  if (initialLoading) {
+  const getCompletion = (profile: ProfileOption): number => {
+    let filled = 0, total = 0;
+    for (const section of PROFILE_SECTIONS) {
+      const data = (profile[section.key as keyof ProfileOption] || {}) as Record<string, string>;
+      for (const field of section.fields) {
+        total++;
+        if (typeof data[field.key] === "string" && data[field.key].trim()) filled++;
+      }
+    }
+    return total > 0 ? Math.round((filled / total) * 100) : 0;
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse text-muted-foreground">Carregando...</div>
@@ -115,77 +118,144 @@ export default function AgentSetup() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Progress */}
-      <div className="w-full px-6 pt-6">
-        <div className="max-w-2xl mx-auto flex gap-2">
-          {STEPS.map((s, i) => (
-            <div
-              key={s.key}
-              className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                i <= step
-                  ? "bg-gradient-to-r from-primary to-accent-foreground"
-                  : "bg-muted"
-              }`}
-            />
-          ))}
+      {/* Header */}
+      <header className="glass-header sticky top-0 z-30">
+        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/agents")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold gradient-text">Configurar Agentes</h1>
+              <p className="text-xs text-muted-foreground">Selecione o DNA de Marca para seus agentes</p>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -40 }}
-          transition={{ duration: 0.35 }}
-          className="w-full max-w-2xl space-y-8"
-        >
-          <div className="text-center space-y-3">
-            <span className="text-5xl">{current.emoji}</span>
-            <h1 className="text-3xl font-bold gradient-text">{current.title}</h1>
-            <p className="text-muted-foreground text-lg">{current.subtitle}</p>
-          </div>
+      <div className="flex-1 flex items-start justify-center px-6 py-10">
+        <div className="w-full max-w-3xl space-y-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center space-y-3"
+          >
+            <span className="text-5xl">🧬</span>
+            <h2 className="text-2xl font-bold text-foreground">
+              Escolha seu DNA de Marca
+            </h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Os agentes usarão o perfil selecionado como contexto estratégico para gerar resultados personalizados.
+            </p>
+          </motion.div>
 
-          <Textarea
-            value={currentValue}
-            onChange={(e) =>
-              setValues((v) => ({ ...v, [current.key]: e.target.value }))
-            }
-            placeholder={current.placeholder}
-            className="min-h-[220px] text-base leading-relaxed"
-          />
-
-          <div className="flex gap-3 justify-between">
-            <button
-              onClick={handleBack}
-              disabled={step === 0}
-              className="px-6 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
+          {profiles.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-center space-y-4 py-10"
             >
-              ← Voltar
-            </button>
+              <p className="text-muted-foreground">
+                Você ainda não tem perfis de DNA. Crie um para começar!
+              </p>
+              <Button
+                onClick={() => navigate("/brand-profiles")}
+                className="gap-2 premium-button border-0 text-primary-foreground"
+              >
+                <Plus className="h-4 w-4" />
+                Criar DNA de Marca
+              </Button>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {profiles.map((profile, i) => {
+                const completion = getCompletion(profile);
+                return (
+                  <motion.button
+                    key={profile.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    onClick={() => handleSelect(profile)}
+                    disabled={saving}
+                    className={`premium-card p-5 text-left w-full group relative transition-all hover:border-primary/30 ${
+                      profile.is_default ? "ring-2 ring-primary/30" : ""
+                    }`}
+                  >
+                    {profile.is_default && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary text-xs font-medium">
+                        <Check className="h-3 w-3" />
+                        Atual
+                      </div>
+                    )}
 
-            {step < STEPS.length - 1 ? (
-              <GlowButton
-                onClick={handleNext}
-                disabled={!currentValue.trim()}
-                glowColor="hsl(262, 83%, 65%)"
-                className="px-8 h-11"
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl">🧬</span>
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                            {profile.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            Atualizado {new Date(profile.updated_at).toLocaleDateString("pt-BR")}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Completion bar */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Preenchimento</span>
+                          <span className={completion === 100 ? "text-green-400 font-medium" : "text-muted-foreground"}>
+                            {completion}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${completion}%`,
+                              background: completion === 100
+                                ? "hsl(142, 71%, 45%)"
+                                : "linear-gradient(90deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)))",
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Summaries */}
+                      {profile.personality_summary && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          🎭 {profile.personality_summary}
+                        </p>
+                      )}
+                      {profile.audience_summary && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          🎯 {profile.audience_summary}
+                        </p>
+                      )}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Create new link */}
+          {profiles.length > 0 && (
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/brand-profiles")}
+                className="text-sm text-muted-foreground hover:text-foreground gap-2"
               >
-                Próximo →
-              </GlowButton>
-            ) : (
-              <GlowButton
-                onClick={handleSave}
-                disabled={!currentValue.trim() || loading}
-                glowColor="hsl(262, 83%, 65%)"
-                className="px-8 h-11"
-              >
-                {loading ? "Salvando..." : "🚀 Ativar Agentes"}
-              </GlowButton>
-            )}
-          </div>
-        </motion.div>
+                <Plus className="h-4 w-4" />
+                Gerenciar perfis de DNA
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
