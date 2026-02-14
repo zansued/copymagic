@@ -893,7 +893,7 @@ Extract ALL the copy content into the PageSpec JSON structure. Preserve every pa
       const renderPrompt = `PageSpec (structured copy):
 ${JSON.stringify(pageSpec, null, 2)}
 
-Brand: { "primary_color": "${primaryColor}", "style": "${style}" ${logoUrl ? `, "logo_url": "${logoUrl}"` : ""} ${siteTitle ? `, "site_title": "${siteTitle}"` : ""} }
+Brand: { "primary_color": "${primaryColor}", "style": "${style}" ${options.branding?.logoUrl ? `, "logo_url": "${options.branding.logoUrl}"` : ""} ${options.branding?.title ? `, "site_title": "${options.branding.title}"` : ""} }
 Locale: { "language": "${lang}", "region": "${project.cultural_region || 'auto'}" }
 Template style: "${templateKey}"
 
