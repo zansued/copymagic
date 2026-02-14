@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PROFILE_SECTIONS, profileToMarkdown, profileToJSON } from "@/lib/brand-profile-types";
+import { PROFILE_SECTIONS, profileToMarkdown, profileToJSON, profileToPDF } from "@/lib/brand-profile-types";
 import type { BrandProfileData } from "@/lib/brand-profile-types";
 
 interface ProfileRow {
@@ -260,6 +260,19 @@ export default function BrandProfiles() {
                         <DropdownMenuItem onClick={() => exportProfile(profile, "json")}>
                           <FileJson className="h-4 w-4 mr-2" />
                           Exportar JSON
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          const d: BrandProfileData = {
+                            brand_identity: profile.brand_identity || {},
+                            brand_voice: profile.brand_voice || {},
+                            target_audience: profile.target_audience || {},
+                            product_service: profile.product_service || {},
+                            credentials: profile.credentials || {},
+                          };
+                          profileToPDF(profile.name, d);
+                        }}>
+                          <FileType className="h-4 w-4 mr-2" />
+                          Exportar PDF
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem

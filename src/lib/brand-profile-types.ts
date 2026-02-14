@@ -204,3 +204,52 @@ export function profileToMarkdown(name: string, data: BrandProfileData): string 
 export function profileToJSON(name: string, data: BrandProfileData): string {
   return JSON.stringify({ name, ...data }, null, 2);
 }
+
+export function profileToPDF(name: string, data: BrandProfileData): void {
+  const html = buildPDFHTML(name, data);
+  const win = window.open("", "_blank");
+  if (!win) return;
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => {
+    setTimeout(() => { win.print(); }, 400);
+  };
+}
+
+function buildPDFHTML(name: string, data: BrandProfileData): string {
+  let sectionsHTML = "";
+
+  for (const section of PROFILE_SECTIONS) {
+    const sectionData = data[section.key] as unknown as Record<string, string>;
+    const hasContent = Object.values(sectionData).some((v) => typeof v === "string" && v.trim());
+    if (!hasContent) continue;
+
+    let fieldsHTML = "";
+    for (const field of section.fields) {
+      const value = sectionData[field.key];
+      if (typeof value === "string" && value.trim()) {
+        fieldsHTML += `<div class="field"><h3>${field.label}</h3><p>${value.trim().replace(/\n/g, "<br>")}</p></div>`;
+      }
+    }
+
+    sectionsHTML += `<div class="section"><h2>${section.emoji} ${section.title}</h2>${fieldsHTML}</div>`;
+  }
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>DNA de Marca – ${name}</title>
+<style>
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1a1a2e; padding: 40px; max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 28px; margin-bottom: 8px; color: #6c2bd9; }
+  .subtitle { font-size: 13px; color: #888; margin-bottom: 32px; }
+  .section { margin-bottom: 28px; page-break-inside: avoid; }
+  .section h2 { font-size: 18px; color: #6c2bd9; border-bottom: 2px solid #ede9fe; padding-bottom: 6px; margin-bottom: 14px; }
+  .field { margin-bottom: 14px; }
+  .field h3 { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .field p { font-size: 14px; line-height: 1.6; color: #333; }
+</style></head><body>
+  <h1>🧬 ${name}</h1>
+  <div class="subtitle">DNA de Marca – Exportado em ${new Date().toLocaleDateString("pt-BR")}</div>
+  ${sectionsHTML}
+</body></html>`;
+}
