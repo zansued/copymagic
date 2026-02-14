@@ -173,7 +173,7 @@ export default function BrandProfileEdit() {
         <nav className="w-56 shrink-0 border-r border-border p-4 space-y-1 hidden md:block sticky top-[57px] h-[calc(100vh-57px)] overflow-y-auto">
           {PROFILE_SECTIONS.map((section, i) => {
             const sectionData = sections[section.key] || {};
-            const filledFields = Object.values(sectionData).filter((v) => (v as string)?.trim()).length;
+            const filledFields = Object.values(sectionData).filter((v) => typeof v === "string" && v.trim()).length;
             const totalFields = section.fields.length;
 
             return (
