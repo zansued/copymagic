@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { X, Sparkles, Square, Copy, Check, Loader2 } from "lucide-react";
+import { X, Sparkles, Square, Copy, Check, Loader2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -181,6 +181,25 @@ export default function MentorAgentExecutor({ agentId, stepTitle, onClose, onCom
     setIsGenerating(false);
   };
 
+  const handleExportPdf = async () => {
+    if (!output || !outputRef.current) return;
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const element = outputRef.current;
+      const opt = {
+        margin: [12, 12, 12, 12],
+        filename: `${config?.name || "output"}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#0f1117" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      await html2pdf().set(opt).from(element).save();
+      toast({ title: "PDF exportado com sucesso!" });
+    } catch {
+      toast({ title: "Erro ao exportar PDF", variant: "destructive" });
+    }
+  };
+
   const handleCopy = () => {
     navigator.clipboard.writeText(output);
     setCopied(true);
@@ -224,6 +243,9 @@ export default function MentorAgentExecutor({ agentId, stepTitle, onClose, onCom
               <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1 text-xs">
                 {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                 {copied ? "Copiado" : "Copiar"}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportPdf} className="gap-1 text-xs">
+                <FileDown className="h-3 w-3" /> PDF
               </Button>
               <Button size="sm" onClick={handleSaveAndClose} className="gap-1 text-xs bg-emerald-600 hover:bg-emerald-700">
                 ✓ Salvar e Concluir
@@ -309,9 +331,21 @@ export default function MentorAgentExecutor({ agentId, stepTitle, onClose, onCom
           </div>
 
           {/* Output */}
-          <div ref={outputRef} className="p-4 overflow-y-auto">
+          <div ref={outputRef} className="p-5 overflow-y-auto">
             {output ? (
-              <div className="prose prose-invert prose-sm max-w-none">
+              <div className="prose prose-invert prose-sm max-w-none
+                prose-headings:font-bold prose-headings:tracking-tight
+                prose-h1:text-xl prose-h1:bg-gradient-to-r prose-h1:from-primary prose-h1:to-accent-foreground prose-h1:bg-clip-text prose-h1:text-transparent prose-h1:mb-4 prose-h1:pb-2 prose-h1:border-b prose-h1:border-border
+                prose-h2:text-lg prose-h2:text-primary prose-h2:mt-6 prose-h2:mb-3
+                prose-h3:text-base prose-h3:text-foreground prose-h3:mt-4 prose-h3:mb-2
+                prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-3
+                prose-strong:text-foreground prose-strong:font-semibold
+                prose-li:text-muted-foreground prose-li:leading-relaxed
+                prose-ul:space-y-1 prose-ol:space-y-1
+                prose-li:marker:text-primary
+                prose-hr:border-border prose-hr:my-6
+                prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:text-muted-foreground
+              ">
                 <ReactMarkdown>{output}</ReactMarkdown>
                 {isGenerating && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />}
               </div>
