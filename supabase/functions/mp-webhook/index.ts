@@ -11,6 +11,47 @@ const PLAN_LIMITS: Record<string, { generations: number; profiles: number }> = {
   agency: { generations: 999999, profiles: 999 },
 };
 
+async function verifyWebhookSignature(req: Request, body: any): Promise<boolean> {
+  const xSignature = req.headers.get("x-signature");
+  const xRequestId = req.headers.get("x-request-id");
+
+  if (!xSignature || !xRequestId) return false;
+
+  const secret = Deno.env.get("MERCADOPAGO_WEBHOOK_SECRET");
+  if (!secret) {
+    console.warn("MERCADOPAGO_WEBHOOK_SECRET not set, skipping signature verification");
+    return true; // Graceful fallback if secret not configured yet
+  }
+
+  const parts = xSignature.split(",");
+  const tsParam = parts.find((p) => p.trim().startsWith("ts="));
+  const v1Param = parts.find((p) => p.trim().startsWith("v1="));
+
+  if (!tsParam || !v1Param) return false;
+
+  const ts = tsParam.trim().split("=")[1];
+  const hash = v1Param.trim().split("=")[1];
+
+  const dataId = body.data?.id || "";
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(manifest));
+  const computedHash = Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return computedHash === hash;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -19,6 +60,16 @@ serve(async (req) => {
   try {
     const body = await req.json();
     console.log("Webhook received:", JSON.stringify(body));
+
+    // Verify webhook signature from Mercado Pago
+    const isValid = await verifyWebhookSignature(req, body);
+    if (!isValid) {
+      console.error("Invalid webhook signature");
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Mercado Pago sends notification with type and data.id
     if (body.type !== "payment" && body.action !== "payment.created" && body.action !== "payment.updated") {
