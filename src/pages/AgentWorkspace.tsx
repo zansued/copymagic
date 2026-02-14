@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Sparkles, Square, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,8 +24,12 @@ interface BrandProfileOption {
 
 export default function AgentWorkspace() {
   const { agentId } = useParams<{ agentId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const fromCampaign = searchParams.get("from") === "campaign";
+  const campaignProjectId = searchParams.get("projectId");
 
   const config = agentId ? AGENT_WORKSPACE_CONFIGS[agentId] : null;
 
@@ -45,7 +49,7 @@ export default function AgentWorkspace() {
   const abortRef = useRef<AbortController | null>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
-  // Initialize default select values
+  // Initialize default select values and campaign context
   useEffect(() => {
     if (!config) return;
     const defaults: Record<string, string> = {};
@@ -54,8 +58,18 @@ export default function AgentWorkspace() {
         defaults[input.key] = input.options[0].value;
       }
     }
+    // If coming from campaign planning, pre-fill the first textarea with copy context
+    if (fromCampaign) {
+      const copyContext = sessionStorage.getItem("campaign_copy_context");
+      if (copyContext) {
+        const firstTextarea = config.inputs.find((i) => i.type === "textarea" && i.required);
+        if (firstTextarea) {
+          defaults[firstTextarea.key] = copyContext;
+        }
+      }
+    }
     setInputs(defaults);
-  }, [config]);
+  }, [config, fromCampaign]);
 
   // Load brand profiles
   useEffect(() => {
@@ -246,7 +260,11 @@ export default function AgentWorkspace() {
       <header className="glass-header sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/agents")}>
+            <Button variant="ghost" size="icon" onClick={() => 
+              fromCampaign && campaignProjectId 
+                ? navigate(`/project/${campaignProjectId}/campaign`) 
+                : navigate("/agents")
+            }>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
