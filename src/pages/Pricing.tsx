@@ -12,8 +12,8 @@ const plans = [
   {
     key: "free",
     name: "Free",
-    price: "R$ 0",
-    period: "para sempre",
+    monthlyPrice: 0,
+    annualPrice: 0,
     icon: Sparkles,
     features: [
       { text: "5 gerações por mês", included: true },
@@ -29,8 +29,8 @@ const plans = [
   {
     key: "pro",
     name: "Pro",
-    price: "R$ 97",
-    period: "/mês",
+    monthlyPrice: 97,
+    annualPrice: 970, // 10 months = 2 free
     icon: Crown,
     features: [
       { text: "100 gerações por mês", included: true },
@@ -47,8 +47,8 @@ const plans = [
   {
     key: "agency",
     name: "Agency",
-    price: "R$ 297",
-    period: "/mês",
+    monthlyPrice: 297,
+    annualPrice: 2970, // 10 months = 2 free
     icon: Building2,
     features: [
       { text: "Gerações ilimitadas", included: true },
@@ -70,6 +70,7 @@ export default function Pricing() {
   const { subscription, loading } = useSubscription();
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [slotsRemaining, setSlotsRemaining] = useState<number | null>(null);
+  const [isAnnual, setIsAnnual] = useState(false);
 
   useEffect(() => {
     supabase
@@ -102,7 +103,10 @@ export default function Pricing() {
             Authorization: `Bearer ${token}`,
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
-          body: JSON.stringify({ plan: planKey }),
+          body: JSON.stringify({
+            plan: planKey,
+            billing: planKey !== "lifetime" && planKey !== "free" && isAnnual ? "annual" : "monthly",
+          }),
         }
       );
 
@@ -131,7 +135,7 @@ export default function Pricing() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
           <h1 className="text-4xl font-bold gradient-text font-[Space_Grotesk] mb-3">
             Escolha seu plano
@@ -141,11 +145,51 @@ export default function Pricing() {
           </p>
         </motion.div>
 
+        {/* Billing toggle */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex items-center justify-center gap-3 mb-10"
+        >
+          <span className={`text-sm font-medium transition-colors ${!isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
+            Mensal
+          </span>
+          <button
+            onClick={() => setIsAnnual(!isAnnual)}
+            className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
+              isAnnual ? "bg-primary" : "bg-muted-foreground/30"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 ${
+                isAnnual ? "translate-x-7" : "translate-x-0"
+              }`}
+            />
+          </button>
+          <span className={`text-sm font-medium transition-colors ${isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
+            Anual
+          </span>
+          {isAnnual && (
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="ml-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full"
+            >
+              2 meses grátis
+            </motion.span>
+          )}
+        </motion.div>
+
         {/* Regular plans */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {plans.map((plan, i) => {
             const isCurrent = currentPlan === plan.key;
             const Icon = plan.icon;
+            const price = plan.key === "free" ? 0 : isAnnual ? plan.annualPrice : plan.monthlyPrice;
+            const monthlyEquivalent = isAnnual && plan.annualPrice > 0
+              ? Math.round((plan.annualPrice / 12) * 100) / 100
+              : null;
 
             return (
               <motion.div
@@ -173,8 +217,34 @@ export default function Pricing() {
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-3xl font-bold text-foreground">{plan.price}</span>
-                  <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>
+                  {plan.key === "free" ? (
+                    <>
+                      <span className="text-3xl font-bold text-foreground">R$ 0</span>
+                      <span className="text-muted-foreground text-sm ml-1">para sempre</span>
+                    </>
+                  ) : isAnnual ? (
+                    <div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-bold text-foreground">
+                          R$ {price.toLocaleString("pt-BR")}
+                        </span>
+                        <span className="text-muted-foreground text-sm">/ano</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground line-through">
+                          R$ {(plan.monthlyPrice * 12).toLocaleString("pt-BR")}/ano
+                        </span>
+                        <span className="text-xs text-primary font-medium">
+                          ≈ R$ {monthlyEquivalent?.toFixed(0)}/mês
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-3xl font-bold text-foreground">R$ {price}</span>
+                      <span className="text-muted-foreground text-sm ml-1">/mês</span>
+                    </>
+                  )}
                 </div>
 
                 <ul className="space-y-3 mb-8 flex-1">
@@ -225,7 +295,6 @@ export default function Pricing() {
             className="max-w-3xl mx-auto mt-12"
           >
             <div className="relative premium-card p-8 ring-2 ring-amber-500/50 shadow-[0_0_60px_hsl(45_100%_50%/0.1)] overflow-hidden">
-              {/* Glow background */}
               <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5 pointer-events-none" />
               
               <div className="relative z-10">

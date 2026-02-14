@@ -6,10 +6,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PLANS: Record<string, { title: string; price: number; generations: number; profiles: number; projects: number; agents_access: string; is_recurring: boolean }> = {
-  pro: { title: "CopyMagic Pro", price: 97, generations: 100, profiles: 5, projects: 10, agents_access: "full", is_recurring: true },
-  agency: { title: "CopyMagic Agency", price: 297, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: true },
-  lifetime: { title: "CopyMagic Vitalício", price: 1297, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: false },
+const PLANS: Record<string, {
+  title: string;
+  monthlyPrice: number;
+  annualPrice: number;
+  generations: number;
+  profiles: number;
+  projects: number;
+  agents_access: string;
+  is_recurring: boolean;
+}> = {
+  pro: { title: "CopyMagic Pro", monthlyPrice: 97, annualPrice: 970, generations: 100, profiles: 5, projects: 10, agents_access: "full", is_recurring: true },
+  agency: { title: "CopyMagic Agency", monthlyPrice: 297, annualPrice: 2970, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: true },
+  lifetime: { title: "CopyMagic Vitalício", monthlyPrice: 1297, annualPrice: 1297, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: false },
 };
 
 serve(async (req) => {
@@ -44,7 +53,7 @@ serve(async (req) => {
     const userId = claimsData.claims.sub;
     const userEmail = claimsData.claims.email || "";
 
-    const { plan } = await req.json();
+    const { plan, billing = "monthly" } = await req.json();
     const planConfig = PLANS[plan];
     if (!planConfig) {
       return new Response(JSON.stringify({ error: "Plano inválido" }), {
@@ -74,14 +83,18 @@ serve(async (req) => {
       }
     }
 
+    const isAnnual = billing === "annual" && plan !== "lifetime";
+    const price = isAnnual ? planConfig.annualPrice : planConfig.monthlyPrice;
+    const titleSuffix = isAnnual ? " (Anual)" : "";
+
     const baseUrl = Deno.env.get("SITE_URL") || "https://copymagic.lovable.app";
 
     const preference = {
       items: [
         {
-          title: planConfig.title,
+          title: planConfig.title + titleSuffix,
           quantity: 1,
-          unit_price: planConfig.price,
+          unit_price: price,
           currency_id: "BRL",
         },
       ],
@@ -92,7 +105,7 @@ serve(async (req) => {
         pending: `${baseUrl}/pricing?status=pending`,
       },
       auto_return: "approved",
-      external_reference: JSON.stringify({ user_id: userId, plan }),
+      external_reference: JSON.stringify({ user_id: userId, plan, billing: isAnnual ? "annual" : "monthly" }),
       notification_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`,
     };
 
