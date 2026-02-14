@@ -3,7 +3,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MenuBar } from "@/components/ui/menu-bar";
-import { FolderOpen, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, CreditCard } from "lucide-react";
+import { FolderOpen, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, CreditCard, Shield } from "lucide-react";
+import { useAdmin } from "@/hooks/use-admin";
 
 const menuItems = [
   {
@@ -69,6 +70,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
 
   const isProjectPage = location.pathname.startsWith("/project/");
   const isSummaryPage = location.pathname.endsWith("/summary");
@@ -139,7 +141,16 @@ export function TopNav({ projectName }: { projectName?: string }) {
         </div>
 
         {/* Right: logout */}
-        <div className="w-40 shrink-0 flex justify-end">
+        <div className="w-40 shrink-0 flex justify-end gap-1">
+          {isAdmin && (
+            <button
+              onClick={() => navigate("/admin")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+              title="Admin"
+            >
+              <Shield className="h-3.5 w-3.5" />
+            </button>
+          )}
           <button
             onClick={signOut}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
