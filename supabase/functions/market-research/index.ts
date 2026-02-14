@@ -34,8 +34,20 @@ serve(async (req) => {
 
     const { query, provider = "deepseek", generation_context } = await req.json();
     const genCtx = validateGenerationContext(generation_context);
-    if (!query) {
+    if (!query || typeof query !== "string" || !query.trim()) {
       return new Response(JSON.stringify({ error: "Query é obrigatória" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (query.length > 5000) {
+      return new Response(JSON.stringify({ error: "Query muito longa (máximo 5.000 caracteres)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (provider && !["openai", "deepseek"].includes(provider)) {
+      return new Response(JSON.stringify({ error: "Provider inválido" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

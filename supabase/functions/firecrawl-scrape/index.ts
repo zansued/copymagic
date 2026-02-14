@@ -38,9 +38,16 @@ Deno.serve(async (req) => {
 
     const { url, options } = await req.json();
 
-    if (!url) {
+    if (!url || typeof url !== "string") {
       return new Response(
         JSON.stringify({ success: false, error: 'URL is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (url.length > 2048) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'URL too long (max 2048 characters)' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

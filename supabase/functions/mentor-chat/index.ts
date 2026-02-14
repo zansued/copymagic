@@ -156,6 +156,28 @@ serve(async (req) => {
       });
     }
 
+    if (!Array.isArray(messages) || messages.length > 100) {
+      return new Response(JSON.stringify({ error: "Máximo de 100 mensagens por requisição" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const totalChars = messages.reduce((sum: number, m: any) => sum + (m?.content?.length || 0), 0);
+    if (totalChars > 200000) {
+      return new Response(JSON.stringify({ error: "Conteúdo das mensagens muito longo" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (provider && !["openai", "deepseek"].includes(provider)) {
+      return new Response(JSON.stringify({ error: "Provider inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const apiKey = provider === "openai"
       ? Deno.env.get("OPENAI_API_KEY")
       : Deno.env.get("DEEPSEEK_API_KEY");
