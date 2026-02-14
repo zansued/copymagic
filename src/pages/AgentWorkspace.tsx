@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Sparkles, Square, Copy, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Square, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { AGENT_WORKSPACE_CONFIGS } from "@/lib/agent-workspace-configs";
 import { profileToMarkdown } from "@/lib/brand-profile-types";
 import { firecrawlApi } from "@/lib/api/firecrawl";
 import ReactMarkdown from "react-markdown";
+import { GenerationHistory } from "@/components/agent/GenerationHistory";
 
 interface BrandProfileOption {
   id: string;
@@ -189,6 +190,19 @@ export default function AgentWorkspace() {
         }
       }
       setIsGenerating(false);
+
+      // Save to history
+      if (accumulated && user && agentId && config) {
+        supabase.from("agent_generations").insert({
+          user_id: user.id,
+          agent_id: agentId,
+          agent_name: config.name,
+          inputs: enrichedInputs,
+          output: accumulated,
+          provider,
+          brand_profile_id: selectedProfileId || null,
+        }).then(() => {});
+      }
     } catch (err: any) {
       if (err.name !== "AbortError") {
         console.error(err);
@@ -196,7 +210,7 @@ export default function AgentWorkspace() {
       }
       setIsGenerating(false);
     }
-  }, [config, inputs, selectedProfileId, provider]);
+  }, [config, inputs, selectedProfileId, provider, user, agentId]);
 
   const handleStop = () => {
     abortRef.current?.abort();
@@ -336,6 +350,15 @@ export default function AgentWorkspace() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* History */}
+            {user && agentId && (
+              <GenerationHistory
+                agentId={agentId}
+                userId={user.id}
+                onLoad={(text) => setOutput(text)}
+              />
+            )}
 
             {/* Generate */}
             <div className="flex gap-3">
