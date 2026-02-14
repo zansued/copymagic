@@ -119,7 +119,7 @@ serve(async (req) => {
         max_tokens: maxTokens,
         messages: [
           { role: "system", content: system_prompt },
-          { role: "user", content: "Gere o conteúdo completo conforme as instruções do system prompt. Entregue o resultado final pronto para uso." },
+          { role: "user", content: "Entregue APENAS o resultado final pronto para uso. Sem introduções, sem explicações de contexto, sem comentários sobre o processo. Vá direto ao conteúdo solicitado." },
         ],
       }),
     });
