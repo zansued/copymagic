@@ -82,7 +82,7 @@ serve(async (req) => {
       notification_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`,
     };
 
-    const mpRes = await fetch("https://api.mercadopago.com/checkout/pro/preferences", {
+    const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
