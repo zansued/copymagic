@@ -139,6 +139,44 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_shares: {
+        Row: {
+          created_at: string
+          generation_id: string
+          id: string
+          is_public: boolean
+          owner_id: string
+          share_token: string
+          shared_with_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          generation_id: string
+          id?: string
+          is_public?: boolean
+          owner_id: string
+          share_token?: string
+          shared_with_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          generation_id?: string
+          id?: string
+          is_public?: boolean
+          owner_id?: string
+          share_token?: string
+          shared_with_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_shares_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_generations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_conversations: {
         Row: {
           created_at: string
@@ -282,6 +320,50 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "mentor_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_shares: {
+        Row: {
+          created_at: string
+          id: string
+          owner_id: string
+          permission: string
+          project_id: string
+          shared_with_email: string
+          shared_with_user_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_id: string
+          permission?: string
+          project_id: string
+          shared_with_email: string
+          shared_with_user_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_id?: string
+          permission?: string
+          project_id?: string
+          shared_with_email?: string
+          shared_with_user_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_shares_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]

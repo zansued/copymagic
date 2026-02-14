@@ -15,7 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3 } from "lucide-react";
+import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3, Share2 } from "lucide-react";
+import { ShareDialog } from "@/components/collaboration/ShareDialog";
 import { toast } from "sonner";
 import { TopNav } from "@/components/TopNav";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
@@ -39,6 +40,7 @@ export default function Projects() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [shareProject, setShareProject] = useState<Project | null>(null);
 
   const fetchProjects = async () => {
     const { data, error } = await supabase
@@ -183,6 +185,17 @@ export default function Projects() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
+                        setShareProject(p);
+                      }}
+                      title="Compartilhar"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setEditingId(p.id);
                         setEditName(p.name);
                       }}
@@ -244,7 +257,15 @@ export default function Projects() {
         </AlertDialogContent>
       </AlertDialog>
 
-      
+      {shareProject && (
+        <ShareDialog
+          open={!!shareProject}
+          onOpenChange={(v) => !v && setShareProject(null)}
+          resourceId={shareProject.id}
+          resourceName={shareProject.name}
+          type="project"
+        />
+      )}
     </div>
   );
 }
