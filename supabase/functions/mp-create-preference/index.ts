@@ -18,7 +18,7 @@ const PLANS: Record<string, {
 }> = {
   pro: { title: "CopyMagic Pro", monthlyPrice: 97, annualPrice: 970, generations: 100, profiles: 5, projects: 10, agents_access: "full", is_recurring: true },
   agency: { title: "CopyMagic Agency", monthlyPrice: 297, annualPrice: 2970, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: true },
-  lifetime: { title: "CopyMagic Vitalício", monthlyPrice: 1297, annualPrice: 1297, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: false },
+  lifetime: { title: "CopyMagic Vitalício", monthlyPrice: 3997, annualPrice: 3997, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: false },
 };
 
 serve(async (req) => {
