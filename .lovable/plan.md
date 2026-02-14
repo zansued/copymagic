@@ -1,63 +1,27 @@
 
 
-## Novo Agente: Otimizacao de LinkedIn
+## Corrigir posicionamento do Tour de Onboarding
 
-Adicionar o agente "Otimizacao de LinkedIn" na categoria **Branding & Posicionamento**, seguindo o padrao existente de configuracao.
+**Problema**: O tooltip do tour sai da tela quando aponta para elementos como a categoria "Ideacao", porque o calculo de posicao usa uma altura fixa estimada (180px) e nao verifica os limites da viewport.
 
-### Registro do Agente
+**Solucao**:
 
-Arquivo: `src/lib/agents.ts`
+1. **Medir o tooltip real** -- Usar o `tooltipRef` que ja existe para obter as dimensoes reais do tooltip apos renderizacao, em vez de usar valores fixos (`tooltipW = 340`, `tooltipH = 180`).
 
-- **ID:** `linkedin-optimizer`
-- **Nome:** Otimizacao de LinkedIn
-- **Emoji:** 💼
-- **Categoria:** `branding`
-- **Role:** Especialista em Perfis Profissionais de LinkedIn
-- **Descricao:** Reescreve seu perfil do LinkedIn para gerar autoridade e atrair oportunidades, com diagnostico completo, 3 opcoes de headline e secoes otimizadas.
+2. **Clampar posicao na viewport** -- Apos calcular `top` e `left`, garantir que o tooltip nao ultrapasse os limites da tela:
+   - `top` entre `16px` e `window.innerHeight - tooltipHeight - 16px`  
+   - `left` entre `16px` e `window.innerWidth - tooltipWidth - 16px`
 
-### Configuracao do Workspace
+3. **Fallback de posicao** -- Se o tooltip nao cabe na posicao configurada (ex: "bottom" mas nao ha espaco abaixo), inverter automaticamente para a posicao oposta (ex: "top").
 
-Arquivo: `src/lib/agent-workspace-configs.ts`
+4. **Recalcular apos animacao** -- Adicionar um pequeno `requestAnimationFrame` ou segundo calculo apos o tooltip renderizar para ajustar com as dimensoes reais.
 
-**Inputs:**
+### Detalhes tecnicos
 
-1. **`linkedin_goal`** (select, required) - Objetivo no LinkedIn
-   - Gerar negocios e clientes
-   - Atrair recrutadores e oportunidades
-   - Fortalecer marca pessoal
-   - Networking estrategico
+No arquivo `src/components/onboarding/OnboardingTour.tsx`:
 
-2. **`strategic_profile`** (select, required) - Perfil Estrategico
-   - Fortalecimento de Marca Pessoal
-   - Busca por Novas Oportunidades
-   - Transicao de Carreira
-   - Posicionamento como Autoridade
-
-3. **`current_role`** (input, required) - Cargo Atual ou Desejado
-
-4. **`content`** (textarea, required) - Conteudo Atual do Perfil (Sobre, Experiencia, Formacao, etc.)
-
-5. **`reference_url`** (input, opcional) - URL de referencia
-
-6. **`extra`** (textarea, opcional) - Instrucoes Gerais
-
-**Logica do Prompt (`buildPrompt`):**
-
-O system prompt instruira o agente a:
-
-1. **Diagnostico do Perfil Atual** - Analise critica das secoes fornecidas, identificando pontos fortes e gaps
-2. **3 Opcoes de Headline** - Combinando cargo, objetivo e perfil estrategico selecionados, com justificativa
-3. **Secao "Sobre" Reescrita** - Narrativa profissional otimizada com gancho, trajetoria, resultados e CTA
-4. **Experiencias Reescritas** - Foco em resultados mensuráveis e verbos de acao, otimizadas para o cargo informado
-5. **Formacao e Certificacoes** - Reorganizacao estrategica
-6. **Recomendacoes Extras** - Dicas de foto, banner, URL personalizada e skills
-
-O prompt integrara o `brandContext` (DNA) quando disponivel e o conteudo raspado de `reference_url`.
-
-### Secao Tecnica
-
-- Nenhuma migracao de banco de dados necessaria
-- Nenhuma nova dependencia
-- Reutiliza a edge function `agent-generate` existente
-- Segue o padrao identico dos agentes ja implementados (mesmo fluxo de `AgentWorkspace.tsx`)
+- Substituir os valores fixos `tooltipW` e `tooltipH` por medidas do `tooltipRef.current?.getBoundingClientRect()`
+- Adicionar logica de fallback: se `rect.bottom + gap + realH > window.innerHeight`, usar posicao "top" em vez de "bottom"
+- Aplicar `Math.max(16, Math.min(calculatedTop, window.innerHeight - realH - 16))` no `style.top`
+- Usar `useLayoutEffect` ou duplo calculo para garantir que as dimensoes estejam disponiveis
 
