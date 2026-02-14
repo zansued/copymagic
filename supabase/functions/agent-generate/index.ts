@@ -45,7 +45,7 @@ serve(async (req) => {
     const used = sub?.generations_used ?? 0;
     const limit = sub?.generations_limit ?? 5;
 
-    // Reset usage if period expired
+    // Reset usage if period expired (skip for lifetime plans)
     if (sub?.current_period_end && new Date(sub.current_period_end) < new Date()) {
       await supabaseAdmin.from("subscriptions").update({
         generations_used: 0,

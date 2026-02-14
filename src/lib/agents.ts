@@ -6,7 +6,11 @@ export interface AgentDef {
   description: string;
   category: "ideation" | "copywriting" | "content" | "products" | "branding";
   available: boolean;
+  freeAccess?: boolean; // true = available on free plan
 }
+
+// IDs of agents available on free plan (3 basic)
+export const FREE_AGENT_IDS = ["icp-profile", "sales-page", "carousel-creator"];
 
 export const AGENT_CATEGORIES = [
   { id: "ideation" as const, label: "Ideação & Estratégia", emoji: "💡", color: "from-yellow-500 to-amber-500" },

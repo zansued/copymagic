@@ -4,11 +4,13 @@ import { useAuth } from "@/hooks/use-auth";
 
 export interface Subscription {
   id: string;
-  plan: "free" | "pro" | "agency";
+  plan: "free" | "pro" | "agency" | "lifetime";
   status: string;
   generations_used: number;
   generations_limit: number;
   brand_profiles_limit: number;
+  projects_limit: number;
+  agents_access: "basic" | "full";
   current_period_end: string | null;
 }
 
@@ -18,6 +20,8 @@ const FREE_DEFAULTS: Omit<Subscription, "id"> = {
   generations_used: 0,
   generations_limit: 5,
   brand_profiles_limit: 1,
+  projects_limit: 1,
+  agents_access: "basic",
   current_period_end: null,
 };
 
