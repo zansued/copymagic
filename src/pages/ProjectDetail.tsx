@@ -129,8 +129,8 @@ export default function ProjectDetail() {
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full mb-6">
-                <TabsTrigger value="research" className="flex-1">🔍 Pesquisa de Mercado</TabsTrigger>
-                <TabsTrigger value="manual" className="flex-1">✍️ Input Manual</TabsTrigger>
+                <TabsTrigger value="research" className="flex-1">🤖 Criar produto com IA</TabsTrigger>
+                <TabsTrigger value="manual" className="flex-1">📦 Já tenho um produto</TabsTrigger>
               </TabsList>
 
               <TabsContent value="research">
