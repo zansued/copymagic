@@ -118,7 +118,7 @@ serve(async (req) => {
     }
 
     // Parse external reference
-    let refData: { user_id: string; plan: string };
+    let refData: { user_id: string; plan: string; billing?: string };
     try {
       refData = JSON.parse(payment.external_reference);
     } catch {
@@ -129,7 +129,7 @@ serve(async (req) => {
       });
     }
 
-    const { user_id, plan } = refData;
+    const { user_id, plan, billing } = refData;
     const limits = PLAN_LIMITS[plan];
     if (!limits) {
       console.error("Unknown plan:", plan);
@@ -147,7 +147,9 @@ serve(async (req) => {
 
     const now = new Date();
     const isLifetime = plan === "lifetime";
-    const periodEnd = isLifetime ? null : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const isAnnual = billing === "annual";
+    const periodDays = isLifetime ? 0 : isAnnual ? 365 : 30;
+    const periodEnd = isLifetime ? null : new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
 
     const { error: upsertError } = await supabaseAdmin
       .from("subscriptions")
