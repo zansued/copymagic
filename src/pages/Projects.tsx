@@ -61,7 +61,7 @@ export default function Projects() {
   const handleCreate = async () => {
     const { data, error } = await supabase
       .from("projects")
-      .insert({ user_id: user!.id, name: "Novo Projeto" })
+      .insert({ user_id: user!.id, name: "Nova Oferta" })
       .select()
       .single();
     if (error) {
@@ -106,8 +106,11 @@ export default function Projects() {
   return (
     <div className="min-h-screen bg-background surface-gradient">
       <TopNav />
-      <header className="pt-8 pb-2 px-4 text-center">
-        <h1 className="text-2xl font-bold gradient-text">Seus Projetos</h1>
+      <header className="pt-8 pb-2 px-4 text-center space-y-2">
+        <h1 className="text-2xl font-bold gradient-text">Laboratório de Copy</h1>
+        <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+          Crie um projeto para cada produto ou oferta. A IA guia você por 9 etapas — do perfil do cliente até a VSL — gerando todo o copy necessário para vender.
+        </p>
       </header>
 
       <main className="container px-4 py-6 max-w-3xl mx-auto space-y-6">
@@ -122,7 +125,7 @@ export default function Projects() {
             />
           </div>
           <Button onClick={handleCreate}>
-            <Plus className="h-4 w-4 mr-1" /> Novo Projeto
+            <Plus className="h-4 w-4 mr-1" /> Nova Oferta
           </Button>
         </div>
 
@@ -130,13 +133,14 @@ export default function Projects() {
           <p className="text-muted-foreground text-center py-12">Carregando...</p>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 space-y-3">
-            <p className="text-4xl">📂</p>
-            <p className="text-muted-foreground">
-              {search ? "Nenhum projeto encontrado" : "Você ainda não tem projetos"}
+            <p className="text-4xl">🧪</p>
+            <p className="text-lg font-semibold text-foreground">Nenhuma oferta criada</p>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              {search ? "Nenhum resultado encontrado" : "Crie seu primeiro projeto de copy. A IA vai guiar você pelas 9 etapas para gerar todo o material de vendas do seu produto."}
             </p>
             {!search && (
-              <Button onClick={handleCreate}>
-                <Plus className="h-4 w-4 mr-1" /> Criar primeiro projeto
+              <Button onClick={handleCreate} className="mt-2">
+                <Plus className="h-4 w-4 mr-1" /> Criar primeira oferta
               </Button>
             )}
           </div>
@@ -245,9 +249,9 @@ export default function Projects() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir oferta?</AlertDialogTitle>
             <AlertDialogDescription>
-              Deseja excluir o projeto <strong>"{projects.find(p => p.id === deleteId)?.name}"</strong>? Essa ação não pode ser desfeita. Todas as copys desse projeto serão perdidas.
+              Deseja excluir <strong>"{projects.find(p => p.id === deleteId)?.name}"</strong>? Essa ação não pode ser desfeita. Todo o copy gerado para essa oferta será perdido.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

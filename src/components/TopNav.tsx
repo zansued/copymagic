@@ -8,7 +8,7 @@ import { FolderOpen, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, Cre
 const menuItems = [
   {
     icon: FolderOpen,
-    label: "Projetos",
+    label: "Lab de Copy",
     path: "/",
     gradient: "radial-gradient(circle, hsl(262 83% 65% / 0.15) 0%, transparent 70%)",
     iconColor: "text-primary",
@@ -77,7 +77,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
     if (!user) return;
     const { data, error } = await supabase
       .from("projects")
-      .insert({ user_id: user.id, name: "Novo Projeto" })
+      .insert({ user_id: user.id, name: "Nova Oferta" })
       .select()
       .single();
     if (error) {

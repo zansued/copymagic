@@ -318,7 +318,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="premium-card p-5 text-center">
                 <p className="text-2xl font-bold text-foreground">{projectCount}</p>
-                <p className="text-xs text-muted-foreground mt-1">Projetos Criados</p>
+                <p className="text-xs text-muted-foreground mt-1">Ofertas no Lab</p>
               </div>
               <div className="premium-card p-5 text-center">
                 <p className="text-2xl font-bold text-foreground">{profileCount}</p>
