@@ -94,11 +94,15 @@ export default function StorytellingAgent() {
     const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/storytelling-adapt`;
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Você precisa estar logado");
+
       const resp = await fetch(FUNCTION_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           original_content: originalContent,
