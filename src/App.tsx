@@ -18,6 +18,8 @@ import BrandProfiles from "./pages/BrandProfiles";
 import BrandProfileEdit from "./pages/BrandProfileEdit";
 import MentorPage from "./pages/MentorPage";
 import Dashboard from "./pages/Dashboard";
+import SharedWithMe from "./pages/SharedWithMe";
+import SharedOutput from "./pages/SharedOutput";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +46,8 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/brand-profiles" element={<ProtectedRoute><BrandProfiles /></ProtectedRoute>} />
             <Route path="/brand-profiles/:id" element={<ProtectedRoute><BrandProfileEdit /></ProtectedRoute>} />
+            <Route path="/shared-with-me" element={<ProtectedRoute><SharedWithMe /></ProtectedRoute>} />
+            <Route path="/shared/:token" element={<SharedOutput />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
