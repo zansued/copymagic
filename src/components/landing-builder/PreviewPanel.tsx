@@ -91,7 +91,7 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
       sections.forEach((section) => {
         const btn = doc.createElement("button");
         btn.className = "section-edit-btn";
-        btn.innerHTML = '✏️ Editar';
+        btn.textContent = '✏️ Editar';
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
