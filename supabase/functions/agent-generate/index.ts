@@ -74,8 +74,8 @@ serve(async (req) => {
       });
     }
 
-    if (system_prompt.length > 50000) {
-      return new Response(JSON.stringify({ error: "Prompt muito longo (máximo 50.000 caracteres)" }), {
+    if (system_prompt.length > 150000) {
+      return new Response(JSON.stringify({ error: "Prompt muito longo (máximo 150.000 caracteres)" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
