@@ -165,7 +165,8 @@ export default function BrandProfiles() {
       const sectionData = (profile[section.key] || {}) as Record<string, string>;
       for (const field of section.fields) {
         total++;
-        if (sectionData[field.key]?.trim()) filled++;
+        const val = sectionData[field.key];
+        if (typeof val === "string" && val.trim()) filled++;
       }
     }
     return total > 0 ? Math.round((filled / total) * 100) : 0;
@@ -337,7 +338,7 @@ export default function BrandProfiles() {
                     <div className="flex flex-wrap gap-1.5">
                       {PROFILE_SECTIONS.map((section) => {
                         const sectionData = (profile[section.key] || {}) as Record<string, string>;
-                        const hasSomeContent = Object.values(sectionData).some((v) => v?.trim());
+                        const hasSomeContent = Object.values(sectionData).some((v) => typeof v === "string" && v.trim());
                         return (
                           <span
                             key={section.key}
