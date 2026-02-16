@@ -185,14 +185,14 @@ export function profileToMarkdown(name: string, data: BrandProfileData): string 
   let md = `# DNA de Marca: ${name}\n\n`;
 
   for (const section of PROFILE_SECTIONS) {
-    const sectionData = data[section.key] as unknown as Record<string, string>;
-    const hasContent = Object.values(sectionData).some((v) => v?.trim());
+    const sectionData = data[section.key] as unknown as Record<string, unknown>;
+    const hasContent = Object.values(sectionData).some((v) => typeof v === "string" && v.trim());
     if (!hasContent) continue;
 
     md += `## ${section.emoji} ${section.title}\n\n`;
     for (const field of section.fields) {
       const value = sectionData[field.key];
-      if (value?.trim()) {
+      if (typeof value === "string" && value.trim()) {
         md += `### ${field.label}\n${value.trim()}\n\n`;
       }
     }
