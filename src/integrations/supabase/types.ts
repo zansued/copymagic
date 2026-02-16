@@ -437,6 +437,50 @@ export type Database = {
         }
         Relationships: []
       }
+      roadmaps: {
+        Row: {
+          brand_profile_id: string | null
+          created_at: string
+          id: string
+          objective: string
+          status: string
+          steps: Json
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_profile_id?: string | null
+          created_at?: string
+          id?: string
+          objective: string
+          status?: string
+          steps?: Json
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_profile_id?: string | null
+          created_at?: string
+          id?: string
+          objective?: string
+          status?: string
+          steps?: Json
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roadmaps_brand_profile_id_fkey"
+            columns: ["brand_profile_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_generations: {
         Row: {
           branding: Json | null
