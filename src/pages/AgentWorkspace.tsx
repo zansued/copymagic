@@ -15,6 +15,7 @@ import { profileToMarkdown } from "@/lib/brand-profile-types";
 import { firecrawlApi } from "@/lib/api/firecrawl";
 import ReactMarkdown from "react-markdown";
 import { GenerationHistory } from "@/components/agent/GenerationHistory";
+import { AiSuggestButton } from "@/components/agent/AiSuggestButton";
 
 interface BrandProfileOption {
   id: string;
@@ -302,9 +303,20 @@ export default function AgentWorkspace() {
             {/* Dynamic inputs */}
             {config.inputs.map((input) => (
               <div key={input.key} className="premium-card p-5 space-y-3">
-                <Label className="text-sm font-medium text-foreground">
-                  {input.label} {input.required && <span className="text-destructive">*</span>}
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-foreground">
+                    {input.label} {input.required && <span className="text-destructive">*</span>}
+                  </Label>
+                  {input.type === "textarea" && (
+                    <AiSuggestButton
+                      inputLabel={input.label}
+                      inputPlaceholder={input.placeholder}
+                      agentName={config.name}
+                      selectedProfileId={selectedProfileId}
+                      onSuggestion={(text) => setInput(input.key, text)}
+                    />
+                  )}
+                </div>
 
                 {input.type === "textarea" && (
                   <Textarea
