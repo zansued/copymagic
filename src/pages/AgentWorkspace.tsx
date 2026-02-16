@@ -110,10 +110,10 @@ export default function AgentWorkspace() {
 
     // Scrape reference URL if present
     const enrichedInputs = { ...inputs };
-    if (inputs.reference_url?.trim()) {
+    if (String(inputs.reference_url || "").trim()) {
       try {
         setOutput("🔍 Extraindo conteúdo da URL de referência...\n");
-        const scrapeResult = await firecrawlApi.scrape(inputs.reference_url.trim());
+        const scrapeResult = await firecrawlApi.scrape(String(inputs.reference_url).trim());
         if (scrapeResult.success) {
           const markdown = scrapeResult.data?.markdown || scrapeResult.data?.data?.markdown;
           if (markdown) {
