@@ -98,7 +98,7 @@ export default function AgentWorkspace() {
 
     const requiredMissing = config.inputs
       .filter((i) => i.required)
-      .some((i) => !inputs[i.key]?.trim());
+      .some((i) => !String(inputs[i.key] || "").trim());
 
     if (requiredMissing) {
       toast({ title: "Preencha os campos obrigatórios", variant: "destructive" });
@@ -417,7 +417,7 @@ export default function AgentWorkspace() {
               ) : (
                 <Button
                   onClick={handleGenerate}
-                  disabled={config.inputs.filter((i) => i.required).some((i) => !inputs[i.key]?.trim())}
+                  disabled={config.inputs.filter((i) => i.required).some((i) => !String(inputs[i.key] || "").trim())}
                   className="flex-1 gap-2 bg-gradient-to-r from-primary to-accent-foreground hover:opacity-90"
                 >
                   <Sparkles className="h-4 w-4" />
