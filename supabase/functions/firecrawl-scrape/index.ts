@@ -52,11 +52,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    // Prefer self-hosted key, fallback to connector key
+    const apiKey = Deno.env.get('FIRECRAWL_SELF_HOSTED_KEY') || Deno.env.get('FIRECRAWL_API_KEY');
+    const baseUrl = Deno.env.get('FIRECRAWL_SELF_HOSTED_KEY')
+      ? 'https://firecrawl.techstorebrasil.com'
+      : 'https://api.firecrawl.dev';
     if (!apiKey) {
-      console.error('FIRECRAWL_API_KEY not configured');
+      console.error('No Firecrawl API key configured');
       return new Response(
-        JSON.stringify({ success: false, error: 'Firecrawl connector not configured' }),
+        JSON.stringify({ success: false, error: 'Firecrawl not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -68,7 +72,7 @@ Deno.serve(async (req) => {
 
     console.log('Scraping URL:', formattedUrl);
 
-    const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+    const response = await fetch(`${baseUrl}/v1/scrape`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
