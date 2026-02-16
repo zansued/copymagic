@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Settings, ArrowLeft, Lock, Crown } from "lucide-react";
+import { Settings, ArrowLeft, Lock, Crown, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -107,10 +107,16 @@ export default function AgentsHub() {
               <p className="text-xs text-muted-foreground">Seu arsenal de IA para marketing</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/agents/setup")} className="gap-2">
-            <Settings className="h-4 w-4" />
-            Trocar DNA
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate("/roadmap")} className="gap-2">
+              <Map className="h-4 w-4" />
+              Roadmap
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/agents/setup")} className="gap-2">
+              <Settings className="h-4 w-4" />
+              Trocar DNA
+            </Button>
+          </div>
         </div>
       </header>
 

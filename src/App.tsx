@@ -18,6 +18,7 @@ import StorytellingAgent from "./pages/StorytellingAgent";
 import BrandProfiles from "./pages/BrandProfiles";
 import BrandProfileEdit from "./pages/BrandProfileEdit";
 import MentorPage from "./pages/MentorPage";
+import Roadmap from "./pages/Roadmap";
 import Dashboard from "./pages/Dashboard";
 import SharedWithMe from "./pages/SharedWithMe";
 import SharedOutput from "./pages/SharedOutput";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/agents/setup" element={<ProtectedRoute><AgentSetup /></ProtectedRoute>} />
             <Route path="/agents/storytelling-adapter" element={<ProtectedRoute><StorytellingAgent /></ProtectedRoute>} />
             <Route path="/agents/:agentId" element={<ProtectedRoute><AgentWorkspace /></ProtectedRoute>} />
+            <Route path="/roadmap" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
             <Route path="/mentor" element={<ProtectedRoute><MentorPage /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/brand-profiles" element={<ProtectedRoute><BrandProfiles /></ProtectedRoute>} />
