@@ -23,6 +23,14 @@ function generateSessionToken(): string {
   return crypto.randomUUID();
 }
 
+async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 const SESSION_TOKEN_KEY = "cm_session_token";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -36,16 +44,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = generateSessionToken();
     localStorage.setItem(SESSION_TOKEN_KEY, token);
 
+    const hashedToken = await hashToken(token);
     await supabase
       .from("subscriptions")
-      .update({ active_session_token: token } as any)
+      .update({ active_session_token: hashedToken } as any)
       .eq("user_id", userId);
   }, []);
 
-  // Validate that local token matches DB token
+  // Validate that local token matches DB token (compare hashes)
   const validateSession = useCallback(async (userId: string) => {
     const localToken = localStorage.getItem(SESSION_TOKEN_KEY);
     if (!localToken) return;
+
+    const hashedLocal = await hashToken(localToken);
 
     const { data } = await supabase
       .from("subscriptions")
@@ -53,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (data && (data as any).active_session_token && (data as any).active_session_token !== localToken) {
+    if (data && (data as any).active_session_token && (data as any).active_session_token !== hashedLocal) {
       // Another session took over
       toast.error("Sua sessão foi encerrada pois outro login foi detectado.");
       localStorage.removeItem(SESSION_TOKEN_KEY);
