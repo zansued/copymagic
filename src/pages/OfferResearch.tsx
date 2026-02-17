@@ -134,7 +134,9 @@ export default function OfferResearch() {
 
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || "Erro na pesquisa");
+      if (data.data?.error) throw new Error(data.data.error);
 
+      console.log("Offer research result:", JSON.stringify(data.data).slice(0, 200));
       setResult(data.data);
       toast.success("Pesquisa concluída!");
     } catch (e: any) {

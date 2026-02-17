@@ -446,28 +446,17 @@ IMPORTANTE para "anuncios_encontrados":
 
     let parsed;
     try {
-      // Remove markdown code fences and any leading/trailing whitespace
+      // Extract JSON: try brace extraction first (most reliable), then strip markdown
       let jsonStr = rawContent.trim();
-      // Handle ```json ... ``` wrapping (with possible spaces/newlines)
-      const jsonMatch = jsonStr.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
-      if (jsonMatch) {
-        jsonStr = jsonMatch[1].trim();
+      const firstBrace = jsonStr.indexOf("{");
+      const lastBrace = jsonStr.lastIndexOf("}");
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        jsonStr = jsonStr.slice(firstBrace, lastBrace + 1);
       }
       parsed = JSON.parse(jsonStr);
     } catch (parseErr) {
       console.error("Failed to parse AI response:", rawContent.slice(0, 500));
-      // Try one more time: extract first { to last }
-      try {
-        const firstBrace = rawContent.indexOf("{");
-        const lastBrace = rawContent.lastIndexOf("}");
-        if (firstBrace !== -1 && lastBrace > firstBrace) {
-          parsed = JSON.parse(rawContent.slice(firstBrace, lastBrace + 1));
-        } else {
-          parsed = { error: "Não foi possível analisar os resultados", raw: rawContent.slice(0, 2000) };
-        }
-      } catch {
-        parsed = { error: "Não foi possível analisar os resultados", raw: rawContent.slice(0, 2000) };
-      }
+      parsed = { error: "Não foi possível analisar os resultados", raw: rawContent.slice(0, 2000) };
     }
 
     return new Response(JSON.stringify({
