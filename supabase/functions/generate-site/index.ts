@@ -39,46 +39,23 @@ Example: <section data-section="hero" class="...">
 ═══════════════════════════════════════
 🖼️ IMAGES (CRITICAL — THIS MAKES THE PAGE REAL)
 ═══════════════════════════════════════
-Use REAL contextual images via Unsplash Source API (FREE, no key). This is what separates amateur from professional.
+PRIORITY: If pre-fetched image URLs are provided in the user prompt (section 7), use THOSE EXACT URLs.
+They are high-quality, niche-specific images from the Unsplash API — already optimized and curated.
 
-Pattern: https://source.unsplash.com/featured/{width}x{height}/?{keyword1},{keyword2}
+FALLBACK (only if no pre-fetched images are provided):
+Use Unsplash Source API: https://source.unsplash.com/featured/{width}x{height}/?{keyword1},{keyword2}
 
-Each image URL MUST use SPECIFIC keywords related to the niche/product. Think like a creative director picking the perfect photo for each section.
-
-REQUIRED image placements with keyword examples:
-- HERO: Full-width background — use niche-specific keywords.
-  Fitness: url('https://source.unsplash.com/featured/1920x1080/?fitness,workout,motivation')
-  Marketing: url('https://source.unsplash.com/featured/1920x1080/?laptop,entrepreneur,success')
-  Cooking: url('https://source.unsplash.com/featured/1920x1080/?cooking,healthy,food,kitchen')
-  Generic: url('https://source.unsplash.com/featured/1920x1080/?business,professional,modern')
-  
-- TESTIMONIALS: Real-looking portrait avatars — vary gender, age, ethnicity.
-  <img src="https://source.unsplash.com/featured/200x200/?portrait,woman,smile" class="rounded-full w-14 h-14 object-cover">
-  <img src="https://source.unsplash.com/featured/200x200/?portrait,man,professional" class="rounded-full w-14 h-14 object-cover">
-  <img src="https://source.unsplash.com/featured/200x200/?portrait,person,happy" class="rounded-full w-14 h-14 object-cover">
-  IMPORTANT: Use DIFFERENT keyword combos for each avatar to get unique faces.
-
-- FEATURES/MECHANISM: Contextual photos that match each benefit or step.
-  <img src="https://source.unsplash.com/featured/600x400/?productivity,focus" loading="lazy">
-
-- SOCIAL PROOF / RESULTS: Before-after style or achievement imagery.
-  <img src="https://source.unsplash.com/featured/800x600/?achievement,celebration,results" loading="lazy">
-
-- ABOUT/TRUST: Team, office, or professional environment.
-  <img src="https://source.unsplash.com/featured/800x400/?team,office,collaboration" loading="lazy">
-
-- GUARANTEE: Trust and security imagery.
-  <img src="https://source.unsplash.com/featured/400x400/?shield,security,trust" loading="lazy">
-
-- BONUS CARDS: Relevant imagery for each bonus offering.
-  <img src="https://source.unsplash.com/featured/500x300/?ebook,digital,learning" loading="lazy">
+REQUIRED image placements:
+- HERO: Full-width background — use the provided hero image URL(s)
+- TESTIMONIALS: Real-looking portrait avatars — use the provided portrait URLs (vary them)
+- FEATURES/MECHANISM: Contextual photos — use provided feature image URLs
+- SOCIAL PROOF / RESULTS: Achievement imagery — use provided result URLs
+- ABOUT/TRUST: Team/office imagery — use provided trust URLs
+- GUARANTEE: Trust and security imagery — use provided guarantee URLs
+- BONUS CARDS: Relevant imagery — use provided bonus URLs
 
 Image rules:
-- ALWAYS use niche-relevant keywords — analyze the copy to pick the best search terms
-- Use 2-3 keywords per image URL separated by commas
-- NEVER repeat the same keyword combination — each image must be unique
-- Add ?sig=1, ?sig=2 etc. suffix to force different results for similar queries
-  Example: https://source.unsplash.com/featured/200x200/?portrait,woman?sig=1
+- Use the EXACT pre-fetched URLs without modification
 - Use object-fit: cover for backgrounds and avatars
 - Add subtle overlay gradients on hero images for text readability
 - loading="lazy" on all images except hero
@@ -562,6 +539,141 @@ OUTPUT FORMAT (ONLY JSON):
 Now render the PageSpec into a premium Next.js project.`;
 
 // ============================================================
+// UNSPLASH API HELPER
+// ============================================================
+
+interface UnsplashPhoto {
+  id: string;
+  urls: { raw: string; full: string; regular: string; small: string; thumb: string };
+  user: { name: string; links: { html: string } };
+  alt_description: string | null;
+  description: string | null;
+}
+
+interface FetchedImageSet {
+  hero: string[];
+  portraits: string[];
+  features: string[];
+  results: string[];
+  trust: string[];
+  guarantee: string[];
+  bonus: string[];
+}
+
+async function fetchUnsplashImages(nicheKeywords: string[]): Promise<FetchedImageSet> {
+  const accessKey = Deno.env.get("UNSPLASH_ACCESS_KEY");
+  if (!accessKey) {
+    console.warn("UNSPLASH_ACCESS_KEY not set, falling back to source.unsplash.com");
+    return buildFallbackImageSet(nicheKeywords);
+  }
+
+  const categories: { key: keyof FetchedImageSet; query: string; count: number; orientation?: string }[] = [
+    { key: "hero", query: nicheKeywords.slice(0, 3).join(" "), count: 3, orientation: "landscape" },
+    { key: "portraits", query: "portrait person professional smile", count: 6, orientation: "squarish" },
+    { key: "features", query: `${nicheKeywords[0]} productivity`, count: 4, orientation: "landscape" },
+    { key: "results", query: `${nicheKeywords[0]} achievement success celebration`, count: 3, orientation: "landscape" },
+    { key: "trust", query: "team office professional collaboration", count: 2, orientation: "landscape" },
+    { key: "guarantee", query: "shield security protection trust", count: 2, orientation: "squarish" },
+    { key: "bonus", query: `${nicheKeywords[0]} learning digital education`, count: 3, orientation: "landscape" },
+  ];
+
+  const imageSet: FetchedImageSet = {
+    hero: [], portraits: [], features: [], results: [],
+    trust: [], guarantee: [], bonus: [],
+  };
+
+  await Promise.all(
+    categories.map(async (cat) => {
+      try {
+        const params = new URLSearchParams({
+          query: cat.query,
+          per_page: String(cat.count),
+          orientation: cat.orientation || "landscape",
+          content_filter: "high",
+        });
+        const res = await fetch(
+          `https://api.unsplash.com/search/photos?${params.toString()}`,
+          { headers: { Authorization: `Client-ID ${accessKey}` } }
+        );
+        if (!res.ok) {
+          console.error(`Unsplash API error for "${cat.key}": ${res.status}`);
+          return;
+        }
+        const data = await res.json();
+        const photos = (data.results || []) as UnsplashPhoto[];
+        imageSet[cat.key] = photos.map((p) => {
+          // Use Unsplash image resizing via URL params for optimal size
+          const width = cat.orientation === "squarish" ? 400 : cat.key === "hero" ? 1920 : 800;
+          const height = cat.orientation === "squarish" ? 400 : cat.key === "hero" ? 1080 : 600;
+          return `${p.urls.raw}&w=${width}&h=${height}&fit=crop&auto=format,compress&q=80`;
+        });
+      } catch (err) {
+        console.error(`Failed to fetch Unsplash images for "${cat.key}":`, err);
+      }
+    })
+  );
+
+  return imageSet;
+}
+
+function buildFallbackImageSet(keywords: string[]): FetchedImageSet {
+  const kw = keywords.join(",");
+  return {
+    hero: [`https://source.unsplash.com/featured/1920x1080/?${kw}`],
+    portraits: [
+      "https://source.unsplash.com/featured/200x200/?portrait,woman,smile?sig=1",
+      "https://source.unsplash.com/featured/200x200/?portrait,man,professional?sig=2",
+      "https://source.unsplash.com/featured/200x200/?portrait,person,happy?sig=3",
+    ],
+    features: [`https://source.unsplash.com/featured/800x600/?${kw},productivity`],
+    results: [`https://source.unsplash.com/featured/800x600/?achievement,results`],
+    trust: [`https://source.unsplash.com/featured/800x400/?team,office`],
+    guarantee: [`https://source.unsplash.com/featured/400x400/?shield,security`],
+    bonus: [`https://source.unsplash.com/featured/500x300/?ebook,learning`],
+  };
+}
+
+function extractNicheKeywords(copy: string, productName: string): string[] {
+  // Extract meaningful keywords from the copy for better image search
+  const keywords: string[] = [];
+  
+  // Use product name
+  if (productName) {
+    keywords.push(...productName.toLowerCase().split(/\s+/).filter(w => w.length > 3).slice(0, 2));
+  }
+
+  // Common niche detection from copy
+  const nicheMap: Record<string, string[]> = {
+    "emagre|peso|dieta|gordu|slim|magr": ["fitness", "healthy", "weight-loss"],
+    "muscula|treino|acade|workout|gym": ["fitness", "workout", "gym"],
+    "market|vendas|negóc|empreen|lucr": ["business", "entrepreneur", "marketing"],
+    "saúde|médic|clínic|terapi|bem-estar": ["health", "wellness", "medical"],
+    "culiná|receita|cozin|gastro|aliment": ["cooking", "food", "kitchen"],
+    "invest|financ|dinheiro|renda|cripto": ["finance", "investment", "money"],
+    "educa|curso|estud|aprend|concurso": ["education", "learning", "study"],
+    "beleza|estétic|pele|cabelo|makeup": ["beauty", "skincare", "cosmetics"],
+    "relacion|casal|amor|namoro|sex": ["relationship", "couple", "love"],
+    "tecnolog|program|código|software|app": ["technology", "coding", "software"],
+    "imóv|casa|apart|constru|decor": ["real-estate", "home", "interior"],
+    "pet|cachorro|gato|animal|vet": ["pet", "dog", "animal"],
+  };
+
+  const lowerCopy = copy.toLowerCase().slice(0, 3000);
+  for (const [pattern, kws] of Object.entries(nicheMap)) {
+    if (new RegExp(pattern).test(lowerCopy)) {
+      keywords.push(...kws);
+      break;
+    }
+  }
+
+  if (keywords.length === 0) {
+    keywords.push("business", "professional", "modern");
+  }
+
+  return keywords.slice(0, 5);
+}
+
+// ============================================================
 // HELPERS
 // ============================================================
 function getStyleFromTemplate(templateKey: string): "dark-premium" | "light-premium" {
@@ -579,8 +691,39 @@ function buildUserPrompt(
   lang: string,
   culturalRegion: string,
   templateKey: string,
-  fullCopy: string
+  fullCopy: string,
+  imageSet?: FetchedImageSet
 ): string {
+  let imageBlock = "";
+  if (imageSet && imageSet.hero.length > 0) {
+    imageBlock = `
+
+7) PRE-FETCHED REAL IMAGES (USE THESE EXACT URLs — do NOT use source.unsplash.com):
+   HERO backgrounds (pick the best one):
+${imageSet.hero.map((u, i) => `   - hero_${i + 1}: ${u}`).join("\n")}
+   
+   PORTRAIT AVATARS for testimonials:
+${imageSet.portraits.map((u, i) => `   - portrait_${i + 1}: ${u}`).join("\n")}
+   
+   FEATURE/MECHANISM images:
+${imageSet.features.map((u, i) => `   - feature_${i + 1}: ${u}`).join("\n")}
+   
+   RESULTS/ACHIEVEMENT images:
+${imageSet.results.map((u, i) => `   - result_${i + 1}: ${u}`).join("\n")}
+   
+   TRUST/TEAM images:
+${imageSet.trust.map((u, i) => `   - trust_${i + 1}: ${u}`).join("\n")}
+   
+   GUARANTEE images:
+${imageSet.guarantee.map((u, i) => `   - guarantee_${i + 1}: ${u}`).join("\n")}
+   
+   BONUS images:
+${imageSet.bonus.map((u, i) => `   - bonus_${i + 1}: ${u}`).join("\n")}
+
+   IMPORTANT: Use these EXACT URLs in the HTML. Do NOT modify them. Do NOT use source.unsplash.com.
+   Place each image in the most contextually appropriate section.`;
+  }
+
   return `Here are the inputs:
 
 1) project: { "id": "${projectId}", "name": "${projectName}" }
@@ -610,6 +753,7 @@ function buildUserPrompt(
 """
 ${fullCopy}
 """
+${imageBlock}
 
 Generate the premium landing page now. Return ONLY valid JSON.`;
 }
@@ -887,6 +1031,13 @@ Modify this section according to the instruction. Return ONLY the modified secti
     const primaryColor = options.branding?.primaryColor || "#7c3aed";
     const style = getStyleFromTemplate(templateKey);
 
+    // Fetch real images from Unsplash API based on niche
+    console.log("Fetching niche-specific images from Unsplash API...");
+    const nicheKeywords = extractNicheKeywords(fullCopy, project.name);
+    console.log("Detected niche keywords:", nicheKeywords.join(", "));
+    const imageSet = await fetchUnsplashImages(nicheKeywords);
+    console.log(`Fetched images: hero=${imageSet.hero.length}, portraits=${imageSet.portraits.length}, features=${imageSet.features.length}`);
+
     const userPrompt = buildUserPrompt(
       projectId,
       project.name,
@@ -898,7 +1049,8 @@ Modify this section according to the instruction. Return ONLY the modified secti
       lang,
       project.cultural_region || "auto",
       templateKey,
-      fullCopy
+      fullCopy,
+      imageSet
     );
 
     if (format === "nextjs") {
