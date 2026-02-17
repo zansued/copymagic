@@ -446,11 +446,28 @@ IMPORTANTE para "anuncios_encontrados":
 
     let parsed;
     try {
-      const jsonStr = rawContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      // Remove markdown code fences and any leading/trailing whitespace
+      let jsonStr = rawContent.trim();
+      // Handle ```json ... ``` wrapping (with possible spaces/newlines)
+      const jsonMatch = jsonStr.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[1].trim();
+      }
       parsed = JSON.parse(jsonStr);
-    } catch {
-      console.error("Failed to parse AI response:", rawContent);
-      parsed = { error: "Não foi possível analisar os resultados", raw: rawContent };
+    } catch (parseErr) {
+      console.error("Failed to parse AI response:", rawContent.slice(0, 500));
+      // Try one more time: extract first { to last }
+      try {
+        const firstBrace = rawContent.indexOf("{");
+        const lastBrace = rawContent.lastIndexOf("}");
+        if (firstBrace !== -1 && lastBrace > firstBrace) {
+          parsed = JSON.parse(rawContent.slice(firstBrace, lastBrace + 1));
+        } else {
+          parsed = { error: "Não foi possível analisar os resultados", raw: rawContent.slice(0, 2000) };
+        }
+      } catch {
+        parsed = { error: "Não foi possível analisar os resultados", raw: rawContent.slice(0, 2000) };
+      }
     }
 
     return new Response(JSON.stringify({
