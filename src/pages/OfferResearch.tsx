@@ -11,8 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, TrendingUp, Megaphone, ShoppingBag, Sparkles, Loader2,
   Target, DollarSign, Lightbulb, BarChart3, Zap, ArrowRight, Globe,
-  CheckCircle2, XCircle, AlertTriangle
+  CheckCircle2, XCircle, AlertTriangle, Eye
 } from "lucide-react";
+import { AdCard, type AdData } from "@/components/offer-research/AdCard";
 
 interface OfferResearchResult {
   score_oportunidade: number;
@@ -32,6 +33,7 @@ interface OfferResearchResult {
     ctas_frequentes: string[];
     insights: string[];
   };
+  anuncios_encontrados?: AdData[];
   ofertas_escaladas: {
     tipos_produto: string[];
     faixa_preco: string;
@@ -320,7 +322,25 @@ export default function OfferResearch() {
                   </SectionCard>
                 )}
 
-                {/* Ofertas Escaladas */}
+                {/* Anúncios Encontrados - Cards */}
+                {result.anuncios_encontrados && result.anuncios_encontrados.length > 0 && (
+                  <div className="md:col-span-2">
+                    <SectionCard title={`Anúncios Encontrados (${result.anuncios_encontrados.length})`} icon={Eye} iconColor="text-primary">
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {result.anuncios_encontrados.map((ad, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2, delay: i * 0.05 }}
+                          >
+                            <AdCard ad={ad} />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </SectionCard>
+                  </div>
+                )}
                 {result.ofertas_escaladas && (
                   <SectionCard title="Ofertas Escaladas" icon={ShoppingBag} iconColor="text-amber-400">
                     <div className="space-y-3">
