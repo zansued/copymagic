@@ -113,15 +113,14 @@ serve(async (req) => {
       }
 
       try {
-        // Use exact phrase matching for more precise results
+        // Use broad matching to capture more scaled offers (synonyms, variations)
         const params = new URLSearchParams({
           search_terms: query,
           ad_type: "ALL",
           ad_reached_countries: '["BR"]',
           ad_active_status: "ACTIVE",
-          search_type: "KEYWORD_EXACT_PHRASE",
           fields: "id,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_descriptions,ad_creative_link_titles,ad_delivery_start_time,ad_delivery_stop_time,ad_snapshot_url,byline,page_id,page_name,publisher_platforms,languages,ad_creative_link_url",
-          limit: "30",
+          limit: "50",
           access_token: META_ACCESS_TOKEN,
         });
 
@@ -139,21 +138,32 @@ serve(async (req) => {
         const ads = data.data || [];
         console.log(`Meta Graph API returned ${ads.length} ads`);
 
-        return ads.map((ad: any) => ({
-          ad_archive_id: ad.id,
-          anunciante: ad.page_name || ad.byline || "Desconhecido",
-          page_id: ad.page_id,
-          texto_anuncio: (ad.ad_creative_bodies || []).join(" ").slice(0, 500),
-          plataforma: (ad.publisher_platforms || []).join(", ") || "Facebook",
-          status: ad.ad_delivery_stop_time ? "Inativo" : "Ativo",
-          data_inicio: ad.ad_delivery_start_time || null,
-          data_fim: ad.ad_delivery_stop_time || null,
-          cta: (ad.ad_creative_link_titles || []).join(" ") || null,
-          url_destino: ad.ad_creative_link_url || null,
-          url_anuncio: ad.id ? `https://www.facebook.com/ads/library/?id=${ad.id}&active_status=all&ad_type=all&country=BR&media_type=all` : null,
-          tipo_midia: null,
-          gancho: (ad.ad_creative_link_descriptions || []).join(" ").slice(0, 200) || null,
-        }));
+        // Calculate longevity (days running) and sort by it — longer = more scaled
+        const now = new Date();
+        const mapped = ads.map((ad: any) => {
+          const startDate = ad.ad_delivery_start_time ? new Date(ad.ad_delivery_start_time) : null;
+          const diasAtivo = startDate ? Math.max(1, Math.round((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))) : 0;
+          return {
+            ad_archive_id: ad.id,
+            anunciante: ad.page_name || ad.byline || "Desconhecido",
+            page_id: ad.page_id,
+            texto_anuncio: (ad.ad_creative_bodies || []).join(" ").slice(0, 500),
+            plataforma: (ad.publisher_platforms || []).join(", ") || "Facebook",
+            status: ad.ad_delivery_stop_time ? "Inativo" : "Ativo",
+            data_inicio: ad.ad_delivery_start_time || null,
+            data_fim: ad.ad_delivery_stop_time || null,
+            dias_ativo: diasAtivo,
+            cta: (ad.ad_creative_link_titles || []).join(" ") || null,
+            url_destino: ad.ad_creative_link_url || null,
+            url_anuncio: ad.id ? `https://www.facebook.com/ads/library/?id=${ad.id}&active_status=all&ad_type=all&country=BR&media_type=all` : null,
+            tipo_midia: null,
+            gancho: (ad.ad_creative_link_descriptions || []).join(" ").slice(0, 200) || null,
+          };
+        });
+
+        // Sort by longevity descending — ads running longer are likely more scaled
+        mapped.sort((a: any, b: any) => b.dias_ativo - a.dias_ativo);
+        return mapped;
       } catch (e) {
         console.error("Meta Graph API fetch failed:", e);
         return [];
@@ -282,16 +292,17 @@ serve(async (req) => {
     const realAds = metaAdsRaw || [];
     
     if (realAds.length > 0) {
-      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY (${realAds.length} encontrados via API oficial)\n` +
+      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY (${realAds.length} encontrados via API oficial, ordenados por longevidade)\n` +
         realAds.map((ad: any, i: number) => 
           `### Anúncio ${i + 1}: ${ad.anunciante}\n` +
           `- Texto: ${ad.texto_anuncio || "N/A"}\n` +
           `- Plataforma: ${ad.plataforma}\n` +
           `- Status: ${ad.status}\n` +
           `- Data início: ${ad.data_inicio || "N/A"}\n` +
+          `- Dias ativo: ${ad.dias_ativo || 0} dias (quanto mais dias = maior sinal de escala)\n` +
           `- CTA: ${ad.cta || "N/A"}\n` +
           `- URL destino: ${ad.url_destino || "N/A"}\n` +
-          `- URL anúncio (snapshot): ${ad.url_anuncio || "N/A"}\n` +
+          `- URL anúncio: ${ad.url_anuncio || "N/A"}\n` +
           `- Gancho: ${ad.gancho || "N/A"}`
         ).join("\n\n");
       
@@ -333,12 +344,13 @@ Para cada anúncio com link, mapeie o FUNIL:
 - checkout_present: true/false/unknown
 - funnel_map: "Ad -> Landing -> Checkout"
 
-Calcule um SCALE SCORE (0-10) baseado em sinais indiretos:
-- Densidade do anunciante (quantos anúncios ativos tem)
-- Dias rodando (longevidade)
-- Variações de criativo
-- Amplitude geográfica
-- Recorrência da promessa
+Calcule um SCALE SCORE (0-10) baseado em SINAIS DE ESCALA REAIS:
+- Longevidade (dias_ativo): anúncios rodando há 14+ dias provavelmente são lucrativos — ninguém paga por anúncio que não converte. Este é o SINAL MAIS FORTE de escala. Peso: 40%
+- Densidade do anunciante: se o mesmo anunciante tem múltiplos anúncios ativos, está escalando. Peso: 25%
+- Variações de criativo: diferentes textos/imagens para o mesmo produto indicam testes A/B e escala. Peso: 20%
+- Recorrência da promessa/mecanismo: mesma promessa aparecendo em múltiplos anunciantes indica nicho validado. Peso: 15%
+
+PRIORIZE anúncios com mais dias ativos. Um anúncio rodando há 30+ dias é muito mais valioso que um de 2 dias.
 
 RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, apenas o JSON puro:
 
@@ -367,12 +379,14 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
       "plataforma": "Facebook/Instagram",
       "status": "Ativo",
       "data_inicio": "data estimada se disponível",
+      "dias_ativo": 0,
       "cta": "botão de ação",
       "url_destino": "URL da página de vendas",
       "url_anuncio": "link para o anúncio na Meta Ad Library",
       "tipo_midia": "vídeo/imagem/carrossel",
       "gancho": "frase de gancho principal",
       "scale_score": 0.0,
+      "sinais_escala": ["longevidade: X dias", "múltiplos criativos", "etc"],
       "offer_card": {
         "promise": "...",
         "mechanism": "...",
