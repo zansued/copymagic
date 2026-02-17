@@ -269,23 +269,55 @@ export default function Roadmap() {
               className="space-y-6"
             >
               {roadmaps.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6">
-                  <span className="text-7xl opacity-30">🗺️</span>
-                  <div className="space-y-2">
-                    <h2 className="text-xl font-bold text-foreground">Nenhum roadmap ainda</h2>
-                    <p className="text-muted-foreground text-sm max-w-md">
-                      Crie seu primeiro mapa estratégico. Descreva seu objetivo e a IA vai gerar um
-                      passo-a-passo personalizado com dicas e links para os agentes.
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex flex-col items-center justify-center min-h-[450px] text-center space-y-8"
+                >
+                  <div className="relative">
+                    <span className="text-8xl block">🗺️</span>
+                    <motion.div
+                      className="absolute -top-2 -right-2"
+                      animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                    >
+                      <Sparkles className="h-6 w-6 text-primary" />
+                    </motion.div>
+                  </div>
+
+                  <div className="space-y-3 max-w-lg">
+                    <h2 className="text-2xl font-bold gradient-text">
+                      Bem-vindo ao seu ponto de partida 🚀
+                    </h2>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Não sabe por onde começar? Diga seu objetivo e a IA cria um{" "}
+                      <span className="text-primary font-medium">mapa estratégico personalizado</span>{" "}
+                      com cada passo que você precisa dar — conectado diretamente aos agentes que vão
+                      executar o trabalho por você.
                     </p>
                   </div>
+
                   <Button
                     onClick={() => setView("create")}
-                    className="gap-2 bg-gradient-to-r from-primary to-accent-foreground hover:opacity-90"
+                    size="lg"
+                    className="gap-2 bg-gradient-to-r from-primary to-accent-foreground hover:opacity-90 text-base px-8"
                   >
-                    <Plus className="h-4 w-4" />
+                    <Sparkles className="h-5 w-5" />
                     Criar meu primeiro Roadmap
                   </Button>
-                </div>
+
+                  <div className="flex flex-wrap justify-center gap-3 pt-2">
+                    {["🎯 Define seus passos", "🤖 Conecta aos agentes", "✅ Acompanha progresso"].map((item) => (
+                      <span
+                        key={item}
+                        className="text-xs text-muted-foreground px-3 py-1.5 rounded-full border border-border/60 bg-muted/30"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {roadmaps.map((rm, i) => {
