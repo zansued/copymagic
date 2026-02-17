@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      ads: {
+        Row: {
+          ad_archive_id: string
+          ad_creative_link_url: string | null
+          ad_snapshot_url: string | null
+          ad_text: string | null
+          created_at: string
+          cta: string | null
+          ended_at: string | null
+          id: string
+          media_type: string | null
+          niche: string | null
+          page_id: string | null
+          page_name: string
+          platform: string | null
+          raw_data: Json | null
+          started_at: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ad_archive_id: string
+          ad_creative_link_url?: string | null
+          ad_snapshot_url?: string | null
+          ad_text?: string | null
+          created_at?: string
+          cta?: string | null
+          ended_at?: string | null
+          id?: string
+          media_type?: string | null
+          niche?: string | null
+          page_id?: string | null
+          page_name?: string
+          platform?: string | null
+          raw_data?: Json | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ad_archive_id?: string
+          ad_creative_link_url?: string | null
+          ad_snapshot_url?: string | null
+          ad_text?: string | null
+          created_at?: string
+          cta?: string | null
+          ended_at?: string | null
+          id?: string
+          media_type?: string | null
+          niche?: string | null
+          page_id?: string | null
+          page_name?: string
+          platform?: string | null
+          raw_data?: Json | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agent_configs: {
         Row: {
           brand_personality: string
@@ -138,6 +201,134 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      collection_items: {
+        Row: {
+          ad_id: string
+          collection_id: string
+          created_at: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          ad_id: string
+          collection_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          ad_id?: string
+          collection_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_items_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      funnels: {
+        Row: {
+          ad_id: string
+          analysis: Json | null
+          checkout_detected: boolean | null
+          checkout_platform: string | null
+          created_at: string
+          final_url: string | null
+          funnel_type: string | null
+          id: string
+          landing_h1: string | null
+          landing_title: string | null
+          landing_url: string | null
+          steps: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ad_id: string
+          analysis?: Json | null
+          checkout_detected?: boolean | null
+          checkout_platform?: string | null
+          created_at?: string
+          final_url?: string | null
+          funnel_type?: string | null
+          id?: string
+          landing_h1?: string | null
+          landing_title?: string | null
+          landing_url?: string | null
+          steps?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ad_id?: string
+          analysis?: Json | null
+          checkout_detected?: boolean | null
+          checkout_platform?: string | null
+          created_at?: string
+          final_url?: string | null
+          funnel_type?: string | null
+          id?: string
+          landing_h1?: string | null
+          landing_title?: string | null
+          landing_url?: string | null
+          steps?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funnels_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       generation_shares: {
         Row: {
@@ -344,6 +535,62 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "mentor_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          ad_id: string
+          analysis: Json | null
+          angle: string | null
+          created_at: string
+          cta: string | null
+          format: string | null
+          id: string
+          mechanism: string | null
+          promise: string | null
+          proof: string | null
+          score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ad_id: string
+          analysis?: Json | null
+          angle?: string | null
+          created_at?: string
+          cta?: string | null
+          format?: string | null
+          id?: string
+          mechanism?: string | null
+          promise?: string | null
+          proof?: string | null
+          score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ad_id?: string
+          analysis?: Json | null
+          angle?: string | null
+          created_at?: string
+          cta?: string | null
+          format?: string | null
+          id?: string
+          mechanism?: string | null
+          promise?: string | null
+          proof?: string | null
+          score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
             referencedColumns: ["id"]
           },
         ]
