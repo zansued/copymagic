@@ -76,42 +76,63 @@ serve(async (req) => {
       return data.data || [];
     };
 
-    // Scrape Meta Ad Library for real ads
-    const scrapeMetaAdLibrary = async (query: string) => {
+    // Fetch real ads from Meta Graph API (Ad Library)
+    const fetchMetaAds = async (query: string) => {
+      const META_ACCESS_TOKEN = Deno.env.get("META_ACCESS_TOKEN");
+      if (!META_ACCESS_TOKEN) {
+        console.warn("META_ACCESS_TOKEN not configured, skipping Meta Ad Library API");
+        return [];
+      }
+
       try {
-        const encodedQuery = encodeURIComponent(query);
-        const adLibraryUrl = `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=BR&q=${encodedQuery}&search_type=keyword_unordered&media_type=all`;
-        
-        console.log("Scraping Meta Ad Library:", adLibraryUrl);
-        
-        const res = await fetch(`${firecrawlBaseUrl}/v1/scrape`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: adLibraryUrl,
-            formats: ["markdown", "links"],
-            waitFor: 3000,
-          }),
+        const params = new URLSearchParams({
+          search_terms: query,
+          ad_type: "ALL",
+          ad_reached_countries: '["BR"]',
+          ad_active_status: "ACTIVE",
+          fields: "id,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_descriptions,ad_creative_link_titles,ad_delivery_start_time,ad_delivery_stop_time,ad_snapshot_url,byline,page_id,page_name,publisher_platforms,languages,ad_creative_link_url",
+          limit: "25",
+          access_token: META_ACCESS_TOKEN,
         });
-        
+
+        const apiUrl = `https://graph.facebook.com/v22.0/ads_archive?${params.toString()}`;
+        console.log("Fetching Meta Graph API ads_archive for:", query);
+
+        const res = await fetch(apiUrl);
         const data = await res.json();
-        if (!res.ok) {
-          console.error("Meta Ad Library scrape error:", data);
-          return null;
+
+        if (!res.ok || data.error) {
+          console.error("Meta Graph API error:", JSON.stringify(data.error || data));
+          return [];
         }
-        return data.data || data;
+
+        const ads = data.data || [];
+        console.log(`Meta Graph API returned ${ads.length} ads`);
+
+        return ads.map((ad: any) => ({
+          ad_archive_id: ad.id,
+          anunciante: ad.page_name || ad.byline || "Desconhecido",
+          page_id: ad.page_id,
+          texto_anuncio: (ad.ad_creative_bodies || []).join(" ").slice(0, 500),
+          plataforma: (ad.publisher_platforms || []).join(", ") || "Facebook",
+          status: ad.ad_delivery_stop_time ? "Inativo" : "Ativo",
+          data_inicio: ad.ad_delivery_start_time || null,
+          data_fim: ad.ad_delivery_stop_time || null,
+          cta: (ad.ad_creative_link_titles || []).join(" ") || null,
+          url_destino: ad.ad_creative_link_url || null,
+          url_anuncio: ad.ad_snapshot_url || null,
+          tipo_midia: null,
+          gancho: (ad.ad_creative_link_descriptions || []).join(" ").slice(0, 200) || null,
+        }));
       } catch (e) {
-        console.error("Meta Ad Library scrape failed:", e);
-        return null;
+        console.error("Meta Graph API fetch failed:", e);
+        return [];
       }
     };
 
     // Parallel searches based on selected sources
     const searchPromises: Record<string, Promise<any[]>> = {};
-    let metaAdsPromise: Promise<any> | null = null;
+    let metaAdsPromise: Promise<any[]> | null = null;
 
     if (sources.includes("trends")) {
       searchPromises.trends = searchFirecrawl(
@@ -125,7 +146,7 @@ serve(async (req) => {
         `"${niche}" anúncios Facebook Instagram Meta Ad Library ads escalados criativos`,
         5
       );
-      metaAdsPromise = scrapeMetaAdLibrary(niche);
+      metaAdsPromise = fetchMetaAds(niche);
     }
 
     if (sources.includes("platforms")) {
@@ -178,21 +199,25 @@ serve(async (req) => {
 
     const culturalPrompt = buildCulturalSystemPrompt(genCtx);
 
-    // Extract ads from Meta Ad Library markdown
+    // Build Meta ads context from real API data
     let metaAdsContext = "";
-    const extractedAds: any[] = [];
+    const realAds = metaAdsRaw || [];
     
-    if (metaAdsRaw) {
-      const markdown = metaAdsRaw.markdown || "";
-      const links = metaAdsRaw.links || [];
-      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY\n${markdown.slice(0, 2000)}`;
+    if (realAds.length > 0) {
+      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY (${realAds.length} encontrados via API oficial)\n` +
+        realAds.map((ad: any, i: number) => 
+          `### Anúncio ${i + 1}: ${ad.anunciante}\n` +
+          `- Texto: ${ad.texto_anuncio || "N/A"}\n` +
+          `- Plataforma: ${ad.plataforma}\n` +
+          `- Status: ${ad.status}\n` +
+          `- Data início: ${ad.data_inicio || "N/A"}\n` +
+          `- CTA: ${ad.cta || "N/A"}\n` +
+          `- URL destino: ${ad.url_destino || "N/A"}\n` +
+          `- URL anúncio (snapshot): ${ad.url_anuncio || "N/A"}\n` +
+          `- Gancho: ${ad.gancho || "N/A"}`
+        ).join("\n\n");
       
-      // Try to extract ad-like links
-      const adLinks = links.filter((l: string) => 
-        l && (l.includes("facebook.com/ads/library") || l.includes("facebook.com/") || l.includes("instagram.com/"))
-      ).slice(0, 10);
-      
-      console.log("Meta Ad Library links found:", adLinks.length);
+      console.log(`Meta API: ${realAds.length} real ads added to context`);
     }
 
     // Use AI to also extract structured ad data from the Meta Ad Library content
@@ -306,11 +331,16 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
   }
 }
 
-IMPORTANTE para "anuncios_encontrados": Extraia o máximo de anúncios reais que encontrar nos dados da Meta Ad Library. Para cada um, inclua o offer_card e funnel estruturados. Se não encontrar dados reais, gere exemplos realistas baseados no nicho pesquisado com a flag "exemplo": true. Tente extrair pelo menos 4-6 anúncios.`
+IMPORTANTE para "anuncios_encontrados": 
+- Os dados de anúncios reais foram obtidos pela Meta Graph API oficial. USE EXATAMENTE os dados fornecidos (anunciante, texto, URLs, datas).
+- NÃO invente URLs nem links. Se o campo url_destino ou url_anuncio estiver como "N/A" ou null, retorne null.
+- Para cada anúncio real, gere o offer_card e funnel baseado no texto e dados fornecidos.
+- Se não houver anúncios reais nos dados, retorne array vazio em anuncios_encontrados. NÃO gere exemplos fictícios.
+- Mantenha os campos ad_archive_id, url_destino e url_anuncio exatamente como recebidos dos dados.`
           },
           {
             role: "user",
-            content: `Nicho pesquisado: "${niche}"\n\nDados coletados:\n\n${fullContext}${metaAdsContext}`
+            content: `Nicho pesquisado: "${niche}"\n\nDados coletados:\n\n${fullContext}${metaAdsContext}\n\n${realAds.length > 0 ? `DADOS ESTRUTURADOS DOS ANÚNCIOS (use estes dados exatos):\n${JSON.stringify(realAds, null, 2)}` : "Nenhum anúncio real encontrado via Meta API."}`
           }
         ],
         temperature: 0.7,
