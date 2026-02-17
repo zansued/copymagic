@@ -76,7 +76,7 @@ PRIORITY: If pre-fetched image URLs are provided in the user prompt (section 7),
 They are high-quality, niche-specific images from the Unsplash API — already optimized and curated.
 
 FALLBACK (only if no pre-fetched images are provided):
-Use Unsplash Source API: https://source.unsplash.com/featured/{width}x{height}/?{keyword1},{keyword2}
+Use https://picsum.photos/seed/{keyword}/{width}/{height} for generic placeholders, or https://i.pravatar.cc/200?img={number} for portrait avatars.
 
 REQUIRED image placements:
 - HERO: Full-width background — use the provided hero image URL(s)
@@ -574,7 +574,7 @@ interface FetchedImageSet {
 async function fetchUnsplashImages(nicheKeywords: string[]): Promise<FetchedImageSet> {
   const accessKey = Deno.env.get("UNSPLASH_ACCESS_KEY");
   if (!accessKey) {
-    console.warn("UNSPLASH_ACCESS_KEY not set, falling back to source.unsplash.com");
+    console.warn("UNSPLASH_ACCESS_KEY not set, using placeholder images");
     return buildFallbackImageSet(nicheKeywords);
   }
 
@@ -583,25 +583,26 @@ async function fetchUnsplashImages(nicheKeywords: string[]): Promise<FetchedImag
     trust: [], guarantee: [], bonus: [],
   };
 
-  // Single batch request: fetch 30 random photos with niche query (1 API call)
   const nicheQuery = nicheKeywords.slice(0, 3).join(" ");
   
-  // We make only 2 API calls total (niche photos + portraits) to stay well under 50/hr
+  // Use /search/photos instead of /photos/random — more reliable and same rate limits
   try {
     const [nicheRes, portraitRes] = await Promise.all([
       fetch(
-        `https://api.unsplash.com/photos/random?query=${encodeURIComponent(nicheQuery)}&count=15&orientation=landscape&content_filter=high`,
+        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(nicheQuery)}&per_page=15&orientation=landscape&content_filter=high`,
         { headers: { Authorization: `Client-ID ${accessKey}` } }
       ),
       fetch(
-        `https://api.unsplash.com/photos/random?query=portrait+person+professional&count=6&orientation=squarish&content_filter=high`,
+        `https://api.unsplash.com/search/photos?query=portrait+person+professional&per_page=6&orientation=squarish&content_filter=high`,
         { headers: { Authorization: `Client-ID ${accessKey}` } }
       ),
     ]);
 
+    console.log(`Unsplash niche response: ${nicheRes.status}, portrait response: ${portraitRes.status}`);
+
     if (nicheRes.ok) {
-      const nichePhotos = (await nicheRes.json()) as UnsplashPhoto[];
-      // Distribute niche photos across categories
+      const nicheData = await nicheRes.json();
+      const nichePhotos = (nicheData.results || []) as UnsplashPhoto[];
       const toUrl = (p: UnsplashPhoto, w: number, h: number) =>
         `${p.urls.raw}&w=${w}&h=${h}&fit=crop&auto=format,compress&q=80`;
 
@@ -611,17 +612,22 @@ async function fetchUnsplashImages(nicheKeywords: string[]): Promise<FetchedImag
       imageSet.trust = nichePhotos.slice(10, 12).map(p => toUrl(p, 800, 400));
       imageSet.guarantee = nichePhotos.slice(12, 13).map(p => toUrl(p, 400, 400));
       imageSet.bonus = nichePhotos.slice(13, 15).map(p => toUrl(p, 500, 300));
+      console.log(`Unsplash: got ${nichePhotos.length} niche photos`);
     } else {
-      console.error(`Unsplash niche fetch error: ${nicheRes.status}`);
+      const errBody = await nicheRes.text();
+      console.error(`Unsplash niche fetch error: ${nicheRes.status} - ${errBody}`);
     }
 
     if (portraitRes.ok) {
-      const portraitPhotos = (await portraitRes.json()) as UnsplashPhoto[];
+      const portraitData = await portraitRes.json();
+      const portraitPhotos = (portraitData.results || []) as UnsplashPhoto[];
       imageSet.portraits = portraitPhotos.map(p =>
         `${p.urls.raw}&w=200&h=200&fit=crop&crop=face&auto=format,compress&q=80`
       );
+      console.log(`Unsplash: got ${portraitPhotos.length} portrait photos`);
     } else {
-      console.error(`Unsplash portrait fetch error: ${portraitRes.status}`);
+      const errBody = await portraitRes.text();
+      console.error(`Unsplash portrait fetch error: ${portraitRes.status} - ${errBody}`);
     }
   } catch (err) {
     console.error("Unsplash API fetch failed, using fallback:", err);
@@ -637,19 +643,41 @@ async function fetchUnsplashImages(nicheKeywords: string[]): Promise<FetchedImag
 }
 
 function buildFallbackImageSet(keywords: string[]): FetchedImageSet {
-  const kw = keywords.join(",");
+  // Use picsum.photos as fallback — reliable and no auth required
   return {
-    hero: [`https://source.unsplash.com/featured/1920x1080/?${kw}`],
-    portraits: [
-      "https://source.unsplash.com/featured/200x200/?portrait,woman,smile?sig=1",
-      "https://source.unsplash.com/featured/200x200/?portrait,man,professional?sig=2",
-      "https://source.unsplash.com/featured/200x200/?portrait,person,happy?sig=3",
+    hero: [
+      "https://picsum.photos/seed/hero1/1920/1080",
+      "https://picsum.photos/seed/hero2/1920/1080",
+      "https://picsum.photos/seed/hero3/1920/1080",
     ],
-    features: [`https://source.unsplash.com/featured/800x600/?${kw},productivity`],
-    results: [`https://source.unsplash.com/featured/800x600/?achievement,results`],
-    trust: [`https://source.unsplash.com/featured/800x400/?team,office`],
-    guarantee: [`https://source.unsplash.com/featured/400x400/?shield,security`],
-    bonus: [`https://source.unsplash.com/featured/500x300/?ebook,learning`],
+    portraits: [
+      "https://i.pravatar.cc/200?img=1",
+      "https://i.pravatar.cc/200?img=5",
+      "https://i.pravatar.cc/200?img=8",
+      "https://i.pravatar.cc/200?img=12",
+      "https://i.pravatar.cc/200?img=15",
+      "https://i.pravatar.cc/200?img=20",
+    ],
+    features: [
+      "https://picsum.photos/seed/feat1/800/600",
+      "https://picsum.photos/seed/feat2/800/600",
+      "https://picsum.photos/seed/feat3/800/600",
+      "https://picsum.photos/seed/feat4/800/600",
+    ],
+    results: [
+      "https://picsum.photos/seed/result1/800/600",
+      "https://picsum.photos/seed/result2/800/600",
+      "https://picsum.photos/seed/result3/800/600",
+    ],
+    trust: [
+      "https://picsum.photos/seed/trust1/800/400",
+      "https://picsum.photos/seed/trust2/800/400",
+    ],
+    guarantee: ["https://picsum.photos/seed/guarantee/400/400"],
+    bonus: [
+      "https://picsum.photos/seed/bonus1/500/300",
+      "https://picsum.photos/seed/bonus2/500/300",
+    ],
   };
 }
 
