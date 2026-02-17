@@ -10,6 +10,7 @@ import { LangSelector } from "@/components/landing-builder/LangSelector";
 import { BrandingOptions } from "@/components/landing-builder/BrandingOptions";
 import { PreviewPanel } from "@/components/landing-builder/PreviewPanel";
 import { ExportButtons } from "@/components/landing-builder/ExportButtons";
+import { GenerationHistory, type SiteGeneration } from "@/components/landing-builder/GenerationHistory";
 
 export default function LandingBuilder() {
   const { user } = useAuth();
@@ -25,6 +26,8 @@ export default function LandingBuilder() {
   const [brandingColor, setBrandingColor] = useState("#7c3aed");
   const [generating, setGenerating] = useState(false);
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
+  const [currentGenerationId, setCurrentGenerationId] = useState<string | null>(null);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -53,6 +56,12 @@ export default function LandingBuilder() {
     })();
   }, [user]);
 
+  // Reset state when project changes
+  useEffect(() => {
+    setGeneratedHtml(null);
+    setCurrentGenerationId(null);
+  }, [selectedProject]);
+
   const selectedProjectData = projects.find((p) => p.id === selectedProject);
 
   const handleGenerate = useCallback(async () => {
@@ -67,6 +76,7 @@ export default function LandingBuilder() {
 
     setGenerating(true);
     setGeneratedHtml(null);
+    setCurrentGenerationId(null);
 
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -104,6 +114,8 @@ export default function LandingBuilder() {
 
       const result = await res.json();
       setGeneratedHtml(result.html);
+      setCurrentGenerationId(result.meta?.generationId || null);
+      setHistoryRefreshKey((k) => k + 1);
       toast.success("Página gerada com sucesso!");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erro desconhecido";
@@ -112,6 +124,41 @@ export default function LandingBuilder() {
       setGenerating(false);
     }
   }, [selectedProject, selectedProjectData, templateKey, includeUpsells, language, brandingTitle, brandingLogo, brandingColor]);
+
+  // When HTML is updated via section editing, persist to DB
+  const handleHtmlUpdate = useCallback(async (newHtml: string) => {
+    setGeneratedHtml(newHtml);
+
+    if (currentGenerationId) {
+      const { error } = await supabase
+        .from("site_generations")
+        .update({ generated_html: newHtml, updated_at: new Date().toISOString() })
+        .eq("id", currentGenerationId);
+
+      if (error) {
+        console.error("Error saving edit:", error);
+      }
+    }
+  }, [currentGenerationId]);
+
+  // Load a saved generation
+  const handleLoadGeneration = useCallback((gen: SiteGeneration) => {
+    if (!gen.generated_html) {
+      toast.error("Esta geração não tem HTML salvo.");
+      return;
+    }
+    setGeneratedHtml(gen.generated_html);
+    setCurrentGenerationId(gen.id);
+    setTemplateKey(gen.template_key);
+    if (gen.language_code) setLanguage(gen.language_code);
+    if (gen.branding) {
+      const b = gen.branding as Record<string, string>;
+      if (b.title) setBrandingTitle(b.title);
+      if (b.logoUrl) setBrandingLogo(b.logoUrl);
+      if (b.primaryColor) setBrandingColor(b.primaryColor);
+    }
+    toast.success("Geração carregada!");
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -181,10 +228,19 @@ export default function LandingBuilder() {
               brandingColor={brandingColor}
               onGenerate={handleGenerate}
             />
+
+            {/* Generation History */}
+            {selectedProject && (
+              <GenerationHistory
+                projectId={selectedProject}
+                onLoad={handleLoadGeneration}
+                refreshKey={historyRefreshKey}
+              />
+            )}
           </motion.div>
 
           {/* RIGHT — Preview */}
-          <PreviewPanel html={generatedHtml} generating={generating} onHtmlUpdate={setGeneratedHtml} />
+          <PreviewPanel html={generatedHtml} generating={generating} onHtmlUpdate={handleHtmlUpdate} />
         </div>
       </main>
     </div>
