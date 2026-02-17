@@ -8,6 +8,7 @@ interface MenuItem {
   label: string
   gradient: string
   iconColor: string
+  dataTour?: string
 }
 
 interface MenuBarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -78,7 +79,7 @@ export const MenuBar = React.forwardRef<HTMLDivElement, MenuBarProps>(
             const isActive = item.label === activeItem
 
             return (
-              <motion.li key={item.label} className="relative">
+              <motion.li key={item.label} className="relative" data-tour={item.dataTour}>
                 <button
                   onClick={() => onItemClick?.(item.label)}
                   className="block w-full"
