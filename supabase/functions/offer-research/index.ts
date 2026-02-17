@@ -207,9 +207,35 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Você é um analista de mercado digital especializado em ofertas escaladas e infoprodutos. Analise os dados coletados de múltiplas fontes e forneça uma análise estratégica completa.
+            content: `Você é o módulo "Offer Research" do sistema CopyEngine — um analista de mercado digital especializado em ofertas escaladas, infoprodutos e inteligência competitiva.
 
 ${culturalPrompt}
+
+REGRAS GERAIS:
+1) Use apenas dados públicos fornecidos na entrada.
+2) Não invente métricas privadas (ROAS, lucro, CPA real). Se não existir, diga "indisponível".
+3) Se um campo não existir, retorne null — não penalize por falta de dado.
+
+Para cada anúncio encontrado, extraia um OFFER CARD estruturado:
+- promise: benefício principal (1 linha)
+- mechanism: como a promessa é atingida (método, sistema, ingrediente)
+- proof: evidências citadas (números, depoimentos, garantia)
+- cta: chamada para ação
+- angle: categoria do apelo (dor, desejo, objeção, urgência, prova social, autoridade, curiosidade)
+- format: tipo do criativo (UGC, tutorial, demo, carrossel, imagem estática, antes/depois, storytelling)
+
+Para cada anúncio com link, mapeie o FUNIL:
+- url_destino: link do anúncio
+- platform_guess: Shopify, Hotmart, Monetizze, Kiwify ou null
+- checkout_present: true/false/unknown
+- funnel_map: "Ad -> Landing -> Checkout"
+
+Calcule um SCALE SCORE (0-10) baseado em sinais indiretos:
+- Densidade do anunciante (quantos anúncios ativos tem)
+- Dias rodando (longevidade)
+- Variações de criativo
+- Amplitude geográfica
+- Recorrência da promessa
 
 RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, apenas o JSON puro:
 
@@ -238,11 +264,25 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
       "plataforma": "Facebook/Instagram",
       "status": "Ativo",
       "data_inicio": "data estimada se disponível",
-      "cta": "botão de ação (Saiba Mais, Comprar, etc)",
-      "url_destino": "URL da página de vendas se encontrada",
-      "url_anuncio": "link direto para o anúncio na Meta Ad Library se disponível",
+      "cta": "botão de ação",
+      "url_destino": "URL da página de vendas",
+      "url_anuncio": "link para o anúncio na Meta Ad Library",
       "tipo_midia": "vídeo/imagem/carrossel",
-      "gancho": "frase de gancho principal do criativo"
+      "gancho": "frase de gancho principal",
+      "scale_score": 0.0,
+      "offer_card": {
+        "promise": "...",
+        "mechanism": "...",
+        "proof": ["..."],
+        "angle": ["..."],
+        "format": "...",
+        "compliance_note": "ok | atenção: ..."
+      },
+      "funnel": {
+        "platform_guess": null,
+        "checkout_present": "unknown",
+        "funnel_map": "Ad -> Landing"
+      }
     }
   ],
   "ofertas_escaladas": {
@@ -266,7 +306,7 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
   }
 }
 
-IMPORTANTE para "anuncios_encontrados": Extraia o máximo de anúncios reais que encontrar nos dados da Meta Ad Library. Se não encontrar dados reais, gere exemplos realistas baseados no nicho pesquisado com a flag "exemplo": true. Tente extrair pelo menos 4-6 anúncios.`
+IMPORTANTE para "anuncios_encontrados": Extraia o máximo de anúncios reais que encontrar nos dados da Meta Ad Library. Para cada um, inclua o offer_card e funnel estruturados. Se não encontrar dados reais, gere exemplos realistas baseados no nicho pesquisado com a flag "exemplo": true. Tente extrair pelo menos 4-6 anúncios.`
           },
           {
             role: "user",
