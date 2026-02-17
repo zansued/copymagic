@@ -150,7 +150,7 @@ serve(async (req) => {
           data_fim: ad.ad_delivery_stop_time || null,
           cta: (ad.ad_creative_link_titles || []).join(" ") || null,
           url_destino: ad.ad_creative_link_url || null,
-          url_anuncio: ad.id ? `https://www.facebook.com/ads/library/?id=${ad.id}` : null,
+          url_anuncio: ad.id ? `https://www.facebook.com/ads/library/?id=${ad.id}&active_status=all&ad_type=all&country=BR&media_type=all` : null,
           tipo_midia: null,
           gancho: (ad.ad_creative_link_descriptions || []).join(" ").slice(0, 200) || null,
         }));
