@@ -27,6 +27,7 @@ const menuItems = [
     path: "/agents",
     gradient: "radial-gradient(circle, hsl(220 90% 56% / 0.15) 0%, transparent 70%)",
     iconColor: "text-blue-400",
+    dataTour: "nav-agents",
   },
   {
     icon: Brain,
@@ -34,6 +35,7 @@ const menuItems = [
     path: "/mentor",
     gradient: "radial-gradient(circle, hsl(292 70% 50% / 0.15) 0%, transparent 70%)",
     iconColor: "text-fuchsia-400",
+    dataTour: "nav-mentor",
   },
   {
     icon: Dna,
@@ -41,6 +43,7 @@ const menuItems = [
     path: "/brand-profiles",
     gradient: "radial-gradient(circle, hsl(262 83% 65% / 0.15) 0%, transparent 70%)",
     iconColor: "text-violet-400",
+    dataTour: "nav-dna",
   },
   {
     icon: Globe,

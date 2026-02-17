@@ -14,6 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { TopNav } from "@/components/TopNav";
+import { OnboardingTour, TourStep } from "@/components/onboarding/OnboardingTour";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -62,6 +63,39 @@ export default function Roadmap() {
   const [roadmaps, setRoadmaps] = useState<RoadmapData[]>([]);
   const [activeRoadmap, setActiveRoadmap] = useState<RoadmapData | null>(null);
   const [view, setView] = useState<"list" | "create" | "detail">("list");
+
+  const tourSteps: TourStep[] = [
+    {
+      target: "[data-tour='roadmap-welcome']",
+      title: "🗺️ Bem-vindo ao Roadmap",
+      description: "Este é o seu ponto de partida. Aqui você cria um plano estratégico personalizado com IA para atingir seus objetivos no digital.",
+      position: "bottom",
+    },
+    {
+      target: "[data-tour='roadmap-cta']",
+      title: "✨ Crie seu primeiro mapa",
+      description: "Clique aqui para descrever seu objetivo. A IA vai gerar um passo-a-passo completo conectado aos agentes que executam o trabalho.",
+      position: "bottom",
+    },
+    {
+      target: "[data-tour='nav-agents']",
+      title: "🤖 Central de Agentes",
+      description: "Seus agentes de IA especializados: copywriting, branding, ofertas e mais. O Roadmap vai linkar direto para eles.",
+      position: "bottom",
+    },
+    {
+      target: "[data-tour='nav-dna']",
+      title: "🧬 DNA de Marca",
+      description: "Configure o perfil da sua marca aqui. Quanto mais completo, mais personalizadas serão as gerações de todos os agentes.",
+      position: "bottom",
+    },
+    {
+      target: "[data-tour='nav-mentor']",
+      title: "🧠 Mentor IA",
+      description: "Seu consultor estratégico pessoal. Tire dúvidas, peça conselhos e receba orientação inteligente a qualquer momento.",
+      position: "bottom",
+    },
+  ];
 
   // Load profiles
   useEffect(() => {
@@ -223,7 +257,7 @@ export default function Roadmap() {
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
-
+      <OnboardingTour steps={tourSteps} storageKey="onboarding-home-v1" />
       {/* Sub-header */}
       <header className="border-b border-border/40">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -237,7 +271,7 @@ export default function Roadmap() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             )}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3" data-tour="roadmap-welcome">
               <span className="text-3xl">🗺️</span>
               <div>
                 <h1 className="text-xl font-bold gradient-text">Roadmap</h1>
@@ -247,6 +281,7 @@ export default function Roadmap() {
           </div>
           {view === "list" && (
             <Button
+              data-tour="roadmap-cta"
               onClick={() => setView("create")}
               className="gap-2 bg-gradient-to-r from-primary to-accent-foreground hover:opacity-90"
             >
