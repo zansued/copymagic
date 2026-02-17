@@ -76,8 +76,42 @@ serve(async (req) => {
       return data.data || [];
     };
 
+    // Scrape Meta Ad Library for real ads
+    const scrapeMetaAdLibrary = async (query: string) => {
+      try {
+        const encodedQuery = encodeURIComponent(query);
+        const adLibraryUrl = `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=BR&q=${encodedQuery}&search_type=keyword_unordered&media_type=all`;
+        
+        console.log("Scraping Meta Ad Library:", adLibraryUrl);
+        
+        const res = await fetch(`${firecrawlBaseUrl}/v1/scrape`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: adLibraryUrl,
+            formats: ["markdown", "links"],
+            waitFor: 3000,
+          }),
+        });
+        
+        const data = await res.json();
+        if (!res.ok) {
+          console.error("Meta Ad Library scrape error:", data);
+          return null;
+        }
+        return data.data || data;
+      } catch (e) {
+        console.error("Meta Ad Library scrape failed:", e);
+        return null;
+      }
+    };
+
     // Parallel searches based on selected sources
     const searchPromises: Record<string, Promise<any[]>> = {};
+    let metaAdsPromise: Promise<any> | null = null;
 
     if (sources.includes("trends")) {
       searchPromises.trends = searchFirecrawl(
@@ -91,6 +125,7 @@ serve(async (req) => {
         `"${niche}" anúncios Facebook Instagram Meta Ad Library ads escalados criativos`,
         5
       );
+      metaAdsPromise = scrapeMetaAdLibrary(niche);
     }
 
     if (sources.includes("platforms")) {
@@ -101,7 +136,10 @@ serve(async (req) => {
     }
 
     const searchKeys = Object.keys(searchPromises);
-    const searchResults = await Promise.all(Object.values(searchPromises));
+    const [searchResults, metaAdsRaw] = await Promise.all([
+      Promise.all(Object.values(searchPromises)),
+      metaAdsPromise,
+    ]);
     const resultsBySource: Record<string, any[]> = {};
     searchKeys.forEach((key, i) => {
       resultsBySource[key] = searchResults[i];
@@ -140,6 +178,24 @@ serve(async (req) => {
 
     const culturalPrompt = buildCulturalSystemPrompt(genCtx);
 
+    // Extract ads from Meta Ad Library markdown
+    let metaAdsContext = "";
+    const extractedAds: any[] = [];
+    
+    if (metaAdsRaw) {
+      const markdown = metaAdsRaw.markdown || "";
+      const links = metaAdsRaw.links || [];
+      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY\n${markdown.slice(0, 3000)}`;
+      
+      // Try to extract ad-like links
+      const adLinks = links.filter((l: string) => 
+        l && (l.includes("facebook.com/ads/library") || l.includes("facebook.com/") || l.includes("instagram.com/"))
+      ).slice(0, 10);
+      
+      console.log("Meta Ad Library links found:", adLinks.length);
+    }
+
+    // Use AI to also extract structured ad data from the Meta Ad Library content
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -175,6 +231,20 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
     "ctas_frequentes": ["cta 1", "cta 2"],
     "insights": ["insight 1", "insight 2"]
   },
+  "anuncios_encontrados": [
+    {
+      "anunciante": "nome do anunciante ou página",
+      "texto_anuncio": "texto principal do anúncio (primeiras linhas)",
+      "plataforma": "Facebook/Instagram",
+      "status": "Ativo",
+      "data_inicio": "data estimada se disponível",
+      "cta": "botão de ação (Saiba Mais, Comprar, etc)",
+      "url_destino": "URL da página de vendas se encontrada",
+      "url_anuncio": "link direto para o anúncio na Meta Ad Library se disponível",
+      "tipo_midia": "vídeo/imagem/carrossel",
+      "gancho": "frase de gancho principal do criativo"
+    }
+  ],
   "ofertas_escaladas": {
     "tipos_produto": ["tipo 1", "tipo 2"],
     "faixa_preco": "R$ X a R$ Y",
@@ -194,11 +264,13 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
     "modelo_funil": "tipo de funil recomendado",
     "gancho_principal": "headline principal do anúncio"
   }
-}`
+}
+
+IMPORTANTE para "anuncios_encontrados": Extraia o máximo de anúncios reais que encontrar nos dados da Meta Ad Library. Se não encontrar dados reais, gere exemplos realistas baseados no nicho pesquisado com a flag "exemplo": true. Tente extrair pelo menos 4-6 anúncios.`
           },
           {
             role: "user",
-            content: `Nicho pesquisado: "${niche}"\n\nDados coletados:\n\n${fullContext}`
+            content: `Nicho pesquisado: "${niche}"\n\nDados coletados:\n\n${fullContext}${metaAdsContext}`
           }
         ],
         temperature: 0.7,
