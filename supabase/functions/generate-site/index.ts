@@ -567,51 +567,60 @@ async function fetchUnsplashImages(nicheKeywords: string[]): Promise<FetchedImag
     return buildFallbackImageSet(nicheKeywords);
   }
 
-  const categories: { key: keyof FetchedImageSet; query: string; count: number; orientation?: string }[] = [
-    { key: "hero", query: nicheKeywords.slice(0, 3).join(" "), count: 3, orientation: "landscape" },
-    { key: "portraits", query: "portrait person professional smile", count: 6, orientation: "squarish" },
-    { key: "features", query: `${nicheKeywords[0]} productivity`, count: 4, orientation: "landscape" },
-    { key: "results", query: `${nicheKeywords[0]} achievement success celebration`, count: 3, orientation: "landscape" },
-    { key: "trust", query: "team office professional collaboration", count: 2, orientation: "landscape" },
-    { key: "guarantee", query: "shield security protection trust", count: 2, orientation: "squarish" },
-    { key: "bonus", query: `${nicheKeywords[0]} learning digital education`, count: 3, orientation: "landscape" },
-  ];
-
   const imageSet: FetchedImageSet = {
     hero: [], portraits: [], features: [], results: [],
     trust: [], guarantee: [], bonus: [],
   };
 
-  await Promise.all(
-    categories.map(async (cat) => {
-      try {
-        const params = new URLSearchParams({
-          query: cat.query,
-          per_page: String(cat.count),
-          orientation: cat.orientation || "landscape",
-          content_filter: "high",
-        });
-        const res = await fetch(
-          `https://api.unsplash.com/search/photos?${params.toString()}`,
-          { headers: { Authorization: `Client-ID ${accessKey}` } }
-        );
-        if (!res.ok) {
-          console.error(`Unsplash API error for "${cat.key}": ${res.status}`);
-          return;
-        }
-        const data = await res.json();
-        const photos = (data.results || []) as UnsplashPhoto[];
-        imageSet[cat.key] = photos.map((p) => {
-          // Use Unsplash image resizing via URL params for optimal size
-          const width = cat.orientation === "squarish" ? 400 : cat.key === "hero" ? 1920 : 800;
-          const height = cat.orientation === "squarish" ? 400 : cat.key === "hero" ? 1080 : 600;
-          return `${p.urls.raw}&w=${width}&h=${height}&fit=crop&auto=format,compress&q=80`;
-        });
-      } catch (err) {
-        console.error(`Failed to fetch Unsplash images for "${cat.key}":`, err);
-      }
-    })
-  );
+  // Single batch request: fetch 30 random photos with niche query (1 API call)
+  const nicheQuery = nicheKeywords.slice(0, 3).join(" ");
+  
+  // We make only 2 API calls total (niche photos + portraits) to stay well under 50/hr
+  try {
+    const [nicheRes, portraitRes] = await Promise.all([
+      fetch(
+        `https://api.unsplash.com/photos/random?query=${encodeURIComponent(nicheQuery)}&count=15&orientation=landscape&content_filter=high`,
+        { headers: { Authorization: `Client-ID ${accessKey}` } }
+      ),
+      fetch(
+        `https://api.unsplash.com/photos/random?query=portrait+person+professional&count=6&orientation=squarish&content_filter=high`,
+        { headers: { Authorization: `Client-ID ${accessKey}` } }
+      ),
+    ]);
+
+    if (nicheRes.ok) {
+      const nichePhotos = (await nicheRes.json()) as UnsplashPhoto[];
+      // Distribute niche photos across categories
+      const toUrl = (p: UnsplashPhoto, w: number, h: number) =>
+        `${p.urls.raw}&w=${w}&h=${h}&fit=crop&auto=format,compress&q=80`;
+
+      imageSet.hero = nichePhotos.slice(0, 3).map(p => toUrl(p, 1920, 1080));
+      imageSet.features = nichePhotos.slice(3, 7).map(p => toUrl(p, 800, 600));
+      imageSet.results = nichePhotos.slice(7, 10).map(p => toUrl(p, 800, 600));
+      imageSet.trust = nichePhotos.slice(10, 12).map(p => toUrl(p, 800, 400));
+      imageSet.guarantee = nichePhotos.slice(12, 13).map(p => toUrl(p, 400, 400));
+      imageSet.bonus = nichePhotos.slice(13, 15).map(p => toUrl(p, 500, 300));
+    } else {
+      console.error(`Unsplash niche fetch error: ${nicheRes.status}`);
+    }
+
+    if (portraitRes.ok) {
+      const portraitPhotos = (await portraitRes.json()) as UnsplashPhoto[];
+      imageSet.portraits = portraitPhotos.map(p =>
+        `${p.urls.raw}&w=200&h=200&fit=crop&crop=face&auto=format,compress&q=80`
+      );
+    } else {
+      console.error(`Unsplash portrait fetch error: ${portraitRes.status}`);
+    }
+  } catch (err) {
+    console.error("Unsplash API fetch failed, using fallback:", err);
+    return buildFallbackImageSet(nicheKeywords);
+  }
+
+  // If we got no hero images, use fallback
+  if (imageSet.hero.length === 0) {
+    return buildFallbackImageSet(nicheKeywords);
+  }
 
   return imageSet;
 }
