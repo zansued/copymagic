@@ -421,7 +421,7 @@ IMPORTANTE para "anuncios_encontrados":
           }
         ],
         temperature: 0.7,
-        max_tokens: 8192,
+        max_tokens: 16384,
       }),
     });
 
