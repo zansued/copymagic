@@ -26,6 +26,8 @@ import Pricing from "./pages/Pricing";
 import AdminPanel from "./pages/AdminPanel";
 import OfferResearch from "./pages/OfferResearch";
 import NotFound from "./pages/NotFound";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +59,8 @@ const App = () => (
             <Route path="/shared/:token" element={<SharedOutput />} />
             <Route path="/offer-research" element={<ProtectedRoute><OfferResearch /></ProtectedRoute>} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
