@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { AnimatedInput } from "@/components/auth/AnimatedInput";
@@ -257,6 +257,15 @@ export default function Auth() {
             <p className="mt-6 text-center text-[11px] text-muted-foreground/60">
               🔒 Seus dados estão protegidos com criptografia de ponta a ponta.
             </p>
+            <div className="mt-3 flex items-center justify-center gap-3">
+              <Link to="/terms" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                Termos de Serviço
+              </Link>
+              <span className="text-muted-foreground/30 text-[10px]">•</span>
+              <Link to="/privacy" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+                Política de Privacidade
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>
