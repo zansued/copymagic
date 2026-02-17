@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Play, Image, Layers, Megaphone, Calendar, MousePointerClick } from "lucide-react";
+import { ExternalLink, Play, Image, Layers, Megaphone, Calendar, MousePointerClick, Clock, TrendingUp } from "lucide-react";
 
 export interface AdData {
   anunciante: string;
@@ -15,6 +15,8 @@ export interface AdData {
   tipo_midia?: string;
   gancho?: string;
   exemplo?: boolean;
+  dias_ativo?: number;
+  sinais_escala?: string[];
 }
 
 const mediaIcon = (tipo?: string) => {
@@ -73,6 +75,35 @@ export function AdCard({ ad }: { ad: AdData }) {
           </Badge>
         )}
       </div>
+
+      {/* Longevidade */}
+      {ad.dias_ativo != null && ad.dias_ativo > 0 && (
+        <div className="flex items-center gap-2 mb-3">
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+            ad.dias_ativo >= 30 ? "bg-primary/15 text-primary border border-primary/20" :
+            ad.dias_ativo >= 14 ? "bg-accent/15 text-accent-foreground border border-accent/20" :
+            "bg-muted text-muted-foreground border border-border"
+          }`}>
+            <Clock className="h-3 w-3" />
+            {ad.dias_ativo} {ad.dias_ativo === 1 ? "dia ativo" : "dias ativo"}
+          </div>
+          {ad.dias_ativo >= 14 && (
+            <span className="text-[10px] text-primary font-medium">🔥 Escala validada</span>
+          )}
+        </div>
+      )}
+
+      {/* Sinais de Escala */}
+      {ad.sinais_escala && ad.sinais_escala.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          <TrendingUp className="h-3 w-3 text-muted-foreground shrink-0" />
+          {ad.sinais_escala.map((sinal, i) => (
+            <Badge key={i} variant="outline" className="text-[10px] px-1.5 py-0 border-primary/20 text-primary/80">
+              {sinal}
+            </Badge>
+          ))}
+        </div>
+      )}
 
       {/* Gancho */}
       {ad.gancho && (
