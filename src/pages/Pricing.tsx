@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Check, Sparkles, Crown, Building2, Gem, Flame, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TopNav } from "@/components/TopNav";
+import { AppFooter } from "@/components/AppFooter";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -388,6 +389,7 @@ export default function Pricing() {
           </motion.div>
         )}
       </main>
+      <AppFooter />
     </div>
   );
 }
