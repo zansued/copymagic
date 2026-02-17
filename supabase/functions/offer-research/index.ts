@@ -113,13 +113,15 @@ serve(async (req) => {
       }
 
       try {
+        // Use exact phrase matching for more precise results
         const params = new URLSearchParams({
           search_terms: query,
           ad_type: "ALL",
           ad_reached_countries: '["BR"]',
           ad_active_status: "ACTIVE",
+          search_type: "KEYWORD_EXACT_PHRASE",
           fields: "id,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_descriptions,ad_creative_link_titles,ad_delivery_start_time,ad_delivery_stop_time,ad_snapshot_url,byline,page_id,page_name,publisher_platforms,languages,ad_creative_link_url",
-          limit: "25",
+          limit: "30",
           access_token: META_ACCESS_TOKEN,
         });
 
@@ -412,7 +414,9 @@ IMPORTANTE para "anuncios_encontrados":
 - NÃO invente URLs nem links. Se o campo url_destino ou url_anuncio estiver como "N/A" ou null, retorne null.
 - Para cada anúncio real, gere o offer_card e funnel baseado no texto e dados fornecidos.
 - Se não houver anúncios reais nos dados, retorne array vazio em anuncios_encontrados. NÃO gere exemplos fictícios.
-- Mantenha os campos ad_archive_id, url_destino e url_anuncio exatamente como recebidos dos dados.`
+- Mantenha os campos ad_archive_id, url_destino e url_anuncio exatamente como recebidos dos dados.
+- FILTRO DE RELEVÂNCIA OBRIGATÓRIO: Antes de incluir qualquer anúncio, verifique se o conteúdo (texto, anunciante, CTA, URL destino) é SEMANTICAMENTE RELEVANTE para o nicho "${niche}". Descarte anúncios que claramente não pertencem ao nicho pesquisado — por exemplo, se o nicho é "Agentes de IA" e o anúncio é sobre novelas, romance ou entretenimento não relacionado, EXCLUA-O do resultado. Inclua apenas anúncios que tenham relação direta com o tema pesquisado.
+- Se após filtrar não restarem anúncios relevantes, retorne array vazio e ajuste o veredicto explicando que não foram encontrados anúncios relevantes para o nicho.`
           },
           {
             role: "user",
