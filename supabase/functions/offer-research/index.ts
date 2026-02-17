@@ -76,6 +76,34 @@ serve(async (req) => {
       return data.data || [];
     };
 
+    const scrapeFirecrawl = async (url: string): Promise<string> => {
+      try {
+        const res = await fetch(`${firecrawlBaseUrl}/v1/scrape`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url,
+            formats: ["markdown"],
+            onlyMainContent: true,
+            waitFor: 3000,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          console.error(`Scrape error for ${url}:`, data);
+          return "";
+        }
+        const md = data.data?.markdown || data.markdown || "";
+        return md.slice(0, 2000);
+      } catch (e) {
+        console.error(`Scrape failed for ${url}:`, e);
+        return "";
+      }
+    };
+
     // Fetch real ads from Meta Graph API (Ad Library)
     const fetchMetaAds = async (query: string) => {
       const META_ACCESS_TOKEN = Deno.env.get("META_ACCESS_TOKEN");
@@ -130,14 +158,24 @@ serve(async (req) => {
       }
     };
 
-    // Parallel searches based on selected sources
+    // Parallel searches and scraping based on selected sources
     const searchPromises: Record<string, Promise<any[]>> = {};
+    const scrapePromises: Record<string, Promise<string>> = {};
     let metaAdsPromise: Promise<any[]> | null = null;
 
     if (sources.includes("trends")) {
       searchPromises.trends = searchFirecrawl(
         `"${niche}" tendências crescimento 2025 Google Trends volume busca`,
         5
+      );
+      // Direct Google Trends scraping
+      const encodedNiche = encodeURIComponent(niche);
+      scrapePromises.google_trends = scrapeFirecrawl(
+        `https://trends.google.com.br/trending?geo=BR&q=${encodedNiche}&hours=168`
+      );
+      // Scrape Google Trends explore for related queries
+      scrapePromises.google_trends_explore = scrapeFirecrawl(
+        `https://trends.google.com.br/trends/explore?q=${encodedNiche}&geo=BR`
       );
     }
 
@@ -154,44 +192,83 @@ serve(async (req) => {
         `"${niche}" produto digital infoproduto Hotmart Kiwify vendas escalado oferta high ticket`,
         5
       );
+      // Direct platform scraping for real product data
+      const encodedNiche = encodeURIComponent(niche);
+      scrapePromises.hotmart = scrapeFirecrawl(
+        `https://hotmart.com/pt-br/marketplace?q=${encodedNiche}&sort=RELEVANCE`
+      );
+      scrapePromises.kiwify = scrapeFirecrawl(
+        `https://dashboard.kiwify.com.br/marketplace?search=${encodedNiche}`
+      );
+      scrapePromises.clickbank = scrapeFirecrawl(
+        `https://www.clickbank.com/marketplace?query=${encodedNiche}&sortField=GRAVITY&sortOrder=DESC`
+      );
     }
 
     const searchKeys = Object.keys(searchPromises);
-    const [searchResults, metaAdsRaw] = await Promise.all([
+    const scrapeKeys = Object.keys(scrapePromises);
+    const [searchResults, metaAdsRaw, scrapeResults] = await Promise.all([
       Promise.all(Object.values(searchPromises)),
       metaAdsPromise,
+      Promise.all(Object.values(scrapePromises)),
     ]);
     const resultsBySource: Record<string, any[]> = {};
     searchKeys.forEach((key, i) => {
       resultsBySource[key] = searchResults[i];
     });
+    const scrapesBySource: Record<string, string> = {};
+    scrapeKeys.forEach((key, i) => {
+      scrapesBySource[key] = scrapeResults[i];
+    });
 
     console.log("Search results collected:", Object.fromEntries(
       Object.entries(resultsBySource).map(([k, v]) => [k, v.length])
+    ));
+    console.log("Scrape results collected:", Object.fromEntries(
+      Object.entries(scrapesBySource).map(([k, v]) => [k, v ? `${v.length} chars` : "empty"])
     ));
 
     // Build context for AI analysis
     const contextParts: string[] = [];
 
     if (resultsBySource.trends?.length) {
-      contextParts.push("## TENDÊNCIAS DE BUSCA\n" + resultsBySource.trends
+      contextParts.push("## TENDÊNCIAS DE BUSCA (via pesquisa web)\n" + resultsBySource.trends
         .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1200)}`)
         .join("\n\n"));
     }
 
+    // Add direct Google Trends scraped data
+    if (scrapesBySource.google_trends) {
+      contextParts.push("## GOOGLE TRENDS - DADOS DIRETOS (scraping)\n" + scrapesBySource.google_trends);
+    }
+    if (scrapesBySource.google_trends_explore) {
+      contextParts.push("## GOOGLE TRENDS - CONSULTAS RELACIONADAS (scraping)\n" + scrapesBySource.google_trends_explore);
+    }
+
     if (resultsBySource.ads?.length) {
-      contextParts.push("## ANÚNCIOS E CRIATIVOS\n" + resultsBySource.ads
+      contextParts.push("## ANÚNCIOS E CRIATIVOS (via pesquisa web)\n" + resultsBySource.ads
         .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1200)}`)
         .join("\n\n"));
     }
 
     if (resultsBySource.platforms?.length) {
-      contextParts.push("## PRODUTOS DIGITAIS EM PLATAFORMAS\n" + resultsBySource.platforms
+      contextParts.push("## PRODUTOS DIGITAIS EM PLATAFORMAS (via pesquisa web)\n" + resultsBySource.platforms
         .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1200)}`)
         .join("\n\n"));
     }
 
-    const fullContext = contextParts.join("\n\n---\n\n").slice(0, 8000);
+    // Add direct platform scraped data
+    if (scrapesBySource.hotmart) {
+      contextParts.push("## HOTMART MARKETPLACE - DADOS DIRETOS (scraping)\n" + scrapesBySource.hotmart);
+    }
+    if (scrapesBySource.kiwify) {
+      contextParts.push("## KIWIFY MARKETPLACE - DADOS DIRETOS (scraping)\n" + scrapesBySource.kiwify);
+    }
+    if (scrapesBySource.clickbank) {
+      contextParts.push("## CLICKBANK MARKETPLACE - DADOS DIRETOS (scraping)\n" + scrapesBySource.clickbank);
+    }
+
+    const fullContext = contextParts.join("\n\n---\n\n").slice(0, 12000);
 
     // AI analysis
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -382,6 +459,9 @@ IMPORTANTE para "anuncios_encontrados":
       sources_used: searchKeys,
       sources_count: Object.fromEntries(
         Object.entries(resultsBySource).map(([k, v]) => [k, v.length])
+      ),
+      scrape_sources: Object.fromEntries(
+        Object.entries(scrapesBySource).map(([k, v]) => [k, v ? "ok" : "empty"])
       ),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
