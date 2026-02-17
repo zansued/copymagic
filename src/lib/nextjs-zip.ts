@@ -39,15 +39,33 @@ const BOILERPLATE: Record<string, (opts: { projectName: string; primaryColor: st
       null,
       2
     ),
-  "tailwind.config.ts": ({ primaryColor }) =>
-    `import type { Config } from "tailwindcss";
+  "tailwind.config.ts": ({ primaryColor }) => {
+    // Convert hex to HSL-ish for Tailwind, but keep hex for simplicity
+    return `import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        brand: "${primaryColor}",
+        brand: {
+          DEFAULT: "${primaryColor}",
+          light: "color-mix(in srgb, ${primaryColor} 70%, white)",
+          dark: "color-mix(in srgb, ${primaryColor} 70%, black)",
+        },
+        "bg-deep": "var(--bg-deep)",
+        "bg-section": "var(--bg-section)",
+        "bg-card": "var(--bg-card)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "text-muted": "var(--text-muted)",
+        border: "var(--border)",
+      },
+      maxWidth: {
+        "6xl": "72rem",
+      },
+      borderRadius: {
+        "2xl": "1rem",
       },
     },
   },
@@ -55,7 +73,8 @@ const config: Config = {
 };
 
 export default config;
-`,
+`;
+  },
   "postcss.config.js": () =>
     `module.exports = {
   plugins: {
@@ -116,10 +135,59 @@ export default function RootLayout({
   );
 }
 `,
-  "app/globals.css": () =>
+  "app/globals.css": ({ primaryColor }) =>
     `@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --primary: ${primaryColor};
+  --primary-glow: color-mix(in srgb, ${primaryColor} 70%, white);
+  --bg-deep: #EBEDF0;
+  --bg-section: #FFFFFF;
+  --bg-section-alt: #F8F8F8;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F0F0F5;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.15);
+  --text-primary: #1a1a2e;
+  --text-secondary: #393939;
+  --text-muted: #9F9F9F;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-deep: #050508;
+    --bg-section: #0a0a12;
+    --bg-card: rgba(255, 255, 255, 0.03);
+    --bg-card-hover: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --text-primary: #f0f0f5;
+    --text-secondary: #8a8a9a;
+    --text-muted: #5a5a6a;
+  }
+}
+
+/* Scroll reveal animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+}
 `,
   "README.md": ({ projectName }) =>
     `# ${projectName}

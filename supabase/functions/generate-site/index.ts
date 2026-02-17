@@ -456,39 +456,84 @@ INPUT: You receive a structured PageSpec JSON with ALL the copy content already 
 YOUR JOB: Render it into a complete Next.js (App Router) + React 18 + TypeScript + Tailwind project.
 Use ALL the content from the PageSpec. Do NOT shorten, summarize, or skip any text.
 
-RULES:
-1) Use ALL text from the PageSpec as-is. Every paragraph, bullet, testimonial must appear in the final page.
-2) Strip any remaining internal labels but preserve the actual content.
-3) Performance-first: minimal JS, CSS animations preferred, no heavy libraries.
-4) Compliance: include footer disclaimers from PageSpec. Use responsible language.
-5) Cultural modeling: write in the locale language, apply subtle cultural touches.
-6) Design must look premium: strong typography, generous spacing, card-based scannability,
-   alternating section rhythm, clear CTAs and trust cues.
+═══════════════════════════════════════
+⚠️ STYLING MODE — TAILWIND-ONLY (MANDATORY)
+═══════════════════════════════════════
+- ALL styling MUST use Tailwind utility classes. NO inline style="" attributes anywhere.
+- The only allowed <style> content is inside globals.css for CSS custom properties (:root vars) and @keyframes.
+- NEVER mix Tailwind with inline styles. Zero tolerance.
+- Use Tailwind's arbitrary value syntax for CSS vars: bg-[var(--primary)], text-[var(--text-primary)], etc.
+- If you need a color not in the Tailwind config, use arbitrary values: bg-[#1a1a2e], NOT style="background:#1a1a2e".
+
+═══════════════════════════════════════
+📐 PREMIUM LAYOUT SYSTEM (MANDATORY)
+═══════════════════════════════════════
+CONTAINER: max-w-6xl mx-auto px-4 sm:px-6 lg:px-8
+SECTIONS: py-16 sm:py-20 (consistent vertical rhythm for ALL sections)
+CARDS: rounded-2xl border border-border p-6 sm:p-8 (single consistent pattern)
+GRID: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8
+
+RESPONSIVE TYPOGRAPHY (no fixed px sizes!):
+- Hero headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight
+- Section titles: text-3xl sm:text-4xl font-bold tracking-tight
+- Subheadings: text-lg sm:text-xl text-secondary
+- Body: text-base sm:text-lg leading-relaxed
+- Labels/badges: text-xs uppercase tracking-widest font-semibold
+
+BUTTONS:
+- Primary CTA: px-8 py-4 sm:px-10 sm:py-5 rounded-full text-base sm:text-lg font-semibold uppercase tracking-wide bg-brand text-white hover:scale-105 transition-transform duration-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2
+- Secondary: px-6 py-3 rounded-xl border text-sm font-medium
+
+═══════════════════════════════════════
+♿ ACCESSIBILITY (REQUIRED)
+═══════════════════════════════════════
+- Every <img> MUST have a descriptive alt attribute
+- Color contrast: WCAG AA minimum (4.5:1 body, 3:1 large text)
+- Buttons/links: visible focus states with focus:ring-2
+- Semantic HTML: <header>, <main>, <section>, <nav>, <footer>
+
+═══════════════════════════════════════
+RULES
+═══════════════════════════════════════
+1) Use ALL text from the PageSpec as-is. Every paragraph, bullet, testimonial must appear.
+2) Strip any remaining internal labels but preserve actual content.
+3) Performance-first: Server Components by default. Only add "use client" for interactive elements (accordion, carousel, sticky CTA).
+4) CSS animations preferred over JS animations. Use Tailwind's animate-* or @keyframes in globals.css.
+5) Compliance: include footer disclaimers from PageSpec.
+6) Cultural modeling: write in the locale language.
+7) Use lucide-react for icons (already in dependencies).
+8) Images: use <Image> from next/image with proper alt, width, height. Use priority on hero image.
 
 REQUIRED SECTIONS (IN THIS ORDER):
-A) Hero - gradient background, animated glow, headline + subhead + bullets + trust strip + dual CTA
+A) Hero - gradient background, headline + subhead + bullets + trust strip + CTA
 B) Problems + False Solutions - card grid
 C) Mechanism / The Big Idea - steps + differentiators
-D) 6-Phase Protocol - visual timeline (desktop: horizontal, mobile: vertical)
-E) Social Proof - testimonials carousel with autoplay, dots, progress
+D) Phases Protocol - visual timeline (desktop: horizontal, mobile: vertical)
+E) Social Proof - testimonials (carousel or grid)
 F) Bonuses - gradient cards + value stack
 G) Offer + Pricing - checklist + price block + for who / not for who
 H) Guarantee - highlighted card + CTA
-I) FAQ - accessible accordion
-J) Final CTA - recap + dual CTA
+I) FAQ - accessible accordion ("use client" component)
+J) Final CTA - recap + CTA
 K) Footer - links + disclaimers + copyright
-
-DESIGN TOKENS:
-- Container: max-w-6xl mx-auto px-4 sm:px-6
-- Spacing: py-16/py-20; Cards: rounded-2xl, shadow-sm
-- Typography: H1 text-4xl sm:text-5xl font-extrabold; H2 text-2xl sm:text-3xl font-bold
-- CSS variables for brand colors in globals.css
 
 FILES TO GENERATE:
 - package.json, next.config.js, tsconfig.json, tailwind.config.ts, postcss.config.js
 - app/layout.tsx, app/page.tsx, app/globals.css
 - components/: Hero, ProblemsTruth, Mechanism, PhasesTimeline, TestimonialsCarousel, BonusesValue, OfferBlock, Guarantee, FAQAccordion, FinalCTA, Footer, StickyCTA
-- lib/: sanitize.ts, types.ts
+- lib/: types.ts
+
+═══════════════════════════════════════
+🔍 MANDATORY CRITIQUE PASS
+═══════════════════════════════════════
+Before returning, self-review and fix:
+1) SPACING: All sections py-16 sm:py-20? Cards p-6? Fix inconsistencies.
+2) CONTRAST: Text readable? CTAs visible? Fix weak contrast.
+3) ALIGNMENT: Grids aligned? No orphaned elements? Fix misalignment.
+4) MOBILE: Works on 375px? Font sizes responsive? Fix breakage.
+5) INLINE STYLES: Any style=""? Convert to Tailwind. Zero tolerance.
+6) IMAGE ALT: Every <img>/<Image> has descriptive alt? Fix missing.
+7) FOCUS STATES: Interactive elements have focus:ring? Add if missing.
 
 OUTPUT FORMAT (ONLY JSON):
 {
@@ -497,7 +542,8 @@ OUTPUT FORMAT (ONLY JSON):
   "notes": {
     "sections": [...],
     "conversion_checks": [...],
-    "performance": [...]
+    "performance": [...],
+    "critique_fixes": [...]
   }
 }
 
