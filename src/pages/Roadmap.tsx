@@ -255,6 +255,12 @@ export default function Roadmap() {
 
   const completedCount = (steps: RoadmapStep[]) => steps.filter((s) => s.completed).length;
 
+  const escapeHtml = (str: string): string => {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  };
+
   const handleExportPdf = async (roadmap: RoadmapData) => {
     try {
       const html2pdf = (await import("html2pdf.js")).default;
@@ -275,13 +281,13 @@ export default function Roadmap() {
             </div>
             <div style="flex:1;background:#1a1a2e;border:1px solid #2a2a3e;border-radius:12px;padding:16px;${step.completed ? 'border-color:rgba(124,58,237,0.3);' : ''}">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                <span style="font-size:18px;">${step.emoji}</span>
+                <span style="font-size:18px;">${escapeHtml(step.emoji)}</span>
                 <span style="font-size:11px;color:#7c3aed;font-weight:600;">Passo ${step.order}</span>
-                ${step.agent_name ? `<span style="font-size:10px;color:#888;margin-left:auto;">🤖 ${step.agent_name}</span>` : ''}
+                ${step.agent_name ? `<span style="font-size:10px;color:#888;margin-left:auto;">🤖 ${escapeHtml(step.agent_name)}</span>` : ''}
               </div>
-              <h3 style="font-size:15px;font-weight:700;color:${step.completed ? '#666' : '#e2e2e2'};margin:0 0 6px;${step.completed ? 'text-decoration:line-through;' : ''}">${step.title}</h3>
-              <p style="font-size:12px;color:#999;line-height:1.6;margin:0;">${step.description}</p>
-              ${step.tip ? `<div style="margin-top:10px;padding:10px 12px;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.12);border-radius:8px;font-size:11px;color:#aaa;line-height:1.5;">💡 ${step.tip}</div>` : ''}
+              <h3 style="font-size:15px;font-weight:700;color:${step.completed ? '#666' : '#e2e2e2'};margin:0 0 6px;${step.completed ? 'text-decoration:line-through;' : ''}">${escapeHtml(step.title)}</h3>
+              <p style="font-size:12px;color:#999;line-height:1.6;margin:0;">${escapeHtml(step.description)}</p>
+              ${step.tip ? `<div style="margin-top:10px;padding:10px 12px;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.12);border-radius:8px;font-size:11px;color:#aaa;line-height:1.5;">💡 ${escapeHtml(step.tip)}</div>` : ''}
             </div>
           </div>`
         )
@@ -291,8 +297,8 @@ export default function Roadmap() {
         <div style="font-family:'Inter','Segoe UI',sans-serif;background:#0f1117;color:#e2e2e2;padding:40px 32px;min-height:100%;">
           <div style="text-align:center;margin-bottom:36px;">
             <div style="font-size:40px;margin-bottom:8px;">🗺️</div>
-            <h1 style="font-size:24px;font-weight:800;margin:0;background:linear-gradient(135deg,#7c3aed,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${roadmap.title}</h1>
-            <p style="font-size:13px;color:#888;margin:8px 0 16px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.5;">${roadmap.objective}</p>
+            <h1 style="font-size:24px;font-weight:800;margin:0;background:linear-gradient(135deg,#7c3aed,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${escapeHtml(roadmap.title)}</h1>
+            <p style="font-size:13px;color:#888;margin:8px 0 16px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.5;">${escapeHtml(roadmap.objective)}</p>
             <div style="display:inline-flex;align-items:center;gap:10px;background:#1a1a2e;border:1px solid #2a2a3e;border-radius:20px;padding:8px 20px;">
               <span style="font-size:12px;color:#aaa;">${done}/${total} concluídos</span>
               <div style="width:80px;height:6px;border-radius:3px;background:#222;overflow:hidden;">
