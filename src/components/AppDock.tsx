@@ -37,9 +37,9 @@ export function AppDock() {
           <DockLabel>Projetos</DockLabel>
           <DockIcon>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/projects")}
               className={`flex items-center justify-center w-full h-full rounded-xl transition-colors ${
-                location.pathname === "/"
+                location.pathname === "/projects"
                   ? "bg-primary/20 text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}

@@ -13,6 +13,7 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
+import { TopNav } from "@/components/TopNav";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -221,21 +222,21 @@ export default function Roadmap() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="glass-header sticky top-0 z-30">
+      <TopNav />
+
+      {/* Sub-header */}
+      <header className="border-b border-border/40">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                if (view === "detail") setView("list");
-                else if (view === "create") setView("list");
-                else navigate("/agents");
-              }}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+            {view !== "list" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setView("list")}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
             <div className="flex items-center gap-3">
               <span className="text-3xl">🗺️</span>
               <div>

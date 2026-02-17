@@ -37,7 +37,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
+            <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/project/:id" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
             <Route path="/project/:id/summary" element={<ProtectedRoute><ProjectSummary /></ProtectedRoute>} />
             <Route path="/project/:id/campaign" element={<ProtectedRoute><CampaignPlanning /></ProtectedRoute>} />
@@ -47,9 +48,8 @@ const App = () => (
             <Route path="/agents/setup" element={<ProtectedRoute><AgentSetup /></ProtectedRoute>} />
             <Route path="/agents/storytelling-adapter" element={<ProtectedRoute><StorytellingAgent /></ProtectedRoute>} />
             <Route path="/agents/:agentId" element={<ProtectedRoute><AgentWorkspace /></ProtectedRoute>} />
-            <Route path="/roadmap" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
-            <Route path="/mentor" element={<ProtectedRoute><MentorPage /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/mentor" element={<ProtectedRoute><MentorPage /></ProtectedRoute>} />
             <Route path="/brand-profiles" element={<ProtectedRoute><BrandProfiles /></ProtectedRoute>} />
             <Route path="/brand-profiles/:id" element={<ProtectedRoute><BrandProfileEdit /></ProtectedRoute>} />
             <Route path="/shared-with-me" element={<ProtectedRoute><SharedWithMe /></ProtectedRoute>} />
