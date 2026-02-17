@@ -108,7 +108,7 @@ export default function AgentsHub() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate("/roadmap")} className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-2">
               <Map className="h-4 w-4" />
               Roadmap
             </Button>
