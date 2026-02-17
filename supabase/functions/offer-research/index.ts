@@ -24,8 +24,8 @@ serve(async (req) => {
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(authHeader.replace("Bearer ", ""));
-    if (claimsError || !claimsData?.claims?.sub) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -170,7 +170,7 @@ serve(async (req) => {
         .join("\n\n"));
     }
 
-    const fullContext = contextParts.join("\n\n---\n\n");
+    const fullContext = contextParts.join("\n\n---\n\n").slice(0, 8000);
 
     // AI analysis
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -185,7 +185,7 @@ serve(async (req) => {
     if (metaAdsRaw) {
       const markdown = metaAdsRaw.markdown || "";
       const links = metaAdsRaw.links || [];
-      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY\n${markdown.slice(0, 3000)}`;
+      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY\n${markdown.slice(0, 2000)}`;
       
       // Try to extract ad-like links
       const adLinks = links.filter((l: string) => 
@@ -274,6 +274,7 @@ IMPORTANTE para "anuncios_encontrados": Extraia o máximo de anúncios reais que
           }
         ],
         temperature: 0.7,
+        max_tokens: 8192,
       }),
     });
 
