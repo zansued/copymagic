@@ -9174,4 +9174,119 @@ CONTEÚDO ORIGINAL:
 ${inputs.content}`;
     },
   },
+
+  "ad-intelligence": {
+    id: "ad-intelligence",
+    name: "Ad Intelligence",
+    emoji: "🕵️",
+    subtitle: "Analise anúncios e extraia inteligência de oferta com Scale Score",
+    inputs: [
+      {
+        key: "ads_data",
+        label: "Dados dos Anúncios",
+        placeholder: "Cole aqui os dados dos anúncios para análise. Pode ser:\n- Texto de anúncios copiados da Meta Ad Library\n- Lista de anúncios com informações (anunciante, texto, link, datas)\n- Dados exportados de ferramentas de spy\n\nQuanto mais dados, melhor a análise.",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "query",
+        label: "Nicho / Termo de Pesquisa",
+        placeholder: "Ex: emagrecimento, marketing digital, finanças pessoais...",
+        type: "input",
+        required: true,
+      },
+      {
+        key: "focus",
+        label: "Foco da Análise",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "complete", label: "🎯 Completa (Score + Offer Card + Funil)" },
+          { value: "offer-card", label: "📋 Offer Cards (Promessa, Mecanismo, Prova)" },
+          { value: "scale-score", label: "📊 Scale Score (Sinais de Escala)" },
+          { value: "funnel", label: "🔻 Mapeamento de Funil" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foque em anúncios de vídeo', 'Compare com meu nicho de coaching'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const focusMap: Record<string, string> = {
+        complete: "Análise COMPLETA: Scale Score + Offer Card + Mapeamento de Funil para cada anúncio",
+        "offer-card": "Foque na extração de OFFER CARDS detalhados (Promessa, Mecanismo, Prova, CTA, Ângulo, Formato)",
+        "scale-score": "Foque no cálculo do SCALE SCORE com todos os sinais indiretos detalhados",
+        funnel: "Foque no MAPEAMENTO DE FUNIL (Ad -> Landing -> Checkout) com detecção de plataforma",
+      };
+
+      return `Você é o módulo "Ad Intelligence" do sistema CopyEngine. Sua função é analisar anúncios coletados de fontes públicas e transformar isso em inteligência de oferta.
+
+REGRAS GERAIS (guardrails)
+1) Use apenas dados públicos fornecidos na entrada.
+2) Não invente métricas privadas (ROAS, lucro, CPA real). Se não existir, diga "indisponível".
+3) Não sugira técnicas de cloaking/bypass de revisão.
+4) Se um campo não existir na entrada, retorne null (não penalize por falta de dado).
+
+FOCO: ${focusMap[inputs.focus] || focusMap.complete}
+
+SCALE SCORE — Sinais indiretos com pesos:
+w1=0.35 (advertiser_density), w2=0.25 (days_running), w3=0.20 (creative_variations), w4=0.10 (geo_amplitude), w5=0.10 (promise_recurrence)
+
+OFFER CARD — Para cada anúncio:
+- promise: benefício principal (1 linha)
+- mechanism: como a promessa é atingida
+- proof: evidências citadas
+- cta: chamada para ação
+- angle: dor, desejo, objeção, urgência, prova social, autoridade, medo/risco, curiosidade
+- format: UGC, tutorial, demo, carrossel, imagem estática, antes/depois, storytelling
+- compliance_note: ok | atenção
+
+FUNIL — Mapa público:
+- initial_url, final_url, page_title, h1, price_detected
+- platform_guess: Shopify, Hotmart, Monetizze, Kiwify ou null
+- checkout_present: true/false/unknown
+- funnel_map: "Ad -> Landing -> Checkout"
+
+Para cada anúncio analisado, apresente:
+
+### [ANUNCIANTE] — Scale Score: X.X/10
+
+**OFFER CARD:**
+- 🎯 Promessa: ...
+- ⚙️ Mecanismo: ...
+- 📊 Provas: ...
+- 🔘 CTA: ...
+- 🎭 Ângulo: ...
+- 🎬 Formato: ...
+- ⚠️ Compliance: ...
+
+**SINAIS DE ESCALA:**
+- Dias rodando: X
+- Densidade do anunciante: X anúncios ativos
+- Variações criativas: X
+- Amplitude geográfica: X países
+- Recorrência da promessa: X
+
+**FUNIL:**
+URL → Landing → Checkout
+Plataforma detectada: ...
+
+**REASONING:** 1-2 frases explicando o score.
+
+---
+
+Ao final, apresente um RANKING dos anúncios por Scale Score e um RESUMO com padrões identificados no lote.
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+NICHO/QUERY: ${inputs.query}
+
+DADOS DOS ANÚNCIOS PARA ANÁLISE:
+${inputs.ads_data}`;
+    },
+  },
 };

@@ -361,6 +361,16 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
 
+  {
+    id: "ad-intelligence",
+    name: "Ad Intelligence",
+    emoji: "🕵️",
+    role: "Analista de Inteligência de Anúncios",
+    description: "Analisa anúncios coletados e gera Scale Score, Offer Card estruturado e mapeamento de funil para cada criativo.",
+    category: "products",
+    available: true,
+  },
+
   // ── Produtos & Ofertas ──
   {
     id: "low-ticket-product",
