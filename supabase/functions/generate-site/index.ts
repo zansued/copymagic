@@ -16,6 +16,38 @@ Your job: generate a VISUALLY BREATHTAKING, conversion-optimized landing page as
 THE PAGE MUST LOOK LIKE A $50,000 AGENCY-BUILT PAGE. Not a template. PREMIUM CRAFT.
 
 ═══════════════════════════════════════
+⚠️ STYLING MODE — MANDATORY RULES
+═══════════════════════════════════════
+You MUST use **Tailwind-only mode**:
+- Include Tailwind via Play CDN: <script src="https://cdn.tailwindcss.com"></script>
+- ALL styling through Tailwind utility classes. NO inline style="" attributes. NO <style> blocks (except a small block for CSS custom properties, @keyframes, and Google Fonts @import).
+- NEVER mix Tailwind classes with inline styles. Pick Tailwind and commit 100%.
+- You may define CSS custom properties (--primary, etc.) and @keyframes in a single <style> block at the top, but ALL layout/spacing/color/typography MUST use Tailwind classes referencing those vars where needed.
+- Use Tailwind's arbitrary value syntax when needed: bg-[var(--primary)], text-[var(--text-primary)], etc.
+
+Tailwind config customization (inside the Play CDN script):
+\`\`\`html
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: 'var(--primary)',
+        'primary-glow': 'var(--primary-glow)',
+        'bg-deep': 'var(--bg-deep)',
+        'bg-section': 'var(--bg-section)',
+        'bg-card': 'var(--bg-card)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-muted': 'var(--text-muted)',
+      }
+    }
+  }
+}
+</script>
+\`\`\`
+
+═══════════════════════════════════════
 💰 SALES PSYCHOLOGY (APPLY THROUGHOUT)
 ═══════════════════════════════════════
 You are not just designing — you are engineering CONVERSIONS. Apply these principles:
@@ -35,7 +67,8 @@ SECTION MARKERS (REQUIRED)
 ═══════════════════════════════════════
 Every major section MUST have a data-section attribute:
 data-section="hero" | "trust-strip" | "problems" | "solution" | "features" | "social-proof" | "pricing" | "faq" | "guarantee" | "final-cta" | "footer"
-Example: <section data-section="hero" class="...">
+Example: <section data-section="hero" class="py-16 sm:py-20">
+
 ═══════════════════════════════════════
 🖼️ IMAGES (CRITICAL — THIS MAKES THE PAGE REAL)
 ═══════════════════════════════════════
@@ -56,9 +89,10 @@ REQUIRED image placements:
 
 Image rules:
 - Use the EXACT pre-fetched URLs without modification
-- Use object-fit: cover for backgrounds and avatars
-- Add subtle overlay gradients on hero images for text readability
+- Use object-fit: cover via Tailwind: class="object-cover"
+- Add overlay gradients on hero images via an absolutely positioned div with bg-gradient-to-b
 - loading="lazy" on all images except hero
+- Always include a descriptive alt="" attribute on every <img>
 - Fallback: if an image doesn't load, use a CSS gradient background as fallback
 
 ═══════════════════════════════════════
@@ -88,8 +122,8 @@ The page MUST include these interactive elements (vanilla JS):
 1) SCROLL REVEAL ANIMATIONS:
    - Every section fades in + slides up on scroll entry
    - Staggered children animation (cards appear one by one)
-   - Use IntersectionObserver + CSS transitions
-   
+   - Use IntersectionObserver + Tailwind transition classes
+
 2) ANIMATED NUMBER COUNTERS:
    - Any number/stat in the copy should count up when scrolled into view
    - Smooth easing animation over 2 seconds
@@ -111,18 +145,45 @@ The page MUST include these interactive elements (vanilla JS):
    - Hide on scroll up, show on scroll down
 
 6) FLOATING ELEMENTS:
-   - Subtle floating glow orbs in hero (CSS @keyframes)
+   - Subtle floating glow orbs in hero (CSS @keyframes in the allowed <style> block)
    - Parallax effect on decorative elements
-   
-7) HOVER EFFECTS:
-   - Cards: translateY(-8px) + enhanced shadow + border glow
-   - Buttons: scale(1.05) + glow spread
-   - Images: subtle zoom (scale 1.05)
-   - Links: underline slide animation
+
+7) HOVER EFFECTS (all via Tailwind):
+   - Cards: hover:-translate-y-2 hover:shadow-xl hover:border-[var(--primary)]/30 transition-all duration-300
+   - Buttons: hover:scale-105 hover:shadow-lg transition-transform duration-200
+   - Images: hover:scale-105 transition-transform duration-300 overflow-hidden on parent
+   - Links: underline animation via pseudo-elements in @keyframes
 
 8) PROGRESS BAR:
    - Reading progress bar at top of page
    - Thin line that fills as user scrolls
+
+═══════════════════════════════════════
+📐 PREMIUM LAYOUT SYSTEM (MANDATORY)
+═══════════════════════════════════════
+These layout patterns are REQUIRED. Follow them exactly:
+
+CONTAINER: max-w-6xl mx-auto px-4 sm:px-6 lg:px-8
+SECTIONS: py-16 sm:py-20 (consistent vertical rhythm)
+CARDS: rounded-2xl border border-[var(--border)] p-6 (single consistent pattern)
+GRID: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+
+RESPONSIVE TYPOGRAPHY (no fixed px sizes for headings!):
+- Hero headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight
+- Section titles: text-3xl sm:text-4xl font-bold tracking-tight
+- Subheadings: text-lg sm:text-xl text-[var(--text-secondary)]
+- Body: text-base sm:text-lg leading-relaxed
+- Labels/badges: text-xs uppercase tracking-widest font-semibold
+
+BUTTONS:
+- Primary CTA: px-8 py-4 sm:px-10 sm:py-5 rounded-full text-base sm:text-lg font-semibold uppercase tracking-wide bg-[var(--primary)] text-white hover:scale-105 transition-transform duration-200 shadow-lg
+- Secondary: px-6 py-3 rounded-xl border border-[var(--border)] text-sm font-medium
+
+SPACING RULES:
+- Between sections: py-16 sm:py-20 (never less)
+- Card internal: p-6 sm:p-8
+- Between heading and content: mb-4 sm:mb-6
+- Between cards in grid: gap-6 sm:gap-8
 
 ═══════════════════════════════════════
 🎨 VISUAL DESIGN SYSTEM
@@ -130,12 +191,9 @@ The page MUST include these interactive elements (vanilla JS):
 TYPOGRAPHY:
 - Load from Google Fonts: Inter (body) + Space Grotesk or Outfit (headings)
   For light/editorial themes: Poppins (body+headings) is also excellent.
-- Hero headline: 56-80px, font-weight 800, line-height 1.05
-- Section titles: 36-48px, font-weight 700  
-- Body: 17-19px, line-height 1.7, font-weight 400
-- Labels/badges: 11-12px, uppercase, letter-spacing 0.1em, font-weight 600
+- Use the responsive classes defined above. NEVER use fixed px font sizes like font-size:70px.
 
-COLOR SYSTEM (CSS custom properties):
+COLOR SYSTEM (CSS custom properties — defined in the single <style> block):
 For DARK themes:
 :root {
   --primary: {brand.primary_color};
@@ -149,8 +207,6 @@ For DARK themes:
   --text-primary: #f0f0f5;
   --text-secondary: #8a8a9a;
   --text-muted: #5a5a6a;
-  --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-glow));
-  --gradient-mesh: radial-gradient(ellipse at 20% 50%, rgba(var(--primary-rgb), 0.08) 0%, transparent 50%);
 }
 For LIGHT themes (longform-dr):
 :root {
@@ -166,35 +222,21 @@ For LIGHT themes (longform-dr):
   --text-primary: #1a1a2e;
   --text-secondary: #393939;
   --text-muted: #9F9F9F;
-  --shadow-card: 0 2px 10px -1px rgba(0,0,0,0.1);
-  --shadow-card-accent: 1px 1px 8px -1px var(--primary);
 }
 
-SPACING:
-- Sections: 100-140px vertical padding
-- Cards: 28-40px padding, 15-24px border-radius
-- Content max-width: 870px for centered text-heavy pages, 1200px for wide layouts
-- Generous whitespace between elements
+SURFACES & CARDS (via Tailwind classes):
+- Dark: backdrop-blur-xl saturate-150 border border-[var(--border)] shadow-lg
+- Light: bg-white rounded-2xl shadow-md border border-[var(--border)]
+- Hover: hover:shadow-xl hover:border-[var(--primary)]/20 transition-all duration-300
 
-SURFACES & CARDS:
-Dark: backdrop-filter: blur(20px) saturate(1.5), border: 1px solid var(--border), glow shadows
-Light: background: var(--bg-section), border-radius: 15px, box-shadow: var(--shadow-card), clean borders
-- Cards on light themes: white containers on light gray background (#EBEDF0)
-- Colored shadow on hover: box-shadow using primary color
-
-GRADIENTS:
-- Text gradients on key headlines: background-clip: text
-- Button gradients: linear-gradient with hover shift
-- Section mesh backgrounds: radial-gradient decorative blobs
-- Divider lines: gradient from transparent to primary to transparent
-
-BUTTONS:
-- Height: 52-60px, padding: 16px 40px
-- Border-radius: 50px (pill shape) for CTAs, 14px for secondary
-- Primary: solid accent color OR gradient background + glow shadow
-- Text: uppercase, font-weight 500-600, font-size 16-20px
-- Micro-interaction: scale(1.05) + shadow spread on hover
-- Arrow icon inside button
+═══════════════════════════════════════
+♿ ACCESSIBILITY (REQUIRED)
+═══════════════════════════════════════
+- Every <img> MUST have a descriptive alt attribute
+- Color contrast: text must meet WCAG AA (4.5:1 for body, 3:1 for large text)
+- Buttons and links must have visible focus states: focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2
+- Interactive elements must be keyboard accessible
+- Use semantic HTML: <header>, <main>, <section>, <nav>, <footer>
 
 ═══════════════════════════════════════
 📐 SECTION BLUEPRINT
@@ -202,150 +244,54 @@ BUTTONS:
 Generate sections in this order with these design patterns:
 
 A) HERO (data-section="hero")
-   - Full viewport height or generous padding
-   - Badge/pill at top ("🔥 Método Exclusivo" etc.)
-   - Massive headline with accent-colored key words (use <span> with primary color)
-   - Subheadline with lighter weight
-   - Video embed area (if applicable) with rounded corners and accent-colored box-shadow
-   - CTA button: pill-shaped, accent color, uppercase, centered
-   - Trust strip below: avatars + social proof numbers
+   - Full viewport or generous padding: min-h-screen or py-20 sm:py-32
+   - Badge/pill at top: inline-flex px-4 py-1.5 rounded-full text-xs uppercase tracking-widest
+   - Massive headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight
+   - Subheadline: text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto
+   - CTA button: rounded-full, accent color, uppercase
+   - Trust strip below: flex items-center gap-4
 
 B) TRUST STRIP (data-section="trust-strip")
-   - Logos or trust badges in a row
-   - Subtle separator lines
+   - Logos or trust badges in a flex row with gap-8
+   - py-8 border-y border-[var(--border)]
 
 C) PROBLEMS (data-section="problems")
-   - Long-form copy text with emotional engagement
-   - Card grid (2-3 columns) for specific problems
-   - Each card: icon + title + description
-   - Alternating subtle backgrounds
+   - max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20
+   - Card grid: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+   - Each card: rounded-2xl border p-6
 
 D) SOLUTION/MECHANISM (data-section="solution")
-   - Split layout: text left, product image right
-   - Product title in accent color
-   - Description text below
-   - Product images displayed in a row (4 items, ~210px each)
+   - grid grid-cols-1 lg:grid-cols-2 gap-8 items-center
+   - Image on one side, text on the other
 
 E) FEATURES/BENEFITS (data-section="features")
-   - Split layout: product image left, text right
-   - Title in accent color
-   - Bullet list with accent-colored checkmarks
-   - Each bullet is a full descriptive sentence
+   - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+   - Each card with icon + title + description
 
 F) SOCIAL PROOF (data-section="social-proof")
-   - Section title in accent color, centered
-   - 3-column grid of testimonial cards
-   - Each card: rounded avatar (65px, border in accent color) + testimony text + before/after image + name + city
-   - Cards with border-radius 12px and box-shadow
+   - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+   - Each card: rounded-2xl avatar (w-16 h-16 rounded-full object-cover border-2 border-[var(--primary)]) + quote + name
 
 G) PRICING/OFFER (data-section="pricing")
-   - "What you'll receive" section with product cards (image left, description right)
-   - Bonuses section on alternate background with title + description + images
-   - Pricing block: original price strikethrough + current price bold + discount headline in accent
-   - Product stack image centered
-   - CTA button: pill-shaped, accent color, uppercase
+   - Centered layout, max-w-3xl mx-auto
+   - Price anchoring: line-through on original + bold current price
+   - CTA button prominent
 
 H) GUARANTEE (data-section="guarantee")
-   - Two-column: guarantee seal/badge image left, text right
-   - Light accent-tinted background (e.g., #FFEEF2 for red accent)
-   - Title in accent color
-   - Full guarantee text
+   - grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 items-center
+   - Shield/badge image + guarantee text
 
 I) FAQ (data-section="faq")
-   - Title in accent color
-   - Animated accordion with smooth open/close
-   - Chevron rotation on toggle
-   - CTA button after FAQ
+   - max-w-3xl mx-auto, accordion pattern
+   - Each item: border-b, cursor-pointer, transition
 
 J) FINAL CTA (data-section="final-cta")
-   - Recap of key benefits
-   - Large CTA button with pulse animation
-   - Urgency element if present in copy
+   - Centered, py-16 sm:py-20
+   - Large CTA with pulse animation
 
 K) FOOTER (data-section="footer")
-   - Two-column layout on accent-colored background
-   - Left: anti-piracy/legal notice
-   - Right: logo + copyright + terms/privacy links
-   - Small text, light color on dark background
-
-═══════════════════════════════════════
-🏗️ FEW-SHOT REFERENCE SNIPPETS
-═══════════════════════════════════════
-Use these as STYLE REFERENCES. Do NOT copy verbatim — adapt to the copy content.
-
-HERO EXAMPLE (light theme):
-\`\`\`html
-<section data-section="hero" style="background: var(--bg-section); padding: 60px 0 30px; max-width: 870px; margin: 0 auto; border-radius: 15px;">
-  <div style="text-align: center; max-width: 770px; margin: 0 auto; padding: 30px 0 0;">
-    <p style="color: var(--text-muted); font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Plano Inovador de</p>
-    <h1 style="font-size: 30px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; margin: 0 80px;">
-      <span style="color: var(--primary); font-size: 42px;">30 Dias</span> Para Você Transformar Seus Resultados!
-    </h1>
-    <div style="margin: 30px 50px 0; border-radius: 15px; box-shadow: 1px 1px 8px -1px var(--primary);">
-      <!-- Video or hero image here -->
-    </div>
-    <a href="#" style="display: inline-block; margin-top: 12px; padding: 16px 40px; background: var(--primary); color: white; border-radius: 50px; font-size: 20px; font-weight: 500; text-transform: uppercase; text-decoration: none;">
-      Quero Começar Hoje
-    </a>
-  </div>
-</section>
-\`\`\`
-
-TESTIMONIAL CARD EXAMPLE:
-\`\`\`html
-<div style="padding: 20px 0; border-radius: 12px; box-shadow: 1px 2px 10px -1px rgba(0,0,0,0.15); margin: 10px; overflow: hidden;">
-  <img src="https://source.unsplash.com/featured/200x200/?portrait,woman,professional?sig=1" 
-       alt="Avatar" style="width: 65px; height: 65px; border-radius: 50%; border: 2px solid var(--primary); display: block; margin: 0 auto; object-fit: cover;">
-  <p style="font-size: 14px; padding: 0 10px; color: var(--text-secondary);">Full testimonial text here...</p>
-  <img src="https://source.unsplash.com/featured/400x300/?results,transformation,before-after" alt="Results" style="width: 100%;" loading="lazy">
-  <p style="text-align: center; color: var(--primary); font-size: 14px; font-weight: 600; margin-bottom: -10px;">Name</p>
-  <p style="text-align: center; color: var(--text-secondary); font-size: 12px;">City, State</p>
-</div>
-\`\`\`
-
-GUARANTEE SECTION EXAMPLE:
-\`\`\`html
-<section data-section="guarantee" style="background: #FFEEF2; padding: 40px 0; border-radius: 0;">
-  <div style="display: flex; align-items: center; max-width: 770px; margin: 0 auto; gap: 20px;">
-    <div style="flex-shrink: 0;">
-      <img src="shield-guarantee-badge.png" alt="Guarantee" style="width: 170px;">
-    </div>
-    <div>
-      <h3 style="color: var(--primary); font-size: 24px; font-weight: 600;">Garantia Incondicional</h3>
-      <p style="color: var(--text-secondary); font-size: 16px;">Full guarantee text with all details...</p>
-    </div>
-  </div>
-</section>
-\`\`\`
-
-PRICING BLOCK EXAMPLE:
-\`\`\`html
-<section data-section="pricing" style="padding: 40px 0 60px; text-align: center;">
-  <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; font-weight: 600; text-decoration: line-through;">Valor total de R$ 394,00</p>
-  <p style="color: var(--text-primary); font-size: 20px; font-weight: 900; text-transform: uppercase; margin-top: -10px;">Por R$ 197,00</p>
-  <h2 style="color: var(--primary); font-size: 40px; font-weight: 600; margin: 0 60px;">Tenha acesso com 50% de desconto hoje</h2>
-  <img src="product-stack.png" alt="Product Stack" style="width: 70%; margin: 30px auto 0;">
-  <a href="#" style="display: inline-block; margin-top: 12px; padding: 16px 40px; background: var(--primary); color: white; border-radius: 50px; font-size: 20px; font-weight: 500; text-transform: uppercase; text-decoration: none;">
-    Inscrever-se Agora
-  </a>
-</section>
-\`\`\`
-
-FOOTER EXAMPLE:
-\`\`\`html
-<footer data-section="footer" style="background: var(--primary); border-radius: 0 0 15px 15px; padding: 10px;">
-  <div style="display: flex; gap: 20px; color: white; max-width: 770px; margin: 0 auto;">
-    <div style="flex: 1;">
-      <h5 style="font-size: 18px;">PIRATARIA É <span style="font-weight: 600;">CRIME</span></h5>
-      <p style="font-size: 12px; font-weight: 300;">Legal disclaimer text...</p>
-    </div>
-    <div style="flex: 1; text-align: center;">
-      <p style="font-size: 12px;">Copyright © 2024 - Company Name<br>Todos os direitos reservados.</p>
-      <p style="font-size: 12px;"><a href="#" style="color: #e8e8e8;">Termos de Uso</a> | <a href="#" style="color: #e8e8e8;">Políticas de Privacidade</a></p>
-    </div>
-  </div>
-</footer>
-\`\`\`
+   - bg-[var(--primary)] text-white py-8
+   - grid grid-cols-1 md:grid-cols-2 gap-6
 
 ═══════════════════════════════════════
 🧹 CONTENT RULES
@@ -360,15 +306,28 @@ FOOTER EXAMPLE:
 ═══════════════════════════════════════
 ⚙️ TECHNICAL RULES
 ═══════════════════════════════════════
-- Single HTML file. ALL CSS in <style> tag. JS at bottom of <body>.
+- Single HTML file. Tailwind via Play CDN. Minimal <style> block only for CSS vars and @keyframes.
 - Google Fonts with display=swap
 - Viewport meta tag, charset UTF-8
-- CSS custom properties for all colors
-- CSS Grid + Flexbox layouts
-- Smooth scroll behavior
-- Responsive: mobile-first with breakpoints at 640px, 768px, 1024px
-- Lazy loading on images: loading="lazy"
+- CSS custom properties for colors (defined in <style>), applied via Tailwind arbitrary values
+- Responsive: mobile-first
+- Lazy loading on images: loading="lazy" (except hero)
 - Semantic HTML: <header>, <main>, <section>, <footer>
+- All JS at bottom of <body>
+
+═══════════════════════════════════════
+🔍 MANDATORY CRITIQUE PASS
+═══════════════════════════════════════
+After generating the full page, you MUST perform a self-review and fix these issues BEFORE returning the output:
+
+1) SPACING CONSISTENCY: Are all sections using py-16 sm:py-20? Are cards using consistent p-6? Fix any inconsistency.
+2) CONTRAST CHECK: Is body text readable against its background? Are CTAs clearly visible? Fix weak contrast.
+3) ALIGNMENT: Are elements properly aligned in grids? Any orphaned elements? Fix misalignment.
+4) MOBILE RESPONSIVENESS: Will the layout break on 375px screens? Are font sizes responsive (text-4xl sm:text-5xl, not fixed px)? Fix any breakage.
+5) TEXT BREATHING: Is there enough whitespace between paragraphs, headings, and sections? Add spacing if text feels cramped.
+6) INLINE STYLE CHECK: Search for any style="" attributes. If found, convert to Tailwind classes. Zero tolerance.
+7) IMAGE ALT CHECK: Every <img> must have a descriptive alt. Fix any missing ones.
+8) FOCUS STATES: Interactive elements must have focus:ring styles. Add if missing.
 
 ═══════════════════════════════════════
 OUTPUT FORMAT
@@ -378,8 +337,10 @@ Return ONLY a JSON object (no markdown fences) with:
   "file_name": "<project-name>-<page_type>.html",
   "html": "<!doctype html>...full premium HTML here...",
   "sections": ["hero", "trust-strip", "problems", ...],
-  "notes": { "sections": [...], "locale_touches": [...], "images_used": [...] }
+  "notes": { "sections": [...], "locale_touches": [...], "images_used": [...], "critique_fixes": [...] }
 }
+
+The "critique_fixes" array must list what you found and fixed during the critique pass.
 
 Generate the page now. Make it ABSOLUTELY STUNNING — the kind of page that makes competitors jealous.`;
 
@@ -398,7 +359,11 @@ RULES:
 - Write content in the same language as the existing section
 - Use real images from Unsplash Source API (https://source.unsplash.com/featured/{width}x{height}/?{keywords}) with niche-relevant keywords
 - Use Lucide icons (<i data-lucide="icon-name">) if icons are needed
-- If new CSS is needed, add it as inline styles or a <style> tag inside the section
+- ALL styling via Tailwind utility classes. NO inline style="" attributes.
+- If the existing section uses inline styles, convert them to Tailwind classes.
+- Every <img> must have a descriptive alt attribute.
+- Use responsive typography: text-4xl sm:text-5xl, NOT fixed px sizes.
+- Maintain consistent spacing: py-16 sm:py-20 for sections, p-6 for cards, gap-6 for grids.
 
 OUTPUT FORMAT:
 Return ONLY a JSON object (no markdown fences) with:
