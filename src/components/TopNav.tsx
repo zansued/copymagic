@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MenuBar } from "@/components/ui/menu-bar";
-import { Map, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, CreditCard, Shield, FolderOpen } from "lucide-react";
+import { Map, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, CreditCard, Shield, FolderOpen, Telescope } from "lucide-react";
 import { useAdmin } from "@/hooks/use-admin";
 
 const menuItems = [
@@ -44,6 +44,13 @@ const menuItems = [
     gradient: "radial-gradient(circle, hsl(262 83% 65% / 0.15) 0%, transparent 70%)",
     iconColor: "text-violet-400",
     dataTour: "nav-dna",
+  },
+  {
+    icon: Telescope,
+    label: "Ofertas",
+    path: "/offer-research",
+    gradient: "radial-gradient(circle, hsl(30 90% 50% / 0.15) 0%, transparent 70%)",
+    iconColor: "text-orange-400",
   },
   {
     icon: Globe,
