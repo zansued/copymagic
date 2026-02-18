@@ -241,17 +241,21 @@ export default function AgentWorkspace() {
   const handleExportPdf = async () => {
     if (!output || !outputRef.current) return;
     try {
+      // Apply print-friendly styles temporarily
+      outputRef.current.classList.add("pdf-export-mode");
       const html2pdf = (await import("html2pdf.js")).default;
       await html2pdf().set({
         margin: [12, 12, 12, 12],
         filename: `${config?.name || "output"}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#0f1117", scrollY: 0 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollY: 0 },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
       }).from(outputRef.current).save();
+      outputRef.current.classList.remove("pdf-export-mode");
       toast({ title: "PDF exportado com sucesso!" });
     } catch {
+      outputRef.current?.classList.remove("pdf-export-mode");
       toast({ title: "Erro ao exportar PDF", variant: "destructive" });
     }
   };
