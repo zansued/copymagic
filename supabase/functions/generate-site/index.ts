@@ -344,26 +344,77 @@ The "critique_fixes" array must list what you found and fixed during the critiqu
 
 Generate the page now. Make it ABSOLUTELY STUNNING — the kind of page that makes competitors jealous.`;
 
-const EDIT_SECTION_PROMPT = `You are an elite web designer at a premium agency. You will receive:
-1) The HTML of a SINGLE SECTION extracted from a landing page
-2) The name/type of that section
-3) An instruction describing what to change
+const EDIT_SECTION_PROMPT = `You are an elite, award-winning web designer at a $500/hr agency.
+You will receive:
+1) The full HTML of the ENTIRE landing page (for context — colors, fonts, design system)
+2) The HTML of a SINGLE SECTION extracted from that page
+3) The name/type of that section
+4) An instruction describing what to change
 
-Your job: modify ONLY this section's HTML according to the instruction.
+Your job: modify ONLY this section's HTML according to the instruction, while IMPROVING the visual quality.
 
-RULES:
-- Return ONLY the modified section HTML (the <section> or element with data-section attribute)
-- Do NOT return a full page — just the section element and its contents
-- Keep the data-section attribute on the root element
-- Make the changes look professional and consistent
-- Write content in the same language as the existing section
-- Use real images from Unsplash Source API (https://source.unsplash.com/featured/{width}x{height}/?{keywords}) with niche-relevant keywords
-- Use Lucide icons (<i data-lucide="icon-name">) if icons are needed
+═══════════════════════════════════════
+⚠️ CRITICAL DESIGN RULES
+═══════════════════════════════════════
+
+UNDERSTAND THE EXISTING DESIGN SYSTEM:
+- Look at the full page HTML to understand the color scheme (CSS custom properties like --primary, --bg-deep, etc.)
+- Match fonts, spacing patterns, and visual style of the rest of the page
+- Your edit must feel like it belongs to the SAME page — consistent, cohesive
+
+WHEN THE USER SAYS "IMPROVE" OR "MAKE BETTER":
+- Add more visual depth: gradients, subtle shadows, layered backgrounds
+- Improve typography hierarchy: bigger headlines, better spacing, add badges/pills
+- Add micro-interactions: hover effects, transitions, subtle animations via Tailwind
+- Improve layout: better use of grid/flex, asymmetric layouts, more whitespace
+- Add visual elements: decorative borders, glows, gradient text, icons
+- Make CTAs more prominent: larger, bolder, with hover effects and shadows
+- NEVER simplify or remove content — always ADD visual richness
+
+STYLING RULES:
 - ALL styling via Tailwind utility classes. NO inline style="" attributes.
-- If the existing section uses inline styles, convert them to Tailwind classes.
-- Every <img> must have a descriptive alt attribute.
-- Use responsive typography: text-4xl sm:text-5xl, NOT fixed px sizes.
-- Maintain consistent spacing: py-16 sm:py-20 for sections, p-6 for cards, gap-6 for grids.
+- If existing section has inline styles, CONVERT them to Tailwind classes.
+- Use Tailwind arbitrary values for CSS vars: bg-[var(--primary)], text-[var(--text-primary)], etc.
+- Responsive: mobile-first (text-xl sm:text-2xl lg:text-3xl pattern)
+- Consistent spacing: py-16 sm:py-20 for sections, p-6 sm:p-8 for cards, gap-6 for grids
+
+TYPOGRAPHY (responsive, NEVER fixed px):
+- Hero headlines: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight
+- Section titles: text-3xl sm:text-4xl font-bold tracking-tight
+- Subheadings: text-lg sm:text-xl text-[var(--text-secondary)]
+- Body: text-base sm:text-lg leading-relaxed
+
+IMAGES:
+- Use https://picsum.photos/seed/{keyword}/{width}/{height} for generic images
+- Use https://i.pravatar.cc/200?img={number} for portrait avatars
+- NEVER use source.unsplash.com (it's deprecated and returns 404)
+- Every <img> must have descriptive alt attribute and loading="lazy"
+- Use object-cover and overflow-hidden on containers
+
+ICONS:
+- Use Lucide icons: <i data-lucide="icon-name" class="w-5 h-5"></i>
+- Don't forget: the page already has Lucide CDN loaded
+
+INTERACTIVE ELEMENTS:
+- Hover effects on cards: hover:-translate-y-1 hover:shadow-xl transition-all duration-300
+- Button hovers: hover:scale-105 hover:shadow-lg transition-transform duration-200
+- Image hovers: hover:scale-105 on img, overflow-hidden on parent
+
+CONTENT RULES:
+- PRESERVE all existing text content — do NOT remove or summarize
+- You may ADD content (more bullets, more detail) but never subtract
+- Write in the SAME language as the existing section
+- Keep the data-section attribute on the root element
+
+═══════════════════════════════════════
+MANDATORY SELF-REVIEW BEFORE RETURNING
+═══════════════════════════════════════
+1) Does the edited section look BETTER than before? If not, add more visual polish.
+2) Is spacing consistent with the rest of the page?
+3) Are there any inline style="" attributes? Convert to Tailwind.
+4) Is typography responsive? No fixed px sizes.
+5) Do all images have alt attributes?
+6) Does it match the page's color system (CSS vars)?
 
 OUTPUT FORMAT:
 Return ONLY a JSON object (no markdown fences) with:
@@ -975,16 +1026,27 @@ serve(async (req) => {
       const originalSectionHtml = sectionMatch[1].trim();
       console.log(`Editing section "${sectionName}" (${originalSectionHtml.length} chars) with instruction: ${instruction.slice(0, 100)}...`);
 
+      // Extract the <style> block and tailwind config for context
+      const styleMatch = currentHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+      const tailwindConfigMatch = currentHtml.match(/<script>\s*tailwind\.config\s*=\s*(\{[\s\S]*?\})\s*<\/script>/i);
+      const designContext = [
+        styleMatch ? `Design System (CSS vars):\n${styleMatch[1].trim()}` : "",
+        tailwindConfigMatch ? `Tailwind Config:\n${tailwindConfigMatch[1].trim()}` : "",
+      ].filter(Boolean).join("\n\n");
+
       const editPrompt = `Section type: data-section="${sectionName}"
 
-Current section HTML:
+${designContext ? `═══ PAGE DESIGN CONTEXT ═══\n${designContext}\n` : ""}
+═══ CURRENT SECTION HTML ═══
 \`\`\`html
 ${originalSectionHtml}
 \`\`\`
 
-Instruction: ${instruction}
+═══ USER INSTRUCTION ═══
+${instruction}
 
-Modify this section according to the instruction. Return ONLY the modified section element. Return ONLY valid JSON.`;
+Modify this section according to the instruction. The result must look PREMIUM and PROFESSIONAL — like a $50,000 agency page.
+Return ONLY valid JSON with "section_html" and "changes" keys.`;
 
       const rawContent = await callOpenAI(EDIT_SECTION_PROMPT, editPrompt);
       const jsonStr = parseJsonFromAI(rawContent);
