@@ -325,41 +325,69 @@ serve(async (req) => {
 
 ${culturalPrompt}
 
-REGRAS GERAIS:
-1) Use apenas dados públicos fornecidos na entrada.
-2) Não invente métricas privadas (ROAS, lucro, CPA real). Se não existir, diga "indisponível".
-3) Se um campo não existir, retorne null — não penalize por falta de dado.
+═══════════════════════════════════════
+OBJETIVO
+═══════════════════════════════════════
+1) Analisar tendências do nicho a partir do CONTEXTO_WEB (dados de pesquisa web, Google Trends, plataformas).
+2) Extrair OFFER CARDS e FUNIL exclusivamente de ANUNCIOS_META (dados oficiais da Meta Graph API).
 
-Para cada anúncio encontrado, extraia um OFFER CARD estruturado:
-- promise: benefício principal (1 linha)
-- mechanism: como a promessa é atingida (método, sistema, ingrediente)
-- proof: evidências citadas (números, depoimentos, garantia)
-- cta: chamada para ação
-- angle: categoria do apelo (dor, desejo, objeção, urgência, prova social, autoridade, curiosidade)
-- format: tipo do criativo (UGC, tutorial, demo, carrossel, imagem estática, antes/depois, storytelling)
+═══════════════════════════════════════
+REGRAS INVIOLÁVEIS
+═══════════════════════════════════════
+- NÃO invente ROAS, lucro, CPA, faturamento, volume de vendas, receita ou qualquer métrica financeira privada.
+- NÃO invente URLs. Se não existir no input, use null.
+- Se um campo não estiver presente no input, retorne null — NUNCA penalize por ausência de dado.
+- ANUNCIOS_META é a ÚNICA fonte para o array "anuncios_encontrados". Se não houver dados de ANUNCIOS_META, retorne array vazio.
+- CONTEXTO_WEB é a ÚNICA fonte para "tendencias" e "ofertas_escaladas" (somente quando houver evidência concreta).
+- Mantenha os campos ad_archive_id, url_destino e url_anuncio EXATAMENTE como recebidos dos dados. Nunca os modifique.
 
-Para cada anúncio com link, mapeie o FUNIL:
-- url_destino: link do anúncio
-- platform_guess: Shopify, Hotmart, Monetizze, Kiwify ou null
-- checkout_present: true/false/unknown
-- funnel_map: "Ad -> Landing -> Checkout"
+═══════════════════════════════════════
+TAREFAS
+═══════════════════════════════════════
 
-Calcule um SCALE SCORE (0-10) baseado em SINAIS DE ESCALA REAIS:
-- Longevidade (dias_ativo): anúncios rodando há 14+ dias provavelmente são lucrativos — ninguém paga por anúncio que não converte. Este é o SINAL MAIS FORTE de escala. Peso: 40%
-- Densidade do anunciante: se o mesmo anunciante tem múltiplos anúncios ativos, está escalando. Peso: 25%
-- Variações de criativo: diferentes textos/imagens para o mesmo produto indicam testes A/B e escala. Peso: 20%
-- Recorrência da promessa/mecanismo: mesma promessa aparecendo em múltiplos anunciantes indica nicho validado. Peso: 15%
+A) TENDÊNCIAS (fonte: CONTEXTO_WEB apenas):
+   - Gere um resumo com termos relacionados ao nicho
+   - Extraia de 2 a 5 insights baseados em evidências do contexto
+   - Avalie interesse_crescente, sazonalidade e volume_estimado
 
-PRIORIZE anúncios com mais dias ativos. Um anúncio rodando há 30+ dias é muito mais valioso que um de 2 dias.
+B) PARA CADA ITEM EM ANUNCIOS_META relevante ao nicho, gere:
+   
+   b.1) OFFER CARD:
+   - promise: benefício principal prometido (1 linha extraída do texto do anúncio)
+   - mechanism: como a promessa é atingida (método, sistema, ingrediente — extraído do texto)
+   - proof: array de evidências citadas no texto (números, depoimentos, garantia). Se não houver, []
+   - angle: array de categorias do apelo (dor, desejo, objeção, urgência, prova social, autoridade, curiosidade)
+   - format: tipo do criativo inferido (UGC, tutorial, demo, carrossel, imagem estática, antes/depois, storytelling)
+   - compliance_note: "ok" ou "atenção: [motivo]"
+   
+   b.2) FUNIL:
+   - platform_guess: inferir por heurística de URL (Shopify, Hotmart, Monetizze, Kiwify, ou null se não for possível)
+   - checkout_present: "unknown" se não houver evidência, true/false somente se a URL indicar claramente
+   - funnel_map: string descritiva ex: "Ad -> Landing -> Checkout" ou "Ad -> Landing"
+   
+   b.3) SINAIS DE ESCALA:
+   - Explique usando APENAS dados disponíveis: dias_ativo, presença de múltiplos criativos do mesmo anunciante, variações de texto
+   - NUNCA cite métricas que não existam nos dados (sem ROAS, sem CPA, sem receita)
+   - scale_score (0-10) baseado em: Longevidade 40%, Densidade do anunciante 25%, Variações de criativo 20%, Recorrência de promessa 15%
 
-RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, apenas o JSON puro:
+═══════════════════════════════════════
+FILTRO DE RELEVÂNCIA (OBRIGATÓRIO)
+═══════════════════════════════════════
+- Antes de incluir qualquer anúncio, verifique se o conteúdo (texto, anunciante, CTA, URL destino) é SEMANTICAMENTE RELEVANTE para o nicho "${niche}".
+- Descarte anúncios que claramente não pertencem ao nicho pesquisado.
+- Se após filtrar não restarem anúncios relevantes, retorne array vazio em anuncios_encontrados e ajuste o veredicto explicando a ausência.
+
+═══════════════════════════════════════
+FORMATO DE SAÍDA
+═══════════════════════════════════════
+Retorne SOMENTE JSON válido, sem markdown, sem backticks, sem texto antes ou depois. Apenas o JSON puro:
 
 {
   "score_oportunidade": 1-10,
   "veredicto": "frase curta sobre viabilidade do nicho",
   "tendencias": {
     "interesse_crescente": true/false,
-    "sazonalidade": "descrição da sazonalidade se houver",
+    "sazonalidade": "descrição ou null",
     "volume_estimado": "alto/médio/baixo",
     "termos_relacionados": ["termo1", "termo2", "termo3"],
     "insights": ["insight 1", "insight 2"]
@@ -374,26 +402,26 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
   },
   "anuncios_encontrados": [
     {
-      "anunciante": "nome do anunciante ou página",
-      "texto_anuncio": "texto principal do anúncio (primeiras linhas)",
-      "plataforma": "Facebook/Instagram",
-      "status": "Ativo",
-      "data_inicio": "data estimada se disponível",
+      "anunciante": "nome exato do ANUNCIOS_META",
+      "texto_anuncio": "texto exato do ANUNCIOS_META",
+      "plataforma": "plataforma exata do ANUNCIOS_META",
+      "status": "status exato",
+      "data_inicio": "data exata ou null",
       "dias_ativo": 0,
-      "cta": "botão de ação",
-      "url_destino": "URL da página de vendas",
-      "url_anuncio": "link para o anúncio na Meta Ad Library",
-      "tipo_midia": "vídeo/imagem/carrossel",
-      "gancho": "frase de gancho principal",
+      "cta": "CTA exato ou null",
+      "url_destino": "URL exata ou null",
+      "url_anuncio": "URL exata ou null",
+      "tipo_midia": "inferido ou null",
+      "gancho": "gancho extraído ou null",
       "scale_score": 0.0,
-      "sinais_escala": ["longevidade: X dias", "múltiplos criativos", "etc"],
+      "sinais_escala": ["longevidade: X dias", "etc"],
       "offer_card": {
         "promise": "...",
         "mechanism": "...",
-        "proof": ["..."],
-        "angle": ["..."],
+        "proof": [],
+        "angle": [],
         "format": "...",
-        "compliance_note": "ok | atenção: ..."
+        "compliance_note": "ok"
       },
       "funnel": {
         "platform_guess": null,
@@ -404,13 +432,13 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
   ],
   "ofertas_escaladas": {
     "tipos_produto": ["tipo 1", "tipo 2"],
-    "faixa_preco": "R$ X a R$ Y",
+    "faixa_preco": "R$ X a R$ Y ou null",
     "modelos_funil": ["modelo 1", "modelo 2"],
-    "diferenciais_vencedores": ["diferencial 1", "diferencial 2"],
+    "diferenciais_vencedores": ["diferencial 1"],
     "exemplos": [
       {"nome": "nome da oferta", "tipo": "curso/mentoria/etc", "destaque": "por que está escalando"}
     ],
-    "insights": ["insight 1", "insight 2"]
+    "insights": ["insight 1"]
   },
   "recomendacao_oferta": {
     "tipo_ideal": "tipo de produto recomendado",
@@ -421,20 +449,11 @@ RESPONDA EXCLUSIVAMENTE em formato JSON válido, sem markdown, sem backticks, ap
     "modelo_funil": "tipo de funil recomendado",
     "gancho_principal": "headline principal do anúncio"
   }
-}
-
-IMPORTANTE para "anuncios_encontrados": 
-- Os dados de anúncios reais foram obtidos pela Meta Graph API oficial. USE EXATAMENTE os dados fornecidos (anunciante, texto, URLs, datas).
-- NÃO invente URLs nem links. Se o campo url_destino ou url_anuncio estiver como "N/A" ou null, retorne null.
-- Para cada anúncio real, gere o offer_card e funnel baseado no texto e dados fornecidos.
-- Se não houver anúncios reais nos dados, retorne array vazio em anuncios_encontrados. NÃO gere exemplos fictícios.
-- Mantenha os campos ad_archive_id, url_destino e url_anuncio exatamente como recebidos dos dados.
-- FILTRO DE RELEVÂNCIA OBRIGATÓRIO: Antes de incluir qualquer anúncio, verifique se o conteúdo (texto, anunciante, CTA, URL destino) é SEMANTICAMENTE RELEVANTE para o nicho "${niche}". Descarte anúncios que claramente não pertencem ao nicho pesquisado — por exemplo, se o nicho é "Agentes de IA" e o anúncio é sobre novelas, romance ou entretenimento não relacionado, EXCLUA-O do resultado. Inclua apenas anúncios que tenham relação direta com o tema pesquisado.
-- Se após filtrar não restarem anúncios relevantes, retorne array vazio e ajuste o veredicto explicando que não foram encontrados anúncios relevantes para o nicho.`
+}`
           },
           {
             role: "user",
-            content: `Nicho pesquisado: "${niche}"\n\nDados coletados:\n\n${fullContext}${metaAdsContext}\n\n${realAds.length > 0 ? `DADOS ESTRUTURADOS DOS ANÚNCIOS (use estes dados exatos):\n${JSON.stringify(realAds, null, 2)}` : "Nenhum anúncio real encontrado via Meta API."}`
+            content: `Nicho pesquisado: "${niche}"\n\n═══ CONTEXTO_WEB (use APENAS para tendências e ofertas_escaladas) ═══\n\n${fullContext}\n\n═══ ANUNCIOS_META (ÚNICA fonte para anuncios_encontrados) ═══\n\n${realAds.length > 0 ? `${metaAdsContext}\n\nDADOS ESTRUTURADOS:\n${JSON.stringify(realAds, null, 2)}` : "Nenhum anúncio encontrado via Meta API. Retorne anuncios_encontrados como array vazio."}`
           }
         ],
         temperature: 0.7,
