@@ -128,10 +128,22 @@ The page MUST include these interactive elements (vanilla JS):
    - Any number/stat in the copy should count up when scrolled into view
    - Smooth easing animation over 2 seconds
 
-3) TESTIMONIAL CAROUSEL:
-   - Auto-rotating testimonials with dots/indicators
-   - Smooth CSS transitions between slides
-   - Pause on hover
+3) RETRO TESTIMONIAL CAROUSEL (MANDATORY DESIGN):
+   - Horizontal scrollable carousel with left/right arrow buttons
+   - Cards: h-[500px] md:h-[550px] w-80 md:w-96, rounded-3xl with a warm gradient background (bg-gradient-to-b from-[#f2f0eb] to-[#fff9eb])
+   - Each card has a subtle background image overlay at 30% opacity for texture
+   - Profile image: centered, rounded-full w-[90px] h-[90px] md:w-[150px] md:h-[150px], with a 3px solid border, sepia/desaturated filter (filter: saturate(0.2) sepia(0.46))
+   - Below image: testimonial quote text in a serif/italic font (use Google Font: Playfair Display or similar), text-2xl, lowercase style, centered
+   - Below quote: person name in italic, followed by designation with underline-offset-8
+   - A large Quote icon (<i data-lucide="quote" class="...">) at top or decorating the card
+   - Arrow buttons: rounded-full, bg-[#4b3f33] text-[#f2f0eb], h-10 w-10, positioned at bottom-right of carousel, with disabled:opacity-50
+   - Scroll container: overflow-x-auto with [scrollbar-width:none] to hide scrollbar, scroll-smooth
+   - Hover effect on cards: slight 3D rotation (transform: rotateX(2deg) rotateY(2deg) rotate(3deg) scale(1.02)) with transition duration 300ms
+   - Click-to-expand: clicking a card opens a full-screen overlay with the complete testimonial text, a close (X) button, and the same warm gradient background
+   - The expanded view: max-w-5xl mx-auto, rounded-3xl, p-4 md:p-10, with the full quote in text-3xl serif font
+   - Backdrop: backdrop-blur-lg on the overlay background
+   - Staggered entrance animation: each card fades in with 200ms delay per index
+   - Use vanilla JS for scroll behavior, expand/collapse, and keyboard Escape to close
 
 4) FAQ ACCORDION:
    - Smooth height animation on open/close
@@ -268,9 +280,21 @@ E) FEATURES/BENEFITS (data-section="features")
    - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
    - Each card with icon + title + description
 
-F) SOCIAL PROOF (data-section="social-proof")
-   - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
-   - Each card: rounded-2xl avatar (w-16 h-16 rounded-full object-cover border-2 border-[var(--primary)]) + quote + name
+F) SOCIAL PROOF / TESTIMONIALS (data-section="social-proof")
+   - RETRO TESTIMONIAL CAROUSEL LAYOUT (mandatory):
+   - Container: max-w-6xl mx-auto, with a section heading above
+   - Horizontal scroll carousel with flex, gap-4, overflow-x-auto, [scrollbar-width:none], scroll-smooth
+   - Each testimonial card: rounded-3xl, h-[500px] md:h-[550px], w-80 md:w-96, bg-gradient-to-b from-[#f2f0eb] to-[#fff9eb], shadow-md, relative, overflow-hidden
+   - Background texture: an absolute-positioned image at opacity-30 covering the card
+   - Profile avatar: centered, w-[90px] h-[90px] md:w-[150px] md:h-[150px], rounded-full, border-[3px] border-solid border-[rgba(59,59,59,0.6)], filter saturate(0.2) sepia(0.46)
+   - Quote text: text-2xl, serif/italic font (Playfair Display), text-[rgba(31,27,29,0.7)], centered, lowercase, max 100 chars with "..." truncation
+   - Name: text-2xl, font-thin, italic, lowercase, centered, with period at end
+   - Designation: text-base, italic, underline underline-offset-8 decoration-1
+   - Navigation arrows: two rounded-full buttons (bg-[#4b3f33] text-[#f2f0eb] h-10 w-10) at bottom-right with ArrowLeft/ArrowRight icons
+   - Hover effect: transform rotateX(2deg) rotateY(2deg) rotate(3deg) scale(1.02) with transition 300ms
+   - Click expands to fullscreen overlay: backdrop-blur-lg, max-w-5xl centered, same warm gradient, close X button (bg-[#4b3f33] rounded-full), full quote in text-3xl serif
+   - Staggered fade-in animation: each card animates in with 200ms * index delay
+   - Use vanilla JS for: horizontal scroll with arrow buttons, expand/collapse card, Escape key to close, body scroll lock when expanded
 
 G) PRICING/OFFER (data-section="pricing")
    - Centered layout, max-w-3xl mx-auto
