@@ -1,83 +1,85 @@
 
+# Catalogo de Padroes por Secao - Componentes 21dev
 
-# Importar Padroes do Bolt.diy para Refinar o Landing Builder
+## Objetivo
 
-## Contexto
+Adicionar um **catalogo de referencia visual** ao `EDIT_SECTION_PROMPT` (e parcialmente ao `HTML_SYSTEM_PROMPT`) com padroes HTML/Tailwind extraidos dos componentes 21dev fornecidos. Isso permite que o agente de edicao tenha exemplos concretos de como construir cada tipo de secao com qualidade premium.
 
-Analisei o projeto gerado pelo seu Bolt.diy e o comparei com o sistema atual de geracao do `generate-site`. O Bolt produziu um projeto **React + Tailwind componentizado** (Navbar, Hero, ProblemSection, OpportunitySection, etc.), enquanto nosso sistema gera **HTML monolitico** com Tailwind via CDN.
+## Componentes Recebidos e Mapeamento
 
-## Diagnostico
-
-Apos analisar os dois, identifiquei os principais padroes do Bolt que nosso prompt **nao cobre** e que melhorariam a qualidade:
-
-| Padrao Bolt.diy | Nosso sistema atual |
-|---|---|
-| Gradientes em botoes (from-purple-600 to-blue-500) | Cor solida via CSS var |
-| Blob animations com keyframes + delay classes | Floating orbs generico no prompt |
-| Trust bar com numeros animados inline | Mencionado mas sem estrutura detalhada |
-| Cards com bgColor por categoria (bg-purple-50, bg-blue-50) | Todos cards com mesmo bg-card |
-| Grid "For who / Not for who" com icones coloridos | Existe no PageSpec mas sem orientacao visual |
-| Pricing com toggle mensal/anual + bonus com timer | Pricing basico com anchoring |
-| Navbar fixa com backdrop-blur + mobile drawer | Nao mencionado no prompt |
-| Gradiente text-transparent em headings estrategicos | Nao orientado no prompt |
+| Componente 21dev | Secao no Landing Builder | Uso |
+|---|---|---|
+| AnimatedTestimonials | `social-proof` | Carrossel de depoimentos com foto, nome, cargo e animacao de rotacao 3D |
+| FeaturesSectionWithHoverEffects | `features` / `solution` | Grid 4x2 com hover effects, bordas condicionais e gradientes |
+| GlowingEffect | Todas as secoes (cards) | Efeito de brilho reativo ao cursor com conic-gradient |
+| LinkPreview | `hero` / `final-cta` | Links com preview de imagem on hover |
+| TypewriterEffect | `hero` | Headlines com efeito de digitacao animada |
 
 ## Plano de Implementacao
 
-### 1. Enriquecer o HTML_SYSTEM_PROMPT com padroes extraidos do Bolt
+### 1. Criar bloco COMPONENT_CATALOG no EDIT_SECTION_PROMPT
 
-Adicionar novas secoes ao prompt existente em `supabase/functions/generate-site/index.ts`:
+Adicionar uma nova secao apos "BOLT-LEVEL PREMIUM PATTERNS" (linha ~494) com snippets HTML/Tailwind puros (adaptados de React para HTML estatico) organizados por tipo de secao:
 
-**A) NAVBAR (nova secao obrigatoria)**
-- Navbar fixa com `bg-white/95 backdrop-blur-md`, logo com icone + nome, navegacao desktop com anchors, botao CTA gradient, menu hamburger mobile com drawer animado
+**A) social-proof - Animated Testimonials Pattern**
+- Layout com imagem a esquerda (stack rotacionado com perspectiva CSS) e texto a direita
+- Navegacao com setas prev/next
+- Animacao de entrada por palavra no depoimento (CSS stagger)
+- Avatar com rotate3d e sombra
 
-**B) GRADIENT TEXT** 
-- Adicionar instrucao para usar `bg-gradient-to-r bg-clip-text text-transparent` em headlines estrategicas (hero, titulos de secao)
+**B) features - Hover Grid Pattern**
+- Grid de 4 colunas com bordas compartilhadas (border-right + border-bottom condicionais)
+- Hover com gradiente radial: `hover:bg-[radial-gradient(var(--mask-size)_circle_at_var(--mouse-x)_var(--mouse-y),...]`
+- Icones no topo + titulo + descricao com hierarquia clara
+- Gradientes separados para linhas superiores vs inferiores
 
-**C) BLOB ANIMATIONS**
-- Adicionar keyframes blob e classes `animation-delay-2000` / `animation-delay-4000` com bolhas decorativas no hero (como o Bolt fez)
+**C) Qualquer card - Glowing Border Pattern**
+- Borda com `conic-gradient` reativa ao cursor via CSS custom properties (`--start`, `--active`)
+- Fallback para glow estatico quando cursor fora de alcance
+- Versao simplificada via CSS puro (sem JS reativo) para HTML estatico
 
-**D) CARDS COM COR CATEGORIZADA**
-- Instruir que cards de features/problemas usem cores distintas por categoria (bg-purple-50, bg-blue-50, bg-green-50, bg-orange-50) em vez de cor unica
+**D) hero - Typewriter Headlines**
+- CSS keyframes para efeito typewriter com cursor piscante
+- `animation: typing Xs steps(N), blink 0.75s step-end infinite`
+- `overflow: hidden; white-space: nowrap; border-right: 3px solid`
 
-**E) TRUST BAR NUMERICA**
-- Adicionar padrao de trust strip com numeros grandes + label (ex: "100.000+\nConteudos Gerados")
+### 2. Adaptar snippets de React para HTML puro
 
-**F) PRICING COM TOGGLE + BONUS**
-- Instruir pricing com switch mensal/anual, tag "Popular", lista de features com check/x, bonus section com timer de urgencia
+Os componentes usam React/Next.js (useState, framer-motion, Image). No catalogo, serao convertidos para:
+- HTML semantico com classes Tailwind
+- CSS keyframes injetados no `<style>` para animacoes (typewriter, glow, stagger)
+- JS vanilla minimo no final do body (para interatividade como carrossel de testimonials e glow tracking)
 
-**G) FOR WHO / NOT FOR WHO**
-- Cards lado a lado com icone verde (CheckCircle) vs vermelho (XCircle), com gradient backgrounds distintos (green-50 vs red-50)
+### 3. Atualizar HTML_SYSTEM_PROMPT
 
-### 2. Atualizar o EDIT_SECTION_PROMPT
+Adicionar mencoes aos novos padroes nas secoes relevantes do prompt principal:
+- Na secao de social-proof: referenciar o padrao AnimatedTestimonials
+- Na secao de features: referenciar o padrao HoverGrid
+- No hero: referenciar o padrao TypewriterHeadline
 
-Adicionar os mesmos padroes visuais como referencia ao prompt de edicao de secoes, para manter consistencia quando o usuario edita partes da pagina.
+### 4. Atualizar postProcessHtml()
 
-### 3. Atualizar o postProcessHtml()
-
-Injetar os keyframes de blob animation e delay classes quando nao presentes, similar ao que ja faz com IntersectionObserver.
+Adicionar keyframes CSS adicionais no head quando detectar patterns relevantes:
+- `@keyframes typing` para typewriter
+- CSS vars para glowing effect (`--start`, `--active`, `--spread`)
 
 ---
 
-### Detalhes Tecnicos
+## Detalhes Tecnicos
 
 **Arquivo modificado:** `supabase/functions/generate-site/index.ts`
 
-**Secoes do prompt a expandir:**
-- `HTML_SYSTEM_PROMPT` (linhas 14-369): Adicionar ~80 linhas com os novos padroes
-- `EDIT_SECTION_PROMPT` (linhas 371-448): Adicionar ~20 linhas de referencia
-- `postProcessHtml()` (linhas 885-939): Adicionar blob keyframes
-
-**Nenhuma mudanca no frontend** -- as melhorias sao todas no prompt de geracao.
+**Locais de edicao:**
+- `EDIT_SECTION_PROMPT` (linhas 487-510): Expandir "BOLT-LEVEL PREMIUM PATTERNS" com o catalogo completo de snippets
+- `HTML_SYSTEM_PROMPT` (linhas ~340-383): Adicionar referencias aos novos padroes nas secoes de social-proof, features e hero
+- `postProcessHtml()`: Adicionar keyframes de typewriter e glowing vars
 
 **Deploy:** Edge function `generate-site` sera redeployada automaticamente.
 
-### Resultado Esperado
+## Resultado Esperado
 
-As proximas geracoes de landing pages terao:
-- Visual mais rico com gradientes e cores categorizadas
-- Navbar profissional fixa
-- Animacoes decorativas (blobs, delays)
-- Pricing mais completo com toggle e bonus
-- Secoes "para quem e / para quem nao e" visualmente distintas
-- Qualidade visual mais proxima do que o Bolt.diy produz
-
+Ao editar uma secao (ex: clicar em "social-proof" e pedir "melhore"), o agente tera snippets concretos de referencia para gerar:
+- Testimonials com layout foto+texto animado em vez de cards simples
+- Features com grid hover-gradient em vez de cards genericos
+- Heroes com headline typewriter em vez de texto estatico
+- Cards com bordas glowing em vez de sombras comuns
