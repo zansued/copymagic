@@ -162,11 +162,15 @@ export default function BrandProfiles() {
     let filled = 0;
     let total = 0;
     for (const section of PROFILE_SECTIONS) {
-      const sectionData = (profile[section.key] || {}) as Record<string, string>;
+      const sectionData = (profile[section.key] || {}) as Record<string, unknown>;
       for (const field of section.fields) {
         total++;
         const val = sectionData[field.key];
-        if (typeof val === "string" && val.trim()) filled++;
+        if (typeof val === "string" && val.trim()) {
+          filled++;
+        } else if (Array.isArray(val) && val.length > 0) {
+          filled++;
+        }
       }
     }
     return total > 0 ? Math.round((filled / total) * 100) : 0;
@@ -337,8 +341,8 @@ export default function BrandProfiles() {
                     {/* Section badges */}
                     <div className="flex flex-wrap gap-1.5">
                       {PROFILE_SECTIONS.map((section) => {
-                        const sectionData = (profile[section.key] || {}) as Record<string, string>;
-                        const hasSomeContent = Object.values(sectionData).some((v) => typeof v === "string" && v.trim());
+                        const sectionData = (profile[section.key] || {}) as Record<string, unknown>;
+                        const hasSomeContent = Object.values(sectionData).some((v) => (typeof v === "string" && v.trim()) || (Array.isArray(v) && v.length > 0));
                         return (
                           <span
                             key={section.key}

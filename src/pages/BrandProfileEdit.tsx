@@ -186,8 +186,10 @@ export default function BrandProfileEdit() {
           {PROFILE_SECTIONS.map((section, i) => {
             const sectionData = sections[section.key] || {};
             const filledFields = section.fields.filter((f) => {
-              const v = sectionData[f.key];
-              return typeof v === "string" && v.trim() !== "";
+              const v = (sectionData as Record<string, unknown>)[f.key];
+              if (typeof v === "string") return v.trim() !== "";
+              if (Array.isArray(v)) return v.length > 0;
+              return false;
             }).length;
             const totalFields = section.fields.length;
 
@@ -250,25 +252,29 @@ export default function BrandProfileEdit() {
             </div>
 
             <div className="space-y-6">
-              {currentSection.fields.map((field) => (
+              {currentSection.fields.map((field) => {
+                const rawVal = currentData[field.key];
+                const displayVal = Array.isArray(rawVal) ? (rawVal as string[]).join("\n") : (rawVal || "");
+                return (
                 <div key={field.key} className="space-y-2">
                   <label className="text-sm font-medium text-foreground">{field.label}</label>
                   {field.multiline ? (
                     <Textarea
-                      value={currentData[field.key] || ""}
+                      value={displayVal}
                       onChange={(e) => updateField(currentSection.key, field.key, e.target.value)}
                       placeholder={field.placeholder}
                       className="min-h-[140px] text-sm leading-relaxed resize-y"
                     />
                   ) : (
                     <Input
-                      value={currentData[field.key] || ""}
+                      value={displayVal}
                       onChange={(e) => updateField(currentSection.key, field.key, e.target.value)}
                       placeholder={field.placeholder}
                     />
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Section navigation */}
