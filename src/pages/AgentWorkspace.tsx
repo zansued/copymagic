@@ -246,8 +246,9 @@ export default function AgentWorkspace() {
         margin: [12, 12, 12, 12],
         filename: `${config?.name || "output"}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#0f1117" },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#0f1117", scrollY: 0 },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
       }).from(outputRef.current).save();
       toast({ title: "PDF exportado com sucesso!" });
     } catch {
@@ -323,7 +324,7 @@ export default function AgentWorkspace() {
                     value={inputs[input.key] || ""}
                     onChange={(e) => setInput(input.key, e.target.value)}
                     placeholder={input.placeholder}
-                    className={`text-sm leading-relaxed ${input.required ? "min-h-[160px]" : "min-h-[80px]"}`}
+                    className={`text-sm leading-relaxed resize ${input.required ? "min-h-[160px]" : "min-h-[80px]"}`}
                   />
                 )}
 
@@ -444,24 +445,12 @@ export default function AgentWorkspace() {
               )}
             </div>
 
-            <div
-              ref={outputRef}
-              className="premium-card p-6 min-h-[600px] max-h-[80vh] overflow-y-auto"
-            >
+            {/* Scrollable view container */}
+            <div className="premium-card min-h-[600px] max-h-[80vh] overflow-y-auto">
+              {/* PDF capture container - no overflow constraints */}
+              <div ref={outputRef} className="p-6">
               {output ? (
-                <div className="prose prose-invert prose-sm max-w-none
-                  prose-headings:font-bold prose-headings:tracking-tight
-                  prose-h1:text-xl prose-h1:bg-gradient-to-r prose-h1:from-primary prose-h1:to-accent-foreground prose-h1:bg-clip-text prose-h1:text-transparent prose-h1:mb-4 prose-h1:pb-2 prose-h1:border-b prose-h1:border-border
-                  prose-h2:text-lg prose-h2:text-primary prose-h2:mt-6 prose-h2:mb-3
-                  prose-h3:text-base prose-h3:text-foreground prose-h3:mt-4 prose-h3:mb-2
-                  prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-3
-                  prose-strong:text-foreground prose-strong:font-semibold
-                  prose-li:text-muted-foreground prose-li:leading-relaxed
-                  prose-ul:space-y-1 prose-ol:space-y-1
-                  prose-li:marker:text-primary
-                  prose-hr:border-border prose-hr:my-6
-                  prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:text-muted-foreground
-                ">
+                <div className="prose-premium max-w-none">
                   <ReactMarkdown>{output}</ReactMarkdown>
                 </div>
               ) : (
@@ -476,6 +465,7 @@ export default function AgentWorkspace() {
               {isGenerating && (
                 <span className="inline-block w-2 h-5 bg-primary animate-pulse ml-1" />
               )}
+              </div>
             </div>
           </div>
         </div>
