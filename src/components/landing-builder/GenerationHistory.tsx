@@ -30,6 +30,7 @@ export interface SiteGeneration {
 
 interface GenerationHistoryProps {
   projectId: string;
+  projectName?: string;
   onLoad: (gen: SiteGeneration) => void;
   refreshKey?: number;
 }
@@ -41,7 +42,7 @@ const TEMPLATE_LABELS: Record<string, string> = {
   "upsell-focus": "Upsell Focus",
 };
 
-export function GenerationHistory({ projectId, onLoad, refreshKey }: GenerationHistoryProps) {
+export function GenerationHistory({ projectId, projectName, onLoad, refreshKey }: GenerationHistoryProps) {
   const { user } = useAuth();
   const [generations, setGenerations] = useState<SiteGeneration[]>([]);
   const [loading, setLoading] = useState(false);
@@ -123,7 +124,7 @@ export function GenerationHistory({ projectId, onLoad, refreshKey }: GenerationH
                       disabled={!gen.generated_html}
                     >
                       <p className="text-xs font-medium text-foreground truncate">
-                        {TEMPLATE_LABELS[gen.template_key] || gen.template_key}
+                        {projectName ? `${projectName} · ` : ""}{TEMPLATE_LABELS[gen.template_key] || gen.template_key}
                       </p>
                       <p className="text-[10px] text-muted-foreground">{dateStr}</p>
                     </button>
