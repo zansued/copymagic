@@ -1560,7 +1560,7 @@ Now review and polish the FULL page HTML below. Apply only the fixes from your c
 ${currentHtml}
 \`\`\``;
 
-      const rawContent = await callOpenAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, 32000);
+      const rawContent = await callOpenAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, 16384);
       const jsonStr = parseJsonFromAI(rawContent);
 
       let reviewedHtml: string;
