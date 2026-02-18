@@ -328,6 +328,60 @@ K) FOOTER (data-section="footer")
 - Preserve ALL copy content — do NOT summarize long sections
 
 ═══════════════════════════════════════
+🚀 BOLT-LEVEL PREMIUM PATTERNS (MANDATORY)
+═══════════════════════════════════════
+Apply these advanced visual patterns extracted from top-tier agency builds:
+
+A) FIXED NAVBAR (every page MUST have this):
+- <nav> fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md shadow-sm (light) or bg-[var(--bg-deep)]/95 backdrop-blur-md border-b border-[var(--border)] (dark)
+- Logo: flex items-center gap-2 — icon (<i data-lucide="zap">) + brand name in font-bold text-xl
+- Desktop nav: hidden md:flex items-center gap-6 with anchor links to sections (href="#hero", etc.)
+- CTA button in nav: bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] text-white px-6 py-2 rounded-full text-sm font-semibold hover:shadow-lg transition-all
+- Mobile: hamburger button (md:hidden) that toggles a drawer overlay — fixed inset-0 bg-black/50 backdrop-blur-sm with a slide-in panel (bg-white or bg-[var(--bg-deep)]) containing vertical nav links + CTA
+- JS: toggle mobile menu open/close, close on link click or backdrop click
+
+B) GRADIENT TEXT ON STRATEGIC HEADLINES:
+- Hero headline and key section titles MUST use: bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] bg-clip-text text-transparent
+- Use sparingly (hero + 1-2 section titles max) for impact, not on every heading
+
+C) BLOB ANIMATIONS IN HERO:
+- Add 2-3 decorative blobs in the hero section as absolutely positioned divs:
+  <div class="absolute top-20 left-10 w-72 h-72 bg-[var(--primary)] rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+  <div class="absolute top-40 right-10 w-72 h-72 bg-[var(--primary-glow)] rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+  <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+- The @keyframes blob and delay classes will be injected automatically by postProcessHtml
+
+D) CATEGORIZED CARD COLORS:
+- Feature/problem cards MUST NOT all use the same bg-card. Instead, assign distinct soft backgrounds per card:
+  Card 1: bg-purple-50 dark:bg-purple-950/20
+  Card 2: bg-blue-50 dark:bg-blue-950/20
+  Card 3: bg-green-50 dark:bg-green-950/20
+  Card 4: bg-orange-50 dark:bg-orange-950/20
+  Card 5: bg-pink-50 dark:bg-pink-950/20
+  Card 6: bg-teal-50 dark:bg-teal-950/20
+- Cycle through these colors. Each card also gets a matching icon color (text-purple-600, text-blue-600, etc.)
+
+E) NUMERIC TRUST BAR:
+- The trust-strip section should be a horizontal flex of 3-5 stat blocks:
+  <div class="text-center"><span class="text-3xl sm:text-4xl font-bold text-[var(--primary)]" data-count="10000">10.000</span><span class="block text-sm text-[var(--text-muted)] mt-1">Clientes Ativos</span></div>
+- Numbers animate on scroll via data-count attribute (handled by postProcessHtml)
+- Separate stats with subtle vertical dividers: border-r border-[var(--border)] last:border-0
+
+F) PRICING WITH TOGGLE + BONUS:
+- If pricing section exists, add a monthly/annual toggle switch:
+  <div class="flex items-center justify-center gap-3 mb-8"><span>Mensal</span><button role="switch" class="relative w-14 h-7 rounded-full bg-[var(--primary)] transition-colors"><span class="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform"></span></button><span>Anual <span class="text-xs text-green-500 font-semibold">-20%</span></span></div>
+- Add a "Popular" / "Mais Escolhido" badge on the recommended plan: absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] text-white text-xs px-4 py-1 rounded-full font-semibold
+- Feature list with check/x icons: <i data-lucide="check" class="text-green-500"> for included, <i data-lucide="x" class="text-red-400 opacity-50"> for not included
+- Bonus section below pricing: cards with timer icon + "Bônus exclusivo" badge
+
+G) FOR WHO / NOT FOR WHO SECTION:
+- If the copy has "para quem é / para quem não é" content, render as side-by-side grid:
+  grid grid-cols-1 md:grid-cols-2 gap-6
+- "Para quem é": bg-green-50 dark:bg-green-950/20 rounded-2xl p-6, each item with <i data-lucide="check-circle" class="text-green-500 w-5 h-5 flex-shrink-0">
+- "Para quem NÃO é": bg-red-50 dark:bg-red-950/20 rounded-2xl p-6, each item with <i data-lucide="x-circle" class="text-red-500 w-5 h-5 flex-shrink-0">
+- Titles: "✅ Isso é para você se..." and "❌ Isso NÃO é para você se..."
+
+═══════════════════════════════════════
 ⚙️ TECHNICAL RULES
 ═══════════════════════════════════════
 - Single HTML file. Tailwind via Play CDN. Minimal <style> block only for CSS vars and @keyframes.
@@ -429,6 +483,15 @@ CONTENT RULES:
 - You may ADD content (more bullets, more detail) but never subtract
 - Write in the SAME language as the existing section
 - Keep the data-section attribute on the root element
+
+BOLT-LEVEL PREMIUM PATTERNS (apply when relevant to the section being edited):
+- Gradient text: bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] bg-clip-text text-transparent on key headlines
+- Categorized card colors: use distinct bg-purple-50, bg-blue-50, bg-green-50, bg-orange-50 per card (not all same bg-card)
+- Navbar: fixed, backdrop-blur-md, with mobile drawer
+- Trust bars: numeric stat blocks with data-count for animation
+- Pricing: monthly/annual toggle, "Popular" badge, check/x feature list
+- For who / Not for who: side-by-side green/red cards with check-circle / x-circle icons
+- Blob decorations: absolute positioned blobs with animate-blob class in hero
 
 ═══════════════════════════════════════
 MANDATORY SELF-REVIEW BEFORE RETURNING
@@ -883,8 +946,29 @@ Generate the premium landing page now. Return ONLY valid JSON.`;
 
 // Post-process generated HTML to ensure scroll animations and enhancements
 function postProcessHtml(html: string): string {
-  // If the HTML already has IntersectionObserver, skip injection
-  if (html.includes('IntersectionObserver')) return html;
+  let result = html;
+
+  // Inject blob animation keyframes if not present
+  if (!result.includes('@keyframes blob')) {
+    const blobStyles = `
+<style>
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+.animate-blob { animation: blob 7s infinite; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+</style>`;
+    if (result.includes('</head>')) {
+      result = result.replace('</head>', blobStyles + '\n</head>');
+    }
+  }
+
+  // If the HTML already has IntersectionObserver, skip script injection
+  if (result.includes('IntersectionObserver')) return result;
 
   const enhancementScript = `
 <script>
@@ -932,10 +1016,10 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>`;
 
   // Inject before </body>
-  if (html.includes('</body>')) {
-    return html.replace('</body>', enhancementScript + '\n</body>');
+  if (result.includes('</body>')) {
+    return result.replace('</body>', enhancementScript + '\n</body>');
   }
-  return html + enhancementScript;
+  return result + enhancementScript;
 }
 
 async function callOpenAI(systemPrompt: string, userPrompt: string, maxTokens = 16384): Promise<string> {
