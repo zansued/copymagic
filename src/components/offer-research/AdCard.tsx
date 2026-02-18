@@ -51,10 +51,12 @@ export function AdCard({ ad }: { ad: AdData }) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">{sanitize(ad.anunciante)}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <Badge className={`text-[10px] px-1.5 py-0 ${platformColor(ad.plataforma)}`}>
-                {ad.plataforma}
-              </Badge>
+            <div className="flex flex-wrap items-center gap-1 mt-0.5">
+              {ad.plataforma.split(/,\s*/).map((p, i) => (
+                <Badge key={i} className={`text-[10px] px-1.5 py-0 ${platformColor(p)}`}>
+                  {p.trim()}
+                </Badge>
+              ))}
               {ad.tipo_midia && (
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5">
                   {mediaIcon(ad.tipo_midia)}
