@@ -116,6 +116,7 @@ serve(async (req) => {
         // Use broad matching to capture more scaled offers (synonyms, variations)
         const params = new URLSearchParams({
           search_terms: query,
+          search_type: "KEYWORD_UNORDERED",
           ad_type: "ALL",
           ad_reached_countries: '["BR"]',
           ad_active_status: "ACTIVE",
