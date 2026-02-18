@@ -177,6 +177,7 @@ These layout patterns are REQUIRED. Follow them exactly:
 
 CONTAINER: max-w-6xl mx-auto px-4 sm:px-6 lg:px-8
 SECTIONS: py-16 sm:py-20 (consistent vertical rhythm)
+SECTION INTRO: Every major section SHOULD use the Section Intro Decorator pattern from the 21dev Component Catalog — icon pill + small caps label + large heading + subtitle. This creates professional visual rhythm across the page.
 CARDS: rounded-2xl border border-[var(--border)] p-6 (single consistent pattern)
 GRID: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
 
@@ -265,8 +266,9 @@ A) HERO (data-section="hero")
    - Trust strip below: flex items-center gap-4
 
 B) TRUST STRIP (data-section="trust-strip")
-   - Logos or trust badges in a flex row with gap-8
-   - py-8 border-y border-[var(--border)]
+    - Logos or trust badges in a flex row with gap-8
+    - py-8 border-y border-[var(--border)]
+    - PREMIUM OPTION: Use the Logo Marquee pattern (infinite CSS scroll with grayscale logos, fade edges) from the 21dev Component Catalog for a more dynamic trust strip
 
 C) PROBLEMS (data-section="problems")
    - max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20
@@ -281,6 +283,7 @@ E) FEATURES/BENEFITS (data-section="features")
     - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
     - Each card with icon + title + description
     - PREMIUM OPTION: Use the HoverGrid pattern (bordered 4-col grid with radial-gradient hover tracking) from the 21dev Component Catalog for a more premium feel
+    - PREMIUM OPTION: Use the Bento Grid pattern (asymmetric 3/5 + 2/5 cols with large screenshot cards) for feature sections with images/screenshots
 
 F) SOCIAL PROOF / TESTIMONIALS (data-section="social-proof")
     - PREMIUM OPTION: Use the AnimatedTestimonials pattern (split layout with 3D photo stack + word-by-word animated quote) from the 21dev Component Catalog instead of simple cards
@@ -677,11 +680,107 @@ function togglePricing(btn) {
 \`\`\`
 Key features: Popular card uses border-2 border-[var(--primary)] + scale-105 + star badge. Toggle animates thumb and swaps prices via data attributes. Confetti effect optional via canvas-confetti CDN.
 
+F) SECTION INTRO DECORATOR — Label + Heading Pattern (inspired by Aros):
+Instead of plain section headings, use a decorative intro with icon pill + label + large heading:
+\`\`\`html
+<section data-section="features" class="py-16 sm:py-20 bg-[var(--bg-section)]">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Decorator intro -->
+    <div class="flex flex-col items-center text-center mb-12">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--primary)]/10 border border-[var(--primary)]/20 mb-4">
+        <i data-lucide="sparkles" class="w-4 h-4 text-[var(--primary)]"></i>
+        <span class="text-xs uppercase tracking-widest font-semibold text-[var(--primary)]">Funcionalidades</span>
+        <i data-lucide="sparkles" class="w-4 h-4 text-[var(--primary)]"></i>
+      </div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--text-primary)] mb-4">Section Headline</h2>
+      <p class="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">Supporting description text</p>
+    </div>
+    <!-- Section content below -->
+  </div>
+</section>
+\`\`\`
+Use this decorator pattern for ALL major sections (features, social-proof, pricing, faq). Vary the label text and icon per section (e.g., "Depoimentos" with message-circle, "Planos" with credit-card, "FAQs" with help-circle).
+
+G) TRUST STRIP — Logo Marquee with Infinite Scroll:
+Instead of static logo rows, use an auto-scrolling marquee for partner/trust logos:
+\`\`\`html
+<section data-section="trust-strip" class="py-8 border-y border-[var(--border)] overflow-hidden bg-[var(--bg-deep)]">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <p class="text-xs uppercase tracking-widest font-semibold text-center text-[var(--text-muted)] mb-6">Parceiros & Programas Oficiais</p>
+    <div class="relative overflow-hidden">
+      <!-- Fade edges -->
+      <div class="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[var(--bg-deep)] to-transparent z-10"></div>
+      <div class="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[var(--bg-deep)] to-transparent z-10"></div>
+      <!-- Marquee track -->
+      <div class="flex gap-12 items-center animate-marquee">
+        <img src="..." alt="Partner 1" class="h-8 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
+        <img src="..." alt="Partner 2" class="h-8 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
+        <!-- Duplicate the set for seamless loop -->
+        <img src="..." alt="Partner 1" class="h-8 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
+        <img src="..." alt="Partner 2" class="h-8 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" />
+      </div>
+    </div>
+  </div>
+</section>
+\`\`\`
+CSS needed: @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } } .animate-marquee { animation: marquee 25s linear infinite; }
+Duplicate all logos inside the track so the loop is seamless. Use grayscale + hover:grayscale-0 for elegance.
+
+H) FEATURES — Bento Grid Layout (inspired by Aros):
+Instead of uniform grids, use an asymmetric bento layout with 1 large card + 2 smaller cards per row:
+\`\`\`html
+<section data-section="features" class="py-16 sm:py-20 bg-[var(--bg-section)]">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Row 1: large card left + small card right -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+      <div class="lg:col-span-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-8 overflow-hidden relative group hover:border-[var(--primary)]/30 transition-colors">
+        <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">Feature Title</h3>
+        <p class="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">Description text explaining the benefit in detail.</p>
+        <img src="..." alt="Feature screenshot" class="rounded-xl w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+      </div>
+      <div class="lg:col-span-2 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-8 flex flex-col justify-between hover:border-[var(--primary)]/30 transition-colors">
+        <div>
+          <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">Feature Title</h3>
+          <p class="text-sm text-[var(--text-secondary)] leading-relaxed">Description text.</p>
+        </div>
+        <img src="..." alt="Feature" class="rounded-xl mt-6 w-full object-cover" loading="lazy" />
+      </div>
+    </div>
+    <!-- Row 2: small left + large right (inverted) -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+      <div class="lg:col-span-2 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-8 hover:border-[var(--primary)]/30 transition-colors">
+        <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">Feature Title</h3>
+        <p class="text-sm text-[var(--text-secondary)] leading-relaxed">Description text.</p>
+        <img src="..." alt="Feature" class="rounded-xl mt-6 w-full object-cover" loading="lazy" />
+      </div>
+      <div class="lg:col-span-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-8 overflow-hidden relative group hover:border-[var(--primary)]/30 transition-colors">
+        <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">Feature Title</h3>
+        <p class="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">Full description text.</p>
+        <img src="..." alt="Feature screenshot" class="rounded-xl w-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+      </div>
+    </div>
+    <!-- Row 3: three equal cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-8 text-center hover:border-[var(--primary)]/30 transition-colors">
+        <div class="inline-flex p-3 rounded-xl bg-[var(--primary)]/10 mb-4"><i data-lucide="zap" class="w-6 h-6 text-[var(--primary)]"></i></div>
+        <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Feature</h3>
+        <p class="text-sm text-[var(--text-secondary)]">Description</p>
+      </div>
+      <!-- Repeat for 2 more cards -->
+    </div>
+  </div>
+</section>
+\`\`\`
+The bento layout creates visual hierarchy by mixing large showcase cards (3/5 width with images) and smaller supporting cards (2/5 width). Alternate the large card position between rows for visual rhythm.
+
 USAGE RULES:
 - Pick patterns that match the section being edited — don't force all patterns into one section
 - Adapt colors to use the page's CSS custom properties (--primary, --bg-card, etc.)
 - Keep vanilla JS minimal — just enough for interactivity (carousel, glow tracking)
 - These are PREMIUM upgrades — use them when user asks to "improve" or "make better"
+- Pattern F (Section Intro Decorator) should be used on EVERY major section for visual consistency
+- Pattern G (Logo Marquee) is ideal for trust-strip sections
+- Pattern H (Bento Grid) is ideal for features/solution sections with screenshots
 
 ═══════════════════════════════════════
 MANDATORY SELF-REVIEW BEFORE RETURNING
@@ -1201,6 +1300,19 @@ function postProcessHtml(html: string): string {
 </style>`;
     if (result.includes('</head>')) {
       result = result.replace('</head>', glowStyles + '\n</head>');
+    }
+  }
+
+  // Inject marquee keyframes if marquee pattern detected
+  if (result.includes('animate-marquee') && !result.includes('@keyframes marquee')) {
+    const marqueeStyles = `
+<style>
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.animate-marquee { animation: marquee 25s linear infinite; display: flex; width: max-content; }
+.animate-marquee:hover { animation-play-state: paused; }
+</style>`;
+    if (result.includes('</head>')) {
+      result = result.replace('</head>', marqueeStyles + '\n</head>');
     }
   }
 
