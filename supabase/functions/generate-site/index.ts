@@ -1476,103 +1476,91 @@ serve(async (req) => {
 
       console.log(`Review-page: reviewing full page (${currentHtml.length} chars)...`);
 
-      const REVIEW_SYSTEM_PROMPT = `You are a SENIOR ART DIRECTOR & UX AUDITOR at a $500/hr agency.
-You receive the FULL HTML of a landing page and your job is to REVIEW and FIX every visual, UX and accessibility issue.
+      // Extract the <head> block to pass as immutable context
+      const headMatch = currentHtml.match(/<head[\s\S]*?<\/head>/i);
+      const headBlock = headMatch ? headMatch[0] : "";
 
-You are NOT generating new content. You are POLISHING an existing page to perfection.
-
-═══════════════════════════════════════
-🔍 YOUR REVIEW CHECKLIST (FIX ALL ISSUES)
-═══════════════════════════════════════
-
-1) COLOR & CONTRAST:
-   - Body text MUST have ≥4.5:1 contrast ratio against its background
-   - Headings MUST have ≥3:1 contrast ratio
-   - CTA buttons MUST be clearly visible — if too dark bg + dark text or too light bg + light text, FIX IT
-   - Check EVERY section: does text color work on its background? Fix muted text that's invisible
-   - Gradient text: verify it's readable. If gradient makes text unreadable, add text-shadow or change gradient
-
-2) SPACING & RHYTHM:
-   - Sections: consistent py-16 sm:py-20 (fix any section with different padding)
-   - Cards: consistent p-6 sm:p-8 (fix inconsistent card padding)
-   - Grid gaps: consistent gap-6 or gap-8 (not mixed)
-   - Heading → content spacing: mb-4 for titles, mb-8 for section intros
-   - Between sections: no "cramped" areas, no excessive gaps
-
-3) TYPOGRAPHY HIERARCHY:
-   - Hero headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight
-   - Section titles: text-3xl sm:text-4xl font-bold
-   - Card titles: text-xl sm:text-2xl font-semibold
-   - Body text: text-base sm:text-lg leading-relaxed
-   - Small/muted text: text-sm
-   - FIX any text that doesn't follow this hierarchy
-
-4) RESPONSIVE DESIGN:
-   - All text uses responsive sizes (text-xl sm:text-2xl, NOT fixed px)
-   - Grids: grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 (mobile → desktop)
-   - Images: w-full with aspect ratio classes (aspect-video, aspect-square)
-   - Padding: px-4 sm:px-6 lg:px-8
-
-5) VISUAL POLISH:
-   - Cards should have hover effects: hover:-translate-y-1 hover:shadow-xl transition-all duration-300
-   - CTAs should have: hover:scale-105 hover:shadow-lg transition-transform
-   - Images should have: rounded-2xl overflow-hidden
-   - Add subtle borders (border border-white/10 or border-[var(--border)]) to cards if missing
-   - Background variety: alternate bg-[var(--bg-deep)] and bg-[var(--bg-section)] between sections
-
-6) CONSISTENCY:
-   - All icons same size within a section (w-5 h-5 or w-6 h-6, not mixed)
-   - All badges/pills same style (rounded-full px-3 py-1 text-xs font-semibold)
-   - CTA button style consistent across page (same padding, font-weight, border-radius)
-   - Color usage: primary color used consistently for accents, not random colors
-
-7) ACCESSIBILITY:
-   - Every <img> has descriptive alt text (not empty, not "image")
-   - Focus states on interactive elements: focus:ring-2 focus:ring-[var(--primary)]
-   - Links and buttons have clear hover/focus states
-   - Sufficient touch targets: min h-10 w-10 for buttons on mobile
-
-8) IMAGES:
-   - NEVER use source.unsplash.com (deprecated, returns 404)
-   - Keep existing working image URLs — do NOT change them unless broken
-   - If any image uses source.unsplash.com, replace with picsum.photos/seed/{keyword}/{w}/{h}
-   - All images: loading="lazy", descriptive alt, object-cover
-
-9) INLINE STYLES:
-   - Convert ANY remaining style="" attributes to Tailwind classes
-   - Exception: CSS custom properties and keyframes in <style> block are OK
+      const REVIEW_SYSTEM_PROMPT = `You are a SENIOR ART DIRECTOR & UX AUDITOR performing a SURGICAL POLISH pass on an existing landing page.
 
 ═══════════════════════════════════════
-⚠️ CRITICAL RULES
+⛔ ABSOLUTE PRESERVATION RULES (NEVER VIOLATE)
 ═══════════════════════════════════════
-- Do NOT remove or shorten ANY text content
-- Do NOT change the page structure/layout dramatically
-- Do NOT remove sections or add new sections
-- Do NOT change images unless they're broken URLs
-- PRESERVE all data-section attributes
-- PRESERVE the existing color scheme/design system (CSS vars)
-- Your job is POLISH, not REDESIGN
-- ALL styling via Tailwind classes (no inline styles)
+1. **PRESERVE THE ENTIRE <head> BLOCK EXACTLY** — copy it character-for-character into your output. This includes:
+   - The Tailwind Play CDN <script src="https://cdn.tailwindcss.com"></script>
+   - The tailwind.config customization <script> block
+   - The <style> block with CSS custom properties (--primary, --bg-deep, etc.) and @keyframes
+   - Google Fonts @import
+   - Lucide Icons CDN script
+   - Meta tags, <title>, viewport
+   DO NOT remove, rewrite, simplify, or "clean up" any of these. They ARE the design system.
+
+2. **PRESERVE ALL TEXT CONTENT** — do not rewrite, shorten, summarize, or remove any copy.
+
+3. **PRESERVE ALL IMAGES** — keep every <img> src URL exactly as-is unless it uses the deprecated domain "source.unsplash.com" (replace those with picsum.photos/seed/{keyword}/{w}/{h}).
+
+4. **PRESERVE data-section ATTRIBUTES** on every <section>.
+
+5. **PRESERVE THE PAGE STRUCTURE** — same sections, same order, same nesting hierarchy.
+
+═══════════════════════════════════════
+🎯 WHAT YOU ACTUALLY FIX (ONLY THESE)
+═══════════════════════════════════════
+
+A) CONTRAST FIXES:
+   - If text is unreadable against its background, change the TEXT class (not the background).
+   - Use the page's existing CSS vars: text-[var(--text-primary)], text-[var(--text-secondary)], text-[var(--text-muted)].
+   - For light-on-light or dark-on-dark issues, adjust the text shade using Tailwind: text-white, text-gray-100, text-gray-900, etc.
+
+B) SPACING CONSISTENCY:
+   - Sections should use py-16 sm:py-20. Fix any that deviate.
+   - Cards should use p-6 sm:p-8. Fix inconsistencies.
+   - Grid gaps should be gap-6 or gap-8 consistently.
+
+C) HOVER & INTERACTION POLISH:
+   - Cards: add hover:-translate-y-1 hover:shadow-xl transition-all duration-300 if missing.
+   - CTA buttons: add hover:scale-105 hover:shadow-lg transition-transform if missing.
+   - Add subtle borders to cards if missing: border border-white/10 or border-[var(--border)].
+
+D) RESPONSIVE FIXES:
+   - Grids must have mobile breakpoints: grid-cols-1 sm:grid-cols-2 lg:grid-cols-3.
+   - Text must use responsive sizes: text-xl sm:text-2xl lg:text-3xl.
+   - Fix overflow issues: add overflow-hidden on image containers.
+
+E) VISUAL REFINEMENTS:
+   - Background alternation: sections should alternate bg-[var(--bg-deep)] and bg-[var(--bg-section)].
+   - Icons within a section should be uniform size.
+   - Badges/pills should have consistent styling.
+
+F) INLINE STYLE CLEANUP:
+   - Convert any style="" attributes to equivalent Tailwind classes.
+   - Exception: CSS custom properties in <style> block are OK and MUST be preserved.
 
 ═══════════════════════════════════════
 OUTPUT FORMAT
 ═══════════════════════════════════════
-Return ONLY a JSON object (no markdown fences):
+Return ONLY a JSON object (no markdown, no code fences):
 {
-  "html": "<!doctype html>...the full corrected HTML...",
-  "fixes": [
-    "Fixed low contrast on hero subtitle — changed text-[var(--text-muted)] to text-[var(--text-secondary)]",
-    "Added hover effects to feature cards",
-    "Fixed inconsistent section padding",
-    ...
-  ]
+  "html": "<!doctype html>...the COMPLETE corrected HTML including the full <head>...",
+  "fixes": ["description of fix 1", "description of fix 2", ...]
 }
 
-The "fixes" array MUST list every change you made. Be specific.`;
+The "html" field MUST start with <!doctype html> and contain the COMPLETE page.
+The "fixes" array lists every specific change you made.`;
 
-      const reviewPrompt = `Review and fix this landing page HTML. Apply ALL checklist items. Return the full corrected HTML.\n\n` + "```html\n" + currentHtml + "\n```";
+      // Build the user prompt — include the head separately for emphasis
+      const reviewPrompt = `Here is the page's design system (<head> block) — YOU MUST PRESERVE THIS EXACTLY in your output:
 
-      const rawContent = await callOpenAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, 16384);
+---HEAD BLOCK (DO NOT MODIFY)---
+${headBlock}
+---END HEAD BLOCK---
+
+Now review and polish the FULL page HTML below. Apply only the fixes from your checklist. Return the complete HTML with the head block preserved.
+
+\`\`\`html
+${currentHtml}
+\`\`\``;
+
+      const rawContent = await callOpenAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, 32000);
       const jsonStr = parseJsonFromAI(rawContent);
 
       let reviewedHtml: string;
@@ -1593,6 +1581,18 @@ The "fixes" array MUST list every change you made. Be specific.`;
 
       if (!reviewedHtml) {
         throw new Error("AI review did not return HTML");
+      }
+
+      // Safety net: if the AI stripped the Tailwind CDN or design system, re-inject the original <head>
+      if (headBlock && !reviewedHtml.includes("cdn.tailwindcss.com")) {
+        console.warn("Review stripped Tailwind CDN — re-injecting original <head>");
+        const reviewedHeadMatch = reviewedHtml.match(/<head[\s\S]*?<\/head>/i);
+        if (reviewedHeadMatch) {
+          reviewedHtml = reviewedHtml.replace(reviewedHeadMatch[0], headBlock);
+        } else {
+          // No <head> at all — inject after <!doctype html><html...>
+          reviewedHtml = reviewedHtml.replace(/<html[^>]*>/i, (match) => match + "\n" + headBlock);
+        }
       }
 
       console.log("Review complete: " + fixes.length + " fixes applied");
