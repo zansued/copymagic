@@ -233,6 +233,7 @@ export default function LandingBuilder() {
             {selectedProject && (
               <GenerationHistory
                 projectId={selectedProject}
+                projectName={selectedProjectData?.name}
                 onLoad={handleLoadGeneration}
                 refreshKey={historyRefreshKey}
               />
