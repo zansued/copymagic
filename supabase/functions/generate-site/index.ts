@@ -370,11 +370,10 @@ E) NUMERIC TRUST BAR:
 - Numbers animate on scroll via data-count attribute (handled by postProcessHtml)
 - Separate stats with subtle vertical dividers: border-r border-[var(--border)] last:border-0
 
-F) PRICING WITH TOGGLE + BONUS:
-- If pricing section exists, add a monthly/annual toggle switch:
-  <div class="flex items-center justify-center gap-3 mb-8"><span>Mensal</span><button role="switch" class="relative w-14 h-7 rounded-full bg-[var(--primary)] transition-colors"><span class="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform"></span></button><span>Anual <span class="text-xs text-green-500 font-semibold">-20%</span></span></div>
-- Add a "Popular" / "Mais Escolhido" badge on the recommended plan: absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] text-white text-xs px-4 py-1 rounded-full font-semibold
-- Feature list with check/x icons: <i data-lucide="check" class="text-green-500"> for included, <i data-lucide="x" class="text-red-400 opacity-50"> for not included
+F) PRICING WITH TOGGLE + BONUS (PREMIUM — see 21dev Catalog pattern E):
+- Use the full premium pricing pattern from Component Catalog: toggle switch with aria-checked, data-monthly/data-annual on price elements, Popular card with scale-105 + star badge + border-2 border-[var(--primary)]
+- Monthly/annual toggle with JS that swaps pricing-value text via data attributes
+- Feature list with check icons: <i data-lucide="check" class="text-green-500"> for included
 - Bonus section below pricing: cards with timer icon + "Bônus exclusivo" badge
 
 G) FOR WHO / NOT FOR WHO SECTION:
@@ -608,6 +607,75 @@ CSS:
 @keyframes blink { 50% { opacity: 0; } }
 \`\`\`
 Adapt step count to headline length. Use on the MAIN headline only, not subheadlines.
+
+E) PRICING — Monthly/Annual Toggle with Popular Badge:
+Instead of static pricing cards, use a toggle switch with animated number transition and a highlighted "Popular" card:
+\`\`\`html
+<section data-section="pricing" class="py-16 sm:py-20 bg-[var(--bg-section)]">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4">...</h2>
+    <p class="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-8">...</p>
+    <!-- Toggle -->
+    <div class="flex items-center justify-center gap-3 mb-12">
+      <span class="text-sm font-medium pricing-label-monthly">Monthly</span>
+      <button id="pricing-toggle" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-[var(--muted)] transition-colors" onclick="togglePricing(this)">
+        <span class="pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg transition-transform translate-x-0" id="pricing-thumb"></span>
+      </button>
+      <span class="text-sm font-medium pricing-label-annual">Annual <span class="text-xs text-[var(--primary)]">(Save 20%)</span></span>
+    </div>
+    <!-- Cards grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <!-- Regular card -->
+      <div class="relative rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-8 text-left shadow-sm hover:shadow-lg transition-shadow">
+        <h3 class="text-lg font-semibold mb-2">Basic</h3>
+        <div class="mb-4">
+          <span class="text-5xl font-bold pricing-value" data-monthly="19" data-annual="15">$19</span>
+          <span class="text-sm text-[var(--text-muted)]">/ month</span>
+        </div>
+        <p class="text-sm text-[var(--text-secondary)] mb-6">billed monthly</p>
+        <ul class="space-y-3 mb-8">
+          <li class="flex items-center gap-2 text-sm"><svg class="w-4 h-4 text-[var(--primary)]" ...><path d="M5 13l4 4L19 7"/></svg> Feature 1</li>
+          <!-- more features -->
+        </ul>
+        <a href="#" class="block w-full text-center py-3 rounded-lg bg-[var(--bg-deep)] text-[var(--text-primary)] font-medium hover:bg-[var(--primary)] hover:text-white transition-colors">Get Started</a>
+      </div>
+      <!-- Popular card (highlighted) -->
+      <div class="relative rounded-2xl border-2 border-[var(--primary)] bg-[var(--bg-card)] p-8 text-left shadow-xl scale-105 z-10">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-semibold flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Popular
+        </div>
+        <h3 class="text-lg font-semibold mb-2">Pro</h3>
+        <div class="mb-4">
+          <span class="text-5xl font-bold pricing-value" data-monthly="49" data-annual="39">$49</span>
+          <span class="text-sm text-[var(--text-muted)]">/ month</span>
+        </div>
+        <p class="text-sm text-[var(--text-secondary)] mb-6">billed monthly</p>
+        <ul class="space-y-3 mb-8">
+          <li class="flex items-center gap-2 text-sm"><svg class="w-4 h-4 text-[var(--primary)]" ...>...</svg> Everything in Basic</li>
+          <!-- more features -->
+        </ul>
+        <a href="#" class="block w-full text-center py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity">Get Started</a>
+      </div>
+    </div>
+  </div>
+</section>
+\`\`\`
+JS for pricing toggle:
+\`\`\`js
+function togglePricing(btn) {
+  const isAnnual = btn.getAttribute('aria-checked') === 'false';
+  btn.setAttribute('aria-checked', isAnnual);
+  btn.querySelector('span').style.transform = isAnnual ? 'translateX(1.25rem)' : 'translateX(0)';
+  btn.style.backgroundColor = isAnnual ? 'var(--primary)' : 'var(--muted)';
+  document.querySelectorAll('.pricing-value').forEach(el => {
+    const val = isAnnual ? el.dataset.annual : el.dataset.monthly;
+    el.textContent = '$' + val;
+  });
+  document.querySelectorAll('.pricing-label-monthly,.pricing-label-annual').forEach(el => el.style.opacity = '');
+}
+\`\`\`
+Key features: Popular card uses border-2 border-[var(--primary)] + scale-105 + star badge. Toggle animates thumb and swaps prices via data attributes. Confetti effect optional via canvas-confetti CDN.
 
 USAGE RULES:
 - Pick patterns that match the section being edited — don't force all patterns into one section
@@ -1181,6 +1249,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Init Lucide icons if loaded
   if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  // Pricing toggle
+  window.togglePricing = function(btn) {
+    var isAnnual = btn.getAttribute('aria-checked') === 'false';
+    btn.setAttribute('aria-checked', String(isAnnual));
+    var thumb = btn.querySelector('#pricing-thumb') || btn.querySelector('span');
+    if (thumb) thumb.style.transform = isAnnual ? 'translateX(1.25rem)' : 'translateX(0)';
+    btn.style.backgroundColor = isAnnual ? 'var(--primary, #7c3aed)' : 'var(--muted, #e5e7eb)';
+    document.querySelectorAll('.pricing-value').forEach(function(el) {
+      var val = isAnnual ? el.getAttribute('data-annual') : el.getAttribute('data-monthly');
+      if (val) el.textContent = el.textContent.replace(/[\\d,.]+/, val);
+    });
+  };
 });
 </script>`;
 
