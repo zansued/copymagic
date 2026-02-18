@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Play, Image, Layers, Megaphone, Calendar, MousePointerClick, Clock, TrendingUp } from "lucide-react";
+import { ExternalLink, Play, Image, Layers, Megaphone, Calendar, MousePointerClick, Clock, TrendingUp, Facebook, Instagram, Globe, MessageCircle, Users, AtSign } from "lucide-react";
 
 export interface AdData {
   anunciante: string;
@@ -27,11 +27,32 @@ const mediaIcon = (tipo?: string) => {
   return <Image className="h-3.5 w-3.5" />;
 };
 
-const platformColor = (plataforma?: string) => {
-  const p = (plataforma || "").toLowerCase();
-  if (p.includes("instagram")) return "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/30";
-  if (p.includes("facebook")) return "bg-blue-500/20 text-blue-300 border-blue-500/30";
-  return "bg-secondary text-secondary-foreground";
+const platformConfig = (platform: string): { icon: React.ReactNode; className: string } => {
+  const p = platform.toLowerCase().trim();
+  if (p.includes("instagram")) return {
+    icon: <Instagram className="h-3 w-3" />,
+    className: "bg-pink-500/15 text-pink-400 border-pink-500/25",
+  };
+  if (p.includes("facebook")) return {
+    icon: <Facebook className="h-3 w-3" />,
+    className: "bg-blue-500/15 text-blue-400 border-blue-500/25",
+  };
+  if (p.includes("messenger")) return {
+    icon: <MessageCircle className="h-3 w-3" />,
+    className: "bg-violet-500/15 text-violet-400 border-violet-500/25",
+  };
+  if (p.includes("audience_network") || p.includes("audience network")) return {
+    icon: <Users className="h-3 w-3" />,
+    className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+  };
+  if (p.includes("threads")) return {
+    icon: <AtSign className="h-3 w-3" />,
+    className: "bg-amber-500/15 text-amber-400 border-amber-500/25",
+  };
+  return {
+    icon: <Globe className="h-3 w-3" />,
+    className: "bg-secondary text-secondary-foreground border-border",
+  };
 };
 
 export function AdCard({ ad }: { ad: AdData }) {
@@ -51,12 +72,16 @@ export function AdCard({ ad }: { ad: AdData }) {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">{sanitize(ad.anunciante)}</p>
-            <div className="flex flex-wrap items-center gap-1 mt-0.5">
-              {ad.plataforma.split(/,\s*/).map((p, i) => (
-                <Badge key={i} className={`text-[10px] px-1.5 py-0 ${platformColor(p)}`}>
-                  {p.trim()}
-                </Badge>
-              ))}
+            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+              {ad.plataforma.split(/,\s*/).map((p, i) => {
+                const config = platformConfig(p);
+                return (
+                  <Badge key={i} variant="outline" className={`text-[10px] px-2 py-0.5 gap-1 border ${config.className}`}>
+                    {config.icon}
+                    {p.trim()}
+                  </Badge>
+                );
+              })}
               {ad.tipo_midia && (
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5">
                   {mediaIcon(ad.tipo_midia)}
