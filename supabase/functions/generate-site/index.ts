@@ -259,6 +259,7 @@ A) HERO (data-section="hero")
    - Full viewport or generous padding: min-h-screen or py-20 sm:py-32
    - Badge/pill at top: inline-flex px-4 py-1.5 rounded-full text-xs uppercase tracking-widest
    - Massive headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight
+   - PREMIUM OPTION: Use the Typewriter headline effect (CSS keyframe typing animation with blinking cursor) from the 21dev Component Catalog for the main headline
    - Subheadline: text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto
    - CTA button: rounded-full, accent color, uppercase
    - Trust strip below: flex items-center gap-4
@@ -277,10 +278,12 @@ D) SOLUTION/MECHANISM (data-section="solution")
    - Image on one side, text on the other
 
 E) FEATURES/BENEFITS (data-section="features")
-   - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
-   - Each card with icon + title + description
+    - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+    - Each card with icon + title + description
+    - PREMIUM OPTION: Use the HoverGrid pattern (bordered 4-col grid with radial-gradient hover tracking) from the 21dev Component Catalog for a more premium feel
 
 F) SOCIAL PROOF / TESTIMONIALS (data-section="social-proof")
+    - PREMIUM OPTION: Use the AnimatedTestimonials pattern (split layout with 3D photo stack + word-by-word animated quote) from the 21dev Component Catalog instead of simple cards
    - RETRO TESTIMONIAL CAROUSEL LAYOUT (mandatory):
    - Container: max-w-6xl mx-auto, with a section heading above
    - Horizontal scroll carousel with flex, gap-4, overflow-x-auto, [scrollbar-width:none], scroll-smooth
@@ -492,6 +495,125 @@ BOLT-LEVEL PREMIUM PATTERNS (apply when relevant to the section being edited):
 - Pricing: monthly/annual toggle, "Popular" badge, check/x feature list
 - For who / Not for who: side-by-side green/red cards with check-circle / x-circle icons
 - Blob decorations: absolute positioned blobs with animate-blob class in hero
+
+═══════════════════════════════════════
+🧩 21DEV COMPONENT CATALOG (USE AS REFERENCE)
+═══════════════════════════════════════
+When improving a section, reference these premium patterns adapted from 21dev components.
+Use the HTML/Tailwind snippets below as INSPIRATION — adapt colors/content to match the page's design system.
+
+A) SOCIAL-PROOF — Animated Testimonials Layout:
+Instead of simple cards, use a split layout with stacked photo + text:
+\`\`\`html
+<section data-section="social-proof" class="py-16 sm:py-20 bg-[var(--bg-section)]">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-12">...</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <!-- Photo stack with 3D perspective -->
+      <div class="relative h-80 w-full" style="perspective:1000px">
+        <img src="..." alt="..." class="absolute inset-0 h-full w-full rounded-3xl object-cover shadow-2xl transition-all duration-500" />
+        <!-- Stacked bg cards for depth -->
+        <div class="absolute inset-4 -z-10 rounded-3xl bg-[var(--bg-card)] rotate-3 opacity-60"></div>
+        <div class="absolute inset-8 -z-20 rounded-3xl bg-[var(--bg-card)] -rotate-3 opacity-30"></div>
+      </div>
+      <!-- Text side -->
+      <div>
+        <p class="text-xl sm:text-2xl leading-relaxed text-[var(--text-secondary)] italic mb-6">
+          <!-- Animate words: each <span> with staggered opacity via CSS animation-delay -->
+          <span class="inline-block opacity-0 animate-[fadeInWord_0.3s_ease_forwards]" style="animation-delay:0.05s">Word1</span>
+          <span class="inline-block opacity-0 animate-[fadeInWord_0.3s_ease_forwards]" style="animation-delay:0.1s">Word2</span>
+          <!-- ... more words -->
+        </p>
+        <p class="text-lg font-semibold text-[var(--text-primary)]">Name</p>
+        <p class="text-sm text-[var(--text-muted)]">Role / Company</p>
+        <!-- Nav arrows -->
+        <div class="flex gap-3 mt-6">
+          <button class="h-10 w-10 rounded-full bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center hover:bg-[var(--primary)] hover:text-white transition-colors" onclick="prevTestimonial()"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+          <button class="h-10 w-10 rounded-full bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center hover:bg-[var(--primary)] hover:text-white transition-colors" onclick="nextTestimonial()"><i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+\`\`\`
+CSS keyframes needed: @keyframes fadeInWord { to { opacity: 1; } }
+JS: prev/next buttons cycle through testimonials by toggling visibility.
+
+B) FEATURES — Hover Grid with Radial Gradient:
+Instead of simple cards, use a bordered grid with mouse-tracking gradient hover:
+\`\`\`html
+<section data-section="features" class="py-16 sm:py-20 bg-[var(--bg-deep)]">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-12">...</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
+      <!-- Each feature cell shares borders -->
+      <div class="group relative p-8 border-b border-r border-[var(--border)] hover:bg-[radial-gradient(400px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(var(--primary-rgb),0.08),transparent_60%)] transition-colors duration-300"
+           onmousemove="this.style.setProperty('--mouse-x',((event.clientX-this.getBoundingClientRect().left)/this.offsetWidth*100)+'%');this.style.setProperty('--mouse-y',((event.clientY-this.getBoundingClientRect().top)/this.offsetHeight*100)+'%')">
+        <div class="mb-4"><i data-lucide="zap" class="w-6 h-6 text-[var(--primary)]"></i></div>
+        <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Feature Title</h3>
+        <p class="text-sm text-[var(--text-secondary)] leading-relaxed">Description text</p>
+      </div>
+      <!-- Repeat for each feature, removing border-r on last column, border-b on last row -->
+    </div>
+  </div>
+</section>
+\`\`\`
+Grid border rules: items in cols 1-3 get border-r, rows 1-(n-1) get border-b. Last col: no border-r. Last row: no border-b.
+Top row items can use gradient from-[var(--bg-section)] via-transparent, bottom row from-transparent via-[var(--bg-section)].
+
+C) ANY CARD — Glowing Border Effect:
+Add a conic-gradient glow that follows cursor angle:
+\`\`\`html
+<div class="glow-card relative rounded-2xl overflow-hidden">
+  <!-- Glow layer (behind content) -->
+  <div class="absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-300 glow-border"></div>
+  <!-- Card content -->
+  <div class="relative bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border)]">
+    <h3>...</h3><p>...</p>
+  </div>
+</div>
+\`\`\`
+CSS for glow-border:
+\`\`\`css
+.glow-card:hover .glow-border { opacity: 1; }
+.glow-border::after {
+  content: ''; position: absolute; inset: -1px;
+  border: 1px solid transparent; border-radius: inherit;
+  background: conic-gradient(from calc(var(--glow-angle,0) * 1deg), #dd7bbb, #d79f1e, #5a922c, #4c7894, #dd7bbb);
+  mask: linear-gradient(#0000,#0000) padding-box, linear-gradient(#fff,#fff) border-box;
+  mask-composite: intersect;
+}
+\`\`\`
+This creates an elegant rainbow glow that traces the card border on hover.
+
+D) HERO — Typewriter Headline Effect:
+\`\`\`html
+<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+  <span class="typewriter-text">Your Headline Here</span>
+  <span class="typewriter-cursor">|</span>
+</h1>
+\`\`\`
+CSS:
+\`\`\`css
+.typewriter-text {
+  display: inline-block; overflow: hidden; white-space: nowrap;
+  border-right: none; /* cursor is separate span */
+  animation: typing 3s steps(30) forwards;
+  width: 0;
+}
+@keyframes typing { to { width: 100%; } }
+.typewriter-cursor {
+  animation: blink 0.75s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+\`\`\`
+Adapt step count to headline length. Use on the MAIN headline only, not subheadlines.
+
+USAGE RULES:
+- Pick patterns that match the section being edited — don't force all patterns into one section
+- Adapt colors to use the page's CSS custom properties (--primary, --bg-card, etc.)
+- Keep vanilla JS minimal — just enough for interactivity (carousel, glow tracking)
+- These are PREMIUM upgrades — use them when user asks to "improve" or "make better"
 
 ═══════════════════════════════════════
 MANDATORY SELF-REVIEW BEFORE RETURNING
@@ -964,6 +1086,53 @@ function postProcessHtml(html: string): string {
 </style>`;
     if (result.includes('</head>')) {
       result = result.replace('</head>', blobStyles + '\n</head>');
+    }
+  }
+
+  // Inject typewriter keyframes if typewriter pattern detected
+  if ((result.includes('typewriter-text') || result.includes('@keyframes typing')) && !result.includes('@keyframes typing')) {
+    const typewriterStyles = `
+<style>
+.typewriter-text {
+  display: inline-block; overflow: hidden; white-space: nowrap;
+  width: 0; animation: typing 3s steps(30) forwards;
+}
+@keyframes typing { to { width: 100%; } }
+.typewriter-cursor { animation: blink 0.75s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+</style>`;
+    if (result.includes('</head>')) {
+      result = result.replace('</head>', typewriterStyles + '\n</head>');
+    }
+  }
+
+  // Inject fadeInWord keyframes if staggered word animation detected
+  if (result.includes('fadeInWord') && !result.includes('@keyframes fadeInWord')) {
+    const fadeWordStyles = `
+<style>
+@keyframes fadeInWord { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>`;
+    if (result.includes('</head>')) {
+      result = result.replace('</head>', fadeWordStyles + '\n</head>');
+    }
+  }
+
+  // Inject glow card styles if glow pattern detected
+  if (result.includes('glow-border') && !result.includes('.glow-border::after')) {
+    const glowStyles = `
+<style>
+.glow-card:hover .glow-border { opacity: 1; }
+.glow-border::after {
+  content: ''; position: absolute; inset: -1px;
+  border: 1px solid transparent; border-radius: inherit;
+  background: conic-gradient(from calc(var(--glow-angle,0) * 1deg), #dd7bbb, #d79f1e, #5a922c, #4c7894, #dd7bbb);
+  -webkit-mask: linear-gradient(#0000,#0000) padding-box, linear-gradient(#fff,#fff) border-box;
+  mask: linear-gradient(#0000,#0000) padding-box, linear-gradient(#fff,#fff) border-box;
+  -webkit-mask-composite: xor; mask-composite: intersect;
+}
+</style>`;
+    if (result.includes('</head>')) {
+      result = result.replace('</head>', glowStyles + '\n</head>');
     }
   }
 
