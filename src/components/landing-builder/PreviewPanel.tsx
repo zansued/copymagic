@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Globe, ExternalLink, Loader2, Pencil } from "lucide-react";
+import { Globe, ExternalLink, Loader2, Pencil, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SectionEditDialog } from "./SectionEditDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
+  const [reviewing, setReviewing] = useState(false);
 
   // Inject hover/click script into iframe for section detection
   const injectSectionInteractions = useCallback((iframe: HTMLIFrameElement) => {
@@ -171,6 +173,48 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
     [html, editingSection, onHtmlUpdate]
   );
 
+  const handleReviewPage = useCallback(async () => {
+    if (!html) return;
+    setReviewing(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-site`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            action: "review-page",
+            currentHtml: html,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Erro ao revisar página");
+      }
+
+      const result = await res.json();
+      onHtmlUpdate?.(result.html);
+      const fixCount = result.fixes?.length || 0;
+      toast.success(`Revisão concluída! ${fixCount} correções aplicadas.`, {
+        description: result.fixes?.slice(0, 3).join(" · ") || undefined,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erro desconhecido";
+      toast.error(msg);
+    } finally {
+      setReviewing(false);
+    }
+  }, [html, onHtmlUpdate]);
+
   return (
     <>
       <motion.div
@@ -196,23 +240,39 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
             )}
           </div>
           {html && (
-            <button
-              onClick={() => {
-                const w = window.open("", "_blank");
-                if (w) { w.document.write(html); w.document.close(); }
-              }}
-              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-            >
-              <ExternalLink className="h-3 w-3" />
-              Abrir
-            </button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReviewPage}
+                disabled={reviewing}
+                className="h-7 text-xs gap-1.5 border-primary/30 hover:border-primary/60"
+              >
+                {reviewing ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3 text-primary" />
+                )}
+                {reviewing ? "Revisando..." : "Revisar Página"}
+              </Button>
+              <button
+                onClick={() => {
+                  const w = window.open("", "_blank");
+                  if (w) { w.document.write(html); w.document.close(); }
+                }}
+                className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Abrir
+              </button>
+            </div>
           )}
         </div>
 
         {/* Content */}
         <div className="flex-1 relative">
           <AnimatePresence mode="wait">
-            {generating && (
+            {(generating || reviewing) && (
               <motion.div
                 key="loading"
                 initial={{ opacity: 0 }}
@@ -223,10 +283,12 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
                 <div className="text-center">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-3" />
                   <p className="text-sm text-muted-foreground">
-                    Gerando sua landing page...
+                    {reviewing ? "Agente revisor analisando a página..." : "Gerando sua landing page..."}
                   </p>
                   <p className="text-[10px] text-muted-foreground/60 mt-1">
-                    Parseando copy → Aplicando template → Otimizando
+                    {reviewing
+                      ? "Verificando contrastes → Corrigindo espaçamentos → Polindo detalhes"
+                      : "Parseando copy → Aplicando template → Otimizando"}
                   </p>
                 </div>
               </motion.div>

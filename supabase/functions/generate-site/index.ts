@@ -1462,6 +1462,151 @@ serve(async (req) => {
     const action = body.action || "generate";
 
     // ============================================================
+    // ACTION: review-page (peer review agent)
+    // ============================================================
+    if (action === "review-page") {
+      const { currentHtml } = body as { action: string; currentHtml: string };
+
+      if (!currentHtml) {
+        return new Response(
+          JSON.stringify({ error: "currentHtml is required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log(`Review-page: reviewing full page (${currentHtml.length} chars)...`);
+
+      const REVIEW_SYSTEM_PROMPT = `You are a SENIOR ART DIRECTOR & UX AUDITOR at a $500/hr agency.
+You receive the FULL HTML of a landing page and your job is to REVIEW and FIX every visual, UX and accessibility issue.
+
+You are NOT generating new content. You are POLISHING an existing page to perfection.
+
+═══════════════════════════════════════
+🔍 YOUR REVIEW CHECKLIST (FIX ALL ISSUES)
+═══════════════════════════════════════
+
+1) COLOR & CONTRAST:
+   - Body text MUST have ≥4.5:1 contrast ratio against its background
+   - Headings MUST have ≥3:1 contrast ratio
+   - CTA buttons MUST be clearly visible — if too dark bg + dark text or too light bg + light text, FIX IT
+   - Check EVERY section: does text color work on its background? Fix muted text that's invisible
+   - Gradient text: verify it's readable. If gradient makes text unreadable, add text-shadow or change gradient
+
+2) SPACING & RHYTHM:
+   - Sections: consistent py-16 sm:py-20 (fix any section with different padding)
+   - Cards: consistent p-6 sm:p-8 (fix inconsistent card padding)
+   - Grid gaps: consistent gap-6 or gap-8 (not mixed)
+   - Heading → content spacing: mb-4 for titles, mb-8 for section intros
+   - Between sections: no "cramped" areas, no excessive gaps
+
+3) TYPOGRAPHY HIERARCHY:
+   - Hero headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight
+   - Section titles: text-3xl sm:text-4xl font-bold
+   - Card titles: text-xl sm:text-2xl font-semibold
+   - Body text: text-base sm:text-lg leading-relaxed
+   - Small/muted text: text-sm
+   - FIX any text that doesn't follow this hierarchy
+
+4) RESPONSIVE DESIGN:
+   - All text uses responsive sizes (text-xl sm:text-2xl, NOT fixed px)
+   - Grids: grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 (mobile → desktop)
+   - Images: w-full with aspect ratio classes (aspect-video, aspect-square)
+   - Padding: px-4 sm:px-6 lg:px-8
+
+5) VISUAL POLISH:
+   - Cards should have hover effects: hover:-translate-y-1 hover:shadow-xl transition-all duration-300
+   - CTAs should have: hover:scale-105 hover:shadow-lg transition-transform
+   - Images should have: rounded-2xl overflow-hidden
+   - Add subtle borders (border border-white/10 or border-[var(--border)]) to cards if missing
+   - Background variety: alternate bg-[var(--bg-deep)] and bg-[var(--bg-section)] between sections
+
+6) CONSISTENCY:
+   - All icons same size within a section (w-5 h-5 or w-6 h-6, not mixed)
+   - All badges/pills same style (rounded-full px-3 py-1 text-xs font-semibold)
+   - CTA button style consistent across page (same padding, font-weight, border-radius)
+   - Color usage: primary color used consistently for accents, not random colors
+
+7) ACCESSIBILITY:
+   - Every <img> has descriptive alt text (not empty, not "image")
+   - Focus states on interactive elements: focus:ring-2 focus:ring-[var(--primary)]
+   - Links and buttons have clear hover/focus states
+   - Sufficient touch targets: min h-10 w-10 for buttons on mobile
+
+8) IMAGES:
+   - NEVER use source.unsplash.com (deprecated, returns 404)
+   - Keep existing working image URLs — do NOT change them unless broken
+   - If any image uses source.unsplash.com, replace with picsum.photos/seed/{keyword}/{w}/{h}
+   - All images: loading="lazy", descriptive alt, object-cover
+
+9) INLINE STYLES:
+   - Convert ANY remaining style="" attributes to Tailwind classes
+   - Exception: CSS custom properties and keyframes in <style> block are OK
+
+═══════════════════════════════════════
+⚠️ CRITICAL RULES
+═══════════════════════════════════════
+- Do NOT remove or shorten ANY text content
+- Do NOT change the page structure/layout dramatically
+- Do NOT remove sections or add new sections
+- Do NOT change images unless they're broken URLs
+- PRESERVE all data-section attributes
+- PRESERVE the existing color scheme/design system (CSS vars)
+- Your job is POLISH, not REDESIGN
+- ALL styling via Tailwind classes (no inline styles)
+
+═══════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════
+Return ONLY a JSON object (no markdown fences):
+{
+  "html": "<!doctype html>...the full corrected HTML...",
+  "fixes": [
+    "Fixed low contrast on hero subtitle — changed text-[var(--text-muted)] to text-[var(--text-secondary)]",
+    "Added hover effects to feature cards",
+    "Fixed inconsistent section padding",
+    ...
+  ]
+}
+
+The "fixes" array MUST list every change you made. Be specific.`;
+
+      const reviewPrompt = `Review and fix this landing page HTML. Apply ALL checklist items. Return the full corrected HTML.\n\n` + "```html\n" + currentHtml + "\n```";
+
+      const rawContent = await callOpenAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, 16384);
+      const jsonStr = parseJsonFromAI(rawContent);
+
+      let reviewedHtml: string;
+      let fixes: string[] = [];
+      try {
+        const parsed = JSON.parse(jsonStr);
+        reviewedHtml = parsed.html;
+        fixes = parsed.fixes || [];
+      } catch {
+        // Try extracting HTML directly
+        const htmlMatch = rawContent.match(/<!doctype html[\s\S]*<\/html>/i);
+        if (htmlMatch) {
+          reviewedHtml = htmlMatch[0];
+        } else {
+          throw new Error("Failed to parse reviewed HTML");
+        }
+      }
+
+      if (!reviewedHtml) {
+        throw new Error("AI review did not return HTML");
+      }
+
+      console.log("Review complete: " + fixes.length + " fixes applied");
+
+      return new Response(
+        JSON.stringify({
+          html: postProcessHtml(reviewedHtml),
+          fixes,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ============================================================
     // ACTION: edit-section
     // ============================================================
     if (action === "edit-section") {
