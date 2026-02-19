@@ -1417,6 +1417,45 @@ async function callOpenAI(systemPrompt: string, userPrompt: string, maxTokens = 
   return aiResult.choices?.[0]?.message?.content || "";
 }
 
+async function callLovableAI(systemPrompt: string, userPrompt: string, model = "google/gemini-2.5-pro", maxTokens = 65536): Promise<string> {
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!apiKey) {
+    throw new Error("LOVABLE_API_KEY not configured");
+  }
+
+  const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.4,
+      max_tokens: maxTokens,
+    }),
+  });
+
+  if (!aiResponse.ok) {
+    if (aiResponse.status === 429) {
+      throw new Error("Rate limit exceeded. Try again in a moment.");
+    }
+    if (aiResponse.status === 402) {
+      throw new Error("AI credits insufficient.");
+    }
+    const errText = await aiResponse.text();
+    console.error("Lovable AI error:", aiResponse.status, errText);
+    throw new Error(`AI generation failed: ${aiResponse.status}`);
+  }
+
+  const aiResult = await aiResponse.json();
+  return aiResult.choices?.[0]?.message?.content || "";
+}
+
 function parseJsonFromAI(rawContent: string): string {
   let jsonStr = rawContent.trim();
   if (jsonStr.startsWith("```")) {
@@ -1481,86 +1520,110 @@ serve(async (req) => {
       const headBlock = headMatch ? headMatch[0] : "";
 
       const REVIEW_SYSTEM_PROMPT = `You are a SENIOR ART DIRECTOR & UX AUDITOR performing a SURGICAL POLISH pass on an existing landing page.
+Your role is like a senior designer doing a final QA pass before launch — fixing small visual issues without changing the design direction.
 
 ═══════════════════════════════════════
 ⛔ ABSOLUTE PRESERVATION RULES (NEVER VIOLATE)
 ═══════════════════════════════════════
-1. **PRESERVE THE ENTIRE <head> BLOCK EXACTLY** — copy it character-for-character into your output. This includes:
-   - The Tailwind Play CDN <script src="https://cdn.tailwindcss.com"></script>
-   - The tailwind.config customization <script> block
-   - The <style> block with CSS custom properties (--primary, --bg-deep, etc.) and @keyframes
-   - Google Fonts @import
-   - Lucide Icons CDN script
-   - Meta tags, <title>, viewport
-   DO NOT remove, rewrite, simplify, or "clean up" any of these. They ARE the design system.
+1. **PRESERVE THE ENTIRE <head> BLOCK CHARACTER-FOR-CHARACTER** — this includes:
+   - Tailwind Play CDN script
+   - tailwind.config customization script  
+   - <style> block with CSS custom properties and @keyframes
+   - Google Fonts imports
+   - Lucide Icons CDN
+   - All meta tags
+   Copy the <head> EXACTLY. Do not "clean up", reorganize, or simplify it.
 
-2. **PRESERVE ALL TEXT CONTENT** — do not rewrite, shorten, summarize, or remove any copy.
+2. **PRESERVE ALL TEXT CONTENT** — zero changes to copy, headlines, bullets, testimonials.
 
-3. **PRESERVE ALL IMAGES** — keep every <img> src URL exactly as-is unless it uses the deprecated domain "source.unsplash.com" (replace those with picsum.photos/seed/{keyword}/{w}/{h}).
+3. **PRESERVE ALL IMAGE URLs** — keep every src exactly as-is. Only exception: replace deprecated "source.unsplash.com" with "picsum.photos/seed/{keyword}/{w}/{h}".
 
-4. **PRESERVE data-section ATTRIBUTES** on every <section>.
+4. **PRESERVE data-section attributes** on every section element.
 
-5. **PRESERVE THE PAGE STRUCTURE** — same sections, same order, same nesting hierarchy.
+5. **PRESERVE ALL JAVASCRIPT** at the bottom of the page — scroll observers, FAQ accordion, carousel logic, counters, mobile menu toggles. Copy them exactly.
+
+6. **PRESERVE THE PAGE STRUCTURE** — same sections, same order, same nesting.
 
 ═══════════════════════════════════════
-🎯 WHAT YOU ACTUALLY FIX (ONLY THESE)
+🎯 WHAT YOU FIX (SURGICAL — ONLY TAILWIND CLASSES)
 ═══════════════════════════════════════
+You ONLY modify Tailwind utility classes on elements. You never add/remove HTML elements, never change text, never touch scripts or styles.
 
-A) CONTRAST FIXES:
-   - If text is unreadable against its background, change the TEXT class (not the background).
-   - Use the page's existing CSS vars: text-[var(--text-primary)], text-[var(--text-secondary)], text-[var(--text-muted)].
-   - For light-on-light or dark-on-dark issues, adjust the text shade using Tailwind: text-white, text-gray-100, text-gray-900, etc.
+A) CONTRAST & READABILITY:
+   - Text unreadable on its bg? Change the text color class (e.g. text-gray-400 → text-gray-200 on dark, or text-gray-500 → text-gray-800 on light).
+   - Use the page's CSS vars when available: text-[var(--text-primary)], text-[var(--text-secondary)].
+   - Ensure body text meets WCAG AA 4.5:1 contrast ratio.
+   - Headlines on gradient/image bgs: ensure text-white or add a text-shadow via drop-shadow-lg.
 
-B) SPACING CONSISTENCY:
-   - Sections should use py-16 sm:py-20. Fix any that deviate.
-   - Cards should use p-6 sm:p-8. Fix inconsistencies.
-   - Grid gaps should be gap-6 or gap-8 consistently.
+B) SPACING STANDARDIZATION:
+   - Sections: should use py-16 sm:py-20 consistently. Fix deviations.
+   - Cards: p-6 sm:p-8 consistently.
+   - Grids: gap-6 or gap-8 consistently within same section.
+   - Heading to content gap: mb-4 sm:mb-6 on section titles.
+   - Section intro (title block) to content: mb-10 sm:mb-12.
 
 C) HOVER & INTERACTION POLISH:
-   - Cards: add hover:-translate-y-1 hover:shadow-xl transition-all duration-300 if missing.
-   - CTA buttons: add hover:scale-105 hover:shadow-lg transition-transform if missing.
-   - Add subtle borders to cards if missing: border border-white/10 or border-[var(--border)].
+   - Cards missing hover? Add: hover:-translate-y-1 hover:shadow-xl transition-all duration-300
+   - CTA buttons missing hover? Add: hover:scale-105 hover:shadow-lg transition-transform duration-200
+   - Cards missing borders? Add: border border-[var(--border)]
+   - Images without hover? Add hover:scale-105 on img + overflow-hidden on parent container.
 
 D) RESPONSIVE FIXES:
-   - Grids must have mobile breakpoints: grid-cols-1 sm:grid-cols-2 lg:grid-cols-3.
-   - Text must use responsive sizes: text-xl sm:text-2xl lg:text-3xl.
-   - Fix overflow issues: add overflow-hidden on image containers.
+   - Grids must have breakpoints: grid-cols-1 sm:grid-cols-2 lg:grid-cols-3
+   - Typography must be responsive: text-2xl sm:text-3xl lg:text-4xl (never fixed px)
+   - Fix any overflow issues: add overflow-hidden where images or content might bleed.
+   - Buttons: ensure adequate touch targets on mobile (min py-3 px-6).
 
-E) VISUAL REFINEMENTS:
-   - Background alternation: sections should alternate bg-[var(--bg-deep)] and bg-[var(--bg-section)].
-   - Icons within a section should be uniform size.
-   - Badges/pills should have consistent styling.
+E) VISUAL CONSISTENCY:
+   - Sections should alternate backgrounds (bg-[var(--bg-deep)] / bg-[var(--bg-section)]).
+   - Icons should be consistent size within a section.
+   - Badges/pills should follow one consistent pattern.
+   - Border radius: cards should all use rounded-2xl consistently.
+   - Shadows: cards in same section should have same shadow level.
 
-F) INLINE STYLE CLEANUP:
-   - Convert any style="" attributes to equivalent Tailwind classes.
-   - Exception: CSS custom properties in <style> block are OK and MUST be preserved.
+F) INLINE STYLE → TAILWIND:
+   - Convert any style="" to Tailwind classes (except those in <style> block or on script elements).
+   - e.g. style="margin-top:20px" → mt-5
+
+═══════════════════════════════════════
+🚫 WHAT YOU NEVER DO
+═══════════════════════════════════════
+- Never remove or add HTML elements/sections
+- Never change any text content
+- Never modify <script> tags or their content
+- Never modify the <style> block
+- Never modify tailwind.config
+- Never change image src URLs (except deprecated source.unsplash.com)
+- Never change data-section values
+- Never add new CSS classes that require custom definitions
+- Never remove existing classes without a clear replacement
 
 ═══════════════════════════════════════
 OUTPUT FORMAT
 ═══════════════════════════════════════
 Return ONLY a JSON object (no markdown, no code fences):
 {
-  "html": "<!doctype html>...the COMPLETE corrected HTML including the full <head>...",
-  "fixes": ["description of fix 1", "description of fix 2", ...]
+  "html": "<!doctype html>...the COMPLETE page with your Tailwind class fixes...",
+  "fixes": ["Increased hero subtitle contrast: text-gray-400 → text-gray-200", "Standardized section spacing to py-16 sm:py-20", ...]
 }
 
-The "html" field MUST start with <!doctype html> and contain the COMPLETE page.
-The "fixes" array lists every specific change you made.`;
+The "html" MUST be the COMPLETE page starting with <!doctype html> and ending with </html>.
+The "fixes" array MUST list every specific class change you made with before/after values.`;
 
-      // Build the user prompt — include the head separately for emphasis
-      const reviewPrompt = `Here is the page's design system (<head> block) — YOU MUST PRESERVE THIS EXACTLY in your output:
+      const reviewPrompt = `IMMUTABLE DESIGN SYSTEM — preserve this <head> block EXACTLY as-is in your output:
 
----HEAD BLOCK (DO NOT MODIFY)---
+---HEAD BLOCK START---
 ${headBlock}
----END HEAD BLOCK---
+---HEAD BLOCK END---
 
-Now review and polish the FULL page HTML below. Apply only the fixes from your checklist. Return the complete HTML with the head block preserved.
+Now review the FULL PAGE below. Apply ONLY Tailwind class fixes from your checklist.
+Do NOT modify any text, scripts, images, or HTML structure. Only adjust Tailwind utility classes for better contrast, spacing, hover effects, and responsiveness.
 
-\`\`\`html
-${currentHtml}
-\`\`\``;
+FULL PAGE HTML:
+${currentHtml}`;
 
-      const rawContent = await callOpenAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, 16384);
+      console.log(`Review-page: calling Gemini 2.5 Pro via Lovable AI (${currentHtml.length} chars)...`);
+      const rawContent = await callLovableAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, "google/gemini-2.5-pro", 65536);
       const jsonStr = parseJsonFromAI(rawContent);
 
       let reviewedHtml: string;
@@ -1590,8 +1653,19 @@ ${currentHtml}
         if (reviewedHeadMatch) {
           reviewedHtml = reviewedHtml.replace(reviewedHeadMatch[0], headBlock);
         } else {
-          // No <head> at all — inject after <!doctype html><html...>
           reviewedHtml = reviewedHtml.replace(/<html[^>]*>/i, (match) => match + "\n" + headBlock);
+        }
+      }
+
+      // Safety net 2: ensure all original scripts are present
+      const originalScripts = currentHtml.match(/<script(?!.*tailwindcss)(?!.*tailwind\.config)[^>]*>[\s\S]*?<\/script>/gi) || [];
+      const reviewedScripts = reviewedHtml.match(/<script(?!.*tailwindcss)(?!.*tailwind\.config)[^>]*>[\s\S]*?<\/script>/gi) || [];
+      if (originalScripts.length > reviewedScripts.length) {
+        console.warn(`Review lost ${originalScripts.length - reviewedScripts.length} script blocks — re-injecting`);
+        // Re-inject missing scripts before </body>
+        const missingScripts = originalScripts.filter(s => !reviewedHtml.includes(s.slice(0, 60)));
+        if (missingScripts.length > 0) {
+          reviewedHtml = reviewedHtml.replace('</body>', missingScripts.join('\n') + '\n</body>');
         }
       }
 
