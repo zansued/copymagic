@@ -9414,4 +9414,153 @@ PRODUTO/OFERTA:
 ${inputs.product_description}`;
     },
   },
+
+  "webinar-script": {
+    id: "webinar-script",
+    name: "Gerador de Webinar/Aula",
+    emoji: "🎓",
+    subtitle: "Roteiros completos para webinários de venda e aulas gratuitas",
+    inputs: [
+      {
+        key: "topic",
+        label: "Tema / Assunto da Aula",
+        placeholder: "Ex: 'Como criar funis de vendas que faturam 6 dígitos', 'Os 5 pilares do tráfego pago para e-commerce'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "webinar_type",
+        label: "Tipo de Webinar",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "selling", label: "🛒 Webinar de Venda (pitch no final)" },
+          { value: "free-class", label: "📚 Aula Gratuita (autoridade + CTA leve)" },
+          { value: "launch", label: "🚀 Aula de Lançamento (CPL)" },
+          { value: "masterclass", label: "🎯 Masterclass (conteúdo denso + oferta)" },
+        ],
+      },
+      {
+        key: "duration",
+        label: "Duração Estimada",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "30", label: "30 minutos" },
+          { value: "45", label: "45 minutos" },
+          { value: "60", label: "60 minutos (padrão)" },
+          { value: "90", label: "90 minutos" },
+          { value: "120", label: "2 horas" },
+        ],
+      },
+      {
+        key: "audience_level",
+        label: "Nível da Audiência",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "beginner", label: "🟢 Iniciante (nunca ouviu falar)" },
+          { value: "intermediate", label: "🟡 Intermediário (já conhece o básico)" },
+          { value: "advanced", label: "🔴 Avançado (quer aprofundar)" },
+          { value: "mixed", label: "🔵 Misto (todos os níveis)" },
+        ],
+      },
+      {
+        key: "product_offer",
+        label: "Produto/Oferta (se houver pitch)",
+        placeholder: "Descreva o produto que será oferecido no final: nome, preço, benefícios, bônus, garantia...",
+        type: "textarea",
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Cole uma URL para extrair contexto adicional (página de vendas, artigo, concorrente...)",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Incluir dinâmica de grupo', 'Focar em casos reais', 'Mencionar bônus X'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const typeMap: Record<string, string> = {
+        selling: "Webinar de Venda — aula com conteúdo de valor seguida de pitch estruturado para venda de produto/serviço",
+        "free-class": "Aula Gratuita — conteúdo educacional generoso que constrói autoridade, com CTA leve no final",
+        launch: "Aula de Lançamento (CPL) — conteúdo estratégico que gera desejo e antecipação, parte de uma sequência de lançamento",
+        masterclass: "Masterclass — conteúdo denso e prático que demonstra expertise, com transição natural para oferta premium",
+      };
+      const levelMap: Record<string, string> = {
+        beginner: "Iniciante — use linguagem simples, explique conceitos básicos, muitos exemplos práticos",
+        intermediate: "Intermediário — pode usar termos técnicos, foque em estratégias e frameworks",
+        advanced: "Avançado — vá direto ao ponto, insights profundos, cases e dados",
+        mixed: "Misto — equilibre profundidade com acessibilidade, use camadas de complexidade",
+      };
+
+      return `Você é o Estrategista de Webinários — um especialista em criar roteiros completos para apresentações ao vivo que educam, engajam e convertem.
+
+MISSÃO: Criar um roteiro completo de ${inputs.duration || "60"} minutos para uma apresentação ao vivo.
+
+TIPO: ${typeMap[inputs.webinar_type] || typeMap["selling"]}
+
+NÍVEL DA AUDIÊNCIA: ${levelMap[inputs.audience_level] || levelMap["mixed"]}
+
+REGRAS ABSOLUTAS:
+1. Inclua TIMESTAMPS detalhados (ex: [00:00-05:00]) para cada bloco do roteiro
+2. Sugira SLIDES — para cada bloco, descreva o que deve aparecer no slide (título, bullet points, imagem sugerida)
+3. Inclua MOMENTOS DE INTERAÇÃO a cada 8-12 minutos (enquetes, perguntas no chat, "digita SIM se...")
+4. Cada bloco deve ter OBJETIVO CLARO e TRANSIÇÃO FLUIDA para o próximo
+5. CTAs estratégicos ao longo da apresentação, não só no final
+6. Inclua SCRIPTS LITERAIS — o que o apresentador deve falar (não apenas tópicos)
+7. Marque PICOS EMOCIONAIS — momentos de história, humor, revelação ou provocação
+8. Se houver pitch de venda, use a estrutura PAS (Problem-Agitate-Solve) na transição
+
+ESTRUTURA OBRIGATÓRIA:
+
+## 🎬 PRÉ-WEBINAR
+- Título do webinar (gancho irresistível)
+- Descrição para divulgação (2-3 linhas)
+- Checklist técnico (equipamento, plataforma, materiais)
+
+## 📋 ROTEIRO COMPLETO
+
+Para cada bloco:
+
+### ⏱️ [TIMESTAMP] — Título do Bloco
+**🎯 Objetivo:** [o que este bloco deve alcançar]
+**📊 Slide sugerido:** [descrição do visual]
+
+**🎤 Script:**
+[Texto literal do que falar — conversacional, engajante]
+
+**💬 Interação:** [pergunta, enquete ou dinâmica para o chat]
+**🔗 Transição:** [frase-gancho para o próximo bloco]
+
+---
+
+BLOCOS ESSENCIAIS (adaptar ao tipo e duração):
+1. **Abertura Impactante** — gancho, promessa, credenciais rápidas
+2. **Contextualização** — por que este tema importa AGORA
+3. **Conteúdo Principal** — 3-5 pontos-chave com exemplos e histórias
+4. **Demonstração/Case** — prova social ou demonstração prática
+5. **Recapitulação** — resumo dos aprendizados
+6. **Transição para Oferta** (se aplicável) — PAS framework
+7. **Apresentação da Oferta** (se aplicável) — benefícios, bônus, garantia, preço
+8. **Q&A / Encerramento** — perguntas frequentes pré-respondidas + despedida
+
+## 📝 MATERIAIS COMPLEMENTARES
+- E-mail de confirmação (pré-webinar)
+- Sequência de lembretes (24h, 1h, 5min antes)
+- E-mail pós-webinar (replay + oferta)
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+${inputs.scraped_content ? `\n--- CONTEÚDO EXTRAÍDO DA URL ---\n${inputs.scraped_content}` : ""}
+${inputs.product_offer ? `\n--- PRODUTO/OFERTA PARA PITCH ---\n${inputs.product_offer}` : ""}
+
+TEMA DA AULA:
+${inputs.topic}`;
+    },
+  },
 };
