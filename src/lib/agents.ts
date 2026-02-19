@@ -645,6 +645,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "webinar-script",
+    name: "Gerador de Webinar/Aula",
+    emoji: "🎓",
+    role: "Estrategista de Webinários e Aulas ao Vivo",
+    description: "Estrutura roteiros completos para webinários de venda ou aulas gratuitas — com timestamps, sugestões de slides, CTAs estratégicos e momentos de interação.",
+    category: "content",
+    available: true,
+  },
+  {
     id: "brand-voice-extractor",
     name: "Voz do Autor/Marca",
     emoji: "🗣️",
