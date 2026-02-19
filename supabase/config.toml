@@ -21,6 +21,9 @@ verify_jwt = false
 [functions.firecrawl-scrape]
 verify_jwt = false
 
+[functions.firecrawl-search]
+verify_jwt = false
+
 [functions.mp-create-preference]
 verify_jwt = false
 

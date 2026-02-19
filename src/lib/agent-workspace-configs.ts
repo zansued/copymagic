@@ -9687,9 +9687,19 @@ ${inputs.competitor_info}`;
         ],
       },
       {
+        key: "auto_research",
+        label: "🔍 Pesquisar preços de concorrentes automaticamente",
+        placeholder: "",
+        type: "select",
+        options: [
+          { value: "yes", label: "✅ Sim — buscar preços reais via web scraping" },
+          { value: "no", label: "❌ Não — vou informar manualmente" },
+        ],
+      },
+      {
         key: "competitors_price",
-        label: "Preços dos Concorrentes (opcional)",
-        placeholder: "Liste preços de 2-5 concorrentes: 'Concorrente A: R$497, Concorrente B: R$297'...",
+        label: "Preços dos Concorrentes (manual, opcional)",
+        placeholder: "Se preferir informar manualmente: 'Concorrente A: R$497, Concorrente B: R$297'...",
         type: "textarea",
       },
       {
@@ -9747,7 +9757,8 @@ Para cada faixa sugerida:
 
 ${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
 ${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
-${inputs.competitors_price ? `\n--- PREÇOS DOS CONCORRENTES ---\n${inputs.competitors_price}` : ""}
+${inputs.competitors_price ? `\n--- PREÇOS DOS CONCORRENTES (MANUAL) ---\n${inputs.competitors_price}` : ""}
+${inputs.scraped_competitors ? `\n--- PESQUISA DE MERCADO REAL (DADOS COLETADOS VIA WEB SCRAPING) ---\nAbaixo estão dados REAIS coletados da web sobre concorrentes e preços similares. Use como referência principal para suas recomendações:\n\n${inputs.scraped_competitors}` : ""}
 
 PRODUTO PARA PRECIFICAR:
 ${inputs.product_description}`;

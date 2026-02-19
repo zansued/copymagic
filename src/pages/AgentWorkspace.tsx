@@ -108,11 +108,50 @@ export default function AgentWorkspace() {
     setIsGenerating(true);
     setOutput("");
 
-    // Scrape reference URL if present
+    // Auto-research competitor prices for price-calculator
     const enrichedInputs = { ...inputs };
+    if (agentId === "price-calculator" && inputs.auto_research === "yes" && String(inputs.product_description || "").trim()) {
+      try {
+        setOutput("🔍 Pesquisando preços de concorrentes na web...\n");
+        const productDesc = String(inputs.product_description).trim();
+        const searchQueries = [
+          `${productDesc} preço valor quanto custa comprar`,
+          `${productDesc} concorrente similar alternativa preço`,
+        ];
+        
+        let allResults = "";
+        for (const q of searchQueries) {
+          const searchResult = await firecrawlApi.search(q, { limit: 5, lang: "pt-br", country: "BR" });
+          if (searchResult.success) {
+            const results = searchResult.data || searchResult || [];
+            const items = Array.isArray(results) ? results : (results.data || []);
+            for (const item of items) {
+              const title = item.title || "";
+              const url = item.url || "";
+              const md = item.markdown || item.description || "";
+              if (title || md) {
+                allResults += `### ${title}\nURL: ${url}\n${md.slice(0, 1500)}\n\n---\n\n`;
+              }
+            }
+          }
+        }
+
+        if (allResults) {
+          enrichedInputs.scraped_competitors = allResults.slice(0, 12000);
+          setOutput("✅ Dados de concorrentes coletados! Gerando análise de pricing...\n\n");
+        } else {
+          setOutput("⚠️ Não encontrei dados de concorrentes. Gerando com base no produto...\n\n");
+        }
+      } catch (err) {
+        console.error("Competitor research error:", err);
+        setOutput("⚠️ Erro na pesquisa de concorrentes. Continuando sem dados de mercado...\n\n");
+      }
+    }
+
+    // Scrape reference URL if present
     if (String(inputs.reference_url || "").trim()) {
       try {
-        setOutput("🔍 Extraindo conteúdo da URL de referência...\n");
+        setOutput((prev) => prev + "🔍 Extraindo conteúdo da URL de referência...\n");
         const scrapeResult = await firecrawlApi.scrape(String(inputs.reference_url).trim());
         if (scrapeResult.success) {
           const markdown = scrapeResult.data?.markdown || scrapeResult.data?.data?.markdown;
@@ -123,8 +162,10 @@ export default function AgentWorkspace() {
       } catch {
         // Continue without scraped content
       }
-      setOutput("");
     }
+
+    // Clear status messages before generation output
+    setOutput("");
 
     // Load brand context
     let brandContext = "";
