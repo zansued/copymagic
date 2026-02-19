@@ -9289,4 +9289,129 @@ DADOS DOS ANÚNCIOS PARA ANÁLISE:
 ${inputs.ads_data}`;
     },
   },
+
+  "whatsapp-copy": {
+    id: "whatsapp-copy",
+    name: "WhatsApp Copy",
+    emoji: "💬",
+    subtitle: "Crie sequências de mensagens persuasivas para WhatsApp",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Produto / Oferta",
+        placeholder: "Descreva seu produto ou oferta: o que é, para quem, qual a transformação, preço, diferenciais...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "sequence_type",
+        label: "Tipo de Sequência",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "broadcast", label: "📢 Broadcast Promocional" },
+          { value: "follow-up", label: "🔄 Follow-up Pós-Lead" },
+          { value: "recovery", label: "🛒 Recuperação de Vendas" },
+          { value: "support", label: "🤝 Atendimento / Suporte" },
+          { value: "launch", label: "🚀 Lançamento" },
+        ],
+      },
+      {
+        key: "num_messages",
+        label: "Número de Mensagens",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "3", label: "3 mensagens (rápida)" },
+          { value: "5", label: "5 mensagens (padrão)" },
+          { value: "7", label: "7 mensagens (completa)" },
+          { value: "10", label: "10 mensagens (extensa)" },
+        ],
+      },
+      {
+        key: "tone",
+        label: "Tom da Conversa",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "casual", label: "😎 Casual / Amigo" },
+          { value: "professional", label: "👔 Profissional" },
+          { value: "urgent", label: "🔥 Urgente" },
+          { value: "consultive", label: "🧠 Consultivo" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Inclua áudios sugeridos', 'Foque em reativação de lista fria', 'Tom mais direto ao ponto'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const typeMap: Record<string, string> = {
+        broadcast: "Broadcast Promocional — sequência de promoção com escassez e urgência para lista de contatos",
+        "follow-up": "Follow-up Pós-Lead — sequência de nutrição e aquecimento após captura de lead",
+        recovery: "Recuperação de Vendas — sequência para reativar interesse de quem demonstrou intenção mas não comprou",
+        support: "Atendimento / Suporte — scripts de resposta rápida para dúvidas, objeções e pós-venda",
+        launch: "Lançamento — sequência de aquecimento pré-lançamento até abertura de carrinho",
+      };
+      const toneMap: Record<string, string> = {
+        casual: "casual e amigável, como se falasse com um amigo próximo",
+        professional: "profissional e respeitoso, mantendo proximidade sem informalidade excessiva",
+        urgent: "urgente e direto, criando senso de escassez e ação imediata",
+        consultive: "consultivo e empático, como um especialista que entende a dor do cliente",
+      };
+
+      return `Você é o Estrategista de Conversão por WhatsApp — um especialista em criar sequências de mensagens que geram respostas, constroem relacionamento e convertem vendas pelo WhatsApp.
+
+MISSÃO: Criar uma sequência completa de ${inputs.num_messages || "5"} mensagens para WhatsApp.
+
+TIPO DE SEQUÊNCIA: ${typeMap[inputs.sequence_type] || typeMap["broadcast"]}
+
+TOM: ${toneMap[inputs.tone] || toneMap["casual"]}
+
+REGRAS ABSOLUTAS:
+1. Mensagens CURTAS — máximo 3 parágrafos curtos por mensagem (WhatsApp não é e-mail)
+2. Linguagem NATURAL e conversacional — como se digitasse no celular, não como se escrevesse uma carta
+3. Emojis ESTRATÉGICOS — use 2-4 por mensagem, nunca mais (sem parecer spam)
+4. Cada mensagem deve ter um OBJETIVO CLARO: abrir conversa, gerar resposta, criar urgência ou fechar
+5. Inclua GATILHOS DE RESPOSTA em toda mensagem: perguntas diretas, enquetes informais ("responde 1 ou 2"), pedidos de opinião
+6. Indique TIMING entre mensagens (ex: "⏰ Enviar 2h depois", "📅 Dia seguinte às 9h")
+7. NÃO use linguagem robótica ou corporativa — WhatsApp é pessoal
+8. Evite blocos longos de texto — use quebras de linha para escaneabilidade
+
+ESTRUTURA OBRIGATÓRIA POR MENSAGEM:
+
+### 📲 Mensagem [N] de [Total]
+**⏰ Timing:** [quando enviar em relação à anterior]
+**🎯 Objetivo:** [abrir conversa / gerar resposta / nutrir / criar urgência / fechar venda]
+
+---
+
+[TEXTO COMPLETO DA MENSAGEM — pronto para copiar e colar no WhatsApp]
+
+---
+
+**💡 Gatilho de Resposta:** [a pergunta ou CTA que incentiva resposta]
+**📝 Nota Estratégica:** [por que esta mensagem funciona nesta posição da sequência]
+
+TEMPLATES POR TIPO:
+
+- **Broadcast**: Abra com benefício/novidade → Apresente a oferta → Crie escassez → Feche com CTA urgente
+- **Follow-up**: Agradeça o interesse → Entregue valor extra → Quebre objeções → Apresente próximo passo
+- **Recuperação**: Retome contato com empatia → Relembre o interesse → Apresente novo ângulo/benefício → Última chance
+- **Atendimento**: Acolha a dúvida → Responda com clareza → Ofereça próximo passo → Confirme satisfação
+- **Lançamento**: Gere curiosidade → Entregue conteúdo de aquecimento → Revele detalhes → Abra carrinho com urgência
+
+Ao final da sequência, inclua:
+- **📊 RESUMO DA ESTRATÉGIA**: visão geral do fluxo e lógica persuasiva
+- **⚡ DICAS DE IMPLEMENTAÇÃO**: melhores horários, uso de áudios/imagens, ferramentas de automação
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+PRODUTO/OFERTA:
+${inputs.product_description}`;
+    },
+  },
 };

@@ -179,6 +179,15 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
   {
+    id: "whatsapp-copy",
+    name: "WhatsApp Copy",
+    emoji: "💬",
+    role: "Especialista em Sequências de WhatsApp",
+    description: "Cria sequências de mensagens para WhatsApp — broadcast, atendimento, follow-up e recuperação de vendas — com tom conversacional e gatilhos de resposta.",
+    category: "copywriting",
+    available: true,
+  },
+  {
     id: "email-sequence",
     name: "Estrategista de E-mails",
     emoji: "📧",
