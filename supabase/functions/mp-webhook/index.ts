@@ -9,7 +9,8 @@ const corsHeaders = {
 const PLAN_LIMITS: Record<string, { generations: number; profiles: number; projects: number; agents_access: string }> = {
   pro: { generations: 100, profiles: 5, projects: 10, agents_access: "full" },
   agency: { generations: 999999, profiles: 999, projects: 999999, agents_access: "full" },
-  lifetime: { generations: 999999, profiles: 999, projects: 999999, agents_access: "full" },
+  agency_plus: { generations: 999999, profiles: 999, projects: 999999, agents_access: "full" },
+  lifetime: { generations: 999999, profiles: 5, projects: 10, agents_access: "full" },
 };
 
 async function verifyWebhookSignature(req: Request, body: any): Promise<boolean> {
