@@ -787,4 +787,13 @@ export const AGENTS: AgentDef[] = [
     category: "branding",
     available: true,
   },
+  {
+    id: "quiz-generator",
+    name: "Gerador de Quiz Interativo",
+    emoji: "🧩",
+    role: "Especialista em Quizzes de Engajamento e Conversão",
+    description: "Cria quizzes interativos estratégicos que engajam o público, qualificam leads e direcionam para a compra do produto ideal.",
+    category: "content",
+    available: true,
+  },
 ];

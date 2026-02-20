@@ -10846,4 +10846,183 @@ SOBRE A MARCA:
 ${inputs.brand_description}`;
     },
   },
+
+  "quiz-generator": {
+    id: "quiz-generator",
+    name: "Gerador de Quiz Interativo",
+    emoji: "🧩",
+    subtitle: "Crie quizzes que engajam, qualificam e vendem",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Produto / Oferta",
+        placeholder: "Descreva o produto ou serviço que o quiz deve direcionar. Ex: 'Curso de marketing digital para iniciantes, R$197, com 8 módulos...'",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "quiz_goal",
+        label: "Objetivo do Quiz",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "lead-capture", label: "📋 Captura de Leads (e-mail antes do resultado)" },
+          { value: "product-match", label: "🎯 Match de Produto (qual produto ideal)" },
+          { value: "awareness", label: "💡 Consciência do Problema (educar + engajar)" },
+          { value: "segmentation", label: "📊 Segmentação (qualificar tipo de cliente)" },
+        ],
+      },
+      {
+        key: "quiz_style",
+        label: "Estilo do Quiz",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "personality", label: "🧠 Teste de Personalidade (qual perfil você é?)" },
+          { value: "diagnostic", label: "🩺 Diagnóstico (descubra seu nível/score)" },
+          { value: "challenge", label: "🏆 Desafio (teste seus conhecimentos)" },
+          { value: "recommendation", label: "🎁 Recomendação (descubra o ideal para você)" },
+        ],
+      },
+      {
+        key: "questions_count",
+        label: "Número de Perguntas",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "5", label: "5 perguntas (rápido)" },
+          { value: "7", label: "7 perguntas (ideal)" },
+          { value: "10", label: "10 perguntas (completo)" },
+        ],
+      },
+      {
+        key: "results_count",
+        label: "Número de Resultados",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "3", label: "3 perfis de resultado" },
+          { value: "4", label: "4 perfis de resultado" },
+          { value: "5", label: "5 perfis de resultado" },
+        ],
+      },
+      {
+        key: "reference_url",
+        label: "URL de Referência (opcional)",
+        placeholder: "Cole uma URL com informações sobre o produto ou página de vendas para enriquecer o quiz",
+        type: "input",
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Tom humorístico', 'Público feminino 30-45', 'Quiz para Instagram Stories', 'Inclua gamificação'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const goalMap: Record<string, string> = {
+        "lead-capture": "captura de leads — o quiz pede o e-mail antes de revelar o resultado, criando curiosidade irresistível",
+        "product-match": "match de produto — cada resultado direciona para o produto/serviço ideal do portfólio",
+        "awareness": "consciência do problema — educa o público sobre uma dor/necessidade que ele ainda não reconhece",
+        "segmentation": "segmentação de leads — classifica o respondente por perfil, estágio ou nível para personalizar a abordagem comercial",
+      };
+      const styleMap: Record<string, string> = {
+        personality: "Teste de Personalidade — 'Qual tipo de [X] você é?' com perfis distintos e identificáveis",
+        diagnostic: "Diagnóstico/Score — 'Descubra seu nível de [X]' com pontuação e classificação",
+        challenge: "Desafio/Trivia — 'Teste seus conhecimentos sobre [X]' com gamificação",
+        recommendation: "Recomendação — 'Descubra qual [produto/solução] é ideal para você' com match personalizado",
+      };
+
+      return `Você é o Especialista em Quizzes Interativos — um estrategista de engajamento e conversão que transforma a curiosidade do público em leads qualificados e vendas.
+
+MISSÃO: Criar um quiz interativo completo com ${inputs.questions_count || "7"} perguntas e ${inputs.results_count || "3"} perfis de resultado.
+
+OBJETIVO: ${goalMap[inputs.quiz_goal] || "captura de leads"}
+ESTILO: ${styleMap[inputs.quiz_style] || "teste de personalidade"}
+
+## ESTRUTURA OBRIGATÓRIA DO QUIZ
+
+### 1. TÍTULO DO QUIZ
+- Headline irresistível que gera clique imediato (3 opções)
+- Subtítulo que reforça o benefício de responder
+- Tempo estimado ("Leva apenas 2 minutos")
+
+### 2. TELA DE ABERTURA
+- Copy de abertura que cria curiosidade e urgência para começar
+- Promessa do que o respondente vai descobrir
+- CTA para iniciar ("Começar Quiz", "Descobrir Agora", etc.)
+
+### 3. PERGUNTAS (${inputs.questions_count || "7"} perguntas)
+
+Para CADA pergunta, forneça:
+
+**Pergunta [N]: [Texto da pergunta]**
+- Tipo: múltipla escolha
+- Opções: 3-4 alternativas (cada uma mapeada para um perfil de resultado)
+- 🎯 Estratégia: [por que essa pergunta é estratégica para segmentar/qualificar]
+- Mapeamento: Opção A → Perfil X | Opção B → Perfil Y | etc.
+
+REGRAS DAS PERGUNTAS:
+- Começar com perguntas fáceis e envolventes (baixo atrito)
+- Aumentar gradualmente a profundidade
+- Usar linguagem conversacional e divertida
+- Cada pergunta deve revelar algo sobre o respondente
+- Evitar perguntas óbvias ou genéricas
+- Incluir pelo menos 1 pergunta-surpresa que quebra o padrão
+
+### 4. LÓGICA DE PONTUAÇÃO
+- Tabela de pontuação: qual perfil cada resposta alimenta
+- Critérios de desempate
+- Fórmula de classificação clara
+
+### 5. TELA DE CAPTURA (se aplicável)
+- Copy persuasiva pré-resultado: "Seu resultado está pronto! Para onde enviamos?"
+- Campo de e-mail com CTA irresistível
+- Elemento de prova social ("12.847 pessoas já descobriram seu perfil")
+
+### 6. PÁGINAS DE RESULTADO (${inputs.results_count || "3"} perfis)
+
+Para CADA resultado, forneça:
+
+**Resultado [N]: [Nome do Perfil]**
+- 🏷️ Título atraente e memorável
+- 📝 Descrição do perfil (3-4 parágrafos que fazem o respondente se sentir compreendido)
+- ✅ Pontos fortes deste perfil
+- ⚠️ Desafios/oportunidades de melhoria
+- 💡 Recomendação personalizada
+- 🎯 CTA específico: qual produto/ação é ideal para este perfil
+- 📊 Estatística social: "X% das pessoas são deste perfil"
+- 🔗 Link/oferta recomendada com copy de transição natural
+
+### 7. COPY DE COMPARTILHAMENTO
+- Frase para compartilhar resultado nas redes sociais
+- Texto para WhatsApp: "Fiz um quiz e descobri que sou [perfil]! Faz o teu: [link]"
+- Hashtags sugeridas
+
+### 8. SEQUÊNCIA PÓS-QUIZ
+- E-mail 1 (imediato): resultado detalhado + CTA suave
+- E-mail 2 (dia seguinte): aprofundamento do perfil + oferta
+- E-mail 3 (3 dias): case de sucesso do mesmo perfil + urgência
+
+### 9. MÉTRICAS E KPIs
+- Taxa de conclusão esperada
+- Pontos de abandono mais comuns e como mitigar
+- Sugestões de otimização
+
+REGRAS GERAIS:
+- O quiz deve ser DIVERTIDO e REVELADOR — não pode parecer pesquisa de mercado
+- Cada resultado deve fazer o respondente se sentir especial e compreendido
+- A transição do resultado para a oferta deve ser NATURAL, não forçada
+- Use gatilhos de curiosidade entre as perguntas para manter o engajamento
+- Adapte o tom ao público-alvo e à voz da marca
+- Todos os resultados devem direcionar para alguma ação (compra, agendamento, download)
+
+${inputs.scraped_content ? `\n--- CONTEÚDO DA URL DE REFERÊNCIA ---\n${inputs.scraped_content}` : ""}
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+PRODUTO/OFERTA PARA DIRECIONAR:
+${inputs.product_description}`;
+    },
+  },
 };
