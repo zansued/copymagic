@@ -30,6 +30,7 @@ export interface ImportedAd {
   offerScore: number;
   riskScore: number;
   overallScore: number;
+  aiScaleScore?: number;
   complianceAlerts: string[];
   savedAsReference: boolean;
 }

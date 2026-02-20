@@ -85,6 +85,7 @@ export default function AdDetailSheet({ ad: initialAd, open, onOpenChange, onUpd
         updatedAd.proof = Array.isArray(result.offer_card.proof) ? result.offer_card.proof.join("; ") : ad.proof;
         updatedAd.offer = result.offer_card.angle?.join(", ") || ad.offer;
         updatedAd.inferredAudience = result.offer_card.format || ad.inferredAudience;
+        updatedAd.aiScaleScore = result.scale_score?.score_0_100 || ad.aiScaleScore;
 
         // Recalculate scores
         const allAds = storage.getAds();

@@ -213,11 +213,15 @@ export default function SwipeOffersTab() {
           matchAd.proof = Array.isArray(result.offer_card.proof)
             ? result.offer_card.proof.join("; ")
             : matchAd.proof;
+          matchAd.offer = result.offer_card.angle?.join(", ") || matchAd.offer;
+          matchAd.inferredAudience = result.offer_card.format || matchAd.inferredAudience;
+          matchAd.aiScaleScore = result.scale_score?.score_0_100 || matchAd.aiScaleScore;
           updated++;
         }
       }
       if (updated > 0) {
-        storage.saveAds(allAds);
+        const recalculated = allAds.map((a) => ({ ...a, ...calculateScores(a, allAds) }));
+        storage.saveAds(recalculated);
         reload();
       }
 
@@ -528,6 +532,7 @@ function AdDetailSheetWithAI({ ad: initialAd, aiResult, open, onOpenChange, onUp
             proof: Array.isArray(result.offer_card.proof) ? result.offer_card.proof.join("; ") : ad.proof,
             offer: result.offer_card.angle?.join(", ") || ad.offer,
             inferredAudience: result.offer_card.format || ad.inferredAudience,
+            aiScaleScore: result.scale_score?.score_0_100 || ad.aiScaleScore,
           };
           // Recalculate heuristic scores with full list
           const allAds = storage.getAds();
