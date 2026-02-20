@@ -467,14 +467,31 @@ function AdDetailSheetWithAI({ ad: initialAd, aiResult, open, onOpenChange, onUp
   const update = (field: keyof ImportedAd, value: string) => setAd((prev) => prev ? { ...prev, [field]: value } : prev);
 
   const save = () => {
-    if (ad) { storage.updateAd(ad); onUpdated(); toast.success("Salvo!"); }
+    if (!ad) return;
+    const allAds = storage.getAds();
+    const exists = allAds.some((a) => a.id === ad.id);
+    if (exists) {
+      storage.updateAd(ad);
+    } else {
+      storage.addAd(ad);
+    }
+    onUpdated();
+    toast.success("Anúncio salvo!");
   };
 
   const saveAsReference = () => {
-    if (ad) {
-      const updated = { ...ad, savedAsReference: true };
-      storage.updateAd(updated); setAd(updated); onUpdated(); toast.success("Referência salva ⭐");
+    if (!ad) return;
+    const updated = { ...ad, savedAsReference: true };
+    const allAds = storage.getAds();
+    const exists = allAds.some((a) => a.id === updated.id);
+    if (exists) {
+      storage.updateAd(updated);
+    } else {
+      storage.addAd(updated);
     }
+    setAd(updated);
+    onUpdated();
+    toast.success("Salvo como referência ⭐");
   };
 
   const handleAnalyzeSingle = async () => {
@@ -659,7 +676,7 @@ function AdDetailSheetWithAI({ ad: initialAd, aiResult, open, onOpenChange, onUp
               <Star className="h-3.5 w-3.5" /> Salvar
             </Button>
             <Button variant="outline" size="sm" onClick={saveAsReference} className="gap-1.5">
-              <Star className="h-3.5 w-3.5" /> Ref
+              <Star className="h-3.5 w-3.5" /> Referência
             </Button>
           </div>
         </div>
