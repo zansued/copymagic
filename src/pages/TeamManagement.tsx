@@ -19,8 +19,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  Users, UserPlus, Loader2, X, Pencil, Check, Plus, ArrowRightLeft, Trash2,
+  Users, UserPlus, Loader2, X, Pencil, Check, Plus, ArrowRightLeft, Trash2, AlertTriangle,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { AnimatedTooltip, type TooltipItem } from "@/components/ui/animated-tooltip";
 import { MemberCard } from "@/components/team/MemberCard";
 
@@ -66,6 +67,12 @@ export default function TeamManagement() {
   // Transfer member dialog
   const [transferring, setTransferring] = useState<{ id: string; name: string } | null>(null);
   const [transferTarget, setTransferTarget] = useState("");
+
+  // Delete team
+  const [showDeleteTeam, setShowDeleteTeam] = useState(false);
+  const [deletingTeam, setDeletingTeam] = useState(false);
+  const [teamProjectsCount, setTeamProjectsCount] = useState<number | null>(null);
+  const [checkingProjects, setCheckingProjects] = useState(false);
 
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
   const MAX_TEAMS = subscription?.plan === "lifetime" ? 5 : 3;
@@ -190,6 +197,28 @@ export default function TeamManagement() {
     setTransferTarget("");
   };
 
+  const handleDeleteTeamClick = async () => {
+    if (!team) return;
+    setCheckingProjects(true);
+    const { count } = await supabase
+      .from("projects")
+      .select("id", { count: "exact", head: true })
+      .eq("team_id", team.id);
+    setTeamProjectsCount(count ?? 0);
+    setCheckingProjects(false);
+    setShowDeleteTeam(true);
+  };
+
+  const handleConfirmDeleteTeam = async () => {
+    if (!team) return;
+    setDeletingTeam(true);
+    const ok = await deleteTeam(team.id);
+    setDeletingTeam(false);
+    setShowDeleteTeam(false);
+    if (ok) toast.success("Equipe excluída");
+    else toast.error("Erro ao excluir equipe");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
@@ -266,6 +295,18 @@ export default function TeamManagement() {
             {isOwnerOrAdmin && teams.length < MAX_TEAMS && (
               <Button variant="outline" size="sm" onClick={() => setShowCreateDialog(true)}>
                 <Plus className="h-4 w-4 mr-1" /> Nova Equipe
+              </Button>
+            )}
+            {myRole === "owner" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={handleDeleteTeamClick}
+                disabled={checkingProjects}
+              >
+                {checkingProjects ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Trash2 className="h-4 w-4 mr-1" />}
+                Excluir Equipe
               </Button>
             )}
           </div>
@@ -499,6 +540,54 @@ export default function TeamManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete team confirmation */}
+      <AlertDialog open={showDeleteTeam} onOpenChange={setShowDeleteTeam}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {teamProjectsCount && teamProjectsCount > 0 ? (
+                <AlertTriangle className="h-5 w-5 text-amber-500" />
+              ) : (
+                <Trash2 className="h-5 w-5 text-destructive" />
+              )}
+              Excluir equipe "{team.name}"
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                {teamProjectsCount && teamProjectsCount > 0 ? (
+                  <>
+                    <p>
+                      Esta equipe possui <strong>{teamProjectsCount} projeto(s) ativo(s)</strong>.
+                      Não é possível excluí-la enquanto houver projetos vinculados.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Remova ou transfira todos os projetos antes de excluir a equipe.
+                    </p>
+                  </>
+                ) : (
+                  <p>
+                    Esta ação é irreversível. Todos os membros serão removidos e os convites pendentes cancelados.
+                  </p>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            {(!teamProjectsCount || teamProjectsCount === 0) && (
+              <AlertDialogAction
+                onClick={handleConfirmDeleteTeam}
+                disabled={deletingTeam}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deletingTeam && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                <Trash2 className="h-4 w-4 mr-2" /> Excluir Equipe
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
