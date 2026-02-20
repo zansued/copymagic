@@ -684,6 +684,98 @@ export type Database = {
         }
         Relationships: []
       }
+      review_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          review_id: string
+        }
+        Insert: {
+          author_id: string
+          content?: string
+          created_at?: string
+          id?: string
+          review_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_comments_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "review_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_requests: {
+        Row: {
+          agent_name: string | null
+          content: string
+          created_at: string
+          generation_id: string | null
+          id: string
+          requested_by: string
+          resolved_at: string | null
+          reviewer_id: string | null
+          status: string
+          team_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agent_name?: string | null
+          content?: string
+          created_at?: string
+          generation_id?: string | null
+          id?: string
+          requested_by: string
+          resolved_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          team_id: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string | null
+          content?: string
+          created_at?: string
+          generation_id?: string | null
+          id?: string
+          requested_by?: string
+          resolved_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          team_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_requests_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_generations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roadmaps: {
         Row: {
           brand_profile_id: string | null
