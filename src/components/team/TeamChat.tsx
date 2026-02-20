@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useTeamMessages, TeamMessage } from "@/hooks/use-team-messages";
 import { useAuth } from "@/hooks/use-auth";
 import { useTeam } from "@/hooks/use-team";
+import { useProfiles } from "@/hooks/use-profiles";
 import { cn } from "@/lib/utils";
 import { Send, Trash2, Pin, Clock, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -9,13 +10,60 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
+// Renders message content with highlighted @mentions
+function MessageContent({ content }: { content: string }) {
+  const parts = content.split(/(@\w[\w\s]*?\b)/g);
+  return (
+    <p className="text-sm text-muted-foreground leading-relaxed mt-0.5 whitespace-pre-wrap break-words">
+      {parts.map((part, i) =>
+        part.startsWith("@") ? (
+          <span key={i} className="text-primary font-medium bg-primary/10 rounded px-0.5">
+            {part}
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </p>
+  );
+}
+
 export function TeamChat() {
   const { user } = useAuth();
-  const { team, isOwnerOrAdmin } = useTeam();
+  const { team, members, isOwnerOrAdmin } = useTeam();
+  const memberUserIds = useMemo(() => members.map((m) => m.user_id), [members]);
+  const { profiles } = useProfiles(memberUserIds);
   const { messages, loading, sendMessage, deleteMessage, pinMessage } = useTeamMessages(team?.id);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Mention autocomplete state
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const [cursorPos, setCursorPos] = useState(0);
+
+  // Build member names list for autocomplete
+  const memberNames = useMemo(() => {
+    return members.map((m) => {
+      const p = profiles[m.user_id];
+      return {
+        userId: m.user_id,
+        name: p?.display_name || m.user_id.slice(0, 8),
+        avatar: p?.avatar_url || undefined,
+      };
+    });
+  }, [members, profiles]);
+
+  // Filtered suggestions
+  const suggestions = useMemo(() => {
+    if (mentionQuery === null) return [];
+    const q = mentionQuery.toLowerCase();
+    return memberNames.filter(
+      (m) => m.name.toLowerCase().includes(q) && m.userId !== user?.id
+    );
+  }, [mentionQuery, memberNames, user?.id]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -24,6 +72,43 @@ export function TeamChat() {
     }
   }, [messages]);
 
+  // Reset mention index when suggestions change
+  useEffect(() => {
+    setMentionIndex(0);
+  }, [suggestions.length]);
+
+  const detectMention = useCallback((value: string, cursor: number) => {
+    // Look backwards from cursor to find @
+    const before = value.slice(0, cursor);
+    const match = before.match(/@(\w*)$/);
+    if (match) {
+      setMentionQuery(match[1]);
+    } else {
+      setMentionQuery(null);
+    }
+  }, []);
+
+  const insertMention = useCallback(
+    (name: string) => {
+      const before = input.slice(0, cursorPos);
+      const after = input.slice(cursorPos);
+      const mentionStart = before.lastIndexOf("@");
+      const newValue = before.slice(0, mentionStart) + `@${name} ` + after;
+      setInput(newValue);
+      setMentionQuery(null);
+      inputRef.current?.focus();
+    },
+    [input, cursorPos]
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const cursor = e.target.selectionStart || 0;
+    setInput(val);
+    setCursorPos(cursor);
+    detectMention(val, cursor);
+  };
+
   const handleSend = async () => {
     if (!input.trim() || sending) return;
     setSending(true);
@@ -31,12 +116,37 @@ export function TeamChat() {
     setSending(false);
     if (ok) {
       setInput("");
+      setMentionQuery(null);
     } else {
       toast.error("Erro ao enviar mensagem");
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // If autocomplete is open, handle navigation
+    if (mentionQuery !== null && suggestions.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setMentionIndex((prev) => (prev + 1) % suggestions.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setMentionIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        insertMention(suggestions[mentionIndex].name);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setMentionQuery(null);
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -57,7 +167,6 @@ export function TeamChat() {
 
   if (!team) return null;
 
-  // Separate pinned messages
   const pinned = messages.filter((m) => m.is_pinned);
   const regular = messages.filter((m) => !m.is_pinned);
 
@@ -131,9 +240,7 @@ export function TeamChat() {
                       {timeAgo}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-0.5 whitespace-pre-wrap break-words">
-                    {msg.content}
-                  </p>
+                  <MessageContent content={msg.content} />
                 </div>
 
                 {/* Actions */}
@@ -164,14 +271,50 @@ export function TeamChat() {
       </div>
 
       {/* Input */}
-      <div className="px-3 py-2 border-t border-border/30">
+      <div className="px-3 py-2 border-t border-border/30 relative">
+        {/* Mention autocomplete popup */}
+        {mentionQuery !== null && suggestions.length > 0 && (
+          <div className="absolute bottom-full left-3 right-3 mb-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden z-50">
+            {suggestions.map((s, i) => (
+              <button
+                key={s.userId}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  insertMention(s.name);
+                }}
+                className={cn(
+                  "w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors",
+                  i === mentionIndex
+                    ? "bg-accent text-accent-foreground"
+                    : "hover:bg-accent/50 text-foreground"
+                )}
+              >
+                <Avatar className="h-5 w-5">
+                  {s.avatar && <AvatarImage src={s.avatar} alt={s.name} />}
+                  <AvatarFallback className="text-[9px] bg-secondary text-secondary-foreground">
+                    {s.name[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span>{s.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex items-center gap-2">
           <input
+            ref={inputRef}
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Mensagem para a equipe..."
+            onClick={(e) => {
+              const cursor = (e.target as HTMLInputElement).selectionStart || 0;
+              setCursorPos(cursor);
+              detectMention(input, cursor);
+            }}
+            placeholder="Mensagem... use @ para mencionar"
             className="flex-1 bg-secondary/50 border border-border/30 rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/50"
             disabled={sending}
           />
