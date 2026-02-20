@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Sparkles, Square, Copy, Check, FileDown } from "lucide-react";
+import { ArrowLeft, Sparkles, Square, Copy, Check, FileDown, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,8 @@ import { firecrawlApi } from "@/lib/api/firecrawl";
 import ReactMarkdown from "react-markdown";
 import { GenerationHistory } from "@/components/agent/GenerationHistory";
 import { AiSuggestButton } from "@/components/agent/AiSuggestButton";
+import { useReviews } from "@/hooks/use-reviews";
+import { useTeam } from "@/hooks/use-team";
 
 interface BrandProfileOption {
   id: string;
@@ -31,6 +33,8 @@ export default function AgentWorkspace() {
 
   const fromCampaign = searchParams.get("from") === "campaign";
   const campaignProjectId = searchParams.get("projectId");
+  const { team } = useTeam();
+  const { createReview } = useReviews();
 
   const config = agentId ? AGENT_WORKSPACE_CONFIGS[agentId] : null;
 
@@ -486,6 +490,22 @@ export default function AgentWorkspace() {
                   <Button variant="outline" size="sm" onClick={handleExportPdf} className="gap-1.5 text-xs">
                     <FileDown className="h-3.5 w-3.5" /> PDF
                   </Button>
+                  {team && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-xs"
+                      onClick={async () => {
+                        await createReview(
+                          `${config.name} — ${new Date().toLocaleDateString("pt-BR")}`,
+                          output,
+                          config.name
+                        );
+                      }}
+                    >
+                      <Send className="h-3.5 w-3.5" /> Enviar para Revisão
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
