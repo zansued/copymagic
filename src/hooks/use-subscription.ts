@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 export interface Subscription {
   id: string;
-  plan: "free" | "pro" | "agency" | "lifetime";
+  plan: "free" | "starter" | "pro" | "agency" | "lifetime";
   status: string;
   generations_used: number;
   generations_limit: number;
