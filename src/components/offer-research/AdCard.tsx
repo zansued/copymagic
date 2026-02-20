@@ -76,10 +76,9 @@ export function AdCard({ ad }: { ad: AdData }) {
               {ad.plataforma.split(/,\s*/).map((p, i) => {
                 const config = platformConfig(p);
                 return (
-                  <Badge key={i} variant="outline" className={`text-[10px] px-2 py-0.5 gap-1 border ${config.className}`}>
+                  <span key={i} title={p.trim()} className={`inline-flex items-center justify-center h-5 w-5 rounded-full ${config.className}`}>
                     {config.icon}
-                    {p.trim()}
-                  </Badge>
+                  </span>
                 );
               })}
               {ad.tipo_midia && (
