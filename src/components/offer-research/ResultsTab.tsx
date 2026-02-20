@@ -98,6 +98,7 @@ export default function ResultsTab() {
             : matchAd.proof;
           matchAd.offer = result.offer_card.angle?.join(", ") || matchAd.offer;
           matchAd.inferredAudience = result.offer_card.format || matchAd.inferredAudience;
+          matchAd.aiScaleScore = result.scale_score?.score_0_100 || matchAd.aiScaleScore;
           updated++;
         }
       }

@@ -58,7 +58,7 @@ export function calculateScores(
   ad: Partial<ImportedAd>,
   allAds: ImportedAd[]
 ): { offerScore: number; riskScore: number; overallScore: number; complianceAlerts: string[] } {
-  const fullText = `${ad.mainText || ""} ${ad.headline || ""}`.toLowerCase();
+  const fullText = `${ad.mainText || ""} ${ad.headline || ""} ${ad.promiseSummary || ""} ${ad.mechanism || ""} ${ad.proof || ""}`.toLowerCase();
 
   const promiseCount = countMatches(fullText, PROMISE_WORDS);
   const promiseScore = Math.min(25, promiseCount * 5);
@@ -76,7 +76,7 @@ export function calculateScores(
     const days = Math.floor(
       (Date.now() - new Date(ad.startDate).getTime()) / (1000 * 60 * 60 * 24)
     );
-    longevityScore = Math.min(15, Math.floor(days / 3));
+    if (days > 0) longevityScore = Math.min(15, Math.floor(days / 3));
   }
 
   const samePageVariations = allAds.filter(
@@ -84,7 +84,13 @@ export function calculateScores(
   ).length;
   const varietyScore = Math.min(20, samePageVariations * 5);
 
-  const offerScore = Math.min(100, promiseScore + mechScore + densityScore + longevityScore + varietyScore);
+  // Bonus for having AI-enriched fields (promise, mechanism, proof filled)
+  let aiFieldsBonus = 0;
+  if (ad.promiseSummary && ad.promiseSummary.length > 3) aiFieldsBonus += 8;
+  if (ad.mechanism && ad.mechanism.length > 3) aiFieldsBonus += 7;
+  if (ad.proof && ad.proof.length > 3) aiFieldsBonus += 5;
+
+  const offerScore = Math.min(100, promiseScore + mechScore + densityScore + longevityScore + varietyScore + aiFieldsBonus);
 
   const alerts: string[] = [];
   let riskPoints = 0;
@@ -96,7 +102,12 @@ export function calculateScores(
   }
   const riskScore = Math.min(100, riskPoints);
 
-  const overallScore = Math.max(0, Math.min(100, offerScore - Math.floor(riskScore * 0.3)));
+  // Blend heuristic with AI scale score if available
+  const heuristicOverall = Math.max(0, Math.min(100, offerScore - Math.floor(riskScore * 0.3)));
+  const aiScore = (ad as any).aiScaleScore;
+  const overallScore = typeof aiScore === "number" && aiScore > 0
+    ? Math.round(aiScore * 0.6 + heuristicOverall * 0.4)
+    : heuristicOverall;
 
   return { offerScore, riskScore, overallScore, complianceAlerts: alerts };
 }
