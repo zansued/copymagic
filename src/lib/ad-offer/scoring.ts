@@ -12,16 +12,54 @@ const MECHANISM_WORDS = [
   "técnica", "passo a passo", "ingrediente", "mistura",
 ];
 
-const COMPLIANCE_RISK_TERMS = [
-  { term: "cura garantida", severity: "high" as const },
-  { term: "antes e depois", severity: "medium" as const },
-  { term: "anvisa", severity: "high" as const },
-  { term: "natural + remédio", severity: "medium" as const },
-  { term: "aprovado pela anvisa", severity: "high" as const },
-  { term: "médicos recomendam", severity: "medium" as const },
-  { term: "cientificamente comprovado", severity: "medium" as const },
-  { term: "100% garantido", severity: "high" as const },
-  { term: "sem efeitos colaterais", severity: "medium" as const },
+// Risk categories aligned with Meta/Google Ads policy violations
+const COMPLIANCE_RISK_TERMS: { term: string; severity: "high" | "medium" | "low"; category: string }[] = [
+  // 🔴 HIGH — likely ad rejection + account restriction
+  { term: "cura garantida", severity: "high", category: "Promessa de cura" },
+  { term: "100% garantido", severity: "high", category: "Garantia absoluta" },
+  { term: "aprovado pela anvisa", severity: "high", category: "Uso indevido de órgão regulador" },
+  { term: "anvisa", severity: "high", category: "Menção a órgão regulador" },
+  { term: "emagreça dormindo", severity: "high", category: "Promessa irreal" },
+  { term: "sem esforço nenhum", severity: "high", category: "Promessa irreal" },
+  { term: "resultado garantido", severity: "high", category: "Garantia absoluta" },
+  { term: "ganhe dinheiro fácil", severity: "high", category: "Esquema financeiro" },
+  { term: "renda extra garantida", severity: "high", category: "Esquema financeiro" },
+  { term: "fique rico", severity: "high", category: "Esquema financeiro" },
+  { term: "ganhe r$", severity: "high", category: "Promessa financeira explícita" },
+  { term: "sem risco", severity: "high", category: "Garantia absoluta" },
+  { term: "cloaker", severity: "high", category: "Técnica proibida" },
+  { term: "burlar", severity: "high", category: "Técnica proibida" },
+  { term: "black hat", severity: "high", category: "Técnica proibida" },
+  { term: "compre seguidores", severity: "high", category: "Prática proibida" },
+  { term: "remédio natural que cura", severity: "high", category: "Promessa de cura" },
+  { term: "substitui remédio", severity: "high", category: "Promessa de cura" },
+  
+  // 🟡 MEDIUM — flag de revisão manual / risco moderado
+  { term: "antes e depois", severity: "medium", category: "Conteúdo restrito" },
+  { term: "médicos recomendam", severity: "medium", category: "Autoridade não verificável" },
+  { term: "cientificamente comprovado", severity: "medium", category: "Claim não verificável" },
+  { term: "sem efeitos colaterais", severity: "medium", category: "Claim médico" },
+  { term: "natural + remédio", severity: "medium", category: "Claim médico" },
+  { term: "milagre", severity: "medium", category: "Linguagem exagerada" },
+  { term: "instantâneo", severity: "medium", category: "Promessa temporal irreal" },
+  { term: "em 24 horas", severity: "medium", category: "Promessa temporal irreal" },
+  { term: "em 7 dias", severity: "medium", category: "Promessa temporal agressiva" },
+  { term: "derrete gordura", severity: "medium", category: "Claim de saúde" },
+  { term: "seca barriga", severity: "medium", category: "Claim de saúde" },
+  { term: "emagreça", severity: "medium", category: "Claim de saúde" },
+  { term: "pare de sofrer", severity: "medium", category: "Apelo emocional extremo" },
+  { term: "última chance", severity: "medium", category: "Falsa urgência" },
+  { term: "só hoje", severity: "medium", category: "Falsa urgência" },
+  { term: "vagas limitadas", severity: "medium", category: "Falsa escassez" },
+  { term: "depoimento", severity: "medium", category: "Prova social (verificar autenticidade)" },
+  { term: "testei e aprovei", severity: "medium", category: "Prova social (verificar autenticidade)" },
+  
+  // 🟢 LOW — atenção, mas geralmente aceito
+  { term: "grátis", severity: "low", category: "Isca de clique" },
+  { term: "oferta especial", severity: "low", category: "Urgência leve" },
+  { term: "tempo limitado", severity: "low", category: "Urgência leve" },
+  { term: "desconto exclusivo", severity: "low", category: "Urgência leve" },
+  { term: "garantia de", severity: "low", category: "Promessa parcial" },
 ];
 
 function countMatches(text: string, words: string[]): number {
@@ -94,12 +132,18 @@ export function calculateScores(
 
   const alerts: string[] = [];
   let riskPoints = 0;
-  for (const { term, severity } of COMPLIANCE_RISK_TERMS) {
+  const flaggedCategories = new Set<string>();
+  for (const { term, severity, category } of COMPLIANCE_RISK_TERMS) {
     if (fullText.includes(term)) {
-      alerts.push(`⚠️ "${term}" (${severity})`);
-      riskPoints += severity === "high" ? 25 : 12;
+      const icon = severity === "high" ? "🔴" : severity === "medium" ? "🟡" : "🟢";
+      alerts.push(`${icon} "${term}" — ${category} (${severity})`);
+      riskPoints += severity === "high" ? 30 : severity === "medium" ? 12 : 4;
+      flaggedCategories.add(category);
     }
   }
+  // Multiple distinct risk categories compound the risk
+  if (flaggedCategories.size >= 3) riskPoints += 15;
+  if (flaggedCategories.size >= 5) riskPoints += 20;
   const riskScore = Math.min(100, riskPoints);
 
   // Blend heuristic with AI scale score if available
