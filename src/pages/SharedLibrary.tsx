@@ -4,15 +4,16 @@ import { useTeam } from "@/hooks/use-team";
 import { useSharedLibrary, SharedLibraryItem } from "@/hooks/use-shared-library";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { BookOpen, Plus, Search, Trash2, Pencil, Copy, Loader2, Tag, Users } from "lucide-react";
+import { BookOpen, Plus, Search, Trash2, Pencil, Copy, Loader2, Tag, LayoutList, Library } from "lucide-react";
+import { Book } from "@/components/ui/book";
 
 const categories = [
   { value: "geral", label: "Geral" },
@@ -24,6 +25,17 @@ const categories = [
   { value: "landing", label: "Landing Page" },
   { value: "social", label: "Social Media" },
 ];
+
+const categoryColors: Record<string, string> = {
+  geral: "hsl(var(--muted))",
+  headline: "hsl(262, 83%, 65%)",
+  body: "hsl(220, 90%, 56%)",
+  cta: "hsl(0, 72%, 55%)",
+  email: "hsl(292, 70%, 50%)",
+  ad: "hsl(35, 90%, 55%)",
+  landing: "hsl(170, 70%, 45%)",
+  social: "hsl(200, 80%, 50%)",
+};
 
 export default function SharedLibrary() {
   const { user } = useAuth();
@@ -37,6 +49,8 @@ export default function SharedLibrary() {
   const [editingItem, setEditingItem] = useState<SharedLibraryItem | null>(null);
   const [form, setForm] = useState({ title: "", content: "", category: "geral", tags: "" });
   const [saving, setSaving] = useState(false);
+  const [view, setView] = useState<"list" | "bookshelf">("bookshelf");
+  const [selectedItem, setSelectedItem] = useState<SharedLibraryItem | null>(null);
 
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
 
@@ -140,7 +154,7 @@ export default function SharedLibrary() {
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -152,9 +166,34 @@ export default function SharedLibrary() {
               {items.length} {items.length === 1 ? "item" : "itens"} salvos · {team.name}
             </p>
           </div>
-          <Button onClick={openNew} size="sm">
-            <Plus className="h-4 w-4 mr-1" /> Novo
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* View Toggle */}
+            <div className="flex items-center gap-0.5 rounded-lg bg-secondary/50 p-1">
+              <button
+                onClick={() => setView("bookshelf")}
+                className={`rounded-md p-1.5 transition-all ${
+                  view === "bookshelf"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Library className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setView("list")}
+                className={`rounded-md p-1.5 transition-all ${
+                  view === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <LayoutList className="h-4 w-4" />
+              </button>
+            </div>
+            <Button onClick={openNew} size="sm">
+              <Plus className="h-4 w-4 mr-1" /> Novo
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -191,7 +230,34 @@ export default function SharedLibrary() {
               {items.length === 0 ? "Nenhum item na biblioteca ainda" : "Nenhum resultado encontrado"}
             </p>
           </div>
+        ) : view === "bookshelf" ? (
+          /* Bookshelf View */
+          <div className="space-y-6">
+            {/* Bookshelf with "shelf" effect */}
+            <div className="flex flex-wrap gap-6 justify-center py-6 px-4 rounded-xl bg-gradient-to-b from-secondary/30 to-transparent border border-border/30">
+              {filtered.map((item) => (
+                <div key={item.id} className="flex flex-col items-center gap-2">
+                  <Book
+                    title={item.title}
+                    variant="stripe"
+                    width={130}
+                    color={categoryColors[item.category] || categoryColors.geral}
+                    textColor="hsl(0, 0%, 100%)"
+                    textured
+                    onClick={() => setSelectedItem(item)}
+                  />
+                  <Badge variant="outline" className="text-[10px]">
+                    {categories.find((c) => c.value === item.category)?.label ?? item.category}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+
+            {/* Shelf shadow line */}
+            <div className="h-1 rounded-full bg-gradient-to-r from-transparent via-border to-transparent -mt-4" />
+          </div>
         ) : (
+          /* List View */
           <div className="grid gap-3">
             {filtered.map((item) => {
               const canManage = user?.id === item.created_by || isOwnerOrAdmin;
@@ -304,6 +370,62 @@ export default function SharedLibrary() {
               {editingItem ? "Salvar Alterações" : "Adicionar à Biblioteca"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Book Detail Dialog */}
+      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
+        <DialogContent className="sm:max-w-lg">
+          {selectedItem && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {selectedItem.title}
+                  <Badge variant="outline" className="text-[10px]">
+                    {categories.find((c) => c.value === selectedItem.category)?.label ?? selectedItem.category}
+                  </Badge>
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                  {selectedItem.content}
+                </p>
+                {selectedItem.tags.length > 0 && (
+                  <div className="flex gap-1 flex-wrap">
+                    {selectedItem.tags.map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-[10px] text-muted-foreground">
+                        <Tag className="h-2.5 w-2.5 mr-0.5" />
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-center gap-2 pt-2">
+                  <Button size="sm" variant="outline" onClick={() => handleCopy(selectedItem.content)}>
+                    <Copy className="h-3.5 w-3.5 mr-1" /> Copiar
+                  </Button>
+                  {(user?.id === selectedItem.created_by || isOwnerOrAdmin) && (
+                    <>
+                      <Button size="sm" variant="outline" onClick={() => { setSelectedItem(null); openEdit(selectedItem); }}>
+                        <Pencil className="h-3.5 w-3.5 mr-1" /> Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => { handleDelete(selectedItem.id); setSelectedItem(null); }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1" /> Excluir
+                      </Button>
+                    </>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground/60">
+                  Criado em {new Date(selectedItem.created_at).toLocaleDateString("pt-BR")}
+                </p>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

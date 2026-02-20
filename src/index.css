@@ -328,6 +328,15 @@
     text-wrap: balance;
   }
 
+  .book-hover {
+    transform: rotateY(-12deg) rotateX(4deg);
+    transition: transform 250ms ease;
+  }
+
+  .book-hover:hover {
+    transform: rotateY(-20deg) rotateX(6deg) scale(1.02);
+  }
+
   /* PDF export: override dark theme to light for print */
   .pdf-export-mode {
     background: #ffffff !important;
