@@ -7,10 +7,11 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   BarChart3, Download, Search, Star, Trash2, AlertTriangle, Flame,
-  Clock, ExternalLink, ArrowUpDown, X, Filter, TrendingUp, Shield,
+  Clock, ExternalLink, ArrowUpDown, X, Filter, TrendingUp, Shield, Bot, Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { storage } from "@/lib/ad-offer/storage";
 import { calculateScores } from "@/lib/ad-offer/scoring";
 import { exportAdsToCsv } from "@/lib/ad-offer/csv-export";
@@ -55,6 +56,66 @@ export default function ResultsTab() {
     storage.saveAds(updated);
     setAds(updated);
     toast.success("Scores recalculados!");
+  };
+
+  const [analyzingAi, setAnalyzingAi] = useState(false);
+
+  const handleAiReanalyze = async () => {
+    const adsToAnalyze = filtered.slice(0, 15);
+    if (adsToAnalyze.length === 0) return;
+
+    setAnalyzingAi(true);
+    try {
+      const adsPayload = adsToAnalyze.map((ad) => ({
+        ad_archive_id: ad.id,
+        page_name: ad.pageOrAdvertiser,
+        ad_text: ad.mainText,
+        headline: ad.headline,
+        status: ad.status,
+        started_at: ad.startDate || null,
+        ad_creative_link_url: ad.link || null,
+        platform: ad.platform,
+      }));
+
+      const { data, error } = await supabase.functions.invoke("ad-intelligence", {
+        body: { query: "oferta escalada", ads: adsPayload },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Erro na análise");
+
+      const results = data.data?.results || [];
+      const allAds = storage.getAds();
+      let updated = 0;
+
+      for (const result of results) {
+        const matchAd = allAds.find((a) => a.id === result.ad_archive_id);
+        if (matchAd && result.offer_card) {
+          matchAd.promiseSummary = result.offer_card.promise || matchAd.promiseSummary;
+          matchAd.mechanism = result.offer_card.mechanism || matchAd.mechanism;
+          matchAd.proof = Array.isArray(result.offer_card.proof)
+            ? result.offer_card.proof.join("; ")
+            : matchAd.proof;
+          matchAd.offer = result.offer_card.angle?.join(", ") || matchAd.offer;
+          matchAd.inferredAudience = result.offer_card.format || matchAd.inferredAudience;
+          updated++;
+        }
+      }
+
+      if (updated > 0) {
+        // Recalculate heuristic scores too
+        const recalculated = allAds.map((ad) => ({ ...ad, ...calculateScores(ad, allAds) }));
+        storage.saveAds(recalculated);
+        setAds(recalculated);
+      }
+
+      toast.success(`${results.length} anúncio(s) reanalisado(s) com IA!`);
+    } catch (e: any) {
+      console.error("AI reanalyze error:", e);
+      toast.error(e.message || "Erro ao reanalisar com IA.");
+    } finally {
+      setAnalyzingAi(false);
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -137,6 +198,10 @@ export default function ResultsTab() {
         )}
 
         <div className="ml-auto flex gap-2">
+          <Button variant="ghost" size="sm" onClick={handleAiReanalyze} disabled={analyzingAi || filtered.length === 0} className="gap-1.5 text-xs h-8">
+            {analyzingAi ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bot className="h-3.5 w-3.5" />}
+            {analyzingAi ? "Analisando..." : `Reanalisar IA (${Math.min(filtered.length, 15)})`}
+          </Button>
           <Button variant="ghost" size="sm" onClick={handleRecalculate} className="gap-1.5 text-xs h-8">
             <Flame className="h-3.5 w-3.5" /> Recalcular
           </Button>
