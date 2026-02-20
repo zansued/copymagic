@@ -258,73 +258,86 @@ function ResultRow({ ad, onClick, onDelete }: { ad: ImportedAd; onClick: () => v
     ? Math.floor((Date.now() - new Date(ad.startDate).getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
+  const scoreColor = ad.overallScore >= 70 ? "text-primary" : ad.overallScore >= 40 ? "text-yellow-400" : "text-muted-foreground";
+
   return (
     <Card
-      className="p-3 border-border/50 bg-card/80 hover:border-primary/30 transition-colors cursor-pointer group"
+      className="border-border/40 bg-card/60 backdrop-blur-sm hover:bg-card/90 hover:border-primary/30 transition-all cursor-pointer group"
       onClick={onClick}
     >
-      <div className="flex items-center gap-3">
-        {/* Score circle */}
-        <div className="shrink-0 w-12 text-center">
-          <div className={`text-xl font-bold ${ad.overallScore >= 70 ? "text-primary" : ad.overallScore >= 40 ? "text-foreground" : "text-muted-foreground"}`}>
-            {ad.overallScore}
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          {/* Score circle */}
+          <div className="shrink-0 w-11 flex flex-col items-center gap-1">
+            <div className={`text-lg font-bold leading-none ${scoreColor}`}>
+              {ad.overallScore}
+            </div>
+            <Progress value={ad.overallScore} className="h-1 w-full" />
           </div>
-          <Progress value={ad.overallScore} className="h-1 mt-1" />
-        </div>
 
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold truncate">{ad.pageOrAdvertiser}</p>
-            {ad.savedAsReference && <Star className="h-3 w-3 text-primary fill-primary shrink-0" />}
+          {/* Info */}
+          <div className="flex-1 min-w-0 space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-semibold truncate">{ad.pageOrAdvertiser}</p>
+              {ad.savedAsReference && <Star className="h-3 w-3 text-primary fill-primary shrink-0" />}
+            </div>
+            {ad.headline && <p className="text-xs text-muted-foreground truncate">{ad.headline}</p>}
+            {/* Mobile badges */}
+            <div className="flex flex-wrap gap-1 sm:hidden mt-1">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">{ad.platform}</Badge>
+              {daysActive != null && daysActive > 0 && (
+                <Badge variant={daysActive >= 14 ? "default" : "outline"} className="text-[10px] px-1.5 py-0 gap-0.5">
+                  <Clock className="h-2.5 w-2.5" /> {daysActive}d
+                </Badge>
+              )}
+            </div>
           </div>
-          {ad.headline && <p className="text-xs text-muted-foreground truncate mt-0.5">{ad.headline}</p>}
-        </div>
 
-        {/* Scores */}
-        <div className="hidden sm:flex items-center gap-3 shrink-0">
-          <div className="text-center">
-            <p className="text-[10px] text-muted-foreground">Oferta</p>
-            <p className="text-sm font-semibold">{ad.offerScore}</p>
+          {/* Scores */}
+          <div className="hidden sm:flex items-center gap-4 shrink-0">
+            <div className="text-center min-w-[36px]">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Oferta</p>
+              <p className="text-sm font-bold tabular-nums">{ad.offerScore}</p>
+            </div>
+            <div className="text-center min-w-[36px]">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Risco</p>
+              <p className={`text-sm font-bold tabular-nums ${ad.riskScore >= 50 ? "text-destructive" : ""}`}>{ad.riskScore}</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-[10px] text-muted-foreground">Risco</p>
-            <p className={`text-sm font-semibold ${ad.riskScore >= 50 ? "text-destructive" : ""}`}>{ad.riskScore}</p>
+
+          {/* Badges */}
+          <div className="hidden md:flex flex-wrap gap-1 shrink-0 max-w-[160px] justify-end">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize whitespace-nowrap">{ad.platform}</Badge>
+            {daysActive != null && daysActive > 0 && (
+              <Badge variant={daysActive >= 14 ? "default" : "outline"} className="text-[10px] px-1.5 py-0 gap-0.5 whitespace-nowrap">
+                <Clock className="h-2.5 w-2.5" /> {daysActive}d
+              </Badge>
+            )}
+            {ad.complianceAlerts.length > 0 && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0 gap-0.5 whitespace-nowrap">
+                <AlertTriangle className="h-2.5 w-2.5" /> {ad.complianceAlerts.length}
+              </Badge>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-0.5 shrink-0">
+            {ad.link && (
+              <Button variant="ghost" size="icon" className="h-7 w-7" asChild onClick={(e) => e.stopPropagation()}>
+                <a href={ad.link} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </Button>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
-
-        {/* Badges */}
-        <div className="hidden md:flex flex-wrap gap-1 shrink-0 max-w-[200px]">
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">{ad.platform}</Badge>
-          {daysActive != null && daysActive > 0 && (
-            <Badge variant={daysActive >= 14 ? "default" : "outline"} className="text-[10px] px-1.5 py-0 gap-0.5">
-              <Clock className="h-2.5 w-2.5" /> {daysActive}d
-            </Badge>
-          )}
-          {ad.complianceAlerts.length > 0 && (
-            <Badge variant="destructive" className="text-[10px] px-1.5 py-0 gap-0.5">
-              <AlertTriangle className="h-2.5 w-2.5" /> {ad.complianceAlerts.length}
-            </Badge>
-          )}
-        </div>
-
-        {/* Link + delete */}
-        <div className="flex items-center gap-1 shrink-0">
-          {ad.link && (
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" asChild onClick={(e) => e.stopPropagation()}>
-              <a href={ad.link} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            </Button>
-          )}
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </div>
+      </CardContent>
     </Card>
   );
 }
