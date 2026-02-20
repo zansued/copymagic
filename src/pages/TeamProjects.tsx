@@ -50,8 +50,10 @@ import {
   CheckCircle2,
   Pause,
   AlertCircle,
+  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MorphingCardStack, type CardData } from "@/components/ui/morphing-card-stack";
 
 // ── Types ──
 type ProjectStatus = "active" | "completed" | "paused";
@@ -129,7 +131,7 @@ export default function TeamProjects() {
 
   const [projects, setProjects] = useState<TeamProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"grid" | "list">("grid");
+  const [view, setView] = useState<"grid" | "list" | "stack">("grid");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">("all");
   const [sortBy, setSortBy] = useState<SortBy>("updated");
@@ -382,24 +384,23 @@ export default function TeamProjects() {
           </Button>
 
           <div className="inline-flex rounded-lg border border-border overflow-hidden">
-            <button
-              onClick={() => setView("grid")}
-              className={cn(
-                "p-2 transition-colors",
-                view === "grid" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"
-              )}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setView("list")}
-              className={cn(
-                "p-2 transition-colors",
-                view === "list" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"
-              )}
-            >
-              <List className="h-4 w-4" />
-            </button>
+            {([
+              { key: "stack" as const, icon: Layers, label: "Stack" },
+              { key: "grid" as const, icon: LayoutGrid, label: "Grid" },
+              { key: "list" as const, icon: List, label: "Lista" },
+            ]).map(({ key, icon: Icon, label }) => (
+              <button
+                key={key}
+                onClick={() => setView(key)}
+                className={cn(
+                  "p-2 transition-colors",
+                  view === key ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"
+                )}
+                title={label}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            ))}
           </div>
 
           {canEdit && (
@@ -455,7 +456,7 @@ export default function TeamProjects() {
           </Card>
         </motion.div>
 
-        {/* ── Projects Grid/List ── */}
+        {/* ── Projects Grid/List/Stack ── */}
         {prepared.length === 0 ? (
           <motion.div variants={itemVariants} className="text-center py-16 space-y-3">
             <FolderOpen className="h-12 w-12 mx-auto text-muted-foreground/50" />
@@ -472,6 +473,53 @@ export default function TeamProjects() {
                 <Plus className="h-4 w-4 mr-1" /> Criar Projeto
               </Button>
             )}
+          </motion.div>
+        ) : view === "stack" ? (
+          <motion.div variants={itemVariants}>
+            <MorphingCardStack
+              cards={prepared.map((p) => {
+                const progress = getProjectProgress(p);
+                const status = getProjectStatus(p);
+                const sc = statusConfig[status];
+                const StatusIcon = sc.icon;
+                return {
+                  id: p.id,
+                  title: p.name,
+                  description: `${completedSteps(p.copy_results)}/9 etapas · ${progress}%`,
+                  icon: <StatusIcon className={cn("h-5 w-5", sc.color)} />,
+                  footer: (
+                    <div className="space-y-2">
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full bg-primary"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <Avatar className="h-4 w-4">
+                            <AvatarImage src={getCreatorAvatar(p.user_id)} />
+                            <AvatarFallback className="text-[7px] bg-primary/10 text-primary">
+                              {getCreatorName(p.user_id).charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">
+                            {getCreatorName(p.user_id)}
+                          </span>
+                        </div>
+                        <Badge variant="secondary" className={cn("text-[9px] gap-0.5", sc.bgColor, sc.color)}>
+                          {sc.label}
+                        </Badge>
+                      </div>
+                    </div>
+                  ),
+                } as CardData;
+              })}
+              onCardClick={(card) => navigate(`/project/${card.id}`)}
+              className="py-4"
+            />
           </motion.div>
         ) : (
           <motion.div
