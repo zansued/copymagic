@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useProfiles } from "@/hooks/use-profiles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,11 +20,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  Users, UserPlus, Loader2, X, Pencil, Check, Plus, ArrowRightLeft, Trash2, AlertTriangle,
+  Users, UserPlus, Loader2, X, Pencil, Check, Plus, ArrowRightLeft, Trash2, AlertTriangle, MessageCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatedTooltip, type TooltipItem } from "@/components/ui/animated-tooltip";
 import { MemberCard } from "@/components/team/MemberCard";
+import { TeamChat } from "@/components/team/TeamChat";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -76,6 +80,8 @@ export default function TeamManagement() {
   const [transferProjectsTarget, setTransferProjectsTarget] = useState("");
   const [transferringProjects, setTransferringProjects] = useState(false);
 
+  const isMobile = useIsMobile();
+  const [chatOpen, setChatOpen] = useState(false);
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
   const MAX_TEAMS = subscription?.plan === "lifetime" ? 5 : 3;
 
@@ -241,8 +247,10 @@ export default function TeamManagement() {
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
-      <motion.div
-        className="max-w-3xl mx-auto px-4 py-8 space-y-6"
+      <div className="flex relative">
+        {/* Main content */}
+        <motion.div
+          className={cn("flex-1 max-w-3xl mx-auto px-4 py-8 space-y-6 transition-all", !isMobile && chatOpen && "mr-80")}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -471,6 +479,64 @@ export default function TeamManagement() {
         </AnimatePresence>
       </motion.div>
 
+        {/* Desktop chat sidebar */}
+        {!isMobile && (
+          <AnimatePresence>
+            {chatOpen && (
+              <motion.aside
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 320, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="fixed top-16 right-0 h-[calc(100vh-4rem)] border-l border-border/50 bg-card/95 backdrop-blur-xl shadow-xl z-30 flex flex-col overflow-hidden"
+              >
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">Chat da Equipe</span>
+                  </div>
+                  <button
+                    onClick={() => setChatOpen(false)}
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <TeamChat />
+              </motion.aside>
+            )}
+          </AnimatePresence>
+        )}
+
+        {/* Mobile chat via Sheet */}
+        {isMobile && (
+          <Sheet open={chatOpen} onOpenChange={setChatOpen}>
+            <SheetContent side="bottom" className="h-[85vh] p-0 flex flex-col rounded-t-2xl">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground">Chat da Equipe</span>
+                </div>
+              </div>
+              <TeamChat />
+            </SheetContent>
+          </Sheet>
+        )}
+
+        {/* Chat FAB */}
+        {!chatOpen && (
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            onClick={() => setChatOpen(true)}
+            className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 flex items-center justify-center transition-colors"
+          >
+            <MessageCircle className="h-6 w-6" />
+          </motion.button>
+        )}
+      </div>
+
       {/* Create new team dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent>
@@ -561,31 +627,24 @@ export default function TeamManagement() {
       </Dialog>
 
       {/* Delete team confirmation */}
-      <AlertDialog open={showDeleteTeam} onOpenChange={(open) => { if (!open) { setShowDeleteTeam(false); setTransferProjectsTarget(""); } }}>
-        <AlertDialogContent>
+      <AlertDialog open={showDeleteTeam} onOpenChange={setShowDeleteTeam}>
+        <AlertDialogContent className="max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              {teamProjectsCount && teamProjectsCount > 0 ? (
-                <AlertTriangle className="h-5 w-5 text-warning" />
-              ) : (
-                <Trash2 className="h-5 w-5 text-destructive" />
-              )}
-              Excluir equipe "{team.name}"
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" /> Excluir Equipe "{team.name}"
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3">
-                {teamProjectsCount && teamProjectsCount > 0 ? (
-                  <>
-                    <p>
-                      Esta equipe possui <strong>{teamProjectsCount} projeto(s) ativo(s)</strong>.
-                      Não é possível excluí-la enquanto houver projetos vinculados.
+                {teamProjectsCount !== null && teamProjectsCount > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-amber-400 font-medium">
+                      ⚠ Esta equipe possui {teamProjectsCount} projeto(s). Transfira-os antes de excluir.
                     </p>
-                    {otherTeams.length > 0 ? (
-                      <div className="space-y-2 pt-1">
-                        <p className="text-sm font-medium text-foreground">Transferir projetos para:</p>
+                    {otherTeams.length > 0 && (
+                      <div className="flex items-center gap-2">
                         <Select value={transferProjectsTarget} onValueChange={setTransferProjectsTarget}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione a equipe destino" />
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Transferir para..." />
                           </SelectTrigger>
                           <SelectContent>
                             {otherTeams.map((t) => (
@@ -594,20 +653,16 @@ export default function TeamManagement() {
                           </SelectContent>
                         </Select>
                         <Button
-                          className="w-full"
+                          size="sm"
                           disabled={!transferProjectsTarget || transferringProjects}
                           onClick={handleTransferProjects}
                         >
-                          {transferringProjects ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRightLeft className="h-4 w-4 mr-2" />}
-                          Transferir {teamProjectsCount} projeto(s)
+                          {transferringProjects && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                          Transferir
                         </Button>
                       </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        Crie outra equipe primeiro para poder transferir os projetos, ou remova-os manualmente.
-                      </p>
                     )}
-                  </>
+                  </div>
                 ) : (
                   <p>
                     Esta ação é irreversível. Todos os membros serão removidos e os convites pendentes cancelados.
