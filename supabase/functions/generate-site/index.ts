@@ -1408,8 +1408,8 @@ Do NOT modify any text, scripts, images, or HTML structure. Only adjust Tailwind
 FULL PAGE HTML:
 ${currentHtml}`;
 
-      console.log(`Review-page: calling Gemini 2.5 Pro via Lovable AI (${currentHtml.length} chars)...`);
-      const rawContent = await callLovableAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, "google/gemini-2.5-pro", 65536);
+      console.log(`Review-page: calling OpenAI (${currentHtml.length} chars)...`);
+      const rawContent = await callOpenAI(REVIEW_SYSTEM_PROMPT, reviewPrompt, 16384);
       const jsonStr = parseJsonFromAI(rawContent);
 
       let reviewedHtml: string;
@@ -1732,8 +1732,8 @@ Render this PageSpec into a premium Next.js project. Use ALL the content — do 
     }
 
     // HTML format (default)
-    console.log("Calling Lovable AI (Gemini 2.5 Pro) to generate landing page (format: html)...");
-    const rawContent = await callLovableAI(HTML_SYSTEM_PROMPT, userPrompt, "google/gemini-2.5-pro", 65536);
+    console.log("Calling OpenAI to generate landing page (format: html)...");
+    const rawContent = await callOpenAI(HTML_SYSTEM_PROMPT, userPrompt, 16384);
     const jsonStr = parseJsonFromAI(rawContent);
 
     let parsed: { file_name?: string; html: string; sections?: string[]; notes?: Record<string, unknown>; polish_report?: Record<string, unknown> };
