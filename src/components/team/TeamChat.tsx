@@ -1,14 +1,18 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useTeamMessages, TeamMessage } from "@/hooks/use-team-messages";
+import { useMessageReactions } from "@/hooks/use-message-reactions";
 import { useAuth } from "@/hooks/use-auth";
 import { useTeam } from "@/hooks/use-team";
 import { useProfiles } from "@/hooks/use-profiles";
 import { cn } from "@/lib/utils";
-import { Send, Trash2, Pin, Clock, Loader2 } from "lucide-react";
+import { Send, Trash2, Pin, Clock, Loader2, SmilePlus } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AnimatePresence, motion } from "motion/react";
+
+const QUICK_EMOJIS = ["👍", "❤️", "😂", "🔥", "👏", "🎯"];
 
 // Renders message content with highlighted @mentions
 function MessageContent({ content }: { content: string }) {
@@ -28,12 +32,91 @@ function MessageContent({ content }: { content: string }) {
   );
 }
 
+// Emoji picker popover
+function EmojiPicker({ onSelect }: { onSelect: (emoji: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="p-1 rounded text-muted-foreground/40 hover:text-primary transition-colors"
+        title="Reagir"
+      >
+        <SmilePlus className="h-3 w-3" />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.12 }}
+            className="absolute right-0 bottom-full mb-1 bg-popover border border-border rounded-lg shadow-lg p-1.5 flex gap-0.5 z-50"
+          >
+            {QUICK_EMOJIS.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                className="w-7 h-7 flex items-center justify-center rounded hover:bg-accent transition-colors text-base"
+                onClick={() => {
+                  onSelect(emoji);
+                  setOpen(false);
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Reaction bar under a message
+function ReactionBar({
+  reactions,
+  currentUserId,
+  onToggle,
+}: {
+  reactions: { emoji: string; count: number; users: string[] }[];
+  currentUserId?: string;
+  onToggle: (emoji: string) => void;
+}) {
+  if (reactions.length === 0) return null;
+  return (
+    <div className="flex items-center gap-1 ml-9 mt-1 flex-wrap">
+      {reactions.map((r) => {
+        const isMine = currentUserId ? r.users.includes(currentUserId) : false;
+        return (
+          <motion.button
+            key={r.emoji}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => onToggle(r.emoji)}
+            className={cn(
+              "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs border transition-colors",
+              isMine
+                ? "bg-primary/10 border-primary/30 text-primary"
+                : "bg-secondary/50 border-border/30 text-muted-foreground hover:bg-accent"
+            )}
+          >
+            <span className="text-sm">{r.emoji}</span>
+            <span>{r.count}</span>
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function TeamChat() {
   const { user } = useAuth();
   const { team, members, isOwnerOrAdmin } = useTeam();
   const memberUserIds = useMemo(() => members.map((m) => m.user_id), [members]);
   const { profiles } = useProfiles(memberUserIds);
   const { messages, loading, sendMessage, deleteMessage, pinMessage } = useTeamMessages(team?.id);
+  const { reactionsMap, toggleReaction } = useMessageReactions(team?.id);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -218,52 +301,62 @@ export function TeamChat() {
             });
 
             return (
-              <div key={msg.id} className="group flex items-start gap-2.5">
-                <Avatar className="h-7 w-7 shrink-0 mt-0.5">
-                  {msg.author_avatar && (
-                    <AvatarImage src={msg.author_avatar} alt={msg.author_name} />
-                  )}
-                  <AvatarFallback className="text-[10px] bg-secondary text-secondary-foreground">
-                    {(msg.author_name || "M")[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+              <div key={msg.id} className="group">
+                <div className="flex items-start gap-2.5">
+                  <Avatar className="h-7 w-7 shrink-0 mt-0.5">
+                    {msg.author_avatar && (
+                      <AvatarImage src={msg.author_avatar} alt={msg.author_name} />
+                    )}
+                    <AvatarFallback className="text-[10px] bg-secondary text-secondary-foreground">
+                      {(msg.author_name || "M")[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className={cn(
-                      "text-xs font-semibold",
-                      isMe ? "text-primary" : "text-foreground"
-                    )}>
-                      {msg.author_name}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground/40">
-                      {timeAgo}
-                    </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className={cn(
+                        "text-xs font-semibold",
+                        isMe ? "text-primary" : "text-foreground"
+                      )}>
+                        {msg.author_name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/40">
+                        {timeAgo}
+                      </span>
+                    </div>
+                    <MessageContent content={msg.content} />
                   </div>
-                  <MessageContent content={msg.content} />
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5">
+                    <EmojiPicker onSelect={(emoji) => toggleReaction(msg.id, emoji)} />
+                    {isOwnerOrAdmin && (
+                      <button
+                        onClick={() => handlePin(msg)}
+                        className="p-1 rounded text-muted-foreground/40 hover:text-primary transition-colors"
+                        title="Fixar"
+                      >
+                        <Pin className="h-3 w-3" />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(msg.id)}
+                        className="p-1 rounded text-muted-foreground/40 hover:text-destructive transition-colors"
+                        title="Excluir"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5">
-                  {isOwnerOrAdmin && (
-                    <button
-                      onClick={() => handlePin(msg)}
-                      className="p-1 rounded text-muted-foreground/40 hover:text-primary transition-colors"
-                      title="Fixar"
-                    >
-                      <Pin className="h-3 w-3" />
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button
-                      onClick={() => handleDelete(msg.id)}
-                      className="p-1 rounded text-muted-foreground/40 hover:text-destructive transition-colors"
-                      title="Excluir"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
+                {/* Reactions */}
+                <ReactionBar
+                  reactions={reactionsMap[msg.id] || []}
+                  currentUserId={user?.id}
+                  onToggle={(emoji) => toggleReaction(msg.id, emoji)}
+                />
               </div>
             );
           })
