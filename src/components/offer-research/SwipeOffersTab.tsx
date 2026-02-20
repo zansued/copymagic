@@ -18,6 +18,7 @@ import { calculateScores, detectFields } from "@/lib/ad-offer/scoring";
 import { generateQueries } from "@/lib/ad-offer/query-generator";
 import type { ImportedAd } from "@/lib/ad-offer/types";
 import ImportAdDialog from "./ImportAdDialog";
+import { VideoPlayer } from "@/components/ui/video-player";
 
 
 interface AiOfferCard {
@@ -515,30 +516,19 @@ function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
       </div>
 
       {/* Snapshot / Video preview area */}
-      <div className="mx-3 mb-2 relative rounded-lg overflow-hidden bg-muted/50 border border-border/30 aspect-[4/3] flex items-center justify-center">
-        {ad.link ? (
-          <>
-            {/* Gradient overlay for visual effect */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
-            {/* Simulated thumbnail with initial + branding */}
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <div className="h-14 w-14 rounded-full bg-background/80 border border-border flex items-center justify-center shadow-lg">
-                <Play className="h-6 w-6 text-foreground ml-0.5" />
-              </div>
-              <span className="text-[10px]">Preview do criativo</span>
-            </div>
-            {/* AI tag overlay */}
-            {aiResult?.offer_card?.format && (
-              <Badge variant="secondary" className="absolute bottom-2 left-2 z-20 text-[10px] px-1.5 py-0 bg-background/80 backdrop-blur-sm">
-                {aiResult.offer_card.format}
-              </Badge>
-            )}
-          </>
-        ) : (
-          <div className="flex flex-col items-center gap-1 text-muted-foreground">
-            <ImageIcon className="h-8 w-8" />
-            <span className="text-[10px]">Sem preview</span>
-          </div>
+      <div className="mx-3 mb-2 relative">
+        <VideoPlayer
+          thumbnailUrl={ad.link ? `https://www.google.com/s2/favicons?domain=${(() => { try { return new URL(ad.link).hostname; } catch { return "example.com"; } })()}&sz=128` : undefined}
+          videoUrl={ad.link || undefined}
+          title={ad.pageOrAdvertiser}
+          description={aiResult?.offer_card?.promise || ad.headline || undefined}
+          aspectRatio="4/3"
+          className="border border-border/30"
+        />
+        {aiResult?.offer_card?.format && (
+          <Badge variant="secondary" className="absolute bottom-2 left-2 z-20 text-[10px] px-1.5 py-0 bg-background/80 backdrop-blur-sm">
+            {aiResult.offer_card.format}
+          </Badge>
         )}
       </div>
 
