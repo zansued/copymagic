@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Save, Star, Download, AlertTriangle, ExternalLink } from "lucide-react";
+import { Save, Star, Download, AlertTriangle, ExternalLink, Bot, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { storage } from "@/lib/ad-offer/storage";
+import { calculateScores } from "@/lib/ad-offer/scoring";
 import { exportAdsToCsv } from "@/lib/ad-offer/csv-export";
 import type { ImportedAd } from "@/lib/ad-offer/types";
 
@@ -21,6 +23,7 @@ interface AdDetailSheetProps {
 
 export default function AdDetailSheet({ ad: initialAd, open, onOpenChange, onUpdated }: AdDetailSheetProps) {
   const [ad, setAd] = useState<ImportedAd | null>(initialAd);
+  const [analyzing, setAnalyzing] = useState(false);
 
   // Sync when opening with a new ad
   if (initialAd && ad && initialAd.id !== ad.id) setAd(initialAd);
@@ -50,16 +53,76 @@ export default function AdDetailSheet({ ad: initialAd, open, onOpenChange, onUpd
     }
   };
 
+  const handleAiReanalyze = async () => {
+    if (!ad) return;
+    setAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ad-intelligence", {
+        body: {
+          query: "oferta escalada",
+          ads: [{
+            ad_archive_id: ad.id,
+            page_name: ad.pageOrAdvertiser,
+            ad_text: ad.mainText,
+            headline: ad.headline,
+            status: ad.status,
+            started_at: ad.startDate || null,
+            ad_creative_link_url: ad.link || null,
+            platform: ad.platform,
+          }],
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Erro na análise");
+
+      const results = data.data?.results || [];
+      const result = results[0];
+      if (result?.offer_card) {
+        const updatedAd = { ...ad };
+        updatedAd.promiseSummary = result.offer_card.promise || ad.promiseSummary;
+        updatedAd.mechanism = result.offer_card.mechanism || ad.mechanism;
+        updatedAd.proof = Array.isArray(result.offer_card.proof) ? result.offer_card.proof.join("; ") : ad.proof;
+        updatedAd.offer = result.offer_card.angle?.join(", ") || ad.offer;
+        updatedAd.inferredAudience = result.offer_card.format || ad.inferredAudience;
+
+        // Recalculate scores
+        const allAds = storage.getAds();
+        const idx = allAds.findIndex((a) => a.id === updatedAd.id);
+        if (idx >= 0) allAds[idx] = updatedAd;
+        const recalculated = allAds.map((a) => ({ ...a, ...calculateScores(a, allAds) }));
+        storage.saveAds(recalculated);
+
+        const finalAd = recalculated.find((a) => a.id === ad.id) || updatedAd;
+        setAd(finalAd);
+        onUpdated();
+        toast.success("Anúncio reanalisado com IA!");
+      } else {
+        toast.info("Sem dados novos da IA para este anúncio.");
+      }
+    } catch (e: any) {
+      console.error("AI reanalyze error:", e);
+      toast.error(e.message || "Erro ao reanalisar com IA.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const scoreColor = (score: number, type: "offer" | "risk" | "overall") => {
     if (type === "risk") return score >= 50 ? "text-destructive" : "text-muted-foreground";
-    return score >= 70 ? "text-primary" : "text-foreground";
+    return score >= 70 ? "text-primary" : score >= 40 ? "text-yellow-400" : "text-foreground";
   };
+
+  const hasAiData = !!(ad.promiseSummary && ad.promiseSummary !== "—" && ad.promiseSummary.length > 2);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{ad.pageOrAdvertiser}</SheetTitle>
+          <SheetTitle className="flex items-center gap-2">
+            {ad.pageOrAdvertiser}
+            {hasAiData && <Sparkles className="h-4 w-4 text-primary" />}
+          </SheetTitle>
           <p className="text-xs text-muted-foreground">{ad.platform} · {ad.status} · {ad.country}</p>
         </SheetHeader>
 
@@ -71,14 +134,60 @@ export default function AdDetailSheet({ ad: initialAd, open, onOpenChange, onUpd
               { label: "Oferta", value: ad.offerScore, type: "offer" as const },
               { label: "Risco", value: ad.riskScore, type: "risk" as const },
             ].map((s) => (
-              <Card key={s.label}>
+              <Card key={s.label} className="border-border/40">
                 <CardContent className="p-3 text-center">
-                  <p className="text-[10px] text-muted-foreground uppercase">{s.label}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
                   <p className={`text-2xl font-bold ${scoreColor(s.value, s.type)}`}>{s.value}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          {/* AI Reanalyze Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAiReanalyze}
+            disabled={analyzing}
+            className="w-full gap-2"
+          >
+            {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
+            {analyzing ? "Analisando com IA..." : "Reanalisar com IA"}
+          </Button>
+
+          {/* AI Offer Card (if available) */}
+          {hasAiData && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="p-4 space-y-2">
+                <p className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" /> Offer Card (IA)
+                </p>
+                {ad.promiseSummary && ad.promiseSummary !== "—" && (
+                  <p className="text-sm"><span className="text-muted-foreground">Promessa:</span> {ad.promiseSummary}</p>
+                )}
+                {ad.mechanism && ad.mechanism !== "—" && (
+                  <p className="text-sm"><span className="text-muted-foreground">Mecanismo:</span> {ad.mechanism}</p>
+                )}
+                {ad.proof && ad.proof !== "—" && (
+                  <p className="text-sm"><span className="text-muted-foreground">Prova:</span> {ad.proof}</p>
+                )}
+                {ad.offer && (
+                  <div className="flex flex-wrap gap-1 items-center">
+                    <span className="text-sm text-muted-foreground">Ângulo:</span>
+                    {ad.offer.split(",").map((a, i) => (
+                      <Badge key={i} variant="secondary" className="text-[10px]">{a.trim()}</Badge>
+                    ))}
+                  </div>
+                )}
+                {ad.inferredAudience && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-muted-foreground">Formato:</span>
+                    <Badge variant="outline" className="text-[10px]">{ad.inferredAudience}</Badge>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Compliance Alerts */}
           {ad.complianceAlerts.length > 0 && (
@@ -95,14 +204,14 @@ export default function AdDetailSheet({ ad: initialAd, open, onOpenChange, onUpd
             </div>
           )}
 
-          {/* Detecção Automática */}
+          {/* Detecção Heurística */}
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detecção Automática</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detecção Heurística</p>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><span className="text-muted-foreground">Promessa:</span> <span>{ad.detectedPromise}</span></div>
-              <div><span className="text-muted-foreground">Mecanismo:</span> <span>{ad.detectedMechanism}</span></div>
-              <div><span className="text-muted-foreground">Prova:</span> <span>{ad.detectedProof}</span></div>
-              <div><span className="text-muted-foreground">CTA:</span> <span>{ad.detectedCTA}</span></div>
+              <div><span className="text-muted-foreground">Promessa:</span> {ad.detectedPromise}</div>
+              <div><span className="text-muted-foreground">Mecanismo:</span> {ad.detectedMechanism}</div>
+              <div><span className="text-muted-foreground">Prova:</span> {ad.detectedProof}</div>
+              <div><span className="text-muted-foreground">CTA:</span> {ad.detectedCTA}</div>
             </div>
           </div>
 
