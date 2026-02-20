@@ -110,6 +110,19 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
         }
       });
 
+      // Double-click on a section opens edit dialog directly
+      doc.addEventListener("dblclick", (e: Event) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains("section-edit-btn")) return;
+        const clickedSection = target.closest("[data-section]");
+        if (clickedSection) {
+          const sectionName = clickedSection.getAttribute("data-section");
+          if (sectionName) {
+            setEditingSection(sectionName);
+          }
+        }
+      });
+
       // Add edit buttons to each section
       sections.forEach((section) => {
         const btn = doc.createElement("button");
