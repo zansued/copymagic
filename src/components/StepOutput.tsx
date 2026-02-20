@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GlowButton } from "@/components/ui/glow-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { CopyScoreCard } from "@/components/agent/CopyScoreCard";
 import { STEPS } from "@/lib/steps";
 
 interface StepOutputProps {
@@ -51,6 +52,7 @@ export function StepOutput({
         <div className="flex gap-2">
           {hasContent && !isGenerating && (
             <>
+              <CopyScoreCard copy={content} agentName={step.agent} />
               <Button variant="outline" size="sm" onClick={handleCopy}>
                 📋 Copiar
               </Button>
