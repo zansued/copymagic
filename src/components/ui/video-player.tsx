@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Play, X } from "lucide-react";
+import { Play, ExternalLink } from "lucide-react";
 
 interface VideoPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
   thumbnailUrl?: string;
@@ -24,20 +24,19 @@ const VideoPlayer = React.forwardRef<HTMLDivElement, VideoPlayerProps>(
     ref
   ) => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
-
-    React.useEffect(() => {
-      const handleEsc = (event: KeyboardEvent) => {
-        if (event.key === "Escape") setIsModalOpen(false);
-      };
-      window.addEventListener("keydown", handleEsc);
-      return () => window.removeEventListener("keydown", handleEsc);
-    }, []);
-
-    React.useEffect(() => {
-      document.body.style.overflow = isModalOpen ? "hidden" : "auto";
-    }, [isModalOpen]);
-
     const hasVideo = !!videoUrl;
+
+    // Check if URL is embeddable (YouTube, Vimeo, etc.)
+    const isEmbeddable = videoUrl && /youtube\.com|youtu\.be|vimeo\.com|dailymotion\.com/.test(videoUrl);
+
+    const handleClick = () => {
+      if (!hasVideo) return;
+      if (isEmbeddable) {
+        setIsModalOpen(true);
+      } else {
+        window.open(videoUrl, "_blank", "noopener,noreferrer");
+      }
+    };
 
     return (
       <>
@@ -49,8 +48,8 @@ const VideoPlayer = React.forwardRef<HTMLDivElement, VideoPlayerProps>(
             className
           )}
           style={{ aspectRatio }}
-          onClick={() => hasVideo && setIsModalOpen(true)}
-          onKeyDown={(e) => e.key === "Enter" && hasVideo && setIsModalOpen(true)}
+          onClick={handleClick}
+          onKeyDown={(e) => e.key === "Enter" && handleClick()}
           tabIndex={hasVideo ? 0 : undefined}
           aria-label={hasVideo ? `Play video: ${title}` : title}
           {...props}
@@ -72,7 +71,11 @@ const VideoPlayer = React.forwardRef<HTMLDivElement, VideoPlayerProps>(
           {hasVideo && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-white/30">
-                <Play className="h-5 w-5 fill-white text-white" />
+                {isEmbeddable ? (
+                  <Play className="h-5 w-5 fill-white text-white" />
+                ) : (
+                  <ExternalLink className="h-5 w-5 text-white" />
+                )}
               </div>
             </div>
           )}
@@ -87,7 +90,7 @@ const VideoPlayer = React.forwardRef<HTMLDivElement, VideoPlayerProps>(
           )}
         </div>
 
-        {isModalOpen && videoUrl && (
+        {isModalOpen && isEmbeddable && videoUrl && (
           <div
             className="fixed inset-0 z-50 flex animate-in fade-in-0 items-center justify-center bg-black/80 backdrop-blur-sm"
             aria-modal="true"
@@ -99,7 +102,7 @@ const VideoPlayer = React.forwardRef<HTMLDivElement, VideoPlayerProps>(
               className="absolute right-4 top-4 z-50 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
               aria-label="Close video player"
             >
-              <X className="h-6 w-6" />
+              ✕
             </button>
 
             <div className="w-full max-w-4xl aspect-video p-4" onClick={(e) => e.stopPropagation()}>
