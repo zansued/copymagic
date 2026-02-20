@@ -4,7 +4,7 @@ import { Check, Sparkles, Crown, Building2, Gem, Flame, X, Users } from "lucide-
 import { Button } from "@/components/ui/button";
 import { TopNav } from "@/components/TopNav";
 import { AppFooter } from "@/components/AppFooter";
-import { CreditCard } from "@/components/ui/credit-card";
+
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,18 +153,6 @@ export default function Pricing() {
           </p>
         </motion.div>
 
-        {/* Decorative credit card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="mb-8"
-        >
-          <CreditCard variant="gradient" />
-          <p className="text-center text-xs text-muted-foreground mt-3">
-            Clique para virar • Efeito 3D com o mouse
-          </p>
-        </motion.div>
 
         {/* Billing toggle */}
         <motion.div
