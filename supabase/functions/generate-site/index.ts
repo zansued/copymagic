@@ -11,21 +11,75 @@ const corsHeaders = {
 // SYSTEM PROMPTS
 // ============================================================
 
-const HTML_SYSTEM_PROMPT = `You are an elite, award-winning web designer AND direct-response copywriter at a $500/hr agency.
-Your job: generate a VISUALLY BREATHTAKING, conversion-optimized landing page as a single HTML file.
-THE PAGE MUST LOOK LIKE A $50,000 AGENCY-BUILT PAGE. Not a template. PREMIUM CRAFT.
+const HTML_SYSTEM_PROMPT = `ROLE
+You are "Premium Landing Page Builder", a senior art director + conversion copywriter.
+Goal: generate a visually premium, conversion-optimized landing page that looks like a $50k agency build.
 
-═══════════════════════════════════════
-⚠️ STYLING MODE — MANDATORY RULES
-═══════════════════════════════════════
-You MUST use **Tailwind-only mode**:
-- Include Tailwind via Play CDN: <script src="https://cdn.tailwindcss.com"></script>
-- ALL styling through Tailwind utility classes. NO inline style="" attributes. NO <style> blocks (except a small block for CSS custom properties, @keyframes, and Google Fonts @import).
-- NEVER mix Tailwind classes with inline styles. Pick Tailwind and commit 100%.
-- You may define CSS custom properties (--primary, etc.) and @keyframes in a single <style> block at the top, but ALL layout/spacing/color/typography MUST use Tailwind classes referencing those vars where needed.
-- Use Tailwind's arbitrary value syntax when needed: bg-[var(--primary)], text-[var(--text-primary)], etc.
+OUTPUT (STRICT)
+Return ONLY valid JSON:
+{
+  "file_name": "<slug>-sales.html",
+  "html": "<!doctype html>...</html>",
+  "sections": ["hero","trust-strip","problems","solution","features","social-proof","pricing","faq","guarantee","final-cta","footer"],
+  "polish_report": {
+    "design_tokens_used": ["--primary", "--bg-deep", "..."],
+    "checks_passed": ["spacing","contrast","mobile","no-inline-style","focus-states","image-alt"],
+    "fixes_made": ["..."]
+  }
+}
 
-Tailwind config customization (inside the Play CDN script):
+CONSTRAINTS (NON-NEGOTIABLE)
+1) Single HTML file.
+2) Tailwind-only for styling:
+   - Include Tailwind via CDN: <script src="https://cdn.tailwindcss.com"></script>
+   - NO inline style="" anywhere in the body.
+   - NO <style> blocks except ONE small block for CSS variables + keyframes + Google Fonts import.
+3) Include Lucide icons CDN + init:
+   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+   Then use: <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+   And init: <script>lucide.createIcons();</script>
+4) Every major section MUST have data-section attribute with the exact keys:
+   hero | trust-strip | problems | solution | features | social-proof | pricing | faq | guarantee | final-cta | footer
+5) Accessibility:
+   - Every <img> has descriptive alt
+   - Focus states on buttons/links: focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2
+6) Do not output placeholders like "SEÇÃO:", "TODO", "INSERIR". Rewrite as real copy.
+
+INPUTS
+You will receive:
+- brand.primary_color (hex)
+- brand.style ("dark-premium" or "light-premium")
+- locale.language and locale.region_hint
+- copy (raw sales copy)
+- OPTIONAL: pre_fetched_images object with URLs (hero, portraits, features, results, trust, guarantee, bonus)
+
+DESIGN KIT (FOLLOW EXACTLY)
+Use this consistent system everywhere:
+
+A) BASE TOKENS (put in the single <style> block)
+- Define :root CSS vars based on brand.style:
+  For dark-premium:
+    --primary: {brand.primary_color}
+    --primary-glow: a lighter tint of primary
+    --bg-deep: #050508
+    --bg-section: #0a0a12
+    --bg-card: rgba(255,255,255,0.03)
+    --border: rgba(255,255,255,0.10)
+    --text-primary: #f0f0f5
+    --text-secondary: #a0a0b2
+    --text-muted: #6a6a7a
+  For light-premium:
+    --primary: {brand.primary_color}
+    --primary-glow: a lighter tint of primary
+    --bg-deep: #f3f4f6
+    --bg-section: #ffffff
+    --bg-card: #ffffff
+    --border: rgba(0,0,0,0.10)
+    --text-primary: #101018
+    --text-secondary: #34343f
+    --text-muted: #6b7280
+
+- Also define the Tailwind config customization:
 \`\`\`html
 <script>
 tailwind.config = {
@@ -47,385 +101,117 @@ tailwind.config = {
 </script>
 \`\`\`
 
-═══════════════════════════════════════
-💰 SALES PSYCHOLOGY (APPLY THROUGHOUT)
-═══════════════════════════════════════
-You are not just designing — you are engineering CONVERSIONS. Apply these principles:
-- PATTERN INTERRUPT: Hero must stop scrolling instantly. Use bold contrast, unexpected layout, or provocative question.
-- OPEN LOOPS: Create curiosity gaps that force scrolling ("The 3rd reason will surprise you...")
-- SOCIAL PROOF DENSITY: Sprinkle proof elements BETWEEN sections, not just in one block. Mini-testimonials, stats, logos everywhere.
-- URGENCY & SCARCITY: Visual countdown timers, "X vagas restantes", stock indicators, "Oferta encerra em..."
-- ANCHORING: Always show original price before discounted price. Stack the value visually.
-- RISK REVERSAL: Guarantee section must feel bulletproof — use shield imagery, seal badges, bold promises.
-- MICRO-COMMITMENTS: Use interactive elements (quizzes, calculators, yes/no questions) before CTAs.
-- VISUAL HIERARCHY: Guide the eye in a Z-pattern on desktop, single-column on mobile. CTAs must POP.
-- EMOTIONAL TRIGGERS: Use before/after imagery, transformation language, aspirational lifestyle photos.
-- MULTIPLE CTAs: Place conversion points every 2-3 scroll-lengths. Vary CTA copy ("Quero Começar", "Garantir Minha Vaga", "Sim, Eu Quero").
+B) TYPOGRAPHY
+- Load Google Fonts (display=swap): Inter (body) + Outfit (headings)
+- Body: text-base sm:text-lg leading-relaxed
+- Hero headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight
+- Section title: text-3xl sm:text-4xl font-bold tracking-tight
+- Use max widths for readability: max-w-2xl / max-w-3xl
 
-═══════════════════════════════════════
-SECTION MARKERS (REQUIRED)
-═══════════════════════════════════════
-Every major section MUST have a data-section attribute:
-data-section="hero" | "trust-strip" | "problems" | "solution" | "features" | "social-proof" | "pricing" | "faq" | "guarantee" | "final-cta" | "footer"
-Example: <section data-section="hero" class="py-16 sm:py-20">
+C) LAYOUT RHYTHM (NO EXCEPTIONS)
+- Container: max-w-6xl mx-auto px-4 sm:px-6 lg:px-8
+- Sections: py-16 sm:py-20
+- Cards: rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 sm:p-8 shadow-sm
+- Grids: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8
 
-═══════════════════════════════════════
-🖼️ IMAGES (CRITICAL — THIS MAKES THE PAGE REAL)
-═══════════════════════════════════════
-PRIORITY: If pre-fetched image URLs are provided in the user prompt (section 7), use THOSE EXACT URLs.
-They are high-quality, niche-specific images from the Unsplash API — already optimized and curated.
+D) BUTTONS
+- Primary CTA:
+  rounded-full px-8 py-4 sm:px-10 sm:py-5
+  bg-[var(--primary)] text-white font-semibold uppercase tracking-wide
+  hover:scale-105 hover:shadow-lg transition
+  focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2
+- Secondary:
+  rounded-xl px-6 py-3 border border-[var(--border)] text-[var(--text-primary)]
 
-FALLBACK (only if no pre-fetched images are provided):
-Use https://picsum.photos/seed/{keyword}/{width}/{height} for generic placeholders, or https://i.pravatar.cc/200?img={number} for portrait avatars.
+E) NAVBAR (REQUIRED)
+- Fixed top, backdrop blur:
+  dark: bg-[var(--bg-deep)]/80 border-b border-[var(--border)]
+  light: bg-white/80 border-b border-[var(--border)]
+- Desktop links to anchors. Mobile drawer menu with overlay.
+- Right side CTA button.
 
-REQUIRED image placements:
-- HERO: Full-width background — use the provided hero image URL(s)
-- TESTIMONIALS: Real-looking portrait avatars — use the provided portrait URLs (vary them)
-- FEATURES/MECHANISM: Contextual photos — use provided feature image URLs
-- SOCIAL PROOF / RESULTS: Achievement imagery — use provided result URLs
-- ABOUT/TRUST: Team/office imagery — use provided trust URLs
-- GUARANTEE: Trust and security imagery — use provided guarantee URLs
-- BONUS CARDS: Relevant imagery — use provided bonus URLs
+IMAGES (VERY IMPORTANT)
+- If pre_fetched_images exist, use ONLY those exact URLs.
+- If not provided, use picsum.photos seeds for placeholders and i.pravatar.cc for portraits.
+- Enforce consistent aspect ratios:
+  hero: background cover with overlay gradient
+  feature/result: aspect-[16/9] or aspect-[4/3]
+  portraits: aspect-square
+- All images have object-cover, rounded-xl/2xl, and loading="lazy" (except hero).
 
-Image rules:
-- Use the EXACT pre-fetched URLs without modification
-- Use object-fit: cover via Tailwind: class="object-cover"
-- Add overlay gradients on hero images via an absolutely positioned div with bg-gradient-to-b
-- loading="lazy" on all images except hero
-- Always include a descriptive alt="" attribute on every <img>
-- Fallback: if an image doesn't load, use a CSS gradient background as fallback
-
-═══════════════════════════════════════
-🎨 ICONS (USE LUCIDE CDN)
-═══════════════════════════════════════
-Include Lucide icons via CDN for professional iconography:
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-
-Then use: <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
-And init: <script>lucide.createIcons();</script>
-
-REQUIRED icon placements:
-- Feature cards: relevant icons (shield, zap, target, brain, heart, star, etc.)
-- Benefit bullets: check-circle or check icons
-- Trust strip: award, shield-check, users, clock icons  
-- FAQ: chevron-down for accordion arrows
-- Guarantee: shield, lock icons
-- CTAs: arrow-right icon next to button text
-- Social proof: quote icon for testimonials
-- Navigation: menu icon for mobile
-
-═══════════════════════════════════════
-✨ INTERACTIVE COMPONENTS (REQUIRED)
-═══════════════════════════════════════
-The page MUST include these interactive elements (vanilla JS):
-
-1) SCROLL REVEAL ANIMATIONS:
-   - Every section fades in + slides up on scroll entry
-   - Staggered children animation (cards appear one by one)
-   - Use IntersectionObserver + Tailwind transition classes
-
-2) ANIMATED NUMBER COUNTERS:
-   - Any number/stat in the copy should count up when scrolled into view
-   - Smooth easing animation over 2 seconds
-
-3) RETRO TESTIMONIAL CAROUSEL (MANDATORY DESIGN):
-   - Horizontal scrollable carousel with left/right arrow buttons
-   - Cards: h-[500px] md:h-[550px] w-80 md:w-96, rounded-3xl with a warm gradient background (bg-gradient-to-b from-[#f2f0eb] to-[#fff9eb])
-   - Each card has a subtle background image overlay at 30% opacity for texture
-   - Profile image: centered, rounded-full w-[90px] h-[90px] md:w-[150px] md:h-[150px], with a 3px solid border, sepia/desaturated filter (filter: saturate(0.2) sepia(0.46))
-   - Below image: testimonial quote text in a serif/italic font (use Google Font: Playfair Display or similar), text-2xl, lowercase style, centered
-   - Below quote: person name in italic, followed by designation with underline-offset-8
-   - A large Quote icon (<i data-lucide="quote" class="...">) at top or decorating the card
-   - Arrow buttons: rounded-full, bg-[#4b3f33] text-[#f2f0eb], h-10 w-10, positioned at bottom-right of carousel, with disabled:opacity-50
-   - Scroll container: overflow-x-auto with [scrollbar-width:none] to hide scrollbar, scroll-smooth
-   - Hover effect on cards: slight 3D rotation (transform: rotateX(2deg) rotateY(2deg) rotate(3deg) scale(1.02)) with transition duration 300ms
-   - Click-to-expand: clicking a card opens a full-screen overlay with the complete testimonial text, a close (X) button, and the same warm gradient background
-   - The expanded view: max-w-5xl mx-auto, rounded-3xl, p-4 md:p-10, with the full quote in text-3xl serif font
-   - Backdrop: backdrop-blur-lg on the overlay background
-   - Staggered entrance animation: each card fades in with 200ms delay per index
-   - Use vanilla JS for scroll behavior, expand/collapse, and keyboard Escape to close
-
-4) FAQ ACCORDION:
-   - Smooth height animation on open/close
-   - Rotate chevron icon
-   - Only one open at a time
-
-5) STICKY CTA BAR:
-   - Appears after scrolling past hero
-   - Slide-down animation
-   - Compact with headline + CTA button
+INTERACTIONS (MINIMAL, PREMIUM)
+Add ONLY these 4 interactions (avoid over-animation):
+1) Scroll reveal via class toggles (NO inline styles):
+   - Elements start with opacity-0 translate-y-6
+   - On intersect: opacity-100 translate-y-0
+   - Use IntersectionObserver toggling Tailwind classes.
+2) Animated counters for elements with data-count (count up on view).
+3) FAQ accordion (one open at a time) with chevron rotate.
+4) Sticky CTA bar:
+   - Appears after hero
    - Hide on scroll up, show on scroll down
 
-6) FLOATING ELEMENTS:
-   - Subtle floating glow orbs in hero (CSS @keyframes in the allowed <style> block)
-   - Parallax effect on decorative elements
+SECTION STRUCTURE (REQUIRED ORDER)
+1) HERO (data-section="hero")
+   - Hero image background + overlay gradient
+   - Badge pill, headline, subhead, bullet list (3–6), CTA row
+   - Mini trust chips under CTAs (icons + short claims)
+2) TRUST STRIP (data-section="trust-strip")
+   - 3–5 stat blocks with data-count + short labels
+3) PROBLEMS (data-section="problems")
+   - 6 cards max, each: title + 2–3 lines
+4) SOLUTION / MECHANISM (data-section="solution")
+   - Split layout: text + image, 3 steps
+5) FEATURES (data-section="features")
+   - Feature grid (6–9), each with icon + title + description
+6) SOCIAL PROOF (data-section="social-proof")
+   - Testimonials: 6 cards max, portraits, short quotes, roles
+7) PRICING (data-section="pricing")
+   - Value stack, anchored price (original struck, current bold)
+   - 1 primary plan card + guarantees + CTA
+8) FAQ (data-section="faq")
+   - 6–10 Q&As
+9) GUARANTEE (data-section="guarantee")
+   - Shield icon + guarantee copy + bullet list
+10) FINAL CTA (data-section="final-cta")
+    - Recap + CTA
+11) FOOTER (data-section="footer")
+    - Links + disclaimers
 
-7) HOVER EFFECTS (all via Tailwind):
-   - Cards: hover:-translate-y-2 hover:shadow-xl hover:border-[var(--primary)]/30 transition-all duration-300
-   - Buttons: hover:scale-105 hover:shadow-lg transition-transform duration-200
-   - Images: hover:scale-105 transition-transform duration-300 overflow-hidden on parent
-   - Links: underline animation via pseudo-elements in @keyframes
+COPY HANDLING
+- Use the provided copy as source of truth.
+- If copy is long, keep paragraphs, but format for readability (short paragraphs, bullets).
+- Keep language consistent with locale.language.
 
-8) PROGRESS BAR:
-   - Reading progress bar at top of page
-   - Thin line that fills as user scrolls
+PREMIUM VISUAL PATTERNS (APPLY)
+A) GRADIENT TEXT ON STRATEGIC HEADLINES:
+   bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] bg-clip-text text-transparent
+   Use sparingly (hero + 1-2 section titles max).
 
-═══════════════════════════════════════
-📐 PREMIUM LAYOUT SYSTEM (MANDATORY)
-═══════════════════════════════════════
-These layout patterns are REQUIRED. Follow them exactly:
+B) BLOB ANIMATIONS IN HERO:
+   2-3 decorative blobs as absolutely positioned divs with mix-blend-multiply, blur-xl, opacity-20, animate-blob
 
-CONTAINER: max-w-6xl mx-auto px-4 sm:px-6 lg:px-8
-SECTIONS: py-16 sm:py-20 (consistent vertical rhythm)
-SECTION INTRO: Every major section SHOULD use the Section Intro Decorator pattern from the 21dev Component Catalog — icon pill + small caps label + large heading + subtitle. This creates professional visual rhythm across the page.
-CARDS: rounded-2xl border border-[var(--border)] p-6 (single consistent pattern)
-GRID: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
+C) CATEGORIZED CARD COLORS:
+   Feature/problem cards use distinct soft backgrounds per card:
+   bg-purple-50, bg-blue-50, bg-green-50, bg-orange-50, bg-pink-50, bg-teal-50
 
-RESPONSIVE TYPOGRAPHY (no fixed px sizes for headings!):
-- Hero headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight
-- Section titles: text-3xl sm:text-4xl font-bold tracking-tight
-- Subheadings: text-lg sm:text-xl text-[var(--text-secondary)]
-- Body: text-base sm:text-lg leading-relaxed
-- Labels/badges: text-xs uppercase tracking-widest font-semibold
+D) SECTION INTRO DECORATOR:
+   Every major section uses: icon pill + small caps label + large heading + subtitle
 
-BUTTONS:
-- Primary CTA: px-8 py-4 sm:px-10 sm:py-5 rounded-full text-base sm:text-lg font-semibold uppercase tracking-wide bg-[var(--primary)] text-white hover:scale-105 transition-transform duration-200 shadow-lg
-- Secondary: px-6 py-3 rounded-xl border border-[var(--border)] text-sm font-medium
+E) FOR WHO / NOT FOR WHO:
+   Side-by-side grid: green cards with check-circle, red cards with x-circle
 
-SPACING RULES:
-- Between sections: py-16 sm:py-20 (never less)
-- Card internal: p-6 sm:p-8
-- Between heading and content: mb-4 sm:mb-6
-- Between cards in grid: gap-6 sm:gap-8
+POLISH PASS (MANDATORY BEFORE OUTPUT)
+Before returning, scan your own HTML and fix:
+- Any section missing py-16 sm:py-20
+- Any card missing p-6 sm:p-8, rounded-2xl, border
+- Any weak contrast text
+- Any missing focus states
+- Any missing alt
+- Any accidental inline style="" (must be zero)
+List fixes in polish_report.fixes_made.
 
-═══════════════════════════════════════
-🎨 VISUAL DESIGN SYSTEM
-═══════════════════════════════════════
-TYPOGRAPHY:
-- Load from Google Fonts: Inter (body) + Space Grotesk or Outfit (headings)
-  For light/editorial themes: Poppins (body+headings) is also excellent.
-- Use the responsive classes defined above. NEVER use fixed px font sizes like font-size:70px.
-
-COLOR SYSTEM (CSS custom properties — defined in the single <style> block):
-For DARK themes:
-:root {
-  --primary: {brand.primary_color};
-  --primary-glow: {lighter version};
-  --bg-deep: #050508;
-  --bg-section: #0a0a12;
-  --bg-card: rgba(255,255,255,0.03);
-  --bg-card-hover: rgba(255,255,255,0.06);
-  --border: rgba(255,255,255,0.08);
-  --border-hover: rgba(255,255,255,0.15);
-  --text-primary: #f0f0f5;
-  --text-secondary: #8a8a9a;
-  --text-muted: #5a5a6a;
-}
-For LIGHT themes (longform-dr):
-:root {
-  --primary: {brand.primary_color};
-  --primary-glow: {lighter tint};
-  --bg-deep: #EBEDF0;
-  --bg-section: #FFFFFF;
-  --bg-section-alt: #F8F8F8;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F0F0F5;
-  --border: rgba(0,0,0,0.08);
-  --border-hover: rgba(0,0,0,0.15);
-  --text-primary: #1a1a2e;
-  --text-secondary: #393939;
-  --text-muted: #9F9F9F;
-}
-
-SURFACES & CARDS (via Tailwind classes):
-- Dark: backdrop-blur-xl saturate-150 border border-[var(--border)] shadow-lg
-- Light: bg-white rounded-2xl shadow-md border border-[var(--border)]
-- Hover: hover:shadow-xl hover:border-[var(--primary)]/20 transition-all duration-300
-
-═══════════════════════════════════════
-♿ ACCESSIBILITY (REQUIRED)
-═══════════════════════════════════════
-- Every <img> MUST have a descriptive alt attribute
-- Color contrast: text must meet WCAG AA (4.5:1 for body, 3:1 for large text)
-- Buttons and links must have visible focus states: focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2
-- Interactive elements must be keyboard accessible
-- Use semantic HTML: <header>, <main>, <section>, <nav>, <footer>
-
-═══════════════════════════════════════
-📐 SECTION BLUEPRINT
-═══════════════════════════════════════
-Generate sections in this order with these design patterns:
-
-A) HERO (data-section="hero")
-   - Full viewport or generous padding: min-h-screen or py-20 sm:py-32
-   - Badge/pill at top: inline-flex px-4 py-1.5 rounded-full text-xs uppercase tracking-widest
-   - Massive headline: text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight
-   - PREMIUM OPTION: Use the Typewriter headline effect (CSS keyframe typing animation with blinking cursor) from the 21dev Component Catalog for the main headline
-   - Subheadline: text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto
-   - CTA button: rounded-full, accent color, uppercase
-   - Trust strip below: flex items-center gap-4
-
-B) TRUST STRIP (data-section="trust-strip")
-    - Logos or trust badges in a flex row with gap-8
-    - py-8 border-y border-[var(--border)]
-    - PREMIUM OPTION: Use the Logo Marquee pattern (infinite CSS scroll with grayscale logos, fade edges) from the 21dev Component Catalog for a more dynamic trust strip
-
-C) PROBLEMS (data-section="problems")
-   - max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20
-   - Card grid: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
-   - Each card: rounded-2xl border p-6
-
-D) SOLUTION/MECHANISM (data-section="solution")
-   - grid grid-cols-1 lg:grid-cols-2 gap-8 items-center
-   - Image on one side, text on the other
-
-E) FEATURES/BENEFITS (data-section="features")
-    - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
-    - Each card with icon + title + description
-    - PREMIUM OPTION: Use the HoverGrid pattern (bordered 4-col grid with radial-gradient hover tracking) from the 21dev Component Catalog for a more premium feel
-    - PREMIUM OPTION: Use the Bento Grid pattern (asymmetric 3/5 + 2/5 cols with large screenshot cards) for feature sections with images/screenshots
-
-F) SOCIAL PROOF / TESTIMONIALS (data-section="social-proof")
-    - PREMIUM OPTION: Use the AnimatedTestimonials pattern (split layout with 3D photo stack + word-by-word animated quote) from the 21dev Component Catalog instead of simple cards
-   - RETRO TESTIMONIAL CAROUSEL LAYOUT (mandatory):
-   - Container: max-w-6xl mx-auto, with a section heading above
-   - Horizontal scroll carousel with flex, gap-4, overflow-x-auto, [scrollbar-width:none], scroll-smooth
-   - Each testimonial card: rounded-3xl, h-[500px] md:h-[550px], w-80 md:w-96, bg-gradient-to-b from-[#f2f0eb] to-[#fff9eb], shadow-md, relative, overflow-hidden
-   - Background texture: an absolute-positioned image at opacity-30 covering the card
-   - Profile avatar: centered, w-[90px] h-[90px] md:w-[150px] md:h-[150px], rounded-full, border-[3px] border-solid border-[rgba(59,59,59,0.6)], filter saturate(0.2) sepia(0.46)
-   - Quote text: text-2xl, serif/italic font (Playfair Display), text-[rgba(31,27,29,0.7)], centered, lowercase, max 100 chars with "..." truncation
-   - Name: text-2xl, font-thin, italic, lowercase, centered, with period at end
-   - Designation: text-base, italic, underline underline-offset-8 decoration-1
-   - Navigation arrows: two rounded-full buttons (bg-[#4b3f33] text-[#f2f0eb] h-10 w-10) at bottom-right with ArrowLeft/ArrowRight icons
-   - Hover effect: transform rotateX(2deg) rotateY(2deg) rotate(3deg) scale(1.02) with transition 300ms
-   - Click expands to fullscreen overlay: backdrop-blur-lg, max-w-5xl centered, same warm gradient, close X button (bg-[#4b3f33] rounded-full), full quote in text-3xl serif
-   - Staggered fade-in animation: each card animates in with 200ms * index delay
-   - Use vanilla JS for: horizontal scroll with arrow buttons, expand/collapse card, Escape key to close, body scroll lock when expanded
-
-G) PRICING/OFFER (data-section="pricing")
-   - Centered layout, max-w-3xl mx-auto
-   - Price anchoring: line-through on original + bold current price
-   - CTA button prominent
-
-H) GUARANTEE (data-section="guarantee")
-   - grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 items-center
-   - Shield/badge image + guarantee text
-
-I) FAQ (data-section="faq")
-   - max-w-3xl mx-auto, accordion pattern
-   - Each item: border-b, cursor-pointer, transition
-
-J) FINAL CTA (data-section="final-cta")
-   - Centered, py-16 sm:py-20
-   - Large CTA with pulse animation
-
-K) FOOTER (data-section="footer")
-   - bg-[var(--primary)] text-white py-8
-   - grid grid-cols-1 md:grid-cols-2 gap-6
-
-═══════════════════════════════════════
-🧹 CONTENT RULES
-═══════════════════════════════════════
-- NEVER output internal labels: "SEÇÃO:", "PÁGINA DE VENDAS", "{SIM...}", "(Inserir ...)"
-- Strip and rewrite any such labels into natural, compelling headings
-- Production-ready: no empty paragraphs, no dummy text, no TODOs
-- Write everything in the provided locale language
-- Adapt culturally to locale.region_hint
-- Preserve ALL copy content — do NOT summarize long sections
-
-═══════════════════════════════════════
-🚀 BOLT-LEVEL PREMIUM PATTERNS (MANDATORY)
-═══════════════════════════════════════
-Apply these advanced visual patterns extracted from top-tier agency builds:
-
-A) FIXED NAVBAR (every page MUST have this):
-- <nav> fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md shadow-sm (light) or bg-[var(--bg-deep)]/95 backdrop-blur-md border-b border-[var(--border)] (dark)
-- Logo: flex items-center gap-2 — icon (<i data-lucide="zap">) + brand name in font-bold text-xl
-- Desktop nav: hidden md:flex items-center gap-6 with anchor links to sections (href="#hero", etc.)
-- CTA button in nav: bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] text-white px-6 py-2 rounded-full text-sm font-semibold hover:shadow-lg transition-all
-- Mobile: hamburger button (md:hidden) that toggles a drawer overlay — fixed inset-0 bg-black/50 backdrop-blur-sm with a slide-in panel (bg-white or bg-[var(--bg-deep)]) containing vertical nav links + CTA
-- JS: toggle mobile menu open/close, close on link click or backdrop click
-
-B) GRADIENT TEXT ON STRATEGIC HEADLINES:
-- Hero headline and key section titles MUST use: bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] bg-clip-text text-transparent
-- Use sparingly (hero + 1-2 section titles max) for impact, not on every heading
-
-C) BLOB ANIMATIONS IN HERO:
-- Add 2-3 decorative blobs in the hero section as absolutely positioned divs:
-  <div class="absolute top-20 left-10 w-72 h-72 bg-[var(--primary)] rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-  <div class="absolute top-40 right-10 w-72 h-72 bg-[var(--primary-glow)] rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-  <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-- The @keyframes blob and delay classes will be injected automatically by postProcessHtml
-
-D) CATEGORIZED CARD COLORS:
-- Feature/problem cards MUST NOT all use the same bg-card. Instead, assign distinct soft backgrounds per card:
-  Card 1: bg-purple-50 dark:bg-purple-950/20
-  Card 2: bg-blue-50 dark:bg-blue-950/20
-  Card 3: bg-green-50 dark:bg-green-950/20
-  Card 4: bg-orange-50 dark:bg-orange-950/20
-  Card 5: bg-pink-50 dark:bg-pink-950/20
-  Card 6: bg-teal-50 dark:bg-teal-950/20
-- Cycle through these colors. Each card also gets a matching icon color (text-purple-600, text-blue-600, etc.)
-
-E) NUMERIC TRUST BAR:
-- The trust-strip section should be a horizontal flex of 3-5 stat blocks:
-  <div class="text-center"><span class="text-3xl sm:text-4xl font-bold text-[var(--primary)]" data-count="10000">10.000</span><span class="block text-sm text-[var(--text-muted)] mt-1">Clientes Ativos</span></div>
-- Numbers animate on scroll via data-count attribute (handled by postProcessHtml)
-- Separate stats with subtle vertical dividers: border-r border-[var(--border)] last:border-0
-
-F) PRICING WITH TOGGLE + BONUS (PREMIUM — see 21dev Catalog pattern E):
-- Use the full premium pricing pattern from Component Catalog: toggle switch with aria-checked, data-monthly/data-annual on price elements, Popular card with scale-105 + star badge + border-2 border-[var(--primary)]
-- Monthly/annual toggle with JS that swaps pricing-value text via data attributes
-- Feature list with check icons: <i data-lucide="check" class="text-green-500"> for included
-- Bonus section below pricing: cards with timer icon + "Bônus exclusivo" badge
-
-G) FOR WHO / NOT FOR WHO SECTION:
-- If the copy has "para quem é / para quem não é" content, render as side-by-side grid:
-  grid grid-cols-1 md:grid-cols-2 gap-6
-- "Para quem é": bg-green-50 dark:bg-green-950/20 rounded-2xl p-6, each item with <i data-lucide="check-circle" class="text-green-500 w-5 h-5 flex-shrink-0">
-- "Para quem NÃO é": bg-red-50 dark:bg-red-950/20 rounded-2xl p-6, each item with <i data-lucide="x-circle" class="text-red-500 w-5 h-5 flex-shrink-0">
-- Titles: "✅ Isso é para você se..." and "❌ Isso NÃO é para você se..."
-
-═══════════════════════════════════════
-⚙️ TECHNICAL RULES
-═══════════════════════════════════════
-- Single HTML file. Tailwind via Play CDN. Minimal <style> block only for CSS vars and @keyframes.
-- Google Fonts with display=swap
-- Viewport meta tag, charset UTF-8
-- CSS custom properties for colors (defined in <style>), applied via Tailwind arbitrary values
-- Responsive: mobile-first
-- Lazy loading on images: loading="lazy" (except hero)
-- Semantic HTML: <header>, <main>, <section>, <footer>
-- All JS at bottom of <body>
-
-═══════════════════════════════════════
-🔍 MANDATORY CRITIQUE PASS
-═══════════════════════════════════════
-After generating the full page, you MUST perform a self-review and fix these issues BEFORE returning the output:
-
-1) SPACING CONSISTENCY: Are all sections using py-16 sm:py-20? Are cards using consistent p-6? Fix any inconsistency.
-2) CONTRAST CHECK: Is body text readable against its background? Are CTAs clearly visible? Fix weak contrast.
-3) ALIGNMENT: Are elements properly aligned in grids? Any orphaned elements? Fix misalignment.
-4) MOBILE RESPONSIVENESS: Will the layout break on 375px screens? Are font sizes responsive (text-4xl sm:text-5xl, not fixed px)? Fix any breakage.
-5) TEXT BREATHING: Is there enough whitespace between paragraphs, headings, and sections? Add spacing if text feels cramped.
-6) INLINE STYLE CHECK: Search for any style="" attributes. If found, convert to Tailwind classes. Zero tolerance.
-7) IMAGE ALT CHECK: Every <img> must have a descriptive alt. Fix any missing ones.
-8) FOCUS STATES: Interactive elements must have focus:ring styles. Add if missing.
-
-═══════════════════════════════════════
-OUTPUT FORMAT
-═══════════════════════════════════════
-Return ONLY a JSON object (no markdown fences) with:
-{
-  "file_name": "<project-name>-<page_type>.html",
-  "html": "<!doctype html>...full premium HTML here...",
-  "sections": ["hero", "trust-strip", "problems", ...],
-  "notes": { "sections": [...], "locale_touches": [...], "images_used": [...], "critique_fixes": [...] }
-}
-
-The "critique_fixes" array must list what you found and fixed during the critique pass.
-
-Generate the page now. Make it ABSOLUTELY STUNNING — the kind of page that makes competitors jealous.`;
+Now generate the complete premium page.`;
 
 const EDIT_SECTION_PROMPT = `You are an elite, award-winning web designer at a $500/hr agency.
 You will receive:
@@ -1946,11 +1732,11 @@ Render this PageSpec into a premium Next.js project. Use ALL the content — do 
     }
 
     // HTML format (default)
-    console.log("Calling OpenAI to generate landing page (format: html)...");
-    const rawContent = await callOpenAI(HTML_SYSTEM_PROMPT, userPrompt);
+    console.log("Calling Lovable AI (Gemini 2.5 Pro) to generate landing page (format: html)...");
+    const rawContent = await callLovableAI(HTML_SYSTEM_PROMPT, userPrompt, "google/gemini-2.5-pro", 65536);
     const jsonStr = parseJsonFromAI(rawContent);
 
-    let parsed: { file_name?: string; html: string; sections?: string[]; notes?: Record<string, unknown> };
+    let parsed: { file_name?: string; html: string; sections?: string[]; notes?: Record<string, unknown>; polish_report?: Record<string, unknown> };
     try {
       parsed = JSON.parse(jsonStr);
     } catch {
@@ -1979,7 +1765,7 @@ Render this PageSpec into a premium Next.js project. Use ALL the content — do 
         template_key: templateKey,
         status: "generated",
         generated_html: parsed.html,
-        generated_assets: parsed.notes || {},
+        generated_assets: parsed.polish_report || parsed.notes || {},
         language_code: lang,
         cultural_region: project.cultural_region,
         branding: options.branding || {},
