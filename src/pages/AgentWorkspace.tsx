@@ -16,6 +16,7 @@ import { firecrawlApi } from "@/lib/api/firecrawl";
 import ReactMarkdown from "react-markdown";
 import { GenerationHistory } from "@/components/agent/GenerationHistory";
 import { AiSuggestButton } from "@/components/agent/AiSuggestButton";
+import { CopyScoreCard } from "@/components/agent/CopyScoreCard";
 import { useReviews } from "@/hooks/use-reviews";
 import { useTeam } from "@/hooks/use-team";
 
@@ -483,6 +484,7 @@ export default function AgentWorkspace() {
               <h2 className="text-sm font-semibold text-foreground">Resultado</h2>
               {output && !isGenerating && (
                 <div className="flex items-center gap-1">
+                  <CopyScoreCard copy={output} agentName={config.name} />
                   <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
                     {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                     {copied ? "Copiado!" : "Copiar"}

@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.ad-intelligence]
 verify_jwt = false
+
+[functions.score-copy]
+verify_jwt = false
