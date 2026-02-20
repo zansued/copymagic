@@ -504,14 +504,22 @@ function AdDetailSheetWithAI({ ad: initialAd, aiResult, open, onOpenChange, onUp
         setLocalAiResult(result);
         // Update ad fields
         if (result.offer_card) {
-          const updated = {
+          const updatedAd = {
             ...ad,
             promiseSummary: result.offer_card.promise || ad.promiseSummary,
             mechanism: result.offer_card.mechanism || ad.mechanism,
             proof: Array.isArray(result.offer_card.proof) ? result.offer_card.proof.join("; ") : ad.proof,
+            offer: result.offer_card.angle?.join(", ") || ad.offer,
+            inferredAudience: result.offer_card.format || ad.inferredAudience,
           };
-          setAd(updated);
-          storage.updateAd(updated);
+          // Recalculate heuristic scores with full list
+          const allAds = storage.getAds();
+          const idx = allAds.findIndex((a) => a.id === updatedAd.id);
+          if (idx >= 0) allAds[idx] = updatedAd;
+          const recalculated = allAds.map((a) => ({ ...a, ...calculateScores(a, allAds) }));
+          storage.saveAds(recalculated);
+          const finalAd = recalculated.find((a) => a.id === ad.id) || updatedAd;
+          setAd(finalAd);
           onUpdated();
         }
         toast.success("Análise IA concluída!");
@@ -627,16 +635,7 @@ function AdDetailSheetWithAI({ ad: initialAd, aiResult, open, onOpenChange, onUp
             </div>
           )}
 
-          {/* Heuristic detection */}
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detecção Heurística</p>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><span className="text-muted-foreground">Promessa:</span> <span>{ad.detectedPromise}</span></div>
-              <div><span className="text-muted-foreground">Mecanismo:</span> <span>{ad.detectedMechanism}</span></div>
-              <div><span className="text-muted-foreground">Prova:</span> <span>{ad.detectedProof}</span></div>
-              <div><span className="text-muted-foreground">CTA:</span> <span>{ad.detectedCTA}</span></div>
-            </div>
-          </div>
+          {/* Heuristic detection removed - covered by Offer Card IA */}
 
           {/* Original text */}
           <div className="space-y-2">
@@ -652,12 +651,10 @@ function AdDetailSheetWithAI({ ad: initialAd, aiResult, open, onOpenChange, onUp
 
           {/* Actions */}
           <div className="flex flex-wrap gap-2 pt-2 border-t">
-            {!currentAi && (
-              <Button onClick={handleAnalyzeSingle} disabled={analyzing} size="sm" variant="outline" className="gap-1.5 flex-1">
-                {analyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bot className="h-3.5 w-3.5" />}
-                Analisar com IA
-              </Button>
-            )}
+            <Button onClick={handleAnalyzeSingle} disabled={analyzing} size="sm" variant="outline" className="gap-1.5 flex-1">
+              {analyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Bot className="h-3.5 w-3.5" />}
+              {currentAi ? "Reanalisar com IA" : "Analisar com IA"}
+            </Button>
             <Button onClick={save} size="sm" className="gap-1.5 flex-1">
               <Star className="h-3.5 w-3.5" /> Salvar
             </Button>
