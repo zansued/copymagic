@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MenuBar } from "@/components/ui/menu-bar";
-import { Map, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, UsersRound, CreditCard, Shield, FolderOpen, Telescope } from "lucide-react";
+import { Map, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, UsersRound, CreditCard, Shield, FolderOpen, Telescope, BookOpen } from "lucide-react";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSubscription } from "@/hooks/use-subscription";
 
@@ -89,13 +89,22 @@ export function TopNav({ projectName }: { projectName?: string }) {
   // Build menu items dynamically based on plan
   const dynamicMenuItems = [
     ...menuItems,
-    ...(isAgency ? [{
-      icon: UsersRound,
-      label: "Equipe",
-      path: "/team",
-      gradient: "radial-gradient(circle, hsl(262 83% 65% / 0.15) 0%, transparent 70%)",
-      iconColor: "text-violet-400",
-    }] : []),
+    ...(isAgency ? [
+      {
+        icon: BookOpen,
+        label: "Biblioteca",
+        path: "/library",
+        gradient: "radial-gradient(circle, hsl(160 70% 45% / 0.15) 0%, transparent 70%)",
+        iconColor: "text-emerald-400",
+      },
+      {
+        icon: UsersRound,
+        label: "Equipe",
+        path: "/team",
+        gradient: "radial-gradient(circle, hsl(262 83% 65% / 0.15) 0%, transparent 70%)",
+        iconColor: "text-violet-400",
+      },
+    ] : []),
   ];
 
   const isProjectPage = location.pathname.startsWith("/project/");

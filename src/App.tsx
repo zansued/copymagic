@@ -26,6 +26,7 @@ import Pricing from "./pages/Pricing";
 import AdminPanel from "./pages/AdminPanel";
 import OfferResearch from "./pages/OfferResearch";
 import TeamManagement from "./pages/TeamManagement";
+import SharedLibrary from "./pages/SharedLibrary";
 import NotFound from "./pages/NotFound";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/shared/:token" element={<SharedOutput />} />
             <Route path="/offer-research" element={<ProtectedRoute><OfferResearch /></ProtectedRoute>} />
             <Route path="/team" element={<ProtectedRoute><TeamManagement /></ProtectedRoute>} />
+            <Route path="/library" element={<ProtectedRoute><SharedLibrary /></ProtectedRoute>} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
