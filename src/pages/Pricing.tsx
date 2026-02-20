@@ -30,6 +30,25 @@ const plans = [
     highlight: false,
   },
   {
+    key: "starter",
+    name: "Starter",
+    tier: 0.5,
+    monthlyPrice: 47,
+    annualPrice: 470,
+    icon: Sparkles,
+    features: [
+      { text: "30 gerações por mês", included: true },
+      { text: "3 projetos no Lab de Copy", included: true },
+      { text: "2 perfis de DNA de Marca", included: true },
+      { text: "Agentes básicos", included: true },
+      { text: "Landing Builder", included: true },
+      { text: "Mentor de Riqueza", included: false },
+      { text: "Colaboração e times", included: false },
+    ],
+    cta: "Assinar Starter",
+    highlight: false,
+  },
+  {
     key: "pro",
     name: "Pro",
     tier: 1,
@@ -87,6 +106,7 @@ const AGENCY_PLUS_ANNUAL = 4970;
 // Map plan keys to tier numbers for comparison
 const PLAN_TIER: Record<string, number> = {
   free: 0,
+  starter: 0.5,
   pro: 1,
   lifetime: 2, // lifetime = Pro individual (above pro but below agency)
   agency: 3,
@@ -230,11 +250,13 @@ export default function Pricing() {
   });
 
   // Determine grid cols based on visible plans
-  const gridCols = visiblePlans.length === 1
+  const gridCols = visiblePlans.length <= 1
     ? "grid-cols-1 max-w-md"
     : visiblePlans.length === 2
       ? "grid-cols-1 md:grid-cols-2 max-w-3xl"
-      : "grid-cols-1 md:grid-cols-3 max-w-5xl";
+      : visiblePlans.length === 3
+        ? "grid-cols-1 md:grid-cols-3 max-w-5xl"
+        : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4 max-w-6xl";
 
   // Should show lifetime offer?
   const showLifetime = slotsRemaining !== null && slotsRemaining > 0
