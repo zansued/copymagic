@@ -204,16 +204,7 @@ export default function AdDetailSheet({ ad: initialAd, open, onOpenChange, onUpd
             </div>
           )}
 
-          {/* Detecção Heurística */}
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detecção Heurística</p>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><span className="text-muted-foreground">Promessa:</span> {ad.detectedPromise}</div>
-              <div><span className="text-muted-foreground">Mecanismo:</span> {ad.detectedMechanism}</div>
-              <div><span className="text-muted-foreground">Prova:</span> {ad.detectedProof}</div>
-              <div><span className="text-muted-foreground">CTA:</span> {ad.detectedCTA}</div>
-            </div>
-          </div>
+          {/* Heuristic detection removed - covered by Offer Card IA */}
 
           {/* Texto Original */}
           <div className="space-y-2">
