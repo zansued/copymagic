@@ -728,6 +728,53 @@ export type Database = {
           },
         ]
       }
+      shared_library: {
+        Row: {
+          agent_name: string | null
+          category: string | null
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          tags: string[] | null
+          team_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agent_name?: string | null
+          category?: string | null
+          content?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          tags?: string[] | null
+          team_id: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string | null
+          category?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          tags?: string[] | null
+          team_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_library_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_generations: {
         Row: {
           branding: Json | null
