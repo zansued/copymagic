@@ -37,10 +37,15 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
           cursor: pointer;
         }
         [data-section]:hover {
-          outline: 2px dashed rgba(124, 58, 237, 0.5);
+          outline: 2px dashed rgba(124, 58, 237, 0.4);
           outline-offset: 4px;
         }
-        [data-section]:hover::after {
+        [data-section].section-selected {
+          outline: 2px solid rgba(124, 58, 237, 0.8) !important;
+          outline-offset: 4px;
+        }
+        [data-section]:hover::after,
+        [data-section].section-selected::after {
           content: attr(data-section);
           position: absolute;
           top: 8px;
@@ -54,7 +59,7 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          z-index: 9999;
+          z-index: 99999;
           pointer-events: none;
           backdrop-filter: blur(4px);
         }
@@ -83,14 +88,29 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
           background: rgba(124, 58, 237, 1);
           transform: scale(1.05);
         }
-        [data-section]:hover .section-edit-btn {
-          display: flex;
+        [data-section].section-selected .section-edit-btn {
+          display: flex !important;
         }
       `;
       doc.head.appendChild(style);
 
-      // Add edit buttons to each section — use direct callback instead of postMessage
       const sections = doc.querySelectorAll("[data-section]");
+
+      // Click on a section to select it and show the edit button
+      doc.addEventListener("click", (e: Event) => {
+        const target = e.target as HTMLElement;
+        // If clicking the edit button itself, don't deselect
+        if (target.classList.contains("section-edit-btn")) return;
+
+        const clickedSection = target.closest("[data-section]");
+        sections.forEach((s) => s.classList.remove("section-selected"));
+
+        if (clickedSection) {
+          clickedSection.classList.add("section-selected");
+        }
+      });
+
+      // Add edit buttons to each section
       sections.forEach((section) => {
         const btn = doc.createElement("button");
         btn.className = "section-edit-btn";
