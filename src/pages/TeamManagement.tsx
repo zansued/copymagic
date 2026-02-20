@@ -73,6 +73,8 @@ export default function TeamManagement() {
   const [deletingTeam, setDeletingTeam] = useState(false);
   const [teamProjectsCount, setTeamProjectsCount] = useState<number | null>(null);
   const [checkingProjects, setCheckingProjects] = useState(false);
+  const [transferProjectsTarget, setTransferProjectsTarget] = useState("");
+  const [transferringProjects, setTransferringProjects] = useState(false);
 
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
   const MAX_TEAMS = subscription?.plan === "lifetime" ? 5 : 3;
@@ -207,6 +209,23 @@ export default function TeamManagement() {
     setTeamProjectsCount(count ?? 0);
     setCheckingProjects(false);
     setShowDeleteTeam(true);
+  };
+
+  const handleTransferProjects = async () => {
+    if (!team || !transferProjectsTarget) return;
+    setTransferringProjects(true);
+    const { error } = await supabase
+      .from("projects")
+      .update({ team_id: transferProjectsTarget })
+      .eq("team_id", team.id);
+    setTransferringProjects(false);
+    if (error) {
+      toast.error("Erro ao transferir projetos");
+      return;
+    }
+    toast.success("Projetos transferidos!");
+    setTeamProjectsCount(0);
+    setTransferProjectsTarget("");
   };
 
   const handleConfirmDeleteTeam = async () => {
@@ -542,28 +561,52 @@ export default function TeamManagement() {
       </Dialog>
 
       {/* Delete team confirmation */}
-      <AlertDialog open={showDeleteTeam} onOpenChange={setShowDeleteTeam}>
+      <AlertDialog open={showDeleteTeam} onOpenChange={(open) => { if (!open) { setShowDeleteTeam(false); setTransferProjectsTarget(""); } }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               {teamProjectsCount && teamProjectsCount > 0 ? (
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                <AlertTriangle className="h-5 w-5 text-warning" />
               ) : (
                 <Trash2 className="h-5 w-5 text-destructive" />
               )}
               Excluir equipe "{team.name}"
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {teamProjectsCount && teamProjectsCount > 0 ? (
                   <>
                     <p>
                       Esta equipe possui <strong>{teamProjectsCount} projeto(s) ativo(s)</strong>.
                       Não é possível excluí-la enquanto houver projetos vinculados.
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Remova ou transfira todos os projetos antes de excluir a equipe.
-                    </p>
+                    {otherTeams.length > 0 ? (
+                      <div className="space-y-2 pt-1">
+                        <p className="text-sm font-medium text-foreground">Transferir projetos para:</p>
+                        <Select value={transferProjectsTarget} onValueChange={setTransferProjectsTarget}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a equipe destino" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {otherTeams.map((t) => (
+                              <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          className="w-full"
+                          disabled={!transferProjectsTarget || transferringProjects}
+                          onClick={handleTransferProjects}
+                        >
+                          {transferringProjects ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowRightLeft className="h-4 w-4 mr-2" />}
+                          Transferir {teamProjectsCount} projeto(s)
+                        </Button>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        Crie outra equipe primeiro para poder transferir os projetos, ou remova-os manualmente.
+                      </p>
+                    )}
                   </>
                 ) : (
                   <p>
