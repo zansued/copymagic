@@ -60,23 +60,24 @@ export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelPro
         }
         .section-edit-btn {
           position: absolute;
-          top: 8px;
-          left: 8px;
-          background: rgba(124, 58, 237, 0.9);
+          top: 80px;
+          left: 16px;
+          background: rgba(124, 58, 237, 0.95);
           color: white;
           border: none;
-          padding: 6px 14px;
+          padding: 8px 18px;
           border-radius: 20px;
-          font-size: 12px;
+          font-size: 13px;
           font-family: Inter, sans-serif;
           font-weight: 600;
           cursor: pointer;
-          z-index: 10000;
+          z-index: 100000;
           display: none;
           align-items: center;
           gap: 4px;
           backdrop-filter: blur(4px);
           transition: transform 0.15s ease, background 0.15s ease;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         .section-edit-btn:hover {
           background: rgba(124, 58, 237, 1);
