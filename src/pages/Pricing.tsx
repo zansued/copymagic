@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Check, Sparkles, Crown, Building2, Gem, Flame, X } from "lucide-react";
+import { CreditCard } from "@/components/ui/credit-card";
 import { Button } from "@/components/ui/button";
 import { TopNav } from "@/components/TopNav";
 import { AppFooter } from "@/components/AppFooter";
@@ -143,6 +144,19 @@ export default function Pricing() {
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto">
             Desbloqueie todo o poder do CopyMagic para escalar seu marketing com IA.
+          </p>
+        </motion.div>
+
+        {/* Decorative credit card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-8"
+        >
+          <CreditCard variant="gradient" />
+          <p className="text-center text-xs text-muted-foreground mt-3">
+            Clique para virar • Efeito 3D com o mouse
           </p>
         </motion.div>
 
