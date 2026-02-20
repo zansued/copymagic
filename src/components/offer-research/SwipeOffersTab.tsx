@@ -554,9 +554,6 @@ function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
             <p className="text-[10px] text-muted-foreground mt-0.5">{aiResult.offer_card.angle.join(", ")}</p>
           )}
         </div>
-        <Button variant="outline" size="sm" className="text-[10px] h-7 px-2 gap-1 shrink-0" onClick={(e) => { e.stopPropagation(); onClick(); }}>
-          <Search className="h-3 w-3" /> Analisar
-        </Button>
       </div>
 
       {/* Action buttons */}
@@ -573,8 +570,8 @@ function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
           onClick={(e) => { e.stopPropagation(); onClick(); }}
           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors"
         >
-          <Sparkles className="h-3.5 w-3.5" />
-          Pôr na Esteira
+          <Bot className="h-3.5 w-3.5" />
+          Analisar com IA
         </button>
       </div>
     </Card>
