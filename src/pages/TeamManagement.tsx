@@ -28,6 +28,7 @@ import { MemberCard } from "@/components/team/MemberCard";
 import { TeamChat } from "@/components/team/TeamChat";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTeamMessages } from "@/hooks/use-team-messages";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -82,6 +83,16 @@ export default function TeamManagement() {
 
   const isMobile = useIsMobile();
   const [chatOpen, setChatOpen] = useState(false);
+  const { messages } = useTeamMessages(team?.id);
+  const [lastSeenCount, setLastSeenCount] = useState(0);
+  const unreadCount = chatOpen ? 0 : Math.max(0, messages.length - lastSeenCount);
+
+  // When chat opens, mark all as seen
+  const handleOpenChat = () => {
+    setChatOpen(true);
+    setLastSeenCount(messages.length);
+  };
+
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
   const MAX_TEAMS = subscription?.plan === "lifetime" ? 5 : 3;
 
@@ -529,10 +540,15 @@ export default function TeamManagement() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            onClick={() => setChatOpen(true)}
+            onClick={handleOpenChat}
             className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 flex items-center justify-center transition-colors"
           >
             <MessageCircle className="h-6 w-6" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1 animate-pulse">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </motion.button>
         )}
       </div>
