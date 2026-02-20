@@ -1138,6 +1138,14 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_team_member_stats: {
+        Args: { _team_id: string }
+        Returns: {
+          last_generation_at: string
+          total_generations: number
+          user_id: string
+        }[]
+      }
       get_team_role: {
         Args: { _team_id: string; _user_id: string }
         Returns: string
