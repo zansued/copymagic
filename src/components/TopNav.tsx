@@ -117,7 +117,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
   };
 
   // Check if current route is a team page (to highlight team button)
-  const isTeamPage = ["/team", "/library", "/reviews", "/team-dashboard"].includes(location.pathname);
+  const isTeamPage = ["/team", "/library", "/reviews", "/team-dashboard", "/team-projects"].includes(location.pathname);
 
   return (
     <>

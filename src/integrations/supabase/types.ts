@@ -677,6 +677,7 @@ export type Database = {
           name: string
           product_input: string
           research_data: Json | null
+          team_id: string | null
           tone_formality: string
           updated_at: string
           user_id: string
@@ -691,6 +692,7 @@ export type Database = {
           name: string
           product_input?: string
           research_data?: Json | null
+          team_id?: string | null
           tone_formality?: string
           updated_at?: string
           user_id: string
@@ -705,11 +707,20 @@ export type Database = {
           name?: string
           product_input?: string
           research_data?: Json | null
+          team_id?: string | null
           tone_formality?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_comments: {
         Row: {
