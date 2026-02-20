@@ -3,8 +3,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MenuBar } from "@/components/ui/menu-bar";
-import { Map, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, CreditCard, Shield, FolderOpen, Telescope } from "lucide-react";
+import { Map, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, UsersRound, CreditCard, Shield, FolderOpen, Telescope } from "lucide-react";
 import { useAdmin } from "@/hooks/use-admin";
+import { useSubscription } from "@/hooks/use-subscription";
 
 const menuItems = [
   {
@@ -81,6 +82,21 @@ export function TopNav({ projectName }: { projectName?: string }) {
   const { id } = useParams<{ id: string }>();
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
+  const { subscription } = useSubscription();
+
+  const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
+
+  // Build menu items dynamically based on plan
+  const dynamicMenuItems = [
+    ...menuItems,
+    ...(isAgency ? [{
+      icon: UsersRound,
+      label: "Equipe",
+      path: "/team",
+      gradient: "radial-gradient(circle, hsl(262 83% 65% / 0.15) 0%, transparent 70%)",
+      iconColor: "text-violet-400",
+    }] : []),
+  ];
 
   const isProjectPage = location.pathname.startsWith("/project/");
   const isSummaryPage = location.pathname.endsWith("/summary");
@@ -99,12 +115,12 @@ export function TopNav({ projectName }: { projectName?: string }) {
     navigate(`/project/${data.id}`);
   };
 
-  const activeLabel = menuItems.find(
+  const activeLabel = dynamicMenuItems.find(
     (i) => i.path !== "__create__" && location.pathname === i.path
   )?.label;
 
   const handleItemClick = (label: string) => {
-    const item = menuItems.find((i) => i.label === label);
+    const item = dynamicMenuItems.find((i) => i.label === label);
     if (!item) return;
     if (item.path === "__create__") {
       handleCreate();
@@ -144,7 +160,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
         {/* Center: MenuBar */}
         <div className="flex-1 flex justify-center">
           <MenuBar
-            items={menuItems}
+            items={dynamicMenuItems}
             activeItem={activeLabel}
             onItemClick={handleItemClick}
           />
