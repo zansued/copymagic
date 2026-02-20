@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Users, UserPlus, Crown, ShieldCheck, Pencil, Eye, Trash2, X, Loader2 } from "lucide-react";
+import { AnimatedTooltip, type TooltipItem } from "@/components/ui/animated-tooltip";
 
 const roleLabels: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   owner: { label: "Owner", icon: Crown, color: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
@@ -104,24 +105,43 @@ export default function TeamManagement() {
   const seatsUsed = members.length + invites.length;
   const seatsAvailable = team.seats_limit - seatsUsed;
 
+  const roleLabel: Record<string, string> = {
+    owner: "Owner",
+    admin: "Admin",
+    editor: "Editor",
+    viewer: "Viewer",
+  };
+
+  const tooltipItems: TooltipItem[] = members.map((m) => ({
+    id: m.id,
+    name: m.user_id.slice(0, 8),
+    designation: roleLabel[m.role] || "Membro",
+    initials: m.role.charAt(0).toUpperCase(),
+  }));
+
   return (
     <div className="min-h-screen bg-background">
       <TopNav />
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Users className="h-6 w-6 text-primary" />
-              {team.name}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <Users className="h-6 w-6 text-primary" />
+                {team.name}
+              </h1>
+              <Badge variant="outline" className="text-xs border-primary/30 text-primary">
+                {team.plan.toUpperCase()}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
               {seatsUsed} / {team.seats_limit} seats utilizados
             </p>
           </div>
-          <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-            {team.plan.toUpperCase()}
-          </Badge>
+          {tooltipItems.length > 0 && (
+            <AnimatedTooltip items={tooltipItems} />
+          )}
         </div>
 
         {/* Invite form */}
