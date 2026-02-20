@@ -1094,6 +1094,44 @@ export type Database = {
           },
         ]
       }
+      team_messages: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          expires_at: string
+          id: string
+          is_pinned: boolean
+          team_id: string
+        }
+        Insert: {
+          author_id: string
+          content?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_pinned?: boolean
+          team_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_pinned?: boolean
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_messages_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teams: {
         Row: {
           created_at: string
