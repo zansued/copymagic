@@ -33,6 +33,7 @@ export interface TeamInvite {
 
 export function useTeam() {
   const { user } = useAuth();
+  const [teams, setTeams] = useState<Team[]>([]);
   const [team, setTeam] = useState<Team | null>(null);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [invites, setInvites] = useState<TeamInvite[]>([]);
@@ -45,16 +46,15 @@ export function useTeam() {
       return;
     }
 
-    // Find team where user is a member
+    // Find all teams where user is a member
     const { data: memberData } = await supabase
       .from("team_members")
       .select("team_id, role")
-      .eq("user_id", user.id)
-      .limit(1)
-      .maybeSingle();
+      .eq("user_id", user.id);
 
-    if (!memberData) {
+    if (!memberData || memberData.length === 0) {
       setTeam(null);
+      setTeams([]);
       setMyRole(null);
       setMembers([]);
       setInvites([]);
@@ -62,21 +62,26 @@ export function useTeam() {
       return;
     }
 
-    setMyRole(memberData.role);
-
-    const { data: teamData } = await supabase
+    const teamIds = memberData.map((m) => m.team_id);
+    const { data: teamsData } = await supabase
       .from("teams")
       .select("*")
-      .eq("id", memberData.team_id)
-      .single();
+      .in("id", teamIds);
 
-    if (teamData) {
-      setTeam(teamData as unknown as Team);
+    const allTeams = (teamsData ?? []) as unknown as Team[];
+    setTeams(allTeams);
 
-      // Fetch members & invites in parallel
+    // Use first team as active by default
+    const primaryTeam = allTeams[0] || null;
+    setTeam(primaryTeam);
+
+    const primaryMember = memberData.find((m) => m.team_id === primaryTeam?.id);
+    setMyRole(primaryMember?.role ?? null);
+
+    if (primaryTeam) {
       const [membersRes, invitesRes] = await Promise.all([
-        supabase.from("team_members").select("*").eq("team_id", teamData.id),
-        supabase.from("team_invites").select("*").eq("team_id", teamData.id).eq("status", "pending"),
+        supabase.from("team_members").select("*").eq("team_id", primaryTeam.id),
+        supabase.from("team_invites").select("*").eq("team_id", primaryTeam.id).eq("status", "pending"),
       ]);
 
       setMembers((membersRes.data ?? []) as unknown as TeamMember[]);
@@ -85,6 +90,33 @@ export function useTeam() {
 
     setLoading(false);
   }, [user]);
+
+  const switchTeam = useCallback(async (teamId: string) => {
+    if (!user) return;
+
+    const { data: memberData } = await supabase
+      .from("team_members")
+      .select("role")
+      .eq("team_id", teamId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!memberData) return;
+
+    const selectedTeam = teams.find((t) => t.id === teamId);
+    if (!selectedTeam) return;
+
+    setTeam(selectedTeam);
+    setMyRole(memberData.role);
+
+    const [membersRes, invitesRes] = await Promise.all([
+      supabase.from("team_members").select("*").eq("team_id", teamId),
+      supabase.from("team_invites").select("*").eq("team_id", teamId).eq("status", "pending"),
+    ]);
+
+    setMembers((membersRes.data ?? []) as unknown as TeamMember[]);
+    setInvites((invitesRes.data ?? []) as unknown as TeamInvite[]);
+  }, [user, teams]);
 
   useEffect(() => {
     fetchTeam();
@@ -101,7 +133,6 @@ export function useTeam() {
 
     if (teamError || !teamData) return null;
 
-    // Add owner as member
     await supabase.from("team_members").insert({
       team_id: teamData.id,
       user_id: user.id,
@@ -111,6 +142,26 @@ export function useTeam() {
     await fetchTeam();
     return teamData;
   }, [user, fetchTeam]);
+
+  const updateTeamName = useCallback(async (newName: string) => {
+    if (!team) return false;
+    const { error } = await supabase
+      .from("teams")
+      .update({ name: newName })
+      .eq("id", team.id);
+
+    if (!error) {
+      setTeam((prev) => prev ? { ...prev, name: newName } : prev);
+      setTeams((prev) => prev.map((t) => t.id === team.id ? { ...t, name: newName } : t));
+    }
+    return !error;
+  }, [team]);
+
+  const deleteTeam = useCallback(async (teamId: string) => {
+    const { error } = await supabase.from("teams").delete().eq("id", teamId);
+    if (!error) await fetchTeam();
+    return !error;
+  }, [fetchTeam]);
 
   const inviteMember = useCallback(async (email: string, role: string = "editor") => {
     if (!user || !team) return false;
@@ -156,20 +207,35 @@ export function useTeam() {
     return !error;
   }, [fetchTeam]);
 
+  const transferMember = useCallback(async (memberId: string, targetTeamId: string) => {
+    const { error } = await supabase
+      .from("team_members")
+      .update({ team_id: targetTeamId })
+      .eq("id", memberId);
+
+    if (!error) await fetchTeam();
+    return !error;
+  }, [fetchTeam]);
+
   const isOwnerOrAdmin = myRole === "owner" || myRole === "admin";
 
   return {
     team,
+    teams,
     members,
     invites,
     myRole,
     loading,
     isOwnerOrAdmin,
     createTeam,
+    updateTeamName,
+    deleteTeam,
     inviteMember,
     cancelInvite,
     removeMember,
     updateMemberRole,
+    transferMember,
+    switchTeam,
     refetch: fetchTeam,
   };
 }
