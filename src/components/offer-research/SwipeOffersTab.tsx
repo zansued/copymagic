@@ -455,7 +455,7 @@ function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
   };
 
   return (
-    <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden flex flex-col" onClick={onClick}>
+    <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/30 transition-all group relative overflow-hidden flex flex-col">
       {/* Top meta bar */}
       <div className="px-3 pt-3 pb-2 space-y-2">
         {/* Score badge + updated info */}
