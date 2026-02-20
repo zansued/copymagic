@@ -146,7 +146,12 @@ export default function SwipeOffersTab() {
       }
 
       if (imported > 0) {
-        storage.saveAds(allAds);
+        // Recalculate all scores with the full list for accurate density/variety
+        const recalculated = allAds.map((ad) => ({
+          ...ad,
+          ...calculateScores(ad, allAds),
+        }));
+        storage.saveAds(recalculated);
         reload();
         toast.success(`${imported} anúncio(s) importado(s) do nicho "${pkg.nicheName}"!`);
       } else {
