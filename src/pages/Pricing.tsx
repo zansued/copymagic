@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Check, Sparkles, Crown, Building2, Gem, Flame, X } from "lucide-react";
-import { CreditCard } from "@/components/ui/credit-card";
+import { Check, Sparkles, Crown, Building2, Gem, Flame, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TopNav } from "@/components/TopNav";
 import { AppFooter } from "@/components/AppFooter";
+import { CreditCard } from "@/components/ui/credit-card";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ const plans = [
       { text: "3 agentes básicos", included: true },
       { text: "Landing Builder", included: false },
       { text: "Mentor de Riqueza", included: false },
+      { text: "Colaboração e times", included: false },
     ],
     cta: "Plano atual",
     highlight: false,
@@ -32,7 +33,7 @@ const plans = [
     key: "pro",
     name: "Pro",
     monthlyPrice: 97,
-    annualPrice: 970, // 10 months = 2 free
+    annualPrice: 970,
     icon: Crown,
     features: [
       { text: "100 gerações por mês", included: true },
@@ -42,6 +43,7 @@ const plans = [
       { text: "Landing Builder", included: true },
       { text: "Mentor de Riqueza", included: true },
       { text: "Suporte prioritário", included: true },
+      { text: "Colaboração e times", included: false },
     ],
     cta: "Assinar Pro",
     highlight: true,
@@ -50,7 +52,7 @@ const plans = [
     key: "agency",
     name: "Agency",
     monthlyPrice: 297,
-    annualPrice: 2970, // 10 months = 2 free
+    annualPrice: 2970,
     icon: Building2,
     features: [
       { text: "Gerações ilimitadas", included: true },
@@ -67,12 +69,16 @@ const plans = [
   },
 ];
 
+const AGENCY_PLUS_MONTHLY = 497;
+const AGENCY_PLUS_ANNUAL = 4970;
+
 export default function Pricing() {
   const { user } = useAuth();
   const { subscription, loading } = useSubscription();
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
   const [slotsRemaining, setSlotsRemaining] = useState<number | null>(null);
   const [isAnnual, setIsAnnual] = useState(false);
+  const [agencyPlus, setAgencyPlus] = useState(false);
 
   useEffect(() => {
     supabase
@@ -201,10 +207,23 @@ export default function Pricing() {
           {plans.map((plan, i) => {
             const isCurrent = currentPlan === plan.key;
             const Icon = plan.icon;
-            const price = plan.key === "free" ? 0 : isAnnual ? plan.annualPrice : plan.monthlyPrice;
-            const monthlyEquivalent = isAnnual && plan.annualPrice > 0
-              ? Math.round((plan.annualPrice / 12) * 100) / 100
+
+            const isAgencyCard = plan.key === "agency";
+            const showPlus = isAgencyCard && agencyPlus;
+            const price = plan.key === "free"
+              ? 0
+              : isAgencyCard
+                ? isAnnual
+                  ? (showPlus ? AGENCY_PLUS_ANNUAL : plan.annualPrice)
+                  : (showPlus ? AGENCY_PLUS_MONTHLY : plan.monthlyPrice)
+                : isAnnual ? plan.annualPrice : plan.monthlyPrice;
+
+            const monthlyEquivalent = isAnnual && price > 0
+              ? Math.round((price / 12) * 100) / 100
               : null;
+
+            const seatsLabel = isAgencyCard ? (showPlus ? "15 seats" : "5 seats") : null;
+            const checkoutKey = isAgencyCard && showPlus ? "agency_plus" : plan.key;
 
             return (
               <motion.div
@@ -228,8 +247,33 @@ export default function Pricing() {
                   <div className="p-2 rounded-lg bg-primary/10">
                     <Icon className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
+                  <h3 className="text-lg font-bold text-foreground">
+                    {isAgencyCard && showPlus ? "Agency Plus" : plan.name}
+                  </h3>
                 </div>
+
+                {/* Agency seats toggle */}
+                {isAgencyCard && (
+                  <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-secondary/50 border border-border/30">
+                    <Users className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <button
+                      onClick={() => setAgencyPlus(false)}
+                      className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
+                        !agencyPlus ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      5 seats
+                    </button>
+                    <button
+                      onClick={() => setAgencyPlus(true)}
+                      className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${
+                        agencyPlus ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      15 seats
+                    </button>
+                  </div>
+                )}
 
                 <div className="mb-6">
                   {plan.key === "free" ? (
@@ -247,7 +291,7 @@ export default function Pricing() {
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-muted-foreground line-through">
-                          R$ {(plan.monthlyPrice * 12).toLocaleString("pt-BR")}/ano
+                          R$ {((isAgencyCard ? (showPlus ? AGENCY_PLUS_MONTHLY : plan.monthlyPrice) : plan.monthlyPrice) * 12).toLocaleString("pt-BR")}/ano
                         </span>
                         <span className="text-xs text-primary font-medium">
                           ≈ R$ {monthlyEquivalent?.toFixed(0)}/mês
@@ -259,6 +303,11 @@ export default function Pricing() {
                       <span className="text-3xl font-bold text-foreground">R$ {price}</span>
                       <span className="text-muted-foreground text-sm ml-1">/mês</span>
                     </>
+                  )}
+                  {seatsLabel && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Inclui {seatsLabel} para sua equipe
+                    </p>
                   )}
                 </div>
 
@@ -273,19 +322,25 @@ export default function Pricing() {
                       <span className={!f.included ? "text-muted-foreground/50" : ""}>{f.text}</span>
                     </li>
                   ))}
+                  {isAgencyCard && showPlus && (
+                    <li className="flex items-start gap-2 text-sm text-foreground/80">
+                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <span>15 membros na equipe</span>
+                    </li>
+                  )}
                 </ul>
 
                 {plan.key === "free" ? (
                   <Button variant="outline" disabled className="w-full">
                     {isCurrent ? "Plano atual" : "Gratuito"}
                   </Button>
-                ) : isCurrent ? (
+                ) : isCurrent && !(isAgencyCard && showPlus && currentPlan === "agency") ? (
                   <Button variant="outline" disabled className="w-full">
                     ✓ Plano ativo
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => handleCheckout(plan.key)}
+                    onClick={() => handleCheckout(checkoutKey)}
                     disabled={!!checkingOut || loading}
                     className={`w-full gap-2 ${
                       plan.highlight
@@ -293,7 +348,11 @@ export default function Pricing() {
                         : ""
                     }`}
                   >
-                    {checkingOut === plan.key ? "Redirecionando..." : plan.cta}
+                    {checkingOut === checkoutKey
+                      ? "Redirecionando..."
+                      : isAgencyCard && showPlus
+                        ? "Assinar Agency Plus"
+                        : plan.cta}
                   </Button>
                 )}
               </motion.div>
@@ -301,7 +360,7 @@ export default function Pricing() {
           })}
         </div>
 
-        {/* Lifetime offer */}
+        {/* Lifetime offer — Pro individual */}
         {slotsRemaining !== null && slotsRemaining > 0 && currentPlan !== "lifetime" && (
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -318,21 +377,21 @@ export default function Pricing() {
                     <Gem className="h-6 w-6 text-amber-400" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-foreground">Acesso Vitalício</h3>
-                    <p className="text-xs text-amber-400 font-medium">Pague uma vez, use para sempre</p>
+                    <h3 className="text-xl font-bold text-foreground">Acesso Vitalício — Pro</h3>
+                    <p className="text-xs text-amber-400 font-medium">Pague uma vez, use para sempre — acesso individual</p>
                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6 mt-6">
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Tenha acesso <strong className="text-foreground">completo e permanente</strong> ao CopyMagic — equivalente ao plano Agency, sem mensalidade. Gerações ilimitadas, todos os agentes, todos os recursos. Para sempre.
+                      Tenha acesso <strong className="text-foreground">completo e permanente</strong> ao plano Pro — gerações ilimitadas, todos os agentes e recursos. <strong className="text-foreground">Uso individual</strong>, sem equipes.
                     </p>
                     <ul className="space-y-2">
                       {[
                         "Gerações ilimitadas para sempre",
                         "Todos os agentes e recursos",
-                        "Projetos e DNAs ilimitados",
+                        "10 projetos e 5 DNAs de Marca",
                         "Landing Builder + Mentor",
                         "Todas as atualizações futuras",
                       ].map((f) => (
@@ -341,16 +400,21 @@ export default function Pricing() {
                           {f}
                         </li>
                       ))}
+                      <li className="flex items-center gap-2 text-sm text-muted-foreground/60">
+                        <X className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                        <span>Colaboração e times (precisa do Agency)</span>
+                      </li>
                     </ul>
                   </div>
 
                   <div className="flex flex-col items-center justify-center text-center space-y-4">
                     <div>
-                      <p className="text-sm text-muted-foreground line-through">R$ 7.128/ano</p>
+                      <p className="text-sm text-muted-foreground line-through">R$ 3.492/ano (Pro anual)</p>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-foreground">R$ 3.997</span>
+                        <span className="text-4xl font-bold text-foreground">R$ 1.997</span>
                         <span className="text-sm text-muted-foreground">único</span>
                       </div>
+                      <p className="text-xs text-primary mt-1">Equivale a ~20 meses de Pro</p>
                     </div>
 
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-destructive/10 text-destructive text-sm font-medium">
@@ -366,7 +430,7 @@ export default function Pricing() {
                     >
                       {checkingOut === "lifetime" ? "Redirecionando..." : "Garantir Acesso Vitalício"}
                     </Button>
-                    <p className="text-xs text-muted-foreground">Pagamento único • Sem mensalidade</p>
+                    <p className="text-xs text-muted-foreground">Pagamento único • Sem mensalidade • Sem equipes</p>
                   </div>
                 </div>
               </div>
@@ -383,7 +447,7 @@ export default function Pricing() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 text-amber-400 font-medium">
               <Gem className="h-4 w-4" />
-              Você tem acesso vitalício ✓
+              Você tem acesso vitalício Pro ✓
             </div>
           </motion.div>
         )}
