@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Search, Plus, ExternalLink, Flame, Clock, Star, Trash2, X,
-  AlertTriangle, Filter, Loader2, Sparkles, Bot, TrendingUp,
+  AlertTriangle, Filter, Loader2, Sparkles, Bot, TrendingUp, Play, Image as ImageIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -53,6 +53,12 @@ export default function SwipeOffersTab() {
   const [selectedNiche, setSelectedNiche] = useState(packages[0]?.nicheId || "");
 
   const reload = useCallback(() => setAds(storage.getAds()), []);
+
+  useEffect(() => {
+    const handler = () => reload();
+    window.addEventListener("ads-updated", handler);
+    return () => window.removeEventListener("ads-updated", handler);
+  }, [reload]);
 
   const filtered = useMemo(() => {
     let list = ads;
@@ -397,7 +403,7 @@ export default function SwipeOffersTab() {
   );
 }
 
-// --- Ad Card ---
+// --- Ad Card (redesigned) ---
 function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
   ad: ImportedAd; aiResult?: AiResult; onClick: () => void; onDelete: () => void;
 }) {
@@ -406,50 +412,151 @@ function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
     : null;
 
   const aiScore = aiResult?.scale_score?.score_0_100;
+  const score = aiScore ?? ad.overallScore;
+
+  const startFormatted = ad.startDate
+    ? new Date(ad.startDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+    : null;
+
+  // Extract domain from link
+  const domain = ad.link ? (() => { try { return new URL(ad.link).hostname.replace("www.", ""); } catch { return null; } })() : null;
+
+  const platformIcons: Record<string, string> = {
+    facebook: "📘", instagram: "📸", messenger: "💬", audience_network: "🌐",
+  };
+
+  const toggleRef = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const allAds = storage.getAds();
+    const target = allAds.find((a) => a.id === ad.id);
+    if (target) {
+      target.savedAsReference = !target.savedAsReference;
+      storage.updateAd(target);
+      // Force parent reload via toast
+      toast.success(target.savedAsReference ? "Salvo como referência ⭐" : "Removido das referências");
+      // We need parent to reload - trigger via window event
+      window.dispatchEvent(new CustomEvent("ads-updated"));
+    }
+  };
 
   return (
-    <Card className="p-4 border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/30 transition-colors cursor-pointer group relative" onClick={onClick}>
-      <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
-
-      <div className="flex items-center gap-2 mb-2">
-        <div className={`text-lg font-bold ${(aiScore ?? ad.overallScore) >= 70 ? "text-primary" : (aiScore ?? ad.overallScore) >= 40 ? "text-foreground" : "text-muted-foreground"}`}>
-          {aiScore ?? ad.overallScore}
+    <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden flex flex-col" onClick={onClick}>
+      {/* Top meta bar */}
+      <div className="px-3 pt-3 pb-2 space-y-2">
+        {/* Score badge + updated info */}
+        <div className="flex items-center justify-between">
+          <Badge variant={score >= 70 ? "default" : "secondary"} className={`text-[10px] px-2 py-0.5 ${score >= 70 ? "bg-primary/20 text-primary border-primary/30" : ""}`}>
+            {score >= 70 ? "🔥 " : ""}{score}/100
+          </Badge>
+          <span className="text-[10px] text-muted-foreground">
+            {startFormatted ? `Publicado ${startFormatted}` : "Sem data"}
+          </span>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">{ad.pageOrAdvertiser}</p>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">{ad.platform}</Badge>
-            {ad.savedAsReference && <Star className="h-3 w-3 text-primary fill-primary" />}
-            {aiResult && <Sparkles className="h-3 w-3 text-amber-400" />}
+
+        {/* Platform + days active row */}
+        <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <span>Plataformas</span>
+            <span className="flex gap-0.5">
+              {ad.platform.split(/,\s*/).map((p, i) => (
+                <span key={i} title={p}>{platformIcons[p.toLowerCase().trim()] || "🌐"}</span>
+              ))}
+            </span>
           </div>
+          {daysActive != null && daysActive > 0 && (
+            <span className={`font-semibold ${daysActive >= 14 ? "text-primary" : ""}`}>
+              Ativo {daysActive} {daysActive === 1 ? "dia" : "dias"}
+            </span>
+          )}
         </div>
       </div>
 
-      {ad.headline && <p className="text-sm font-medium line-clamp-1 mb-1">{ad.headline}</p>}
+      {/* Advertiser row */}
+      <div className="px-3 pb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
+            {ad.pageOrAdvertiser.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold truncate text-foreground">{ad.pageOrAdvertiser}</p>
+            {domain && <p className="text-[10px] text-muted-foreground truncate">{domain}</p>}
+          </div>
+        </div>
+        <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive shrink-0">
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
 
-      {/* AI Offer Card preview */}
-      {aiResult?.offer_card?.promise ? (
-        <p className="text-xs text-primary line-clamp-2 mb-2">✨ {aiResult.offer_card.promise}</p>
-      ) : (
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{ad.mainText}</p>
-      )}
+      {/* Ad text preview */}
+      <div className="px-3 pb-2">
+        <p className="text-xs text-foreground/80 line-clamp-1">
+          {ad.headline || ad.mainText.slice(0, 60)}
+          {(ad.headline || ad.mainText).length > 60 && <span className="font-semibold text-foreground"> Ver mais...</span>}
+        </p>
+      </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-[10px]">
-        {daysActive != null && daysActive > 0 && (
-          <span className={`flex items-center gap-1 ${daysActive >= 14 ? "text-primary font-semibold" : "text-muted-foreground"}`}>
-            <Clock className="h-3 w-3" /> {daysActive}d{daysActive >= 14 && " 🔥"}
-          </span>
+      {/* Snapshot / Video preview area */}
+      <div className="mx-3 mb-2 relative rounded-lg overflow-hidden bg-muted/50 border border-border/30 aspect-[4/3] flex items-center justify-center">
+        {ad.link ? (
+          <>
+            {/* Gradient overlay for visual effect */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
+            {/* Simulated thumbnail with initial + branding */}
+            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <div className="h-14 w-14 rounded-full bg-background/80 border border-border flex items-center justify-center shadow-lg">
+                <Play className="h-6 w-6 text-foreground ml-0.5" />
+              </div>
+              <span className="text-[10px]">Preview do criativo</span>
+            </div>
+            {/* AI tag overlay */}
+            {aiResult?.offer_card?.format && (
+              <Badge variant="secondary" className="absolute bottom-2 left-2 z-20 text-[10px] px-1.5 py-0 bg-background/80 backdrop-blur-sm">
+                {aiResult.offer_card.format}
+              </Badge>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-1 text-muted-foreground">
+            <ImageIcon className="h-8 w-8" />
+            <span className="text-[10px]">Sem preview</span>
+          </div>
         )}
-        {ad.riskScore > 0 && (
-          <span className="flex items-center gap-1 text-destructive">
-            <AlertTriangle className="h-3 w-3" /> {ad.riskScore}
-          </span>
-        )}
-        {aiResult?.offer_card?.angle && (
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{aiResult.offer_card.angle[0]}</Badge>
-        )}
+      </div>
+
+      {/* AI Promise / offer info */}
+      <div className="px-3 pb-2 flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          {aiResult?.offer_card?.promise ? (
+            <p className="text-xs font-medium text-primary line-clamp-1">✨ {aiResult.offer_card.promise}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground line-clamp-1">{ad.mainText.slice(0, 80)}</p>
+          )}
+          {aiResult?.offer_card?.angle && (
+            <p className="text-[10px] text-muted-foreground mt-0.5">{aiResult.offer_card.angle.join(", ")}</p>
+          )}
+        </div>
+        <Button variant="outline" size="sm" className="text-[10px] h-7 px-2 gap-1 shrink-0" onClick={(e) => { e.stopPropagation(); onClick(); }}>
+          <Search className="h-3 w-3" /> Analisar
+        </Button>
+      </div>
+
+      {/* Action buttons */}
+      <div className="border-t border-border/30 flex">
+        <button
+          onClick={toggleRef}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs transition-colors hover:bg-muted/50 ${ad.savedAsReference ? "text-primary font-semibold" : "text-muted-foreground"}`}
+        >
+          <Star className={`h-3.5 w-3.5 ${ad.savedAsReference ? "fill-primary" : ""}`} />
+          Favoritar
+        </button>
+        <div className="w-px bg-border/30" />
+        <button
+          onClick={(e) => { e.stopPropagation(); onClick(); }}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          Pôr na Esteira
+        </button>
       </div>
     </Card>
   );
