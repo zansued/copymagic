@@ -8,6 +8,7 @@ import { Map, Plus, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, UsersRound
 import { useAdmin } from "@/hooks/use-admin";
 import { useSubscription } from "@/hooks/use-subscription";
 import { TeamSidebar } from "@/components/TeamSidebar";
+import { InviteNotifications } from "@/components/InviteNotifications";
 
 const menuItems = [
   {
@@ -158,7 +159,8 @@ export function TopNav({ projectName }: { projectName?: string }) {
           </div>
 
           {/* Right: team + admin + logout */}
-          <div className="w-40 shrink-0 flex justify-end gap-1">
+          <div className="w-40 shrink-0 flex justify-end items-center gap-1">
+            <InviteNotifications />
             {isAgency && (
               <button
                 onClick={() => setTeamSidebarOpen(true)}
