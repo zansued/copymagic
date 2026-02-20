@@ -51,9 +51,20 @@ import {
   Pause,
   AlertCircle,
   Layers,
+  Columns3,
+  GripVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MorphingCardStack, type CardData } from "@/components/ui/morphing-card-stack";
+import {
+  Kanban,
+  KanbanBoard,
+  KanbanColumn,
+  KanbanColumnContent,
+  KanbanItem,
+  KanbanItemHandle,
+  KanbanOverlay,
+} from "@/components/ui/kanban";
 
 // ── Types ──
 type ProjectStatus = "active" | "completed" | "paused";
@@ -131,7 +142,7 @@ export default function TeamProjects() {
 
   const [projects, setProjects] = useState<TeamProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"grid" | "list" | "stack">("grid");
+  const [view, setView] = useState<"grid" | "list" | "stack" | "kanban">("grid");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">("all");
   const [sortBy, setSortBy] = useState<SortBy>("updated");
@@ -385,6 +396,7 @@ export default function TeamProjects() {
 
           <div className="inline-flex rounded-lg border border-border overflow-hidden">
             {([
+              { key: "kanban" as const, icon: Columns3, label: "Kanban" },
               { key: "stack" as const, icon: Layers, label: "Stack" },
               { key: "grid" as const, icon: LayoutGrid, label: "Grid" },
               { key: "list" as const, icon: List, label: "Lista" },
@@ -473,6 +485,87 @@ export default function TeamProjects() {
                 <Plus className="h-4 w-4 mr-1" /> Criar Projeto
               </Button>
             )}
+          </motion.div>
+        ) : view === "kanban" ? (
+          <motion.div variants={itemVariants}>
+            {(() => {
+              const kanbanCols: Record<string, TeamProject[]> = {
+                paused: prepared.filter((p) => getProjectStatus(p) === "paused"),
+                active: prepared.filter((p) => getProjectStatus(p) === "active"),
+                completed: prepared.filter((p) => getProjectStatus(p) === "completed"),
+              };
+              const colConfig: Record<string, { label: string; color: string }> = {
+                paused: { label: "Sem progresso", color: "border-t-muted-foreground" },
+                active: { label: "Em andamento", color: "border-t-blue-500" },
+                completed: { label: "Concluído", color: "border-t-emerald-500" },
+              };
+              return (
+                <Kanban
+                  value={kanbanCols}
+                  onValueChange={() => {}}
+                  getItemValue={(item: TeamProject) => item.id}
+                >
+                  <KanbanBoard className="grid-cols-1 sm:grid-cols-3">
+                    {Object.entries(colConfig).map(([status, config]) => (
+                      <KanbanColumn
+                        key={status}
+                        value={status}
+                        disabled
+                        className={cn(
+                          "rounded-xl border border-border bg-card/50 p-3 border-t-4",
+                          config.color
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-3 px-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-sm text-foreground">{config.label}</h3>
+                            <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
+                              {kanbanCols[status]?.length || 0}
+                            </Badge>
+                          </div>
+                        </div>
+                        <KanbanColumnContent value={status} className="min-h-[200px] gap-3">
+                          {(kanbanCols[status] || []).map((p) => {
+                            const progress = getProjectProgress(p);
+                            return (
+                              <KanbanItem key={p.id} value={p.id} disabled>
+                                <div
+                                  className="rounded-lg border border-border bg-card p-3 space-y-2 cursor-pointer hover:border-primary/50 transition-colors"
+                                  onClick={() => navigate(`/project/${p.id}`)}
+                                >
+                                  <h4 className="font-semibold text-sm text-foreground truncate">{p.name}</h4>
+                                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full bg-primary transition-all"
+                                      style={{ width: `${progress}%` }}
+                                    />
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5">
+                                      <Avatar className="h-4 w-4">
+                                        <AvatarImage src={getCreatorAvatar(p.user_id)} />
+                                        <AvatarFallback className="text-[7px] bg-primary/10 text-primary">
+                                          {getCreatorName(p.user_id).charAt(0).toUpperCase()}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">
+                                        {getCreatorName(p.user_id)}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] text-muted-foreground">{progress}%</span>
+                                  </div>
+                                </div>
+                              </KanbanItem>
+                            );
+                          })}
+                        </KanbanColumnContent>
+                      </KanbanColumn>
+                    ))}
+                  </KanbanBoard>
+                  <KanbanOverlay />
+                </Kanban>
+              );
+            })()}
           </motion.div>
         ) : view === "stack" ? (
           <motion.div variants={itemVariants}>
