@@ -29,6 +29,7 @@ import TeamManagement from "./pages/TeamManagement";
 import SharedLibrary from "./pages/SharedLibrary";
 import ReviewApprovals from "./pages/ReviewApprovals";
 import TeamDashboard from "./pages/TeamDashboard";
+import TeamProjects from "./pages/TeamProjects";
 import NotFound from "./pages/NotFound";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/library" element={<ProtectedRoute><SharedLibrary /></ProtectedRoute>} />
             <Route path="/reviews" element={<ProtectedRoute><ReviewApprovals /></ProtectedRoute>} />
             <Route path="/team-dashboard" element={<ProtectedRoute><TeamDashboard /></ProtectedRoute>} />
+            <Route path="/team-projects" element={<ProtectedRoute><TeamProjects /></ProtectedRoute>} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

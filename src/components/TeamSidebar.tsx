@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { X, BookOpen, ClipboardCheck, TrendingUp, UsersRound } from "lucide-react";
+import { X, BookOpen, ClipboardCheck, TrendingUp, UsersRound, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TeamSidebarProps {
@@ -15,6 +15,13 @@ const teamItems = [
     path: "/team",
     description: "Gerenciar membros e convites",
     iconColor: "text-violet-400",
+  },
+  {
+    icon: FolderOpen,
+    label: "Projetos",
+    path: "/team-projects",
+    description: "Projetos colaborativos do time",
+    iconColor: "text-blue-400",
   },
   {
     icon: BookOpen,
