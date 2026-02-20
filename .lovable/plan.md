@@ -1,53 +1,54 @@
 
+# Plano do Projeto — CopyEngine Pro
 
-# Agente WhatsApp Copy
+## ✅ Sprints de Colaboração (Concluídas)
 
-Novo agente especializado em criar sequencias de mensagens para WhatsApp, cobrindo broadcast, atendimento, follow-up e recuperacao de vendas.
+### Sprint 1 — Gestão de Equipe ✅
+- Tabelas `teams`, `team_members`, `team_invites` com RLS
+- Hook `useTeam` com CRUD completo
+- Página `/team` para owners/admins gerenciarem membros
+- Convites por e-mail com papéis (owner, admin, editor, viewer)
 
-## O que sera criado
+### Sprint 2 — Biblioteca Compartilhada ✅
+- Tabela `shared_library` com categorias e tags
+- Hook `useSharedLibrary` com busca e filtros
+- Página `/library` para repositório centralizado de copies
+- Permissões: leitura para todos, edição/exclusão para criador ou admin
 
-Dois arquivos serao editados para adicionar o agente completo:
+### Sprint 3 — Fluxo de Revisão e Aprovação ✅
+- Tabelas `review_requests` e `review_comments`
+- Fluxo pending → approved/rejected com timestamps
+- Página `/reviews` com visualização Markdown e comentários
+- Aprovação restrita a owners/admins
 
-### 1. Registro do agente (`src/lib/agents.ts`)
+### Sprint 4 — Dashboard de Métricas ✅
+- Função `get_team_member_stats` (SECURITY DEFINER)
+- Página `/team-dashboard` com cards de resumo e tabela por membro
+- Métricas: gerações, revisões, itens na biblioteca, última atividade
+- Acesso restrito a owners/admins
 
-Adicionar entrada na categoria **copywriting** com:
-- **ID**: `whatsapp-copy`
-- **Nome**: WhatsApp Copy
-- **Emoji**: 📲 (ou similar, diferenciando do Story Launch)
-- **Role**: Especialista em Sequencias de WhatsApp
-- **Descricao**: Cria sequencias de mensagens para WhatsApp — broadcast, atendimento, follow-up e recuperacao de vendas — com tom conversacional e gatilhos de resposta.
+---
 
-### 2. Configuracao do workspace (`src/lib/agent-workspace-configs.ts`)
+## 🔜 Próximos Passos
 
-Adicionar configuracao `whatsapp-copy` seguindo o padrao existente com:
+### 1. Botão "Enviar para Revisão" no AgentWorkspace
+- Adicionar ação pós-geração para enviar output diretamente ao fluxo de aprovação
+- Preencher automaticamente título, conteúdo e agent_name
 
-**Inputs**:
-| Campo | Tipo | Obrigatorio |
-|-------|------|-------------|
-| Produto/Oferta (descricao do produto, transformacao, preco) | textarea | Sim |
-| Tipo de Sequencia (Broadcast promocional, Follow-up pos-lead, Recuperacao de vendas, Atendimento/Suporte, Lancamento) | select | Nao |
-| Numero de Mensagens (3, 5, 7, 10) | select | Nao |
-| Tom (Casual/amigo, Profissional, Urgente, Consultivo) | select | Nao |
-| Instrucoes Extras | textarea | Nao |
+### 2. Botão "Salvar na Biblioteca" no AgentWorkspace
+- Permitir salvar outputs aprovados ou gerados diretamente na shared_library
+- Pré-preencher categoria e tags com base no agente usado
 
-**Prompt (`buildPrompt`)**:
+### 3. Agente WhatsApp Copy
+- Novo agente especializado em sequências de mensagens para WhatsApp
+- Registro em `agents.ts` e configuração em `agent-workspace-configs.ts`
+- Tipos: broadcast, follow-up, recuperação de vendas, atendimento, lançamento
+- Sem alteração de backend (usa `agent-generate` existente)
 
-O system prompt definira a persona como um Estrategista de Conversao por WhatsApp com as seguintes regras:
+### 4. Notificações in-app
+- Avisar membros quando uma revisão for aprovada/rejeitada
+- Notificar admins sobre novas solicitações de revisão
 
-- Mensagens curtas (maximo 3 paragrafos por mensagem), escaneáveis e naturais
-- Emojis estrategicos (sem exagero)
-- Cada mensagem com objetivo claro (abrir conversa, gerar resposta, criar urgencia, fechar)
-- Incluir gatilhos de resposta (perguntas, enquetes informais, opcoes "responde 1 ou 2")
-- Indicacoes de timing entre mensagens (ex: "enviar 2h depois", "dia seguinte as 9h")
-- Estrutura por mensagem: numero, timing, texto completo, objetivo da mensagem e gatilho de resposta
-- Adaptar tom conforme selecao (casual, profissional, urgente, consultivo)
-- Templates por tipo: broadcast (promocao com escassez), follow-up (nutricao pos-lead), recuperacao (reativacao de interesse), atendimento (scripts de resposta), lancamento (sequencia de aquecimento)
-
-## Detalhes tecnicos
-
-Nenhuma alteracao de backend e necessaria. O agente usa a mesma edge function `agent-generate` que todos os outros agentes ja utilizam.
-
-Arquivos modificados:
-- `src/lib/agents.ts` — adicionar 1 objeto `AgentDef` na secao copywriting
-- `src/lib/agent-workspace-configs.ts` — adicionar 1 bloco `AgentWorkspaceConfig` com inputs e `buildPrompt`
-
+### 5. Onboarding de Time
+- Fluxo guiado para owners criarem seu primeiro time
+- Aceite automático de convites ao fazer login com e-mail convidado
