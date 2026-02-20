@@ -1792,9 +1792,11 @@ Render this PageSpec into a premium Next.js project. Use ALL the content — do 
     );
   } catch (err) {
     console.error("generate-site error:", err);
+    const msg = err instanceof Error ? err.message : "Internal server error";
+    const status = msg.includes("credits insufficient") ? 402 : msg.includes("Rate limit") ? 429 : 500;
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ error: msg }),
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
