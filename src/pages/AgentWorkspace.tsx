@@ -287,20 +287,15 @@ export default function AgentWorkspace() {
   const handleExportPdf = async () => {
     if (!output || !outputRef.current) return;
     
-    // Clone the content to avoid ref/component issues with html2pdf
     const clone = outputRef.current.cloneNode(true) as HTMLElement;
-    clone.style.color = "#000";
-    clone.style.backgroundColor = "#fff";
-    clone.style.padding = "24px";
-    clone.style.fontFamily = "serif";
-    // Remove any interactive elements that could cause issues
-    clone.querySelectorAll("button, [role='button']").forEach(el => el.remove());
-    
-    // Temporarily append clone off-screen for rendering
-    clone.style.position = "absolute";
-    clone.style.left = "-9999px";
-    clone.style.top = "0";
-    clone.style.width = "800px";
+    clone.style.cssText = "position:absolute;left:-9999px;top:0;width:800px;color:#000;background:#fff;padding:24px;font-family:Georgia,serif;";
+    // Strip backgrounds, canvas, svg, img to avoid html2canvas createPattern errors
+    clone.querySelectorAll("button,[role='button'],canvas,video").forEach(el => el.remove());
+    clone.querySelectorAll("*").forEach(el => {
+      const h = el as HTMLElement;
+      h.style.backgroundImage = "none";
+      h.style.background = h.style.background?.replace(/url\([^)]*\)/g, "none") || "";
+    });
     document.body.appendChild(clone);
     
     try {
@@ -309,7 +304,7 @@ export default function AgentWorkspace() {
         margin: [12, 12, 12, 12],
         filename: `${config?.name || "output"}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollY: 0 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollY: 0, imageTimeout: 0, removeContainer: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
       }).from(clone).save();
