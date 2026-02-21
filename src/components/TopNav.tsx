@@ -107,12 +107,18 @@ export function TopNav({ projectName }: { projectName?: string }) {
     navigate(`/project/${data.id}`);
   };
 
-  const activeLabel = menuItems.find(
+  // Filter menu items based on plan
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.path === "/shared-with-me" && !isAgency) return false;
+    return true;
+  });
+
+  const activeLabel = filteredMenuItems.find(
     (i) => location.pathname === i.path
   )?.label;
 
   const handleItemClick = (label: string) => {
-    const item = menuItems.find((i) => i.label === label);
+    const item = filteredMenuItems.find((i) => i.label === label);
     if (!item) return;
     navigate(item.path);
   };
@@ -152,7 +158,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
           {/* Center: MenuBar */}
           <div className="flex-1 flex justify-center">
             <MenuBar
-              items={menuItems}
+              items={filteredMenuItems}
               activeItem={activeLabel}
               onItemClick={handleItemClick}
             />

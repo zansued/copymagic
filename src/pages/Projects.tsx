@@ -198,7 +198,11 @@ export default function Projects() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setShareProject(p);
+                        if (subscription?.plan === "agency" || (subscription?.plan as string) === "agency_plus") {
+                          setShareProject(p);
+                        } else {
+                          toast.info("Compartilhamento de projetos disponível no plano Agency");
+                        }
                       }}
                       title="Compartilhar"
                     >
