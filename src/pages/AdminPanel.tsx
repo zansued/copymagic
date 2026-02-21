@@ -267,6 +267,8 @@ export default function AdminPanel() {
                     <th className="text-left p-3">Plano</th>
                     <th className="text-center p-3">Gerações</th>
                     <th className="text-left p-3">Cadastro</th>
+                     <th className="text-left p-3">Início</th>
+                     <th className="text-left p-3">Vencimento</th>
                      <th className="text-left p-3">Status</th>
                      <th className="text-center p-3">Ações</th>
                   </tr>
@@ -286,6 +288,20 @@ export default function AdminPanel() {
                       </td>
                       <td className="p-3 text-xs text-muted-foreground">
                         {new Date(u.registered_at).toLocaleDateString("pt-BR")}
+                      </td>
+                      <td className="p-3 text-xs text-muted-foreground">
+                        {u.current_period_start
+                          ? new Date(u.current_period_start).toLocaleDateString("pt-BR")
+                          : "—"}
+                      </td>
+                      <td className="p-3 text-xs text-muted-foreground">
+                        {u.plan === "lifetime" ? (
+                          <span className="text-emerald-400 font-medium">Vitalício</span>
+                        ) : u.current_period_end ? (
+                          <span className={new Date(u.current_period_end) < new Date() ? "text-red-400 font-medium" : ""}>
+                            {new Date(u.current_period_end).toLocaleDateString("pt-BR")}
+                          </span>
+                        ) : "—"}
                       </td>
                       <td className="p-3">
                         {u.subscription_status === "blocked" ? (
