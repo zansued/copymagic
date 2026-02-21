@@ -289,12 +289,13 @@ export default function AgentWorkspace() {
     
     const clone = outputRef.current.cloneNode(true) as HTMLElement;
     clone.style.cssText = "position:absolute;left:-9999px;top:0;width:800px;color:#000;background:#fff;padding:24px;font-family:Georgia,serif;";
-    // Strip backgrounds, canvas, svg, img to avoid html2canvas createPattern errors
-    clone.querySelectorAll("button,[role='button'],canvas,video").forEach(el => el.remove());
+    // Strip elements that cause html2canvas createPattern errors
+    clone.querySelectorAll("button,[role='button'],canvas,video,svg,img").forEach(el => el.remove());
     clone.querySelectorAll("*").forEach(el => {
       const h = el as HTMLElement;
       h.style.backgroundImage = "none";
-      h.style.background = h.style.background?.replace(/url\([^)]*\)/g, "none") || "";
+      h.style.background = "none";
+      h.style.boxShadow = "none";
     });
     document.body.appendChild(clone);
     
