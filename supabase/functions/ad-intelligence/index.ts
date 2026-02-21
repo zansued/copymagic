@@ -243,19 +243,29 @@ serve(async (req) => {
     // Truncate if too large
     const truncatedPrompt = userPrompt.slice(0, 50000);
 
+    // Use OpenAI API key (user-provided) with fallback to Lovable AI
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY não configurada");
+    
+    const useOpenAI = !!OPENAI_API_KEY;
+    const apiUrl = useOpenAI
+      ? "https://api.openai.com/v1/chat/completions"
+      : "https://ai.gateway.lovable.dev/v1/chat/completions";
+    const apiKey = useOpenAI ? OPENAI_API_KEY : LOVABLE_API_KEY;
+    const model = useOpenAI ? "gpt-4o" : "google/gemini-2.5-flash";
 
-    console.log(`Ad Intelligence: analyzing ${adsForPrompt.length} ads for query "${query}"`);
+    if (!apiKey) throw new Error("Nenhuma chave de IA configurada (OPENAI_API_KEY ou LOVABLE_API_KEY)");
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    console.log(`Ad Intelligence: analyzing ${adsForPrompt.length} ads for query "${query}" via ${useOpenAI ? "OpenAI" : "Lovable AI"}`);
+
+    const aiResponse = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model,
         messages: [
           { role: "system", content: AD_INTELLIGENCE_SYSTEM_PROMPT },
           { role: "user", content: truncatedPrompt },
@@ -272,7 +282,7 @@ serve(async (req) => {
         });
       }
       if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos de IA insuficientes." }), {
+        return new Response(JSON.stringify({ error: "Créditos de IA insuficientes. Verifique sua chave OpenAI ou créditos Lovable." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
