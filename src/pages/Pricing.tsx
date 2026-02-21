@@ -103,6 +103,9 @@ const lifetimeFeatures = [
 const AGENCY_PLUS_MONTHLY = 497;
 const AGENCY_PLUS_ANNUAL = 4970;
 
+// Lifetime → Agency discount (20%)
+const LIFETIME_DISCOUNT = 0.2;
+
 // Map plan keys to tier numbers for comparison
 const PLAN_TIER: Record<string, number> = {
   free: 0,
@@ -217,6 +220,7 @@ export default function Pricing() {
           body: JSON.stringify({
             plan: planKey,
             billing: planKey !== "lifetime" && planKey !== "free" && isAnnual ? "annual" : "monthly",
+            lifetime_discount: currentPlan === "lifetime" && (planKey === "agency" || planKey === "agency_plus"),
           }),
         }
       );
@@ -333,13 +337,19 @@ export default function Pricing() {
 
               const isAgencyCard = plan.key === "agency";
               const showPlus = isAgencyCard && agencyPlus;
-              const price = plan.key === "free"
+              const isLifetimeUpgrade = isAgencyCard && currentPlan === "lifetime";
+
+              const basePrice = plan.key === "free"
                 ? 0
                 : isAgencyCard
                   ? isAnnual
                     ? (showPlus ? AGENCY_PLUS_ANNUAL : plan.annualPrice)
                     : (showPlus ? AGENCY_PLUS_MONTHLY : plan.monthlyPrice)
                   : isAnnual ? plan.annualPrice : plan.monthlyPrice;
+
+              const price = isLifetimeUpgrade
+                ? Math.round(basePrice * (1 - LIFETIME_DISCOUNT))
+                : basePrice;
 
               const monthlyEquivalent = isAnnual && price > 0
                 ? Math.round((price / 12) * 100) / 100
@@ -358,14 +368,22 @@ export default function Pricing() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                   className={`premium-card p-6 flex flex-col relative ${
-                    plan.highlight && !showAsCurrent
+                    isLifetimeUpgrade
                       ? "ring-2 ring-primary shadow-[0_0_30px_hsl(var(--primary)/0.15)]"
-                      : ""
+                      : plan.highlight && !showAsCurrent
+                        ? "ring-2 ring-primary shadow-[0_0_30px_hsl(var(--primary)/0.15)]"
+                        : ""
                   }`}
                 >
                   {plan.highlight && !showAsCurrent && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
                       Mais popular
+                    </div>
+                  )}
+                  {isLifetimeUpgrade && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                      <Gem className="h-3 w-3" />
+                      20% off para Vitalícios
                     </div>
                   )}
 
@@ -416,19 +434,44 @@ export default function Pricing() {
                           <span className="text-muted-foreground text-sm">/ano</span>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-muted-foreground line-through">
-                            R$ {((isAgencyCard ? (showPlus ? AGENCY_PLUS_MONTHLY : plan.monthlyPrice) : plan.monthlyPrice) * 12).toLocaleString("pt-BR")}/ano
-                          </span>
-                          <span className="text-xs text-primary font-medium">
-                            ≈ R$ {monthlyEquivalent?.toFixed(0)}/mês
-                          </span>
+                          {isLifetimeUpgrade ? (
+                            <>
+                              <span className="text-xs text-muted-foreground line-through">
+                                R$ {basePrice.toLocaleString("pt-BR")}/ano
+                              </span>
+                              <span className="text-xs text-primary font-medium">
+                                20% off Vitalício
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-xs text-muted-foreground line-through">
+                                R$ {((isAgencyCard ? (showPlus ? AGENCY_PLUS_MONTHLY : plan.monthlyPrice) : plan.monthlyPrice) * 12).toLocaleString("pt-BR")}/ano
+                              </span>
+                              <span className="text-xs text-primary font-medium">
+                                ≈ R$ {monthlyEquivalent?.toFixed(0)}/mês
+                              </span>
+                            </>
+                          )}
                         </div>
                       </div>
                     ) : (
-                      <>
-                        <span className="text-3xl font-bold text-foreground">R$ {price}</span>
-                        <span className="text-muted-foreground text-sm ml-1">/mês</span>
-                      </>
+                      <div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-bold text-foreground">R$ {price}</span>
+                          <span className="text-muted-foreground text-sm">/mês</span>
+                        </div>
+                        {isLifetimeUpgrade && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-muted-foreground line-through">
+                              R$ {basePrice}/mês
+                            </span>
+                            <span className="text-xs text-primary font-medium">
+                              20% off Vitalício
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     )}
                     {seatsLabel && (
                       <p className="text-xs text-muted-foreground mt-1">
@@ -567,7 +610,7 @@ export default function Pricing() {
             className="text-center mt-8"
           >
             <p className="text-sm text-muted-foreground">
-              Quer colaboração em equipe? Considere adicionar o plano <strong className="text-foreground">Agency</strong>.
+              Como membro Vitalício, você tem <strong className="text-primary">20% de desconto exclusivo</strong> no plano Agency para colaboração em equipe.
             </p>
           </motion.div>
         )}
