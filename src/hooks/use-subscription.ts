@@ -50,10 +50,16 @@ export function useSubscription() {
     if (data) {
       setSubscription(data as unknown as Subscription);
     } else {
-      // Create free plan for new users
+      // Create free plan for new users with 30-day period
+      const periodStart = new Date().toISOString();
+      const periodEnd = new Date(Date.now() + 30 * 86400000).toISOString();
       const { data: newSub } = await supabase
         .from("subscriptions")
-        .insert({ user_id: user.id })
+        .insert({
+          user_id: user.id,
+          current_period_start: periodStart,
+          current_period_end: periodEnd,
+        })
         .select()
         .single();
 
