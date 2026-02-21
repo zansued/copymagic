@@ -978,6 +978,7 @@ export type Database = {
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
+          fallback_plan: string | null
           generations_limit: number
           generations_used: number
           id: string
@@ -996,6 +997,7 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          fallback_plan?: string | null
           generations_limit?: number
           generations_used?: number
           id?: string
@@ -1014,6 +1016,7 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          fallback_plan?: string | null
           generations_limit?: number
           generations_used?: number
           id?: string

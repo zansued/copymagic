@@ -112,6 +112,50 @@ serve(async (req) => {
     const payment = await paymentRes.json();
     console.log("Payment status:", payment.status, "external_reference:", payment.external_reference);
 
+    // Handle failed/refunded/cancelled payments — revert to fallback plan
+    if (payment.status === "rejected" || payment.status === "cancelled" || payment.status === "refunded") {
+      let refData: { user_id: string; plan: string };
+      try {
+        refData = JSON.parse(payment.external_reference);
+      } catch {
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const supabaseAdmin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      const { data: currentSub } = await supabaseAdmin
+        .from("subscriptions")
+        .select("fallback_plan")
+        .eq("user_id", refData.user_id)
+        .maybeSingle();
+
+      if (currentSub?.fallback_plan) {
+        const fb = currentSub.fallback_plan;
+        const fbLimits = PLAN_LIMITS[fb] || PLAN_LIMITS.pro;
+        await supabaseAdmin.from("subscriptions").update({
+          plan: fb,
+          status: "active",
+          generations_limit: fbLimits.generations,
+          brand_profiles_limit: fbLimits.profiles,
+          projects_limit: fbLimits.projects,
+          agents_access: fbLimits.agents_access,
+          current_period_end: fb === "lifetime" ? null : undefined,
+          fallback_plan: null,
+        }).eq("user_id", refData.user_id);
+
+        console.log(`Reverted user ${refData.user_id} to fallback plan: ${fb}`);
+      }
+
+      return new Response(JSON.stringify({ ok: true, reverted: !!currentSub?.fallback_plan }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (payment.status !== "approved") {
       return new Response(JSON.stringify({ ok: true, status: payment.status }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -146,6 +190,19 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Check current subscription for fallback_plan logic
+    const { data: currentSub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("plan, fallback_plan")
+      .eq("user_id", user_id)
+      .maybeSingle();
+
+    // If upgrading from lifetime to a recurring plan, preserve lifetime as fallback
+    let fallbackPlan = currentSub?.fallback_plan || null;
+    if (currentSub?.plan === "lifetime" && plan !== "lifetime") {
+      fallbackPlan = "lifetime";
+    }
+
     const now = new Date();
     const isLifetime = plan === "lifetime";
     const isAnnual = billing === "annual";
@@ -168,6 +225,7 @@ serve(async (req) => {
           agents_access: limits.agents_access,
           current_period_start: now.toISOString(),
           current_period_end: periodEnd ? periodEnd.toISOString() : null,
+          fallback_plan: isLifetime ? null : fallbackPlan,
         },
         { onConflict: "user_id" }
       );
