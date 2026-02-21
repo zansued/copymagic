@@ -38,8 +38,8 @@ const plans = [
     icon: Sparkles,
     features: [
       { text: "30 gerações por mês", included: true },
-      { text: "3 projetos no Lab de Copy", included: true },
-      { text: "2 perfis de DNA de Marca", included: true },
+      { text: "5 projetos no Lab de Copy", included: true },
+      { text: "3 perfis de DNA de Marca", included: true },
       { text: "Agentes básicos", included: true },
       { text: "Landing Builder", included: true },
       { text: "Mentor de Riqueza", included: false },
@@ -57,8 +57,8 @@ const plans = [
     icon: Crown,
     features: [
       { text: "100 gerações por mês", included: true },
-      { text: "10 projetos no Lab de Copy", included: true },
-      { text: "5 perfis de DNA de Marca", included: true },
+      { text: "25 projetos no Lab de Copy", included: true },
+      { text: "10 perfis de DNA de Marca", included: true },
       { text: "Todos os agentes", included: true },
       { text: "Landing Builder", included: true },
       { text: "Mentor de Riqueza", included: true },
@@ -94,7 +94,7 @@ const plans = [
 const lifetimeFeatures = [
   { text: "Gerações ilimitadas para sempre", included: true },
   { text: "Todos os agentes e recursos", included: true },
-  { text: "10 projetos e 5 DNAs de Marca", included: true },
+  { text: "30 projetos e 15 DNAs de Marca", included: true },
   { text: "Landing Builder + Mentor", included: true },
   { text: "Todas as atualizações futuras", included: true },
   { text: "Colaboração e times", included: false },

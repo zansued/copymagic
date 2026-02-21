@@ -16,11 +16,11 @@ const PLANS: Record<string, {
   agents_access: string;
   is_recurring: boolean;
 }> = {
-  starter: { title: "CopyMagic Starter", monthlyPrice: 47, annualPrice: 470, generations: 30, profiles: 2, projects: 3, agents_access: "basic", is_recurring: true },
-  pro: { title: "CopyMagic Pro", monthlyPrice: 97, annualPrice: 970, generations: 100, profiles: 5, projects: 10, agents_access: "full", is_recurring: true },
+  starter: { title: "CopyMagic Starter", monthlyPrice: 47, annualPrice: 470, generations: 30, profiles: 3, projects: 5, agents_access: "basic", is_recurring: true },
+  pro: { title: "CopyMagic Pro", monthlyPrice: 97, annualPrice: 970, generations: 100, profiles: 10, projects: 25, agents_access: "full", is_recurring: true },
   agency: { title: "CopyMagic Agency", monthlyPrice: 297, annualPrice: 2970, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: true },
   agency_plus: { title: "CopyMagic Agency Plus", monthlyPrice: 497, annualPrice: 4970, generations: 999999, profiles: 999, projects: 999999, agents_access: "full", is_recurring: true },
-  lifetime: { title: "CopyMagic Vitalício (Pro)", monthlyPrice: 1997, annualPrice: 1997, generations: 999999, profiles: 5, projects: 10, agents_access: "full", is_recurring: false },
+  lifetime: { title: "CopyMagic Vitalício (Pro)", monthlyPrice: 1997, annualPrice: 1997, generations: 999999, profiles: 15, projects: 30, agents_access: "full", is_recurring: false },
 };
 
 serve(async (req) => {
