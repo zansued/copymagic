@@ -14,7 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { BookOpen, Plus, Search, Trash2, Pencil, Copy, Loader2, Tag, LayoutList, Library, Share2 } from "lucide-react";
+import { BookOpen, Plus, Search, Trash2, Pencil, Copy, Loader2, Tag, LayoutList, Library, Share2, FileDown } from "lucide-react";
 import { Book } from "@/components/ui/book";
 import ReactMarkdown from "react-markdown";
 
@@ -152,6 +152,30 @@ export default function SharedLibrary() {
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
     toast.success("Copiado!");
+  };
+
+  const handleExportPdf = async (item: SharedLibraryItem) => {
+    const container = document.createElement("div");
+    container.style.cssText = "position:absolute;left:-9999px;top:0;width:800px;color:#000;background:#fff;padding:32px;font-family:Georgia,serif;";
+    container.innerHTML = `<h1 style="font-size:20px;font-weight:bold;margin-bottom:8px;">${item.title.replace(/</g, "&lt;")}</h1>
+      <p style="font-size:11px;color:#888;margin-bottom:16px;">${categories.find(c => c.value === item.category)?.label ?? item.category}${item.agent_name ? ` · ${item.agent_name}` : ""} · ${new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
+      <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;">${item.content.replace(/</g, "&lt;")}</div>`;
+    document.body.appendChild(container);
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      await html2pdf().set({
+        margin: [12, 12, 12, 12],
+        filename: `${item.title.slice(0, 40)}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      }).from(container).save();
+      toast.success("PDF exportado!");
+    } catch {
+      toast.error("Erro ao exportar PDF");
+    } finally {
+      document.body.removeChild(container);
+    }
   };
 
   return (
@@ -423,6 +447,9 @@ export default function SharedLibrary() {
               <div className="shrink-0 border-t border-border bg-card/80 backdrop-blur-sm px-6 py-3 flex items-center gap-2 flex-wrap">
                 <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleCopy(selectedItem.content)}>
                   <Copy className="h-3.5 w-3.5" /> Copiar
+                </Button>
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleExportPdf(selectedItem)}>
+                  <FileDown className="h-3.5 w-3.5" /> PDF
                 </Button>
                 {selectedItem.tags.length > 0 && (
                   <div className="flex gap-1 flex-wrap ml-auto">
