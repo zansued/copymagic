@@ -10,10 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { BookOpen, Plus, Search, Trash2, Pencil, Copy, Loader2, Tag, LayoutList, Library } from "lucide-react";
+import { BookOpen, Plus, Search, Trash2, Pencil, Copy, Loader2, Tag, LayoutList, Library, Share2 } from "lucide-react";
 import { Book } from "@/components/ui/book";
+import ReactMarkdown from "react-markdown";
 
 const categories = [
   { value: "geral", label: "Geral" },
@@ -373,25 +376,56 @@ export default function SharedLibrary() {
         </DialogContent>
       </Dialog>
 
-      {/* Book Detail Dialog */}
-      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
-        <DialogContent className="sm:max-w-lg">
+      {/* Book Detail Sheet */}
+      <Sheet open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
+        <SheetContent className="sm:max-w-xl w-full p-0 flex flex-col">
           {selectedItem && (
             <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  {selectedItem.title}
-                  <Badge variant="outline" className="text-[10px]">
-                    {categories.find((c) => c.value === selectedItem.category)?.label ?? selectedItem.category}
-                  </Badge>
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                  {selectedItem.content}
-                </p>
+              {/* Header with colored accent bar */}
+              <div
+                className="h-1.5 w-full shrink-0"
+                style={{ background: categoryColors[selectedItem.category] || categoryColors.geral }}
+              />
+              <SheetHeader className="px-6 pt-5 pb-0 shrink-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1.5 min-w-0">
+                    <SheetTitle className="text-lg font-bold text-foreground leading-tight">
+                      {selectedItem.title}
+                    </SheetTitle>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge
+                        className="text-[10px] font-medium border-0 text-white"
+                        style={{ backgroundColor: categoryColors[selectedItem.category] || categoryColors.geral }}
+                      >
+                        {categories.find((c) => c.value === selectedItem.category)?.label ?? selectedItem.category}
+                      </Badge>
+                      {selectedItem.agent_name && (
+                        <Badge variant="secondary" className="text-[10px]">
+                          🤖 {selectedItem.agent_name}
+                        </Badge>
+                      )}
+                      <span className="text-[11px] text-muted-foreground">
+                        {new Date(selectedItem.created_at).toLocaleDateString("pt-BR")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </SheetHeader>
+
+              {/* Scrollable content */}
+              <ScrollArea className="flex-1 px-6 py-4">
+                <div className="prose-premium max-w-none text-sm leading-relaxed">
+                  <ReactMarkdown>{selectedItem.content}</ReactMarkdown>
+                </div>
+              </ScrollArea>
+
+              {/* Sticky footer actions */}
+              <div className="shrink-0 border-t border-border bg-card/80 backdrop-blur-sm px-6 py-3 flex items-center gap-2 flex-wrap">
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleCopy(selectedItem.content)}>
+                  <Copy className="h-3.5 w-3.5" /> Copiar
+                </Button>
                 {selectedItem.tags.length > 0 && (
-                  <div className="flex gap-1 flex-wrap">
+                  <div className="flex gap-1 flex-wrap ml-auto">
                     {selectedItem.tags.map((tag) => (
                       <Badge key={tag} variant="outline" className="text-[10px] text-muted-foreground">
                         <Tag className="h-2.5 w-2.5 mr-0.5" />
@@ -400,34 +434,26 @@ export default function SharedLibrary() {
                     ))}
                   </div>
                 )}
-                <div className="flex items-center gap-2 pt-2">
-                  <Button size="sm" variant="outline" onClick={() => handleCopy(selectedItem.content)}>
-                    <Copy className="h-3.5 w-3.5 mr-1" /> Copiar
-                  </Button>
-                  {(user?.id === selectedItem.created_by || isOwnerOrAdmin) && (
-                    <>
-                      <Button size="sm" variant="outline" onClick={() => { setSelectedItem(null); openEdit(selectedItem); }}>
-                        <Pencil className="h-3.5 w-3.5 mr-1" /> Editar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => { handleDelete(selectedItem.id); setSelectedItem(null); }}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 mr-1" /> Excluir
-                      </Button>
-                    </>
-                  )}
-                </div>
-                <p className="text-[11px] text-muted-foreground/60">
-                  Criado em {new Date(selectedItem.created_at).toLocaleDateString("pt-BR")}
-                </p>
+                {(user?.id === selectedItem.created_by || isOwnerOrAdmin) && (
+                  <>
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => { setSelectedItem(null); openEdit(selectedItem); }}>
+                      <Pencil className="h-3.5 w-3.5" /> Editar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-destructive hover:bg-destructive/10"
+                      onClick={() => { handleDelete(selectedItem.id); setSelectedItem(null); }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Excluir
+                    </Button>
+                  </>
+                )}
               </div>
             </>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
