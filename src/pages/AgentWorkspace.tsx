@@ -286,9 +286,24 @@ export default function AgentWorkspace() {
 
   const handleExportPdf = async () => {
     if (!output || !outputRef.current) return;
+    
+    // Clone the content to avoid ref/component issues with html2pdf
+    const clone = outputRef.current.cloneNode(true) as HTMLElement;
+    clone.style.color = "#000";
+    clone.style.backgroundColor = "#fff";
+    clone.style.padding = "24px";
+    clone.style.fontFamily = "serif";
+    // Remove any interactive elements that could cause issues
+    clone.querySelectorAll("button, [role='button']").forEach(el => el.remove());
+    
+    // Temporarily append clone off-screen for rendering
+    clone.style.position = "absolute";
+    clone.style.left = "-9999px";
+    clone.style.top = "0";
+    clone.style.width = "800px";
+    document.body.appendChild(clone);
+    
     try {
-      // Apply print-friendly styles temporarily
-      outputRef.current.classList.add("pdf-export-mode");
       const html2pdf = (await import("html2pdf.js")).default;
       await html2pdf().set({
         margin: [12, 12, 12, 12],
@@ -297,12 +312,13 @@ export default function AgentWorkspace() {
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollY: 0 },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-      }).from(outputRef.current).save();
-      outputRef.current.classList.remove("pdf-export-mode");
+      }).from(clone).save();
       toast({ title: "PDF exportado com sucesso!" });
-    } catch {
-      outputRef.current?.classList.remove("pdf-export-mode");
+    } catch (err) {
+      console.error("PDF export error:", err);
       toast({ title: "Erro ao exportar PDF", variant: "destructive" });
+    } finally {
+      document.body.removeChild(clone);
     }
   };
 
