@@ -18,7 +18,7 @@ const FREE_DEFAULTS: Omit<Subscription, "id"> = {
   plan: "free",
   status: "active",
   generations_used: 0,
-  generations_limit: 5,
+  generations_limit: 20,
   brand_profiles_limit: 1,
   projects_limit: 1,
   agents_access: "basic",

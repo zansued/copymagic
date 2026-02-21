@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Users, DollarSign, BarChart3, Crown, Building2, Sparkles, Shield, Search } from "lucide-react";
+import { Users, DollarSign, BarChart3, Crown, Building2, Sparkles, Shield, Search, Ban, CheckCircle, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,7 @@ import { TopNav } from "@/components/TopNav";
 import { useAdmin } from "@/hooks/use-admin";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface AdminUser {
   user_id: string;
@@ -34,7 +35,8 @@ interface Metrics {
 }
 
 const PLAN_LIMITS: Record<string, number> = {
-  free: 5,
+  free: 20,
+  starter: 30,
   pro: 100,
   agency: 999999,
   lifetime: 999999,
@@ -49,7 +51,8 @@ export default function AdminPanel() {
   const [loadingData, setLoadingData] = useState(true);
   const [search, setSearch] = useState("");
   const [updatingUser, setUpdatingUser] = useState<string | null>(null);
-
+  const [trialDialog, setTrialDialog] = useState<{ userId: string; email: string } | null>(null);
+  const [trialDays, setTrialDays] = useState("7");
   useEffect(() => {
     if (adminLoading) return;
     if (!isAdmin) return;
@@ -96,16 +99,54 @@ export default function AdminPanel() {
       await adminFetch("update-plan", "POST", {
         target_user_id: userId,
         plan: newPlan,
-        generations_limit: PLAN_LIMITS[newPlan] || 5,
+        generations_limit: PLAN_LIMITS[newPlan] || 20,
       });
       setUsers((prev) =>
         prev.map((u) =>
           u.user_id === userId
-            ? { ...u, plan: newPlan, generations_limit: PLAN_LIMITS[newPlan] || 5, generations_used: 0 }
+            ? { ...u, plan: newPlan, generations_limit: PLAN_LIMITS[newPlan] || 20, generations_used: 0 }
             : u
         )
       );
       toast.success("Plano atualizado!");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro");
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
+  const handleBlockUser = async (userId: string, blocked: boolean) => {
+    setUpdatingUser(userId);
+    try {
+      const action = blocked ? "unblock-user" : "block-user";
+      await adminFetch(action, "POST", { target_user_id: userId });
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.user_id === userId
+            ? { ...u, subscription_status: blocked ? "active" : "blocked" }
+            : u
+        )
+      );
+      toast.success(blocked ? "Usuário desbloqueado!" : "Usuário bloqueado!");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro");
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
+  const handleGrantTrial = async () => {
+    if (!trialDialog) return;
+    setUpdatingUser(trialDialog.userId);
+    try {
+      const res = await adminFetch("grant-trial", "POST", {
+        target_user_id: trialDialog.userId,
+        days: Number(trialDays),
+      });
+      toast.success(`${res.days} dias grátis concedidos!`);
+      setTrialDialog(null);
+      setTrialDays("7");
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Erro");
     } finally {
@@ -226,8 +267,8 @@ export default function AdminPanel() {
                     <th className="text-left p-3">Plano</th>
                     <th className="text-center p-3">Gerações</th>
                     <th className="text-left p-3">Cadastro</th>
-                    <th className="text-left p-3">Último Acesso</th>
-                    <th className="text-center p-3">Ações</th>
+                     <th className="text-left p-3">Status</th>
+                     <th className="text-center p-3">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -246,27 +287,60 @@ export default function AdminPanel() {
                       <td className="p-3 text-xs text-muted-foreground">
                         {new Date(u.registered_at).toLocaleDateString("pt-BR")}
                       </td>
-                      <td className="p-3 text-xs text-muted-foreground">
-                        {u.last_sign_in_at
-                          ? new Date(u.last_sign_in_at).toLocaleDateString("pt-BR")
-                          : "—"}
+                      <td className="p-3">
+                        {u.subscription_status === "blocked" ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-red-400 bg-red-400/10 border border-red-400/20">
+                            <Ban className="h-3 w-3" /> Bloqueado
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-emerald-400 bg-emerald-400/10 border border-emerald-400/20">
+                            <CheckCircle className="h-3 w-3" /> Ativo
+                          </span>
+                        )}
                       </td>
-                      <td className="p-3 text-center">
-                        <Select
-                          value={u.plan}
-                          onValueChange={(v) => handlePlanChange(u.user_id, v)}
-                          disabled={updatingUser === u.user_id}
-                        >
-                          <SelectTrigger className="h-7 text-xs w-28 mx-auto">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="free">Free</SelectItem>
-                            <SelectItem value="pro">Pro</SelectItem>
-                            <SelectItem value="agency">Agency</SelectItem>
-                            <SelectItem value="lifetime">Vitalício</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <td className="p-3">
+                        <div className="flex items-center gap-1 justify-center">
+                          <Select
+                            value={u.plan}
+                            onValueChange={(v) => handlePlanChange(u.user_id, v)}
+                            disabled={updatingUser === u.user_id}
+                          >
+                            <SelectTrigger className="h-7 text-xs w-28">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="free">Free</SelectItem>
+                              <SelectItem value="starter">Starter</SelectItem>
+                              <SelectItem value="pro">Pro</SelectItem>
+                              <SelectItem value="agency">Agency</SelectItem>
+                              <SelectItem value="lifetime">Vitalício</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            title={u.subscription_status === "blocked" ? "Desbloquear" : "Bloquear"}
+                            disabled={updatingUser === u.user_id}
+                            onClick={() => handleBlockUser(u.user_id, u.subscription_status === "blocked")}
+                          >
+                            {u.subscription_status === "blocked" ? (
+                              <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                            ) : (
+                              <Ban className="h-3.5 w-3.5 text-red-400" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            title="Dar dias grátis"
+                            disabled={updatingUser === u.user_id}
+                            onClick={() => setTrialDialog({ userId: u.user_id, email: u.email })}
+                          >
+                            <CalendarPlus className="h-3.5 w-3.5 text-sky-400" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -276,6 +350,35 @@ export default function AdminPanel() {
           )}
         </motion.div>
       </main>
+
+      {/* Trial Days Dialog */}
+      <Dialog open={!!trialDialog} onOpenChange={() => setTrialDialog(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Dar dias grátis</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Conceder trial para <strong>{trialDialog?.email}</strong>
+          </p>
+          <div className="flex items-center gap-3">
+            <Input
+              type="number"
+              min={1}
+              max={90}
+              value={trialDays}
+              onChange={(e) => setTrialDays(e.target.value)}
+              className="w-24"
+            />
+            <span className="text-sm text-muted-foreground">dias</span>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTrialDialog(null)}>Cancelar</Button>
+            <Button onClick={handleGrantTrial} disabled={updatingUser === trialDialog?.userId}>
+              Conceder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

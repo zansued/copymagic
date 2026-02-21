@@ -140,7 +140,6 @@ serve(async (req) => {
 
       if (action === "update-plan") {
         const { target_user_id, plan, generations_limit } = body;
-        // Call RPC with the user's supabase client (which has auth.uid() set)
         const { error } = await supabaseUser.rpc("admin_update_user_plan", {
           _target_user_id: target_user_id,
           _plan: plan,
@@ -148,6 +147,56 @@ serve(async (req) => {
         });
         if (error) throw error;
         return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (action === "block-user") {
+        const { target_user_id } = body;
+        // Ban user via Auth Admin API
+        const { error: banError } = await supabaseAdmin.auth.admin.updateUserById(target_user_id, {
+          ban_duration: "876000h", // ~100 years
+        });
+        if (banError) throw banError;
+        // Also set subscription status to blocked
+        await supabaseAdmin
+          .from("subscriptions")
+          .update({ status: "blocked" })
+          .eq("user_id", target_user_id);
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (action === "unblock-user") {
+        const { target_user_id } = body;
+        // Unban user
+        const { error: unbanError } = await supabaseAdmin.auth.admin.updateUserById(target_user_id, {
+          ban_duration: "none",
+        });
+        if (unbanError) throw unbanError;
+        // Restore subscription status
+        await supabaseAdmin
+          .from("subscriptions")
+          .update({ status: "active" })
+          .eq("user_id", target_user_id);
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (action === "grant-trial") {
+        const { target_user_id, days } = body;
+        const trialDays = Math.min(Math.max(Number(days) || 7, 1), 90);
+        // Extend or set current_period_end
+        await supabaseAdmin
+          .from("subscriptions")
+          .update({
+            current_period_end: new Date(Date.now() + trialDays * 86400000).toISOString(),
+            status: "active",
+          })
+          .eq("user_id", target_user_id);
+        return new Response(JSON.stringify({ ok: true, days: trialDays }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
