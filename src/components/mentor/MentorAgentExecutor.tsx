@@ -183,20 +183,34 @@ export default function MentorAgentExecutor({ agentId, stepTitle, onClose, onCom
 
   const handleExportPdf = async () => {
     if (!output || !outputRef.current) return;
+    const clone = outputRef.current.cloneNode(true) as HTMLElement;
+    clone.style.cssText = "position:absolute;left:-9999px;top:0;width:800px;color:#000;background:#fff;padding:24px;font-family:Georgia,serif;";
+    clone.querySelectorAll("button,[role='button'],canvas,video,svg,img").forEach(el => el.remove());
+    clone.querySelectorAll("*").forEach(el => {
+      const h = el as HTMLElement;
+      h.style.backgroundImage = "none";
+      h.style.backgroundColor = "transparent";
+      h.style.boxShadow = "none";
+      h.style.color = "#000";
+      h.style.webkitTextFillColor = "#000";
+      h.style.webkitBackgroundClip = "unset";
+    });
+    document.body.appendChild(clone);
     try {
       const html2pdf = (await import("html2pdf.js")).default;
-      const element = outputRef.current;
-      const opt = {
+      await html2pdf().set({
         margin: [12, 12, 12, 12],
         filename: `${config?.name || "output"}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#0f1117" },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollY: 0, imageTimeout: 0, removeContainer: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      };
-      await html2pdf().set(opt).from(element).save();
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      }).from(clone).save();
       toast({ title: "PDF exportado com sucesso!" });
     } catch {
       toast({ title: "Erro ao exportar PDF", variant: "destructive" });
+    } finally {
+      document.body.removeChild(clone);
     }
   };
 

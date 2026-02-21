@@ -299,8 +299,11 @@ export default function AgentWorkspace() {
     clone.querySelectorAll("*").forEach(el => {
       const h = el as HTMLElement;
       h.style.backgroundImage = "none";
-      h.style.background = "none";
+      h.style.backgroundColor = "transparent";
       h.style.boxShadow = "none";
+      h.style.color = "#000";
+      h.style.webkitTextFillColor = "#000";
+      h.style.webkitBackgroundClip = "unset";
     });
     document.body.appendChild(clone);
     
