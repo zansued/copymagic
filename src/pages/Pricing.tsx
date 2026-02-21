@@ -18,7 +18,7 @@ const plans = [
     annualPrice: 0,
     icon: Sparkles,
     features: [
-      { text: "5 gerações por mês", included: true },
+      { text: "20 gerações por mês", included: true },
       { text: "1 projeto no Lab de Copy", included: true },
       { text: "1 perfil de DNA de Marca", included: true },
       { text: "3 agentes básicos", included: true },
