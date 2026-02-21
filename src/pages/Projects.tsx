@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useTeam } from "@/hooks/use-team";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,8 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3, Share2, Lock } from "lucide-react";
-import { ShareDialog } from "@/components/collaboration/ShareDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3, Share2, Lock, UsersRound, Check } from "lucide-react";
 import { toast } from "sonner";
 import { TopNav } from "@/components/TopNav";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
@@ -28,6 +35,7 @@ interface Project {
   product_input: string;
   research_data: any;
   copy_results: any;
+  team_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -35,6 +43,7 @@ interface Project {
 export default function Projects() {
   const { user, signOut } = useAuth();
   const { subscription } = useSubscription();
+  const { teams } = useTeam();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +52,7 @@ export default function Projects() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [shareProject, setShareProject] = useState<Project | null>(null);
+  const [assigningTeam, setAssigningTeam] = useState(false);
 
   const projectsLimit = subscription?.projects_limit ?? 1;
 
@@ -275,13 +285,67 @@ export default function Projects() {
       </AlertDialog>
 
       {shareProject && (
-        <ShareDialog
-          open={!!shareProject}
-          onOpenChange={(v) => !v && setShareProject(null)}
-          resourceId={shareProject.id}
-          resourceName={shareProject.name}
-          type="project"
-        />
+        <Dialog open={!!shareProject} onOpenChange={(v) => !v && setShareProject(null)}>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UsersRound className="h-5 w-5 text-primary" />
+                Compartilhar com equipe
+              </DialogTitle>
+              <DialogDescription className="truncate">
+                {shareProject.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              {teams.length === 0 ? (
+                <div className="text-center py-6 space-y-2">
+                  <p className="text-sm text-muted-foreground">Você ainda não tem equipes.</p>
+                  <Button size="sm" variant="outline" onClick={() => navigate("/team")}>
+                    Criar equipe
+                  </Button>
+                </div>
+              ) : (
+                teams.map((t) => {
+                  const isAssigned = (shareProject as any).team_id === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors text-left ${
+                        isAssigned
+                          ? "border-primary/50 bg-primary/5"
+                          : "border-border/50 hover:border-primary/30 hover:bg-muted/30"
+                      }`}
+                      onClick={async () => {
+                        const newTeamId = isAssigned ? null : t.id;
+                        const { error } = await supabase
+                          .from("projects")
+                          .update({ team_id: newTeamId })
+                          .eq("id", shareProject.id);
+                        if (error) {
+                          toast.error("Erro ao atualizar equipe");
+                        } else {
+                          toast.success(newTeamId ? `Projeto vinculado à equipe "${t.name}"` : "Projeto desvinculado da equipe");
+                          setProjects((prev) =>
+                            prev.map((p) =>
+                              p.id === shareProject.id ? { ...p, team_id: newTeamId } as any : p
+                            )
+                          );
+                          setShareProject(null);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <UsersRound className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">{t.name}</span>
+                      </div>
+                      {isAssigned && <Check className="h-4 w-4 text-primary" />}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
