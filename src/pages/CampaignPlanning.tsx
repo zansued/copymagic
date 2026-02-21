@@ -97,7 +97,17 @@ export default function CampaignPlanning() {
     })();
   }, [id]);
 
-  // Build copy context for agents
+  // Steps that contain strategic/short content — always pass in full
+  const STRATEGIC_STEPS = new Set(["avatar", "oferta", "usp", "anuncios"]);
+  // Steps with long-form content — pass only a trimmed summary
+  const LONG_FORM_STEPS = new Set(["pagina_vendas", "upsells", "vsl_longa", "pagina_upsell", "vsl_upsell"]);
+
+  const summarize = (text: string, maxChars = 800) => {
+    if (text.length <= maxChars) return text;
+    return text.slice(0, maxChars).replace(/\s+\S*$/, "") + "\n\n[… conteúdo completo omitido para brevidade]";
+  };
+
+  // Full context (used for ProjectSummary display)
   const buildCopyContext = () => {
     const parts: string[] = [];
     if (productInput) {
@@ -111,9 +121,27 @@ export default function CampaignPlanning() {
     return parts.join("\n\n---\n\n");
   };
 
+  // Lean context for agent workspace — avoids prompt overflow
+  const buildAgentContext = () => {
+    const parts: string[] = [];
+    if (productInput) {
+      parts.push(`## Produto/Oferta\n${productInput}`);
+    }
+    STEPS.forEach((step) => {
+      const content = copyResults[step.id];
+      if (!content) return;
+      if (STRATEGIC_STEPS.has(step.id)) {
+        parts.push(`## ${step.label}\n${content}`);
+      } else if (LONG_FORM_STEPS.has(step.id)) {
+        parts.push(`## ${step.label} (resumo)\n${summarize(content)}`);
+      }
+    });
+    return parts.join("\n\n---\n\n");
+  };
+
   const handleOpenAgent = (agentId: string) => {
-    // Store copy context in sessionStorage so agent workspace can use it
-    const context = buildCopyContext();
+    // Store lean context — strategic steps in full, long-form as summary
+    const context = buildAgentContext();
     sessionStorage.setItem("campaign_copy_context", context);
     sessionStorage.setItem("campaign_project_id", id || "");
     sessionStorage.setItem("campaign_project_name", projectName);
