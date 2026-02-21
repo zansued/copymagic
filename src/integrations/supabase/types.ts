@@ -336,27 +336,33 @@ export type Database = {
           generation_id: string
           id: string
           is_public: boolean
+          last_viewed_at: string | null
           owner_id: string
           share_token: string
           shared_with_email: string | null
+          view_count: number
         }
         Insert: {
           created_at?: string
           generation_id: string
           id?: string
           is_public?: boolean
+          last_viewed_at?: string | null
           owner_id: string
           share_token?: string
           shared_with_email?: string | null
+          view_count?: number
         }
         Update: {
           created_at?: string
           generation_id?: string
           id?: string
           is_public?: boolean
+          last_viewed_at?: string | null
           owner_id?: string
           share_token?: string
           shared_with_email?: string | null
+          view_count?: number
         }
         Relationships: [
           {
@@ -1265,6 +1271,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_share_view: { Args: { p_token: string }; Returns: undefined }
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean

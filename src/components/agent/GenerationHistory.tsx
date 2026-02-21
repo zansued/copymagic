@@ -18,7 +18,7 @@ interface Generation {
 interface GenerationHistoryProps {
   agentId: string;
   userId: string;
-  onLoad: (output: string) => void;
+  onLoad: (output: string, generationId?: string) => void;
 }
 
 export function GenerationHistory({ agentId, userId, onLoad }: GenerationHistoryProps) {
@@ -99,7 +99,7 @@ export function GenerationHistory({ agentId, userId, onLoad }: GenerationHistory
                 <div
                   key={item.id}
                   className="group rounded-lg border border-border/50 p-3 hover:border-primary/30 hover:bg-muted/20 transition-all cursor-pointer"
-                  onClick={() => onLoad(item.output)}
+                  onClick={() => onLoad(item.output, item.id)}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0 space-y-1">

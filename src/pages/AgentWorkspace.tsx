@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Sparkles, Square, Copy, Check, FileDown, Send } from "lucide-react";
+import { ArrowLeft, Sparkles, Square, Copy, Check, FileDown, Send, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import ReactMarkdown from "react-markdown";
 import { GenerationHistory } from "@/components/agent/GenerationHistory";
 import { AiSuggestButton } from "@/components/agent/AiSuggestButton";
 import { CopyScoreCard } from "@/components/agent/CopyScoreCard";
+import { WhatsAppShareButton } from "@/components/collaboration/WhatsAppShareButton";
 import { useReviews } from "@/hooks/use-reviews";
 import { useTeam } from "@/hooks/use-team";
 
@@ -52,6 +53,7 @@ export default function AgentWorkspace() {
   const [output, setOutput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [lastGenerationId, setLastGenerationId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
@@ -254,7 +256,7 @@ export default function AgentWorkspace() {
 
       // Save to history
       if (accumulated && user && agentId && config) {
-        supabase.from("agent_generations").insert({
+        const { data: genData } = await supabase.from("agent_generations").insert({
           user_id: user.id,
           agent_id: agentId,
           agent_name: config.name,
@@ -262,7 +264,8 @@ export default function AgentWorkspace() {
           output: accumulated,
           provider,
           brand_profile_id: selectedProfileId || null,
-        }).then(() => {});
+        }).select("id").single();
+        if (genData) setLastGenerationId(genData.id);
       }
     } catch (err: any) {
       if (err.name !== "AbortError") {
@@ -466,7 +469,7 @@ export default function AgentWorkspace() {
               <GenerationHistory
                 agentId={agentId}
                 userId={user.id}
-                onLoad={(text) => setOutput(text)}
+                onLoad={(text, genId) => { setOutput(text); if (genId) setLastGenerationId(genId); }}
               />
             )}
 
@@ -504,6 +507,12 @@ export default function AgentWorkspace() {
                   <Button variant="outline" size="sm" onClick={handleExportPdf} className="gap-1.5 text-xs">
                     <FileDown className="h-3.5 w-3.5" /> PDF
                   </Button>
+                  {lastGenerationId && (
+                    <WhatsAppShareButton
+                      generationId={lastGenerationId}
+                      agentName={config.name}
+                    />
+                  )}
                   {team && (
                     <Button
                       variant="outline"
