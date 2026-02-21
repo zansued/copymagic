@@ -51,6 +51,7 @@ function ReviewCard({
   onApprove,
   onReject,
   onOpenComments,
+  onOpenDetail,
   showHandle,
 }: {
   review: ReviewRequest;
@@ -58,12 +59,13 @@ function ReviewCard({
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onOpenComments: (id: string) => void;
+  onOpenDetail: (id: string) => void;
   showHandle?: boolean;
 }) {
   const st = COLUMN_CONFIG[review.status] || COLUMN_CONFIG.pending;
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 space-y-2 group">
+    <div className="rounded-lg border border-border bg-card p-4 space-y-2 group cursor-pointer hover:border-primary/40 transition-colors" onClick={() => onOpenDetail(review.id)}>
       <div className="flex items-start gap-2">
         {showHandle && (
           <KanbanItemHandle>
@@ -99,7 +101,7 @@ function ReviewCard({
           variant="ghost"
           size="sm"
           className="gap-1 text-[10px] h-7 px-2"
-          onClick={() => onOpenComments(review.id)}
+          onClick={(e) => { e.stopPropagation(); onOpenComments(review.id); }}
         >
           <MessageSquare className="h-3 w-3" /> Comentar
         </Button>
@@ -109,7 +111,7 @@ function ReviewCard({
               variant="ghost"
               size="sm"
               className="text-primary hover:text-primary/80 gap-1 text-[10px] h-7 px-2"
-              onClick={() => onApprove(review.id)}
+              onClick={(e) => { e.stopPropagation(); onApprove(review.id); }}
             >
               <CheckCircle2 className="h-3 w-3" /> Aprovar
             </Button>
@@ -117,7 +119,7 @@ function ReviewCard({
               variant="ghost"
               size="sm"
               className="text-destructive gap-1 text-[10px] h-7 px-2"
-              onClick={() => onReject(review.id)}
+              onClick={(e) => { e.stopPropagation(); onReject(review.id); }}
             >
               <XCircle className="h-3 w-3" /> Rejeitar
             </Button>
@@ -138,6 +140,9 @@ export default function ReviewApprovals() {
   const [newContent, setNewContent] = useState("");
   const [newAgent, setNewAgent] = useState("");
   const [view, setView] = useState<"kanban" | "list">("kanban");
+
+  // Detail modal state
+  const [detailReviewId, setDetailReviewId] = useState<string | null>(null);
 
   // Comment state
   const [activeReviewId, setActiveReviewId] = useState<string | null>(null);
@@ -204,6 +209,10 @@ export default function ReviewApprovals() {
 
   const activeReview = activeReviewId
     ? reviews.find((r) => r.id === activeReviewId)
+    : null;
+
+  const detailReview = detailReviewId
+    ? reviews.find((r) => r.id === detailReviewId)
     : null;
 
   if (!team) {
@@ -354,6 +363,7 @@ export default function ReviewApprovals() {
                           onApprove={(id) => updateStatus(id, "approved")}
                           onReject={(id) => updateStatus(id, "rejected")}
                           onOpenComments={openComments}
+                          onOpenDetail={(id) => setDetailReviewId(id)}
                           showHandle={canApprove}
                         />
                       </KanbanItem>
@@ -386,7 +396,7 @@ export default function ReviewApprovals() {
             {reviews.map((r) => {
               const st = COLUMN_CONFIG[r.status] || COLUMN_CONFIG.pending;
               return (
-                <div key={r.id} className="premium-card p-5 space-y-3">
+                <div key={r.id} className="premium-card p-5 space-y-3 cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setDetailReviewId(r.id)}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
@@ -409,7 +419,7 @@ export default function ReviewApprovals() {
                         variant="ghost"
                         size="sm"
                         className="gap-1 text-xs"
-                        onClick={() => openComments(r.id)}
+                        onClick={(e) => { e.stopPropagation(); openComments(r.id); }}
                       >
                         <MessageSquare className="h-3.5 w-3.5" /> Comentar
                       </Button>
@@ -419,7 +429,7 @@ export default function ReviewApprovals() {
                             variant="ghost"
                             size="sm"
                             className="text-primary hover:text-primary/80 gap-1 text-xs"
-                            onClick={() => updateStatus(r.id, "approved")}
+                            onClick={(e) => { e.stopPropagation(); updateStatus(r.id, "approved"); }}
                           >
                             <CheckCircle2 className="h-3.5 w-3.5" /> Aprovar
                           </Button>
@@ -427,7 +437,7 @@ export default function ReviewApprovals() {
                             variant="ghost"
                             size="sm"
                             className="text-destructive gap-1 text-xs"
-                            onClick={() => updateStatus(r.id, "rejected")}
+                            onClick={(e) => { e.stopPropagation(); updateStatus(r.id, "rejected"); }}
                           >
                             <XCircle className="h-3.5 w-3.5" /> Rejeitar
                           </Button>
@@ -496,6 +506,73 @@ export default function ReviewApprovals() {
               <Send className="h-4 w-4" />
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Detail Dialog ── */}
+      <Dialog
+        open={!!detailReviewId}
+        onOpenChange={(open) => { if (!open) setDetailReviewId(null); }}
+      >
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <div className="flex items-center gap-2 flex-wrap">
+              <DialogTitle className="text-lg">{detailReview?.title}</DialogTitle>
+              {detailReview && (
+                <Badge variant={COLUMN_CONFIG[detailReview.status]?.badgeVariant || "outline"}>
+                  {COLUMN_CONFIG[detailReview.status]?.label || detailReview.status}
+                </Badge>
+              )}
+              {detailReview?.agent_name && (
+                <Badge variant="secondary" className="text-xs">{detailReview.agent_name}</Badge>
+              )}
+            </div>
+            {detailReview && (
+              <p className="text-xs text-muted-foreground">
+                Enviado em {new Date(detailReview.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </p>
+            )}
+          </DialogHeader>
+
+          {/* Full content */}
+          <div className="flex-1 overflow-y-auto rounded-lg border bg-muted/30 p-4 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent">
+            <div className="prose prose-sm prose-invert max-w-none prose-premium">
+              <ReactMarkdown>{detailReview?.content || ""}</ReactMarkdown>
+            </div>
+          </div>
+
+          {/* Actions footer */}
+          {detailReview && (
+            <div className="flex items-center gap-2 pt-2 border-t border-border">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={() => { setDetailReviewId(null); openComments(detailReview.id); }}
+              >
+                <MessageSquare className="h-3.5 w-3.5" /> Comentar
+              </Button>
+              {canApprove && detailReview.status === "pending" && (
+                <>
+                  <Button
+                    size="sm"
+                    className="gap-1"
+                    onClick={() => { updateStatus(detailReview.id, "approved"); setDetailReviewId(null); }}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Aprovar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="gap-1"
+                    onClick={() => { updateStatus(detailReview.id, "rejected"); setDetailReviewId(null); }}
+                  >
+                    <XCircle className="h-3.5 w-3.5" /> Rejeitar
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
