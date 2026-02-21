@@ -154,17 +154,48 @@ export default function SharedLibrary() {
     toast.success("Copiado!");
   };
 
+  const mdToHtml = (md: string): string => {
+    return md
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      // headings
+      .replace(/^### \*\*(.+?)\*\*$/gm, '<h3 style="font-size:16px;font-weight:bold;margin:24px 0 8px;color:#000;border-bottom:1px solid #ddd;padding-bottom:6px;">$1</h3>')
+      .replace(/^### (.+)$/gm, '<h3 style="font-size:16px;font-weight:bold;margin:24px 0 8px;color:#000;border-bottom:1px solid #ddd;padding-bottom:6px;">$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2 style="font-size:18px;font-weight:bold;margin:28px 0 10px;color:#000;">$2$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1 style="font-size:22px;font-weight:bold;margin:28px 0 12px;color:#000;">$1</h1>')
+      // hr
+      .replace(/^---+$/gm, '<hr style="border:none;border-top:1px solid #ccc;margin:20px 0;">')
+      // bold
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // italic
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // bullet lists
+      .replace(/^\* (.+)$/gm, '<li style="margin-left:20px;margin-bottom:4px;list-style:disc;">$1</li>')
+      // tables (pipe-separated)
+      .replace(/^\|(.+)\|$/gm, (_, row: string) => {
+        const cells = row.split("|").map(c => c.trim()).filter(Boolean);
+        if (cells.every(c => /^-+$/.test(c))) return '';
+        return '<tr>' + cells.map(c => `<td style="padding:6px 12px;border:1px solid #ddd;font-size:13px;">${c}</td>`).join('') + '</tr>';
+      })
+      // wrap consecutive <tr> in table
+      .replace(/((?:<tr>.*<\/tr>\n?)+)/g, '<table style="border-collapse:collapse;width:100%;margin:12px 0;">$1</table>')
+      // paragraphs (lines that aren't already HTML)
+      .replace(/^(?!<[hlutrp]|<hr|<li|<table|<strong)(.+)$/gm, '<p style="margin:0 0 8px;line-height:1.7;">$1</p>')
+      // wrap consecutive <li> in <ul>
+      .replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul style="margin:8px 0;padding:0;">$1</ul>');
+  };
+
   const handleExportPdf = async (item: SharedLibraryItem) => {
-    // Build a standalone HTML document string and use html2pdf on an iframe to avoid rendering issues
+    const bodyHtml = mdToHtml(item.content);
     const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-      body{margin:0;padding:32px;font-family:Georgia,serif;color:#000;background:#fff;}
-      h1{font-size:20px;font-weight:bold;margin:0 0 8px 0;color:#000;}
-      .meta{font-size:11px;color:#666;margin-bottom:16px;}
-      .content{font-size:14px;line-height:1.7;white-space:pre-wrap;color:#000;}
+      body{margin:0;padding:40px;font-family:'Segoe UI',Arial,sans-serif;color:#000;background:#fff;font-size:14px;line-height:1.7;}
+      h1.title{font-size:22px;font-weight:bold;margin:0 0 4px;color:#111;}
+      .meta{font-size:11px;color:#888;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #eee;}
+      strong{font-weight:700;}
+      table{border-collapse:collapse;width:100%;}
     </style></head><body>
-      <h1>${item.title.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</h1>
+      <h1 class="title">${item.title.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</h1>
       <p class="meta">${categories.find(c => c.value === item.category)?.label ?? item.category}${item.agent_name ? ` · ${item.agent_name}` : ""} · ${new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
-      <div class="content">${item.content.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</div>
+      ${bodyHtml}
     </body></html>`;
 
     const iframe = document.createElement("iframe");
@@ -187,6 +218,7 @@ export default function SharedLibrary() {
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
       }).from(iframeDoc.body).save();
       toast.success("PDF exportado!");
     } catch {
