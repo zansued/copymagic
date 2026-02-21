@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Sparkles, Square, Copy, Check, FileDown, Send, MessageCircle } from "lucide-react";
+import { ArrowLeft, Sparkles, Square, Copy, Check, FileDown, Send, MessageCircle, BookmarkPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ import { CopyScoreCard } from "@/components/agent/CopyScoreCard";
 import { WhatsAppShareButton } from "@/components/collaboration/WhatsAppShareButton";
 import { useReviews } from "@/hooks/use-reviews";
 import { useTeam } from "@/hooks/use-team";
+import { useSharedLibrary } from "@/hooks/use-shared-library";
 
 interface BrandProfileOption {
   id: string;
@@ -37,6 +38,7 @@ export default function AgentWorkspace() {
   const campaignProjectId = searchParams.get("projectId");
   const { team } = useTeam();
   const { createReview } = useReviews();
+  const { addItem: addToLibrary } = useSharedLibrary();
 
   const config = agentId ? AGENT_WORKSPACE_CONFIGS[agentId] : null;
 
@@ -514,20 +516,46 @@ export default function AgentWorkspace() {
                     />
                   )}
                   {team && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5 text-xs"
-                      onClick={async () => {
-                        await createReview(
-                          `${config.name} — ${new Date().toLocaleDateString("pt-BR")}`,
-                          output,
-                          config.name
-                        );
-                      }}
-                    >
-                      <Send className="h-3.5 w-3.5" /> Enviar para Revisão
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 text-xs"
+                        onClick={async () => {
+                          if (!user) return;
+                          const result = await addToLibrary(
+                            {
+                              title: `${config.name} — ${new Date().toLocaleDateString("pt-BR")}`,
+                              content: output,
+                              agent_name: config.name,
+                              category: "copy",
+                            },
+                            user.id
+                          );
+                          if (result) {
+                            toast({ title: "Salvo na Biblioteca da equipe!" });
+                          } else {
+                            toast({ title: "Erro ao salvar na Biblioteca", variant: "destructive" });
+                          }
+                        }}
+                      >
+                        <BookmarkPlus className="h-3.5 w-3.5" /> Salvar na Biblioteca
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 text-xs"
+                        onClick={async () => {
+                          await createReview(
+                            `${config.name} — ${new Date().toLocaleDateString("pt-BR")}`,
+                            output,
+                            config.name
+                          );
+                        }}
+                      >
+                        <Send className="h-3.5 w-3.5" /> Enviar para Revisão
+                      </Button>
+                    </>
                   )}
                 </div>
               )}
