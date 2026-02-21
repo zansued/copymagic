@@ -33,38 +33,79 @@ const COMPLIANCE_RISK_TERMS: { term: string; severity: "high" | "medium" | "low"
   { term: "compre seguidores", severity: "high", category: "Prática proibida" },
   { term: "remédio natural que cura", severity: "high", category: "Promessa de cura" },
   { term: "substitui remédio", severity: "high", category: "Promessa de cura" },
+  { term: "cura ", severity: "high", category: "Promessa de cura" },
+  { term: "curar", severity: "high", category: "Promessa de cura" },
+  { term: "garantido", severity: "high", category: "Garantia absoluta" },
+  { term: "garantida", severity: "high", category: "Garantia absoluta" },
   
   // 🟡 MEDIUM — flag de revisão manual / risco moderado
   { term: "antes e depois", severity: "medium", category: "Conteúdo restrito" },
   { term: "médicos recomendam", severity: "medium", category: "Autoridade não verificável" },
   { term: "cientificamente comprovado", severity: "medium", category: "Claim não verificável" },
+  { term: "comprovado", severity: "medium", category: "Claim não verificável" },
   { term: "sem efeitos colaterais", severity: "medium", category: "Claim médico" },
-  { term: "natural + remédio", severity: "medium", category: "Claim médico" },
   { term: "milagre", severity: "medium", category: "Linguagem exagerada" },
   { term: "instantâneo", severity: "medium", category: "Promessa temporal irreal" },
+  { term: "instantaneamente", severity: "medium", category: "Promessa temporal irreal" },
   { term: "em 24 horas", severity: "medium", category: "Promessa temporal irreal" },
   { term: "em 7 dias", severity: "medium", category: "Promessa temporal agressiva" },
+  { term: "em 15 dias", severity: "medium", category: "Promessa temporal agressiva" },
+  { term: "em 21 dias", severity: "medium", category: "Promessa temporal agressiva" },
+  { term: "em 30 dias", severity: "medium", category: "Promessa temporal agressiva" },
   { term: "derrete gordura", severity: "medium", category: "Claim de saúde" },
+  { term: "derrete", severity: "medium", category: "Claim de saúde" },
   { term: "seca barriga", severity: "medium", category: "Claim de saúde" },
+  { term: "seca ", severity: "medium", category: "Claim de saúde" },
   { term: "emagreça", severity: "medium", category: "Claim de saúde" },
+  { term: "emagrecer", severity: "medium", category: "Claim de saúde" },
+  { term: "emagrecimento", severity: "medium", category: "Claim de saúde" },
   { term: "pare de sofrer", severity: "medium", category: "Apelo emocional extremo" },
   { term: "última chance", severity: "medium", category: "Falsa urgência" },
   { term: "só hoje", severity: "medium", category: "Falsa urgência" },
   { term: "vagas limitadas", severity: "medium", category: "Falsa escassez" },
+  { term: "últimas vagas", severity: "medium", category: "Falsa escassez" },
+  { term: "últimas unidades", severity: "medium", category: "Falsa escassez" },
   { term: "depoimento", severity: "medium", category: "Prova social (verificar autenticidade)" },
   { term: "testei e aprovei", severity: "medium", category: "Prova social (verificar autenticidade)" },
+  { term: "sem dieta", severity: "medium", category: "Promessa irreal" },
+  { term: "sem treino", severity: "medium", category: "Promessa irreal" },
+  { term: "sem exercício", severity: "medium", category: "Promessa irreal" },
+  { term: "elimina", severity: "medium", category: "Linguagem exagerada" },
+  { term: "acaba com", severity: "medium", category: "Linguagem exagerada" },
+  { term: "transforma", severity: "medium", category: "Linguagem exagerada" },
+  { term: "surpreendente", severity: "medium", category: "Linguagem exagerada" },
+  { term: "incrível", severity: "medium", category: "Linguagem exagerada" },
+  { term: "resolve de vez", severity: "medium", category: "Promessa irreal" },
   
   // 🟢 LOW — atenção, mas geralmente aceito
   { term: "grátis", severity: "low", category: "Isca de clique" },
+  { term: "gratuito", severity: "low", category: "Isca de clique" },
   { term: "oferta especial", severity: "low", category: "Urgência leve" },
   { term: "tempo limitado", severity: "low", category: "Urgência leve" },
   { term: "desconto exclusivo", severity: "low", category: "Urgência leve" },
+  { term: "desconto", severity: "low", category: "Urgência leve" },
   { term: "garantia de", severity: "low", category: "Promessa parcial" },
+  { term: "garantia", severity: "low", category: "Promessa parcial" },
+  { term: "promoção", severity: "low", category: "Urgência leve" },
+  { term: "por tempo limitado", severity: "low", category: "Urgência leve" },
+  { term: "aproveite", severity: "low", category: "Urgência leve" },
+  { term: "não perca", severity: "low", category: "Urgência leve" },
+  { term: "resultado", severity: "low", category: "Promessa parcial" },
+  { term: "rápido", severity: "low", category: "Promessa parcial" },
+  { term: "segredo", severity: "low", category: "Curiosidade" },
+  { term: "método", severity: "low", category: "Curiosidade" },
+  { term: "fórmula", severity: "low", category: "Curiosidade" },
+  { term: "truque", severity: "low", category: "Curiosidade" },
+  { term: "protocolo", severity: "low", category: "Curiosidade" },
 ];
 
+function normalizeText(text: string): string {
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 function countMatches(text: string, words: string[]): number {
-  const lower = text.toLowerCase();
-  return words.filter((w) => lower.includes(w.toLowerCase())).length;
+  const lower = normalizeText(text);
+  return words.filter((w) => lower.includes(normalizeText(w))).length;
 }
 
 export function detectFields(text: string) {
@@ -96,7 +137,7 @@ export function calculateScores(
   ad: Partial<ImportedAd>,
   allAds: ImportedAd[]
 ): { offerScore: number; riskScore: number; overallScore: number; complianceAlerts: string[] } {
-  const fullText = `${ad.mainText || ""} ${ad.headline || ""} ${ad.promiseSummary || ""} ${ad.mechanism || ""} ${ad.proof || ""}`.toLowerCase();
+  const fullText = normalizeText(`${ad.mainText || ""} ${ad.headline || ""} ${ad.promiseSummary || ""} ${ad.mechanism || ""} ${ad.proof || ""}`);
 
   const promiseCount = countMatches(fullText, PROMISE_WORDS);
   const promiseScore = Math.min(25, promiseCount * 5);
@@ -134,7 +175,7 @@ export function calculateScores(
   let riskPoints = 0;
   const flaggedCategories = new Set<string>();
   for (const { term, severity, category } of COMPLIANCE_RISK_TERMS) {
-    if (fullText.includes(term)) {
+    if (fullText.includes(normalizeText(term))) {
       const icon = severity === "high" ? "🔴" : severity === "medium" ? "🟡" : "🟢";
       alerts.push(`${icon} "${term}" — ${category} (${severity})`);
       riskPoints += severity === "high" ? 30 : severity === "medium" ? 12 : 4;
