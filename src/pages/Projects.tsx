@@ -25,6 +25,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Trash2, Edit2, FolderOpen, Plus, Search, BarChart3, Share2, Lock, UsersRound, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { TopNav } from "@/components/TopNav";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
@@ -195,7 +196,18 @@ export default function Projects() {
                       onClick={() => navigate(`/project/${p.id}`)}
                       className="flex-1 text-left min-w-0"
                     >
-                      <h3 className="font-semibold text-foreground truncate">{p.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-foreground truncate">{p.name}</h3>
+                        {p.team_id && (() => {
+                          const teamName = teams.find(t => t.id === p.team_id)?.name;
+                          return teamName ? (
+                            <Badge variant="secondary" className="shrink-0 text-[10px] px-1.5 py-0">
+                              <UsersRound className="h-3 w-3 mr-1" />
+                              {teamName}
+                            </Badge>
+                          ) : null;
+                        })()}
+                      </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {completedSteps(p.copy_results)}/9 etapas •{" "}
                         {new Date(p.updated_at).toLocaleDateString("pt-BR")}
