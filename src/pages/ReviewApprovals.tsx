@@ -4,6 +4,7 @@ import { TopNav } from "@/components/TopNav";
 import { useReviews, type ReviewRequest, type ReviewComment } from "@/hooks/use-reviews";
 import { useTeam } from "@/hooks/use-team";
 import { useAuth } from "@/hooks/use-auth";
+import { useSharedLibrary } from "@/hooks/use-shared-library";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -25,9 +26,11 @@ import {
   List,
   Columns3,
   GripVertical,
+  BookmarkPlus,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
   Kanban,
   KanbanBoard,
@@ -134,7 +137,8 @@ export default function ReviewApprovals() {
   const { user } = useAuth();
   const { team, myRole } = useTeam();
   const { reviews, loading, createReview, updateStatus, fetchComments, addComment, refetch } = useReviews();
-
+  const { addItem: addToLibrary } = useSharedLibrary();
+  const [savingToLibrary, setSavingToLibrary] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
@@ -167,6 +171,26 @@ export default function ReviewApprovals() {
     const data = await fetchComments(reviewId);
     setComments(data);
     setCommentsLoading(false);
+  };
+
+  const handleSaveToLibrary = async (review: ReviewRequest) => {
+    if (!user) return;
+    setSavingToLibrary(true);
+    const result = await addToLibrary(
+      {
+        title: review.title,
+        content: review.content,
+        agent_name: review.agent_name || undefined,
+        category: "aprovado",
+      },
+      user.id
+    );
+    setSavingToLibrary(false);
+    if (result) {
+      toast.success("Salvo na biblioteca!");
+    } else {
+      toast.error("Erro ao salvar na biblioteca");
+    }
   };
 
   const handleAddComment = async () => {
@@ -552,6 +576,17 @@ export default function ReviewApprovals() {
               >
                 <MessageSquare className="h-3.5 w-3.5" /> Comentar
               </Button>
+              {detailReview.status === "approved" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  disabled={savingToLibrary}
+                  onClick={() => handleSaveToLibrary(detailReview)}
+                >
+                  <BookmarkPlus className="h-3.5 w-3.5" /> Salvar na Biblioteca
+                </Button>
+              )}
               {canApprove && detailReview.status === "pending" && (
                 <>
                   <Button
