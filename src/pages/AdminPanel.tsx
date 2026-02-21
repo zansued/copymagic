@@ -122,13 +122,17 @@ export default function AdminPanel() {
   const planIcon = (plan: string) => {
     if (plan === "agency") return <Building2 className="h-3.5 w-3.5" />;
     if (plan === "pro") return <Crown className="h-3.5 w-3.5" />;
+    if (plan === "lifetime") return <Shield className="h-3.5 w-3.5" />;
+    if (plan === "starter") return <BarChart3 className="h-3.5 w-3.5" />;
     return <Sparkles className="h-3.5 w-3.5" />;
   };
 
   const planColor = (plan: string) => {
-    if (plan === "agency") return "text-amber-400 bg-amber-400/10";
-    if (plan === "pro") return "text-primary bg-primary/10";
-    return "text-muted-foreground bg-muted";
+    if (plan === "agency") return "text-amber-400 bg-amber-400/10 border-amber-400/20";
+    if (plan === "pro") return "text-violet-400 bg-violet-400/10 border-violet-400/20";
+    if (plan === "lifetime") return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
+    if (plan === "starter") return "text-sky-400 bg-sky-400/10 border-sky-400/20";
+    return "text-zinc-400 bg-zinc-400/10 border-zinc-400/20";
   };
 
   return (
