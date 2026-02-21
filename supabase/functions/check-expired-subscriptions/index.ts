@@ -26,8 +26,9 @@ serve(async (req) => {
     );
 
     const now = new Date().toISOString();
+    const nowDate = new Date();
 
-    // Find expired subscriptions (recurring plans only, not lifetime)
+    // ── 1. Handle expired PAID subscriptions (not free, not lifetime) ──
     const { data: expired, error } = await supabaseAdmin
       .from("subscriptions")
       .select("user_id, plan, fallback_plan, current_period_end")
@@ -42,7 +43,7 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log(`Found ${expired?.length || 0} expired subscriptions`);
+    console.log(`Found ${expired?.length || 0} expired paid subscriptions`);
 
     let reverted = 0;
     let downgraded = 0;
@@ -51,7 +52,6 @@ serve(async (req) => {
       const fallback = sub.fallback_plan;
 
       if (fallback && PLAN_LIMITS[fallback]) {
-        // Revert to fallback plan (e.g., lifetime)
         const limits = PLAN_LIMITS[fallback];
         await supabaseAdmin.from("subscriptions").update({
           plan: fallback,
@@ -65,12 +65,11 @@ serve(async (req) => {
           generations_used: 0,
           updated_at: now,
         }).eq("user_id", sub.user_id);
-
-        console.log(`Reverted user ${sub.user_id} from ${sub.plan} to fallback: ${fallback}`);
+        console.log(`Reverted user ${sub.user_id} to fallback: ${fallback}`);
         reverted++;
       } else {
-        // No fallback — downgrade to free
         const limits = PLAN_LIMITS.free;
+        const nextPeriodEnd = new Date(nowDate.getTime() + 30 * 86400000).toISOString();
         await supabaseAdmin.from("subscriptions").update({
           plan: "free",
           status: "active",
@@ -78,22 +77,49 @@ serve(async (req) => {
           brand_profiles_limit: limits.profiles,
           projects_limit: limits.projects,
           agents_access: limits.agents_access,
-          current_period_end: null,
+          current_period_start: now,
+          current_period_end: nextPeriodEnd,
           fallback_plan: null,
           generations_used: 0,
           updated_at: now,
         }).eq("user_id", sub.user_id);
-
-        console.log(`Downgraded user ${sub.user_id} from ${sub.plan} to free`);
+        console.log(`Downgraded user ${sub.user_id} to free (next reset: ${nextPeriodEnd})`);
         downgraded++;
       }
     }
 
+    // ── 2. Handle FREE plan monthly reset ──
+    const { data: freeExpired, error: freeError } = await supabaseAdmin
+      .from("subscriptions")
+      .select("user_id, current_period_end, generations_used")
+      .eq("plan", "free")
+      .eq("status", "active")
+      .not("current_period_end", "is", null)
+      .lt("current_period_end", now);
+
+    if (freeError) {
+      console.error("Free reset query error:", freeError);
+    }
+
+    let freeReset = 0;
+    for (const sub of freeExpired || []) {
+      const nextPeriodEnd = new Date(nowDate.getTime() + 30 * 86400000).toISOString();
+      await supabaseAdmin.from("subscriptions").update({
+        generations_used: 0,
+        current_period_start: now,
+        current_period_end: nextPeriodEnd,
+        updated_at: now,
+      }).eq("user_id", sub.user_id);
+      console.log(`Reset free user ${sub.user_id} generations (was ${sub.generations_used})`);
+      freeReset++;
+    }
+
     return new Response(JSON.stringify({
       ok: true,
-      checked: expired?.length || 0,
+      checked: (expired?.length || 0) + (freeExpired?.length || 0),
       reverted,
       downgraded,
+      freeReset,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
