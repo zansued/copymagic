@@ -155,28 +155,44 @@ export default function SharedLibrary() {
   };
 
   const handleExportPdf = async (item: SharedLibraryItem) => {
-    const container = document.createElement("div");
-    container.style.cssText = "position:fixed;left:0;top:0;width:800px;color:#000;background:#fff;padding:32px;font-family:Georgia,serif;z-index:-1;opacity:0;pointer-events:none;";
-    container.innerHTML = `<h1 style="font-size:20px;font-weight:bold;margin-bottom:8px;color:#000;">${item.title.replace(/</g, "&lt;")}</h1>
-      <p style="font-size:11px;color:#666;margin-bottom:16px;">${categories.find(c => c.value === item.category)?.label ?? item.category}${item.agent_name ? ` · ${item.agent_name}` : ""} · ${new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
-      <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;color:#000;">${item.content.replace(/</g, "&lt;")}</div>`;
-    document.body.appendChild(container);
-    // Allow layout to settle
-    await new Promise(r => setTimeout(r, 100));
+    // Build a standalone HTML document string and use html2pdf on an iframe to avoid rendering issues
+    const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+      body{margin:0;padding:32px;font-family:Georgia,serif;color:#000;background:#fff;}
+      h1{font-size:20px;font-weight:bold;margin:0 0 8px 0;color:#000;}
+      .meta{font-size:11px;color:#666;margin-bottom:16px;}
+      .content{font-size:14px;line-height:1.7;white-space:pre-wrap;color:#000;}
+    </style></head><body>
+      <h1>${item.title.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</h1>
+      <p class="meta">${categories.find(c => c.value === item.category)?.label ?? item.category}${item.agent_name ? ` · ${item.agent_name}` : ""} · ${new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
+      <div class="content">${item.content.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</div>
+    </body></html>`;
+
+    const iframe = document.createElement("iframe");
+    iframe.style.cssText = "position:fixed;left:0;top:0;width:800px;height:1200px;border:none;z-index:-1;pointer-events:none;";
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) { document.body.removeChild(iframe); return; }
+    iframeDoc.open();
+    iframeDoc.write(htmlContent);
+    iframeDoc.close();
+
+    await new Promise(r => setTimeout(r, 200));
+
     try {
       const html2pdf = (await import("html2pdf.js")).default;
       await html2pdf().set({
         margin: [12, 12, 12, 12],
         filename: `${item.title.slice(0, 40)}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false, windowWidth: 800 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      }).from(container).save();
+      }).from(iframeDoc.body).save();
       toast.success("PDF exportado!");
     } catch {
       toast.error("Erro ao exportar PDF");
     } finally {
-      document.body.removeChild(container);
+      document.body.removeChild(iframe);
     }
   };
 
