@@ -261,78 +261,64 @@ export default function Roadmap() {
     return div.innerHTML;
   };
 
-  const handleExportPdf = async (roadmap: RoadmapData) => {
-    try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      const done = completedCount(roadmap.steps);
-      const total = roadmap.steps.length;
-      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const handleExportPdf = (roadmap: RoadmapData) => {
+    const done = completedCount(roadmap.steps);
+    const total = roadmap.steps.length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
-      const stepsHtml = roadmap.steps
-        .sort((a, b) => a.order - b.order)
-        .map(
-          (step) => `
-          <div style="display:flex;gap:16px;margin-bottom:20px;">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-              <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid ${step.completed ? '#7c3aed' : '#333'};background:${step.completed ? 'rgba(124,58,237,0.15)' : 'transparent'};">
-                ${step.completed ? '✓' : step.order}
-              </div>
-              <div style="flex:1;width:2px;background:linear-gradient(to bottom,#7c3aed33,#22222200);min-height:20px;"></div>
-            </div>
-            <div style="flex:1;background:#1a1a2e;border:1px solid #2a2a3e;border-radius:12px;padding:16px;${step.completed ? 'border-color:rgba(124,58,237,0.3);' : ''}">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                <span style="font-size:18px;">${escapeHtml(step.emoji)}</span>
-                <span style="font-size:11px;color:#7c3aed;font-weight:600;">Passo ${step.order}</span>
-                ${step.agent_name ? `<span style="font-size:10px;color:#888;margin-left:auto;">🤖 ${escapeHtml(step.agent_name)}</span>` : ''}
-              </div>
-              <h3 style="font-size:15px;font-weight:700;color:${step.completed ? '#666' : '#e2e2e2'};margin:0 0 6px;${step.completed ? 'text-decoration:line-through;' : ''}">${escapeHtml(step.title)}</h3>
-              <p style="font-size:12px;color:#999;line-height:1.6;margin:0;">${escapeHtml(step.description)}</p>
-              ${step.tip ? `<div style="margin-top:10px;padding:10px 12px;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.12);border-radius:8px;font-size:11px;color:#aaa;line-height:1.5;">💡 ${escapeHtml(step.tip)}</div>` : ''}
-            </div>
-          </div>`
-        )
-        .join("");
-
-      const htmlContent = `
-        <div style="font-family:'Inter','Segoe UI',sans-serif;background:#0f1117;color:#e2e2e2;padding:40px 32px;min-height:100%;">
-          <div style="text-align:center;margin-bottom:36px;">
-            <div style="font-size:40px;margin-bottom:8px;">🗺️</div>
-            <h1 style="font-size:24px;font-weight:800;margin:0;background:linear-gradient(135deg,#7c3aed,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${escapeHtml(roadmap.title)}</h1>
-            <p style="font-size:13px;color:#888;margin:8px 0 16px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.5;">${escapeHtml(roadmap.objective)}</p>
-            <div style="display:inline-flex;align-items:center;gap:10px;background:#1a1a2e;border:1px solid #2a2a3e;border-radius:20px;padding:8px 20px;">
-              <span style="font-size:12px;color:#aaa;">${done}/${total} concluídos</span>
-              <div style="width:80px;height:6px;border-radius:3px;background:#222;overflow:hidden;">
-                <div style="height:100%;width:${pct}%;border-radius:3px;background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div>
-              </div>
-              <span style="font-size:12px;color:#7c3aed;font-weight:700;">${pct}%</span>
+    const stepsHtml = roadmap.steps
+      .sort((a, b) => a.order - b.order)
+      .map(
+        (step) => `
+        <div style="display:flex;gap:16px;margin-bottom:20px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid ${step.completed ? '#7c3aed' : '#ccc'};background:${step.completed ? 'rgba(124,58,237,0.15)' : 'transparent'};color:#000;">
+              ${step.completed ? '✓' : step.order}
             </div>
           </div>
-          ${stepsHtml}
-          <div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid #1f1f2f;">
-            <p style="font-size:10px;color:#555;">Gerado por CopyMagic • ${new Date().toLocaleDateString("pt-BR")}</p>
+          <div style="flex:1;border:1px solid #ddd;border-radius:12px;padding:16px;${step.completed ? 'border-color:rgba(124,58,237,0.3);' : ''}">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:18px;">${escapeHtml(step.emoji)}</span>
+              <span style="font-size:11px;color:#7c3aed;font-weight:600;">Passo ${step.order}</span>
+              ${step.agent_name ? `<span style="font-size:10px;color:#888;margin-left:auto;">🤖 ${escapeHtml(step.agent_name)}</span>` : ''}
+            </div>
+            <h3 style="font-size:15px;font-weight:700;color:${step.completed ? '#999' : '#111'};margin:0 0 6px;${step.completed ? 'text-decoration:line-through;' : ''}">${escapeHtml(step.title)}</h3>
+            <p style="font-size:12px;color:#555;line-height:1.6;margin:0;">${escapeHtml(step.description)}</p>
+            ${step.tip ? `<div style="margin-top:10px;padding:10px 12px;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.12);border-radius:8px;font-size:11px;color:#666;line-height:1.5;">💡 ${escapeHtml(step.tip)}</div>` : ''}
           </div>
-        </div>`;
+        </div>`
+      )
+      .join("");
 
-      const container = document.createElement("div");
-      container.innerHTML = htmlContent;
-      document.body.appendChild(container);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(roadmap.title)}</title>
+<style>
+  @media print { html, body { background:#fff!important; color:#000!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',Arial,sans-serif;color:#000;background:#fff;padding:40px;font-size:14px;line-height:1.7;max-width:800px;margin:0 auto;}
+</style></head><body>
+  <div style="text-align:center;margin-bottom:36px;">
+    <div style="font-size:40px;margin-bottom:8px;">🗺️</div>
+    <h1 style="font-size:24px;font-weight:800;margin:0;color:#7c3aed;">${escapeHtml(roadmap.title)}</h1>
+    <p style="font-size:13px;color:#666;margin:8px auto 16px;max-width:420px;line-height:1.5;">${escapeHtml(roadmap.objective)}</p>
+    <div style="display:inline-flex;align-items:center;gap:10px;border:1px solid #ddd;border-radius:20px;padding:8px 20px;">
+      <span style="font-size:12px;color:#666;">${done}/${total} concluídos</span>
+      <div style="width:80px;height:6px;border-radius:3px;background:#eee;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;border-radius:3px;background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div>
+      </div>
+      <span style="font-size:12px;color:#7c3aed;font-weight:700;">${pct}%</span>
+    </div>
+  </div>
+  ${stepsHtml}
+  <div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid #eee;">
+    <p style="font-size:10px;color:#999;">Gerado por CopyMagic • ${new Date().toLocaleDateString("pt-BR")}</p>
+  </div>
+</body></html>`;
 
-      await html2pdf()
-        .set({
-          margin: 0,
-          filename: `${roadmap.title.replace(/[^a-zA-Z0-9]/g, "-")}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#0f1117" },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        })
-        .from(container)
-        .save();
-
-      document.body.removeChild(container);
-      toast({ title: "PDF exportado com sucesso! 📄" });
-    } catch {
-      toast({ title: "Erro ao exportar PDF", variant: "destructive" });
-    }
+    const win = window.open("", "_blank");
+    if (!win) { toast({ title: "Permita popups para exportar", variant: "destructive" }); return; }
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { setTimeout(() => win.print(), 400); };
   };
 
   return (

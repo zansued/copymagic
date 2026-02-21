@@ -289,12 +289,9 @@ export default function AgentWorkspace() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExportPdf = async () => {
+  const handleExportPdf = () => {
     if (!output || !outputRef.current) return;
-    
     const clone = outputRef.current.cloneNode(true) as HTMLElement;
-    clone.style.cssText = "position:fixed;left:0;top:0;width:800px;color:#000;background:#fff;padding:24px;font-family:Georgia,serif;z-index:-1;opacity:0;pointer-events:none;";
-    // Strip elements that cause html2canvas createPattern errors
     clone.querySelectorAll("button,[role='button'],canvas,video,svg,img").forEach(el => el.remove());
     clone.querySelectorAll("*").forEach(el => {
       const h = el as HTMLElement;
@@ -305,25 +302,17 @@ export default function AgentWorkspace() {
       h.style.webkitTextFillColor = "#000";
       h.style.webkitBackgroundClip = "unset";
     });
-    document.body.appendChild(clone);
-    
-    try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      await html2pdf().set({
-        margin: [12, 12, 12, 12],
-        filename: `${config?.name || "output"}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollY: 0, imageTimeout: 0, removeContainer: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-      }).from(clone).save();
-      toast({ title: "PDF exportado com sucesso!" });
-    } catch (err) {
-      console.error("PDF export error:", err);
-      toast({ title: "Erro ao exportar PDF", variant: "destructive" });
-    } finally {
-      document.body.removeChild(clone);
-    }
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${config?.name || "output"}</title>
+<style>
+  @media print { html, body { background:#fff!important; color:#000!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Georgia,serif;color:#000;background:#fff;padding:40px;font-size:14px;line-height:1.7;max-width:800px;margin:0 auto;}
+</style></head><body>${clone.innerHTML}</body></html>`;
+    const win = window.open("", "_blank");
+    if (!win) { toast({ title: "Permita popups para exportar", variant: "destructive" }); return; }
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { setTimeout(() => win.print(), 400); };
   };
 
   useEffect(() => {
