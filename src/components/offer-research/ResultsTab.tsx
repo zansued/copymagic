@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   BarChart3, Download, Search, Star, Trash2, AlertTriangle, Flame,
   Clock, ExternalLink, ArrowUpDown, X, Filter, TrendingUp, Shield, Bot, Loader2,
+  Facebook, Instagram, MessageCircle, Users, AtSign, Globe,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -254,6 +255,30 @@ function StatCard({ label, value, icon, accent, warning }: { label: string; valu
   );
 }
 
+const PLATFORM_ICON_MAP: Record<string, { icon: React.ReactNode; className: string; label: string }> = {
+  facebook: { icon: <Facebook className="h-3 w-3" />, className: "bg-blue-500/15 text-blue-400 border-blue-500/25", label: "Facebook" },
+  instagram: { icon: <Instagram className="h-3 w-3" />, className: "bg-pink-500/15 text-pink-400 border-pink-500/25", label: "Instagram" },
+  messenger: { icon: <MessageCircle className="h-3 w-3" />, className: "bg-violet-500/15 text-violet-400 border-violet-500/25", label: "Messenger" },
+  audience_network: { icon: <Users className="h-3 w-3" />, className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25", label: "Audience Network" },
+  threads: { icon: <AtSign className="h-3 w-3" />, className: "bg-amber-500/15 text-amber-400 border-amber-500/25", label: "Threads" },
+};
+
+function PlatformIcons({ platform }: { platform: string }) {
+  const platforms = platform.split(",").map((p) => p.trim().toLowerCase().replace(/\s+/g, "_"));
+  return (
+    <div className="flex items-center gap-1">
+      {platforms.map((p) => {
+        const info = PLATFORM_ICON_MAP[p] || { icon: <Globe className="h-3 w-3" />, className: "bg-muted text-muted-foreground border-border", label: p };
+        return (
+          <div key={p} title={info.label} className={`flex items-center justify-center h-5 w-5 rounded border ${info.className}`}>
+            {info.icon}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ResultRow({ ad, onClick, onDelete }: { ad: ImportedAd; onClick: () => void; onDelete: () => void }) {
   const daysActive = ad.startDate
     ? Math.floor((Date.now() - new Date(ad.startDate).getTime()) / (1000 * 60 * 60 * 24))
@@ -285,7 +310,7 @@ function ResultRow({ ad, onClick, onDelete }: { ad: ImportedAd; onClick: () => v
             {ad.headline && <p className="text-xs text-muted-foreground truncate">{ad.headline}</p>}
             {/* Mobile badges */}
             <div className="flex flex-wrap gap-1 sm:hidden mt-1">
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">{ad.platform}</Badge>
+              <PlatformIcons platform={ad.platform} />
               {daysActive != null && daysActive > 0 && (
                 <Badge variant={daysActive >= 14 ? "default" : "outline"} className="text-[10px] px-1.5 py-0 gap-0.5">
                   <Clock className="h-2.5 w-2.5" /> {daysActive}d
@@ -307,8 +332,8 @@ function ResultRow({ ad, onClick, onDelete }: { ad: ImportedAd; onClick: () => v
           </div>
 
           {/* Badges */}
-          <div className="hidden md:flex flex-wrap gap-1 shrink-0 max-w-[160px] justify-end">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize whitespace-nowrap">{ad.platform}</Badge>
+          <div className="hidden md:flex items-center gap-1.5 shrink-0 justify-end">
+            <PlatformIcons platform={ad.platform} />
             {daysActive != null && daysActive > 0 && (
               <Badge variant={daysActive >= 14 ? "default" : "outline"} className="text-[10px] px-1.5 py-0 gap-0.5 whitespace-nowrap">
                 <Clock className="h-2.5 w-2.5" /> {daysActive}d
