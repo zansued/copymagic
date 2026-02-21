@@ -55,7 +55,7 @@ serve(async (req) => {
     const userId = claimsData.claims.sub;
     const userEmail = claimsData.claims.email || "";
 
-    const { plan, billing = "monthly" } = await req.json();
+    const { plan, billing = "monthly", lifetime_discount = false } = await req.json();
     const planConfig = PLANS[plan];
     if (!planConfig) {
       return new Response(JSON.stringify({ error: "Plano inválido" }), {
@@ -85,8 +85,22 @@ serve(async (req) => {
       }
     }
 
+    // Validate lifetime discount: user must actually be on lifetime plan
+    let applyDiscount = false;
+    if (lifetime_discount && (plan === "agency" || plan === "agency_plus")) {
+      const { createClient: createAdminClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      const supabaseAdmin = createAdminClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      const { data: sub } = await supabaseAdmin.from("subscriptions").select("plan").eq("user_id", userId).single();
+      if (sub?.plan === "lifetime") {
+        applyDiscount = true;
+      }
+    }
+
     const isAnnual = billing === "annual" && plan !== "lifetime";
-    const price = isAnnual ? planConfig.annualPrice : planConfig.monthlyPrice;
+    let price = isAnnual ? planConfig.annualPrice : planConfig.monthlyPrice;
+    if (applyDiscount) {
+      price = Math.round(price * 0.8); // 20% off
+    }
     const titleSuffix = isAnnual ? " (Anual)" : "";
 
     const baseUrl = Deno.env.get("SITE_URL") || "https://copymagic.lovable.app";
