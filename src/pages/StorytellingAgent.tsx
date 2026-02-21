@@ -179,7 +179,7 @@ export default function StorytellingAgent() {
   const handleExportPdf = async () => {
     if (!output || !outputRef.current) return;
     const clone = outputRef.current.cloneNode(true) as HTMLElement;
-    clone.style.cssText = "position:absolute;left:-9999px;top:0;width:800px;color:#000;background:#fff;padding:24px;font-family:Georgia,serif;";
+    clone.style.cssText = "position:fixed;left:0;top:0;width:800px;color:#000;background:#fff;padding:24px;font-family:Georgia,serif;z-index:-1;opacity:0;pointer-events:none;";
     clone.querySelectorAll("button,[role='button'],canvas,video,svg,img").forEach(el => el.remove());
     clone.querySelectorAll("*").forEach(el => {
       const h = el as HTMLElement;
