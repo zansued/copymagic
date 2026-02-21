@@ -175,7 +175,7 @@ export default function CampaignPlanning() {
                 🚀 Planejamento de Campanha
               </h1>
               <p className="text-sm text-muted-foreground">
-                {completedSteps.length} de {STEPS.length} etapas concluídas — Todos os agentes recebem o conteúdo completo das suas copys
+                {completedSteps.length} de {STEPS.length} etapas concluídas — Agentes recebem contexto estratégico otimizado
               </p>
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function CampaignPlanning() {
                 </Button>
               </div>
               <CardDescription>
-                Os agentes utilizam o conteúdo integral de todas as {completedSteps.length} etapas geradas — produto, avatar, oferta, USP, página de vendas e mais
+                Os agentes recebem Avatar, Oferta, USP e Anúncios na íntegra. Etapas longas (VSL, Página de Vendas) vão como resumo para evitar sobrecarga
               </CardDescription>
             </CardHeader>
             {expandedSummary && (
