@@ -184,59 +184,30 @@ export default function SharedLibrary() {
       .replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul style="margin:8px 0;padding:0;">$1</ul>');
   };
 
-  const handleExportPdf = async (item: SharedLibraryItem) => {
+  const handleExportPdf = (item: SharedLibraryItem) => {
     const bodyHtml = mdToHtml(item.content);
-    const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-      body{margin:0;padding:40px;font-family:'Segoe UI',Arial,sans-serif;color:#000;background:#fff;font-size:14px;line-height:1.7;}
-      h1.title{font-size:22px;font-weight:bold;margin:0 0 4px;color:#111;}
-      .meta{font-size:11px;color:#888;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #eee;}
-      strong{font-weight:700;}
-      table{border-collapse:collapse;width:100%;}
-    </style></head><body>
-      <h1 class="title">${item.title.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</h1>
-      <p class="meta">${categories.find(c => c.value === item.category)?.label ?? item.category}${item.agent_name ? ` · ${item.agent_name}` : ""} · ${new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
-      ${bodyHtml}
-    </body></html>`;
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${item.title.replace(/"/g, "&quot;")}</title>
+<style>
+  @media print {
+    html, body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',Arial,sans-serif; color:#000; background:#fff; padding:40px; font-size:14px; line-height:1.7; max-width:800px; margin:0 auto; }
+  h1.title { font-size:22px; font-weight:bold; margin:0 0 4px; color:#111; }
+  .meta { font-size:11px; color:#888; margin-bottom:24px; padding-bottom:12px; border-bottom:2px solid #eee; }
+  strong { font-weight:700; }
+  table { border-collapse:collapse; width:100%; }
+</style></head><body>
+  <h1 class="title">${item.title.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</h1>
+  <p class="meta">${categories.find(c => c.value === item.category)?.label ?? item.category}${item.agent_name ? ` · ${item.agent_name}` : ""} · ${new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
+  ${bodyHtml}
+</body></html>`;
 
-    const iframe = document.createElement("iframe");
-    iframe.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;border:none;z-index:99999;opacity:0;pointer-events:none;";
-    document.body.appendChild(iframe);
-
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!iframeDoc) { document.body.removeChild(iframe); return; }
-    iframeDoc.open();
-    iframeDoc.write(htmlContent);
-    iframeDoc.close();
-
-    await new Promise(r => setTimeout(r, 400));
-
-    try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      await html2pdf().set({
-        margin: [12, 12, 12, 12],
-        filename: `${item.title.slice(0, 40)}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-          logging: false,
-          windowWidth: 800,
-          windowHeight: iframeDoc.body.scrollHeight,
-          width: 800,
-          height: iframeDoc.body.scrollHeight,
-          scrollX: 0,
-          scrollY: 0,
-        },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["css", "legacy"] },
-      }).from(iframeDoc.body).save();
-      toast.success("PDF exportado!");
-    } catch {
-      toast.error("Erro ao exportar PDF");
-    } finally {
-      document.body.removeChild(iframe);
-    }
+    const win = window.open("", "_blank");
+    if (!win) { toast.error("Permita popups para exportar"); return; }
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { setTimeout(() => win.print(), 400); };
   };
 
   return (
