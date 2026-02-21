@@ -198,14 +198,17 @@ export default function SharedLibrary() {
       ${bodyHtml}
     </body></html>`;
 
-    const container = document.createElement("div");
-    container.style.cssText = "position:fixed;left:0;top:0;width:800px;background:#fff;color:#000;padding:40px;font-family:'Segoe UI',Arial,sans-serif;font-size:14px;line-height:1.7;z-index:9999;";
-    container.innerHTML = `<h1 style="font-size:22px;font-weight:bold;margin:0 0 4px;color:#111;">${item.title.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</h1>
-      <p style="font-size:11px;color:#888;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #eee;">${categories.find(c => c.value === item.category)?.label ?? item.category}${item.agent_name ? ` · ${item.agent_name}` : ""} · ${new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
-      ${bodyHtml}`;
-    document.body.appendChild(container);
+    const iframe = document.createElement("iframe");
+    iframe.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;border:none;z-index:99999;opacity:0;pointer-events:none;";
+    document.body.appendChild(iframe);
 
-    await new Promise(r => setTimeout(r, 300));
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) { document.body.removeChild(iframe); return; }
+    iframeDoc.open();
+    iframeDoc.write(htmlContent);
+    iframeDoc.close();
+
+    await new Promise(r => setTimeout(r, 400));
 
     try {
       const html2pdf = (await import("html2pdf.js")).default;
@@ -213,15 +216,26 @@ export default function SharedLibrary() {
         margin: [12, 12, 12, 12],
         filename: `${item.title.slice(0, 40)}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+          windowWidth: 800,
+          windowHeight: iframeDoc.body.scrollHeight,
+          width: 800,
+          height: iframeDoc.body.scrollHeight,
+          scrollX: 0,
+          scrollY: 0,
+        },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["css", "legacy"] },
-      }).from(container).save();
+      }).from(iframeDoc.body).save();
       toast.success("PDF exportado!");
     } catch {
       toast.error("Erro ao exportar PDF");
     } finally {
-      document.body.removeChild(container);
+      document.body.removeChild(iframe);
     }
   };
 
