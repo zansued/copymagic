@@ -18,6 +18,37 @@ import { calculateScores, detectFields } from "@/lib/ad-offer/scoring";
 import { generateQueries } from "@/lib/ad-offer/query-generator";
 import type { ImportedAd } from "@/lib/ad-offer/types";
 import ImportAdDialog from "./ImportAdDialog";
+
+// Shared platform icon config
+const PLATFORM_ICON_MAP: Record<string, { icon: React.ReactNode; className: string; label: string }> = {
+  facebook: { icon: <Facebook className="h-3 w-3" />, className: "bg-blue-500/15 text-blue-400 border-blue-500/25", label: "Facebook" },
+  instagram: { icon: <Instagram className="h-3 w-3" />, className: "bg-pink-500/15 text-pink-400 border-pink-500/25", label: "Instagram" },
+  messenger: { icon: <MessageCircle className="h-3 w-3" />, className: "bg-violet-500/15 text-violet-400 border-violet-500/25", label: "Messenger" },
+  audience_network: { icon: <Users className="h-3 w-3" />, className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25", label: "Audience Network" },
+  threads: { icon: <AtSign className="h-3 w-3" />, className: "bg-amber-500/15 text-amber-400 border-amber-500/25", label: "Threads" },
+};
+const DEFAULT_PLATFORM = { icon: <Globe className="h-3 w-3" />, className: "bg-secondary text-secondary-foreground border-border", label: "Outro" };
+
+function getPlatformConfig(p: string) {
+  const key = p.toLowerCase().trim().replace(/\s+/g, "_");
+  return PLATFORM_ICON_MAP[key] || DEFAULT_PLATFORM;
+}
+
+function PlatformIcons({ platform }: { platform: string }) {
+  const platforms = platform.split(",").map((p) => p.trim()).filter(Boolean);
+  return (
+    <span className="flex gap-1">
+      {platforms.map((p, i) => {
+        const config = getPlatformConfig(p);
+        return (
+          <span key={i} title={config.label} className={`inline-flex items-center justify-center h-5 w-5 rounded border ${config.className}`}>
+            {config.icon}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 import { VideoPlayer } from "@/components/ui/video-player";
 
 
@@ -423,23 +454,6 @@ function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
   // Extract domain from link
   const domain = ad.link ? (() => { try { return new URL(ad.link).hostname.replace("www.", ""); } catch { return null; } })() : null;
 
-  const platformIconMap: Record<string, { icon: React.ReactNode; className: string }> = {
-    facebook: { icon: <Facebook className="h-3 w-3" />, className: "bg-blue-500/15 text-blue-400 border-blue-500/25" },
-    instagram: { icon: <Instagram className="h-3 w-3" />, className: "bg-pink-500/15 text-pink-400 border-pink-500/25" },
-    messenger: { icon: <MessageCircle className="h-3 w-3" />, className: "bg-violet-500/15 text-violet-400 border-violet-500/25" },
-    audience_network: { icon: <Users className="h-3 w-3" />, className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" },
-    threads: { icon: <AtSign className="h-3 w-3" />, className: "bg-amber-500/15 text-amber-400 border-amber-500/25" },
-  };
-  const defaultPlatform = { icon: <Globe className="h-3 w-3" />, className: "bg-secondary text-secondary-foreground border-border" };
-
-  const getPlatformConfig = (p: string) => {
-    const key = p.toLowerCase().trim();
-    for (const [k, v] of Object.entries(platformIconMap)) {
-      if (key.includes(k)) return v;
-    }
-    return defaultPlatform;
-  };
-
   const toggleRef = (e: React.MouseEvent) => {
     e.stopPropagation();
     const allAds = storage.getAds();
@@ -447,9 +461,7 @@ function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
     if (target) {
       target.savedAsReference = !target.savedAsReference;
       storage.updateAd(target);
-      // Force parent reload via toast
       toast.success(target.savedAsReference ? "Salvo como referência ⭐" : "Removido das referências");
-      // We need parent to reload - trigger via window event
       window.dispatchEvent(new CustomEvent("ads-updated"));
     }
   };
@@ -472,16 +484,7 @@ function SwipeAdCard({ ad, aiResult, onClick, onDelete }: {
         <div className="flex items-center justify-between text-[10px] text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <span>Plataformas</span>
-            <span className="flex gap-1">
-              {ad.platform.split(/,\s*/).map((p, i) => {
-                const config = getPlatformConfig(p);
-                return (
-                  <span key={i} title={p.trim()} className={`inline-flex items-center justify-center h-5 w-5 rounded-full border ${config.className}`}>
-                    {config.icon}
-                  </span>
-                );
-              })}
-            </span>
+            <PlatformIcons platform={ad.platform} />
           </div>
           {daysActive != null && daysActive > 0 && (
             <span className={`font-semibold ${daysActive >= 14 ? "text-primary" : ""}`}>
@@ -680,7 +683,19 @@ function AdDetailSheetWithAI({ ad: initialAd, aiResult, open, onOpenChange, onUp
             {ad.pageOrAdvertiser}
             {currentAi && <Sparkles className="h-4 w-4 text-amber-400" />}
           </SheetTitle>
-          <p className="text-xs text-muted-foreground">{ad.platform} · {ad.status} · {ad.country}</p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="flex gap-1">
+              {ad.platform.split(/,\s*/).map((p, i) => {
+                const config = getPlatformConfig(p);
+                return (
+                  <span key={i} title={p.trim()} className={`inline-flex items-center justify-center h-5 w-5 rounded border ${config.className}`}>
+                    {config.icon}
+                  </span>
+                );
+              })}
+            </span>
+            <span>· {ad.status} · {ad.country}</span>
+          </div>
         </SheetHeader>
 
         <div className="space-y-5 mt-4">
