@@ -38,6 +38,38 @@ export function StepOutput({
     navigator.clipboard.writeText(content);
   };
 
+  const handleExportPdf = () => {
+    const md = content;
+    // Simple markdown → HTML
+    const html = md
+      .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+      .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+      .replace(/^# (.+)$/gm, "<h1>$1</h1>")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/^- (.+)$/gm, "<li>$1</li>")
+      .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+      .replace(/\n{2,}/g, "<br/><br/>")
+      .replace(/\n/g, "<br/>");
+
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${step.icon} ${step.label}</title>
+      <style>
+        @media print { body { background:#fff!important; color:#000!important; } }
+        body { font-family: Georgia, 'Times New Roman', serif; padding:40px 50px; line-height:1.8; color:#000; background:#fff; max-width:800px; margin:0 auto; }
+        h1 { font-size:22px; margin-bottom:4px; } h2 { font-size:18px; margin-top:24px; } h3 { font-size:16px; margin-top:18px; }
+        ul { padding-left:20px; } li { margin-bottom:4px; }
+        .header { border-bottom:2px solid #333; padding-bottom:12px; margin-bottom:24px; }
+        .meta { font-size:12px; color:#666; }
+      </style></head><body>
+      <div class="header"><h1>${step.icon} ${step.label}</h1><p class="meta">🤖 ${step.agent} — ${step.description}</p></div>
+      ${html}
+    </body></html>`);
+    win.document.close();
+    win.onload = () => setTimeout(() => win.print(), 400);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
@@ -53,6 +85,9 @@ export function StepOutput({
           {hasContent && !isGenerating && (
             <>
               <CopyScoreCard copy={content} agentName={step.agent} />
+              <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                📄 PDF
+              </Button>
               <Button variant="outline" size="sm" onClick={handleCopy}>
                 📋 Copiar
               </Button>
