@@ -262,22 +262,41 @@ export default function SharedLibrary() {
           <div className="space-y-6">
             {/* Bookshelf with "shelf" effect */}
             <div className="flex flex-wrap gap-6 justify-center py-6 px-4 rounded-xl bg-gradient-to-b from-secondary/30 to-transparent border border-border/30">
-              {filtered.map((item) => (
-                <div key={item.id} className="flex flex-col items-center gap-2">
-                  <Book
-                    title={item.title}
-                    variant="stripe"
-                    width={130}
-                    color={categoryColors[item.category] || categoryColors.geral}
-                    textColor="hsl(0, 0%, 100%)"
-                    textured
-                    onClick={() => setSelectedItem(item)}
-                  />
-                  <Badge variant="outline" className="text-[10px]">
-                    {categories.find((c) => c.value === item.category)?.label ?? item.category}
-                  </Badge>
-                </div>
-              ))}
+              {filtered.map((item) => {
+                const catLabel = categories.find((c) => c.value === item.category)?.label ?? item.category;
+                const catColor = categoryColors[item.category] || categoryColors.geral;
+                return (
+                  <div key={item.id} className="flex flex-col items-center gap-2">
+                    <Book
+                      title={item.title}
+                      variant="stripe"
+                      width={130}
+                      color={catColor}
+                      textColor="hsl(0, 0%, 100%)"
+                      textured
+                      onClick={() => setSelectedItem(item)}
+                      illustration={
+                        <div className="flex flex-col items-center gap-1 px-2">
+                          <div
+                            className="rounded-full px-2.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white shadow-md border border-white/20 backdrop-blur-sm"
+                            style={{ backgroundColor: catColor }}
+                          >
+                            {catLabel}
+                          </div>
+                          {item.agent_name && (
+                            <span className="text-[7px] text-white/70 font-medium truncate max-w-[90px]">
+                              🤖 {item.agent_name}
+                            </span>
+                          )}
+                        </div>
+                      }
+                    />
+                    <Badge variant="outline" className="text-[10px]">
+                      {catLabel}
+                    </Badge>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Shelf shadow line */}

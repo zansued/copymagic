@@ -88,7 +88,10 @@ export function Book({
             style={{ background: resolvedColor }}
           >
             {variant === "stripe" && illustration !== null && (
-              <div className="absolute inset-0 flex items-center justify-center opacity-30">
+              <div className={cn(
+                "absolute inset-0 flex items-center justify-center",
+                illustration ? "opacity-90" : "opacity-30"
+              )}>
                 {resolvedIllustration}
               </div>
             )}
