@@ -1046,6 +1046,7 @@ serve(async (req) => {
 ${culturalPrompt}
 
 REGRAS ABSOLUTAS DO SISTEMA:
+• REGRA #1 — NOME DO PRODUTO: Use SEMPRE o nome exato do produto/oferta informado pelo usuário no campo PRODUTO. NUNCA invente, renomeie ou substitua por outro nome, sistema ou marca. Se o produto se chama "CopyEngine Pro", use "CopyEngine Pro" em todo o texto. Se etapas anteriores já definiram um nome, mantenha-o fielmente.
 • Nunca inventar dados científicos, estudos ou estatísticas falsas.
 • Nunca quebrar coerência psicológica do avatar.
 • Linguagem sempre humana, emocional e persuasiva.
@@ -1060,7 +1061,7 @@ REGRAS ABSOLUTAS DO SISTEMA:
     if (previous_context) {
       messages.push({
         role: "assistant",
-        content: `CONTEXTO DAS ETAPAS ANTERIORES (use como base obrigatória):\n\n${previous_context}`
+        content: `CONTEXTO DAS ETAPAS ANTERIORES (use como base obrigatória — mantenha EXATAMENTE o mesmo nome de produto/marca/oferta usado abaixo):\n\n${previous_context}`
       });
     }
 
