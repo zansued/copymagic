@@ -50,6 +50,7 @@ interface OfferResearchResult {
     modelo_funil: string;
     gancho_principal: string;
   };
+  termos_alternativos_sugeridos?: string[];
 }
 
 const sourceOptions = [
@@ -105,7 +106,8 @@ export default function AiResearchTab() {
   const [niche, setNiche] = useState("");
   const [selectedSources, setSelectedSources] = useState<string[]>(["trends", "ads", "platforms"]);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<OfferResearchResult | null>(null);
+    const [result, setResult] = useState<OfferResearchResult | null>(null);
+    const [metadata, setMetadata] = useState<any>(null);
 
   const toggleSource = (id: string) => {
     setSelectedSources(prev =>
@@ -125,6 +127,7 @@ export default function AiResearchTab() {
 
     setLoading(true);
     setResult(null);
+    setMetadata(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("offer-research", {
@@ -136,6 +139,7 @@ export default function AiResearchTab() {
       if (data.data?.error) throw new Error(data.data.error);
 
       setResult(data.data);
+      setMetadata(data.metadata || null);
       toast.success("Pesquisa concluída!");
     } catch (e: any) {
       console.error("Offer research error:", e);
@@ -363,6 +367,7 @@ export default function AiResearchTab() {
 
               {result.recomendacao_oferta && (
                 <SectionCard title="Recomendação de Oferta" icon={Target} iconColor="text-primary">
+                  {/* ... keep existing code */}
                   <div className="space-y-3">
                     <div className="p-3 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
                       <p className="text-lg font-bold text-foreground">{result.recomendacao_oferta.nome_sugerido}</p>
@@ -392,6 +397,62 @@ export default function AiResearchTab() {
                     </div>
                   </div>
                 </SectionCard>
+              )}
+
+              {/* Termos alternativos sugeridos */}
+              {result.termos_alternativos_sugeridos && result.termos_alternativos_sugeridos.length > 0 && (
+                <div className="md:col-span-2">
+                  <Card className="p-4 border-border/50 bg-card/80">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lightbulb className="h-4 w-4 text-amber-400" />
+                      <span className="text-sm font-medium text-foreground">Termos alternativos sugeridos</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {result.termos_alternativos_sugeridos.map((t: string, i: number) => (
+                        <Badge key={i} variant="outline" className="text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => { setNiche(t); }}>
+                          {t}
+                        </Badge>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              {/* Metadata debug panel */}
+              {metadata && (
+                <div className="md:col-span-2">
+                  <details className="group">
+                    <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                      <BarChart3 className="h-3 w-3" /> Dados de depuração (queries, contagens)
+                    </summary>
+                    <Card className="mt-2 p-4 border-border/50 bg-card/80 text-xs space-y-2">
+                      {metadata.queries_usadas && (
+                        <div>
+                          <p className="font-medium text-muted-foreground mb-1">Queries usadas:</p>
+                          {Object.entries(metadata.queries_usadas).map(([k, v]: [string, any]) => (
+                            <div key={k} className="ml-2">
+                              <span className="text-foreground/70">{k}:</span>{" "}
+                              <span className="text-foreground">{Array.isArray(v) ? v.join(" | ") : String(v)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-3">
+                        <span>Meta brutos: <strong>{metadata.meta_ads_count_raw ?? "?"}</strong></span>
+                        <span>Meta filtrados: <strong>{metadata.meta_ads_count_after_filter ?? "?"}</strong></span>
+                        <span>Contexto: <strong>{metadata.context_length ?? "?"}</strong> chars</span>
+                      </div>
+                      {metadata.search_results_by_source && (
+                        <div className="flex flex-wrap gap-3">
+                          {Object.entries(metadata.search_results_by_source).map(([k, v]: [string, any]) => (
+                            <span key={k}>{k}: <strong>{v}</strong></span>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  </details>
+                </div>
               )}
             </div>
           </motion.div>

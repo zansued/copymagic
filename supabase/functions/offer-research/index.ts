@@ -6,6 +6,130 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function dedupeByField<T>(arr: T[], key: keyof T): T[] {
+  const seen = new Set<string>();
+  return arr.filter((item) => {
+    const val = String(item[key] ?? "");
+    if (!val || seen.has(val)) return false;
+    seen.add(val);
+    return true;
+  });
+}
+
+function dedupeByTextHash(ads: any[]): any[] {
+  const seen = new Set<string>();
+  return ads.filter((ad) => {
+    const hash = (ad.texto_anuncio || "").trim().toLowerCase().slice(0, 120);
+    if (!hash || seen.has(hash)) return false;
+    seen.add(hash);
+    return true;
+  });
+}
+
+const OFFER_TERMS = [
+  "garantia", "bônus", "módulo", "inscrição", "checkout", "pix", "parcela",
+  "método", "resultado", "aula", "grátis", "desconto", "oferta", "curso",
+  "mentoria", "treinamento", "programa", "desafio", "vagas", "matrícula",
+  "certificado", "acesso", "comunidade", "suporte", "transforma",
+  "comprar", "assinar", "investimento", "promoção", "exclusiv"
+];
+
+function hasOfferSignal(text: string): boolean {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  return OFFER_TERMS.some((t) => lower.includes(t));
+}
+
+// ─── Query Pack Generator (mini OpenAI call) ────────────────────────────────
+
+async function generateQueryPack(niche: string, apiKey: string): Promise<{
+  queries_trends: string[];
+  queries_platforms: string[];
+  queries_ads: string[];
+}> {
+  const fallback = buildHeuristicQueries(niche);
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        max_tokens: 600,
+        temperature: 0.5,
+        messages: [
+          {
+            role: "system",
+            content: `Você gera pacotes de queries de busca para pesquisa de mercado digital no Brasil.
+Retorne APENAS JSON válido, sem markdown. Formato:
+{
+  "queries_trends": ["q1","q2","q3","q4"],
+  "queries_platforms": ["q1","q2","q3"],
+  "queries_ads": ["q1","q2","q3","q4"]
+}
+queries_trends: 4 queries para Google Trends / tendências (inclua sinônimos, dores, "2025"/"2026")
+queries_platforms: 3 queries para buscar infoprodutos em marketplaces (Hotmart, Kiwify, Monetizze, Eduzz) — use "site:" quando fizer sentido
+queries_ads: 4 termos de busca para Meta Ad Library (curtos, 2-4 palavras cada, sinônimos e variações de dor/promessa)
+Adapte ao nicho de forma criativa. Inclua variações de dor, desejo e termos de compra.`
+          },
+          { role: "user", content: `Nicho: "${niche}"` }
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      console.warn("Query pack AI call failed, using heuristic:", res.status);
+      return fallback;
+    }
+
+    const data = await res.json();
+    const raw = data.choices?.[0]?.message?.content || "";
+    const firstBrace = raw.indexOf("{");
+    const lastBrace = raw.lastIndexOf("}");
+    if (firstBrace === -1 || lastBrace <= firstBrace) return fallback;
+
+    const parsed = JSON.parse(raw.slice(firstBrace, lastBrace + 1));
+    return {
+      queries_trends: (parsed.queries_trends || []).slice(0, 5),
+      queries_platforms: (parsed.queries_platforms || []).slice(0, 4),
+      queries_ads: (parsed.queries_ads || []).slice(0, 5),
+    };
+  } catch (e) {
+    console.warn("Query pack generation failed, using heuristic:", e);
+    return fallback;
+  }
+}
+
+function buildHeuristicQueries(niche: string) {
+  const dores = ["como", "sem esforço", "rápido", "em 30 dias", "método"];
+  const compra = ["curso", "mentoria", "programa", "treinamento"];
+  return {
+    queries_trends: [
+      `"${niche}" tendências crescimento 2025`,
+      `"${niche}" ${dores[0]} ${dores[2]} resultados`,
+      `${niche} mercado digital demanda 2025 2026`,
+    ],
+    queries_platforms: [
+      `site:hotmart.com "${niche}" curso mentoria`,
+      `site:kiwify.com.br "${niche}" programa treinamento`,
+      `${niche} infoproduto Monetizze Eduzz vendas`,
+    ],
+    queries_ads: [
+      niche,
+      `${niche} ${compra[0]}`,
+      `${niche} ${dores[0]} ${dores[2]}`,
+      `${niche} ${compra[1]} ${compra[3]}`,
+    ],
+  };
+}
+
+// ─── Main Handler ───────────────────────────────────────────────────────────
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -49,268 +173,260 @@ serve(async (req) => {
     const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_SELF_HOSTED_KEY") || Deno.env.get("FIRECRAWL_API_KEY");
     if (!FIRECRAWL_API_KEY) throw new Error("FIRECRAWL_API_KEY não configurada");
 
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
+
     const firecrawlBaseUrl = Deno.env.get("FIRECRAWL_SELF_HOSTED_KEY")
       ? "https://firecrawl.techstorebrasil.com"
       : "https://api.firecrawl.dev";
 
-    const searchFirecrawl = async (query: string, limit = 5) => {
-      const res = await fetch(`${firecrawlBaseUrl}/v1/search`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query,
-          limit,
-          lang: "pt-br",
-          country: "BR",
-          scrapeOptions: { formats: ["markdown"] },
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        console.error("Firecrawl search error:", data);
-        return [];
-      }
-      return data.data || [];
-    };
+    // ═══ STEP 1: Generate Query Pack ═══════════════════════════════════════
+    console.log("Step 1: Generating query pack for niche:", niche);
+    const queryPack = await generateQueryPack(niche, OPENAI_API_KEY);
+    console.log("Query pack generated:", JSON.stringify(queryPack));
 
-    const scrapeFirecrawl = async (url: string): Promise<string> => {
+    // ═══ STEP 2: Search & Scrape Functions ═════════════════════════════════
+
+    const firecrawlCounts: Record<string, number> = {};
+
+    const searchFirecrawl = async (query: string, limit = 12): Promise<any[]> => {
       try {
-        const res = await fetch(`${firecrawlBaseUrl}/v1/scrape`, {
+        const res = await fetch(`${firecrawlBaseUrl}/v1/search`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            url,
-            formats: ["markdown"],
-            onlyMainContent: true,
-            waitFor: 3000,
+            query,
+            limit,
+            lang: "pt-br",
+            country: "BR",
+            scrapeOptions: { formats: ["markdown"] },
           }),
         });
         const data = await res.json();
         if (!res.ok) {
-          console.error(`Scrape error for ${url}:`, data);
-          return "";
+          console.error("Firecrawl search error:", data);
+          firecrawlCounts[query] = 0;
+          return [];
         }
-        const md = data.data?.markdown || data.markdown || "";
-        return md.slice(0, 2000);
+        const results = data.data || [];
+        firecrawlCounts[query] = results.length;
+        return results;
       } catch (e) {
-        console.error(`Scrape failed for ${url}:`, e);
-        return "";
+        console.error("Firecrawl search failed:", e);
+        firecrawlCounts[query] = 0;
+        return [];
       }
     };
 
-    // Fetch real ads from Meta Graph API (Ad Library)
-    const fetchMetaAds = async (query: string) => {
+    // ═══ STEP 3: Meta Ads with multiple queries, pagination, dedupe ═══════
+
+    const fetchMetaAds = async (searchTerms: string[]): Promise<{ ads: any[]; rawCount: number; afterFilterCount: number }> => {
       const META_ACCESS_TOKEN = Deno.env.get("META_ACCESS_TOKEN");
       if (!META_ACCESS_TOKEN) {
         console.warn("META_ACCESS_TOKEN not configured, skipping Meta Ad Library API");
-        return [];
+        return { ads: [], rawCount: 0, afterFilterCount: 0 };
       }
 
-      try {
-        // Use broad matching to capture more scaled offers (synonyms, variations)
-        const params = new URLSearchParams({
-          search_terms: query,
-          search_type: "KEYWORD_UNORDERED",
-          ad_type: "ALL",
-          ad_reached_countries: '["BR"]',
-          ad_active_status: "ACTIVE",
-          fields: "id,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_descriptions,ad_creative_link_titles,ad_delivery_start_time,ad_delivery_stop_time,ad_snapshot_url,byline,page_id,page_name,publisher_platforms,languages,ad_creative_link_url",
-          limit: "50",
-          access_token: META_ACCESS_TOKEN,
-        });
+      const allAds: any[] = [];
+      const seenIds = new Set<string>();
 
-        const apiUrl = `https://graph.facebook.com/v22.0/ads_archive?${params.toString()}`;
-        console.log("Fetching Meta Graph API ads_archive for:", query);
+      for (const term of searchTerms.slice(0, 5)) {
+        try {
+          let url: string | null = buildMetaUrl(term, META_ACCESS_TOKEN, 50);
+          let pagesRead = 0;
 
-        const res = await fetch(apiUrl);
-        const data = await res.json();
+          while (url && pagesRead < 3 && allAds.length < 200) {
+            const res = await fetch(url);
+            const data = await res.json();
 
-        if (!res.ok || data.error) {
-          console.error("Meta Graph API error:", JSON.stringify(data.error || data));
-          return [];
+            if (!res.ok || data.error) {
+              console.error("Meta API error for term:", term, data.error?.message || "");
+              break;
+            }
+
+            for (const ad of (data.data || [])) {
+              if (!seenIds.has(ad.id)) {
+                seenIds.add(ad.id);
+                allAds.push(ad);
+              }
+            }
+
+            url = data.paging?.next || null;
+            pagesRead++;
+          }
+        } catch (e) {
+          console.error("Meta API failed for term:", term, e);
         }
-
-        const ads = data.data || [];
-        console.log(`Meta Graph API returned ${ads.length} ads`);
-
-        // Calculate longevity (days running) and sort by it — longer = more scaled
-        const now = new Date();
-        const mapped = ads.map((ad: any) => {
-          const startDate = ad.ad_delivery_start_time ? new Date(ad.ad_delivery_start_time) : null;
-          const diasAtivo = startDate ? Math.max(1, Math.round((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))) : 0;
-          return {
-            ad_archive_id: ad.id,
-            anunciante: ad.page_name || ad.byline || "Desconhecido",
-            page_id: ad.page_id,
-            texto_anuncio: (ad.ad_creative_bodies || []).join(" ").slice(0, 500),
-            plataforma: (ad.publisher_platforms || []).join(", ") || "Facebook",
-            status: ad.ad_delivery_stop_time ? "Inativo" : "Ativo",
-            data_inicio: ad.ad_delivery_start_time || null,
-            data_fim: ad.ad_delivery_stop_time || null,
-            dias_ativo: diasAtivo,
-            cta: (ad.ad_creative_link_titles || []).join(" ") || null,
-            url_destino: ad.ad_creative_link_url || null,
-            url_anuncio: ad.id ? `https://www.facebook.com/ads/library/?id=${ad.id}&active_status=all&ad_type=all&country=BR&media_type=all` : null,
-            tipo_midia: null,
-            gancho: (ad.ad_creative_link_descriptions || []).join(" ").slice(0, 200) || null,
-          };
-        });
-
-        // Sort by longevity descending — ads running longer are likely more scaled
-        mapped.sort((a: any, b: any) => b.dias_ativo - a.dias_ativo);
-        return mapped;
-      } catch (e) {
-        console.error("Meta Graph API fetch failed:", e);
-        return [];
       }
+
+      const rawCount = allAds.length;
+      console.log(`Meta API: ${rawCount} raw ads collected from ${searchTerms.length} terms`);
+
+      const now = new Date();
+      let mapped = allAds.map((ad: any) => {
+        const startDate = ad.ad_delivery_start_time ? new Date(ad.ad_delivery_start_time) : null;
+        const diasAtivo = startDate ? Math.max(1, Math.round((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))) : 0;
+        return {
+          ad_archive_id: ad.id,
+          anunciante: ad.page_name || ad.byline || "Desconhecido",
+          page_id: ad.page_id,
+          texto_anuncio: (ad.ad_creative_bodies || []).join(" ").slice(0, 500),
+          plataforma: (ad.publisher_platforms || []).join(", ") || "Facebook",
+          status: ad.ad_delivery_stop_time ? "Inativo" : "Ativo",
+          data_inicio: ad.ad_delivery_start_time || null,
+          data_fim: ad.ad_delivery_stop_time || null,
+          dias_ativo: diasAtivo,
+          cta: (ad.ad_creative_link_titles || []).join(" ") || null,
+          url_destino: ad.ad_creative_link_url || null,
+          url_anuncio: ad.id ? `https://www.facebook.com/ads/library/?id=${ad.id}&active_status=all&ad_type=all&country=BR&media_type=all` : null,
+          tipo_midia: null,
+          gancho: (ad.ad_creative_link_descriptions || []).join(" ").slice(0, 200) || null,
+        };
+      });
+
+      // Dedupe by text hash
+      mapped = dedupeByTextHash(mapped);
+
+      // Sort by longevity
+      mapped.sort((a: any, b: any) => b.dias_ativo - a.dias_ativo);
+
+      // Calculate advertiser density
+      const densityMap: Record<string, number> = {};
+      for (const ad of mapped) {
+        if (ad.page_id) densityMap[ad.page_id] = (densityMap[ad.page_id] || 0) + 1;
+      }
+      for (const ad of mapped) {
+        (ad as any).densidade_anunciante = ad.page_id ? (densityMap[ad.page_id] || 1) : 1;
+      }
+
+      const afterFilterCount = mapped.length;
+      console.log(`Meta API: ${afterFilterCount} ads after dedupe`);
+      return { ads: mapped, rawCount, afterFilterCount };
     };
 
-    // Parallel searches and scraping based on selected sources
-    const searchPromises: Record<string, Promise<any[]>> = {};
-    const scrapePromises: Record<string, Promise<string>> = {};
-    let metaAdsPromise: Promise<any[]> | null = null;
+    function buildMetaUrl(query: string, token: string, limit: number): string {
+      const params = new URLSearchParams({
+        search_terms: query,
+        search_type: "KEYWORD_UNORDERED",
+        ad_type: "ALL",
+        ad_reached_countries: '["BR"]',
+        ad_active_status: "ACTIVE",
+        fields: "id,ad_creative_bodies,ad_creative_link_captions,ad_creative_link_descriptions,ad_creative_link_titles,ad_delivery_start_time,ad_delivery_stop_time,ad_snapshot_url,byline,page_id,page_name,publisher_platforms,languages,ad_creative_link_url",
+        limit: String(limit),
+        access_token: token,
+      });
+      return `https://graph.facebook.com/v22.0/ads_archive?${params.toString()}`;
+    }
+
+    // ═══ STEP 4: Execute parallel searches ═════════════════════════════════
+
+    const searchPromises: { key: string; promise: Promise<any[]> }[] = [];
+    let metaAdsPromise: Promise<{ ads: any[]; rawCount: number; afterFilterCount: number }> | null = null;
 
     if (sources.includes("trends")) {
-      searchPromises.trends = searchFirecrawl(
-        `"${niche}" tendências crescimento 2025 Google Trends volume busca`,
-        5
-      );
-      // Direct Google Trends scraping
-      const encodedNiche = encodeURIComponent(niche);
-      scrapePromises.google_trends = scrapeFirecrawl(
-        `https://trends.google.com.br/trending?geo=BR&q=${encodedNiche}&hours=168`
-      );
-      // Scrape Google Trends explore for related queries
-      scrapePromises.google_trends_explore = scrapeFirecrawl(
-        `https://trends.google.com.br/trends/explore?q=${encodedNiche}&geo=BR`
-      );
+      for (const q of queryPack.queries_trends.slice(0, 3)) {
+        searchPromises.push({ key: "trends", promise: searchFirecrawl(q, 12) });
+      }
     }
 
     if (sources.includes("ads")) {
-      searchPromises.ads = searchFirecrawl(
-        `"${niche}" anúncios Facebook Instagram Meta Ad Library ads escalados criativos`,
-        5
-      );
-      metaAdsPromise = fetchMetaAds(niche);
+      for (const q of queryPack.queries_ads.slice(0, 2)) {
+        searchPromises.push({ key: "ads", promise: searchFirecrawl(q + " anúncios criativos escalados", 10) });
+      }
+      metaAdsPromise = fetchMetaAds(queryPack.queries_ads);
     }
 
     if (sources.includes("platforms")) {
-      searchPromises.platforms = searchFirecrawl(
-        `"${niche}" produto digital infoproduto Hotmart Kiwify vendas escalado oferta high ticket`,
-        5
-      );
-      // Direct platform scraping for real product data
-      const encodedNiche = encodeURIComponent(niche);
-      scrapePromises.hotmart = scrapeFirecrawl(
-        `https://hotmart.com/pt-br/marketplace?q=${encodedNiche}&sort=RELEVANCE`
-      );
-      scrapePromises.kiwify = scrapeFirecrawl(
-        `https://dashboard.kiwify.com.br/marketplace?search=${encodedNiche}`
-      );
-      scrapePromises.clickbank = scrapeFirecrawl(
-        `https://www.clickbank.com/marketplace?query=${encodedNiche}&sortField=GRAVITY&sortOrder=DESC`
-      );
+      for (const q of queryPack.queries_platforms.slice(0, 3)) {
+        searchPromises.push({ key: "platforms", promise: searchFirecrawl(q, 12) });
+      }
     }
 
-    const searchKeys = Object.keys(searchPromises);
-    const scrapeKeys = Object.keys(scrapePromises);
-    const [searchResults, metaAdsRaw, scrapeResults] = await Promise.all([
-      Promise.all(Object.values(searchPromises)),
+    const [searchResults, metaAdsResult] = await Promise.all([
+      Promise.all(searchPromises.map((s) => s.promise)),
       metaAdsPromise,
-      Promise.all(Object.values(scrapePromises)),
     ]);
-    const resultsBySource: Record<string, any[]> = {};
-    searchKeys.forEach((key, i) => {
-      resultsBySource[key] = searchResults[i];
-    });
-    const scrapesBySource: Record<string, string> = {};
-    scrapeKeys.forEach((key, i) => {
-      scrapesBySource[key] = scrapeResults[i];
+
+    // Aggregate and dedupe search results by URL
+    const resultsBySource: Record<string, any[]> = { trends: [], ads: [], platforms: [] };
+    const seenUrls = new Set<string>();
+
+    searchPromises.forEach((s, i) => {
+      for (const r of searchResults[i]) {
+        const url = r.url || r.title || "";
+        if (seenUrls.has(url)) continue;
+        seenUrls.add(url);
+        resultsBySource[s.key].push(r);
+      }
     });
 
     console.log("Search results collected:", Object.fromEntries(
       Object.entries(resultsBySource).map(([k, v]) => [k, v.length])
     ));
-    console.log("Scrape results collected:", Object.fromEntries(
-      Object.entries(scrapesBySource).map(([k, v]) => [k, v ? `${v.length} chars` : "empty"])
-    ));
 
-    // Build context for AI analysis
+    // ═══ STEP 5: Build context with noise filtering ════════════════════════
+
     const contextParts: string[] = [];
 
-    if (resultsBySource.trends?.length) {
+    if (resultsBySource.trends.length) {
       contextParts.push("## TENDÊNCIAS DE BUSCA (via pesquisa web)\n" + resultsBySource.trends
-        .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1200)}`)
+        .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1500)}`)
         .join("\n\n"));
     }
 
-    // Add direct Google Trends scraped data
-    if (scrapesBySource.google_trends) {
-      contextParts.push("## GOOGLE TRENDS - DADOS DIRETOS (scraping)\n" + scrapesBySource.google_trends);
-    }
-    if (scrapesBySource.google_trends_explore) {
-      contextParts.push("## GOOGLE TRENDS - CONSULTAS RELACIONADAS (scraping)\n" + scrapesBySource.google_trends_explore);
-    }
-
-    if (resultsBySource.ads?.length) {
+    if (resultsBySource.ads.length) {
       contextParts.push("## ANÚNCIOS E CRIATIVOS (via pesquisa web)\n" + resultsBySource.ads
-        .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1200)}`)
+        .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1500)}`)
         .join("\n\n"));
     }
 
-    if (resultsBySource.platforms?.length) {
-      contextParts.push("## PRODUTOS DIGITAIS EM PLATAFORMAS (via pesquisa web)\n" + resultsBySource.platforms
-        .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1200)}`)
+    // Filter platform results: prioritize pages with offer signals
+    const platformResults = resultsBySource.platforms;
+    const withSignal = platformResults.filter((r: any) =>
+      hasOfferSignal(r.markdown || r.description || r.title || "")
+    );
+    const platformsToUse = withSignal.length >= 2 ? withSignal : platformResults;
+
+    if (platformsToUse.length) {
+      contextParts.push("## PRODUTOS DIGITAIS EM PLATAFORMAS (via pesquisa web)\n" + platformsToUse
+        .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1500)}`)
         .join("\n\n"));
     }
 
-    // Add direct platform scraped data
-    if (scrapesBySource.hotmart) {
-      contextParts.push("## HOTMART MARKETPLACE - DADOS DIRETOS (scraping)\n" + scrapesBySource.hotmart);
-    }
-    if (scrapesBySource.kiwify) {
-      contextParts.push("## KIWIFY MARKETPLACE - DADOS DIRETOS (scraping)\n" + scrapesBySource.kiwify);
-    }
-    if (scrapesBySource.clickbank) {
-      contextParts.push("## CLICKBANK MARKETPLACE - DADOS DIRETOS (scraping)\n" + scrapesBySource.clickbank);
-    }
+    // Cap at 18k chars, prioritizing relevant content
+    const fullContext = contextParts.join("\n\n---\n\n").slice(0, 18000);
 
-    const fullContext = contextParts.join("\n\n---\n\n").slice(0, 12000);
+    // ═══ STEP 6: Build Meta ads context ════════════════════════════════════
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY não configurada");
+    const realAds = metaAdsResult?.ads || [];
+    const metaAdsCountRaw = metaAdsResult?.rawCount || 0;
+    const metaAdsCountFiltered = metaAdsResult?.afterFilterCount || 0;
 
-    const culturalPrompt = buildCulturalSystemPrompt(genCtx);
-
-    // Build Meta ads context from real API data
     let metaAdsContext = "";
-    const realAds = metaAdsRaw || [];
-    
     if (realAds.length > 0) {
-      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY (${realAds.length} encontrados via API oficial, ordenados por longevidade)\n` +
-        realAds.map((ad: any, i: number) => 
+      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY (${realAds.length} após dedupe, ${metaAdsCountRaw} brutos)\n` +
+        realAds.slice(0, 60).map((ad: any, i: number) =>
           `### Anúncio ${i + 1}: ${ad.anunciante}\n` +
           `- Texto: ${ad.texto_anuncio || "N/A"}\n` +
           `- Plataforma: ${ad.plataforma}\n` +
           `- Status: ${ad.status}\n` +
           `- Data início: ${ad.data_inicio || "N/A"}\n` +
-          `- Dias ativo: ${ad.dias_ativo || 0} dias (quanto mais dias = maior sinal de escala)\n` +
+          `- Dias ativo: ${ad.dias_ativo || 0} dias\n` +
           `- CTA: ${ad.cta || "N/A"}\n` +
           `- URL destino: ${ad.url_destino || "N/A"}\n` +
           `- URL anúncio: ${ad.url_anuncio || "N/A"}\n` +
-          `- Gancho: ${ad.gancho || "N/A"}`
+          `- Gancho: ${ad.gancho || "N/A"}\n` +
+          `- Densidade anunciante: ${ad.densidade_anunciante || 1} anúncios do mesmo page_id`
         ).join("\n\n");
-      
-      console.log(`Meta API: ${realAds.length} real ads added to context`);
     }
 
-    // Use AI to also extract structured ad data from the Meta Ad Library content
+    // ═══ STEP 7: AI Analysis ═══════════════════════════════════════════════
+
+    const culturalPrompt = buildCulturalSystemPrompt(genCtx);
+
     const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -343,6 +459,14 @@ REGRAS INVIOLÁVEIS
 - Mantenha os campos ad_archive_id, url_destino e url_anuncio EXATAMENTE como recebidos dos dados. Nunca os modifique.
 
 ═══════════════════════════════════════
+EVIDÊNCIA FRACA
+═══════════════════════════════════════
+Se o CONTEXTO_WEB tiver pouca ou nenhuma informação útil sobre o nicho, ou se após filtrar não restarem anúncios relevantes:
+- O veredicto DEVE incluir "evidência insuficiente" 
+- Sugira 3 termos de busca alternativos que poderiam retornar melhores resultados
+- Não inflacione scores artificialmente — se não há dados, score_oportunidade deve ser baixo (1-3)
+
+═══════════════════════════════════════
 TAREFAS
 ═══════════════════════════════════════
 
@@ -367,7 +491,7 @@ B) PARA CADA ITEM EM ANUNCIOS_META relevante ao nicho, gere:
    - funnel_map: string descritiva ex: "Ad -> Landing -> Checkout" ou "Ad -> Landing"
    
    b.3) SINAIS DE ESCALA:
-   - Explique usando APENAS dados disponíveis: dias_ativo, presença de múltiplos criativos do mesmo anunciante, variações de texto
+   - Explique usando APENAS dados disponíveis: dias_ativo, densidade_anunciante (múltiplos criativos do mesmo anunciante), variações de texto
    - NUNCA cite métricas que não existam nos dados (sem ROAS, sem CPA, sem receita)
    - scale_score (0-10) baseado em: Longevidade 40%, Densidade do anunciante 25%, Variações de criativo 20%, Recorrência de promessa 15%
 
@@ -386,6 +510,7 @@ Retorne SOMENTE JSON válido, sem markdown, sem backticks, sem texto antes ou de
 {
   "score_oportunidade": 1-10,
   "veredicto": "frase curta sobre viabilidade do nicho",
+  "termos_alternativos_sugeridos": ["termo1", "termo2", "termo3"],
   "tendencias": {
     "interesse_crescente": true/false,
     "sazonalidade": "descrição ou null",
@@ -415,7 +540,7 @@ Retorne SOMENTE JSON válido, sem markdown, sem backticks, sem texto antes ou de
       "tipo_midia": "inferido ou null",
       "gancho": "gancho extraído ou null",
       "scale_score": 0.0,
-      "sinais_escala": ["longevidade: X dias", "etc"],
+      "sinais_escala": ["longevidade: X dias", "densidade: Y anúncios do mesmo anunciante", "etc"],
       "offer_card": {
         "promise": "...",
         "mechanism": "...",
@@ -454,7 +579,7 @@ Retorne SOMENTE JSON válido, sem markdown, sem backticks, sem texto antes ou de
           },
           {
             role: "user",
-            content: `Nicho pesquisado: "${niche}"\n\n═══ CONTEXTO_WEB (use APENAS para tendências e ofertas_escaladas) ═══\n\n${fullContext}\n\n═══ ANUNCIOS_META (ÚNICA fonte para anuncios_encontrados) ═══\n\n${realAds.length > 0 ? `${metaAdsContext}\n\nDADOS ESTRUTURADOS:\n${JSON.stringify(realAds, null, 2)}` : "Nenhum anúncio encontrado via Meta API. Retorne anuncios_encontrados como array vazio."}`
+            content: `Nicho pesquisado: "${niche}"\n\n═══ CONTEXTO_WEB (use APENAS para tendências e ofertas_escaladas) ═══\n\n${fullContext}\n\n═══ ANUNCIOS_META (ÚNICA fonte para anuncios_encontrados) ═══\n\n${realAds.length > 0 ? `${metaAdsContext}\n\nDADOS ESTRUTURADOS:\n${JSON.stringify(realAds.slice(0, 60), null, 2)}` : "Nenhum anúncio encontrado via Meta API. Retorne anuncios_encontrados como array vazio."}`
           }
         ],
         temperature: 0.7,
@@ -483,7 +608,6 @@ Retorne SOMENTE JSON válido, sem markdown, sem backticks, sem texto antes ou de
 
     let parsed;
     try {
-      // Extract JSON: try brace extraction first (most reliable), then strip markdown
       let jsonStr = rawContent.trim();
       const firstBrace = jsonStr.indexOf("{");
       const lastBrace = jsonStr.lastIndexOf("}");
@@ -496,16 +620,21 @@ Retorne SOMENTE JSON válido, sem markdown, sem backticks, sem texto antes ou de
       parsed = { error: "Não foi possível analisar os resultados", raw: rawContent.slice(0, 2000) };
     }
 
+    // ═══ STEP 8: Return with full metadata ═════════════════════════════════
+
     return new Response(JSON.stringify({
       success: true,
       data: parsed,
-      sources_used: searchKeys,
-      sources_count: Object.fromEntries(
-        Object.entries(resultsBySource).map(([k, v]) => [k, v.length])
-      ),
-      scrape_sources: Object.fromEntries(
-        Object.entries(scrapesBySource).map(([k, v]) => [k, v ? "ok" : "empty"])
-      ),
+      metadata: {
+        queries_usadas: queryPack,
+        meta_ads_count_raw: metaAdsCountRaw,
+        meta_ads_count_after_filter: metaAdsCountFiltered,
+        firecrawl_counts: firecrawlCounts,
+        search_results_by_source: Object.fromEntries(
+          Object.entries(resultsBySource).map(([k, v]) => [k, v.length])
+        ),
+        context_length: fullContext.length,
+      },
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
