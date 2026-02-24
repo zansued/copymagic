@@ -8,12 +8,12 @@ const corsHeaders = {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function dedupeByField<T>(arr: T[], key: keyof T): T[] {
+function dedupeByUrl<T extends { url?: string; title?: string }>(arr: T[]): T[] {
   const seen = new Set<string>();
   return arr.filter((item) => {
-    const val = String(item[key] ?? "");
-    if (!val || seen.has(val)) return false;
-    seen.add(val);
+    const key = item.url || item.title || "";
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 }
@@ -42,7 +42,31 @@ function hasOfferSignal(text: string): boolean {
   return OFFER_TERMS.some((t) => lower.includes(t));
 }
 
-// ─── Query Pack Generator (mini OpenAI call) ────────────────────────────────
+const STOPWORDS = new Set([
+  "de", "da", "do", "das", "dos", "a", "o", "as", "os", "em", "no", "na",
+  "com", "para", "por", "que", "um", "uma", "e", "é", "se", "ou", "ao",
+  "como", "mais", "sem", "seu", "sua", "ter", "ser", "não", "já", "tem",
+  "site", "www", "com", "br", "http", "https"
+]);
+
+function extractKeywords(texts: string[]): string[] {
+  const words = new Set<string>();
+  for (const t of texts) {
+    const tokens = t.toLowerCase().replace(/[^a-záàâãéèêíóôõúüç\s]/g, " ").split(/\s+/);
+    for (const tok of tokens) {
+      if (tok.length >= 3 && !STOPWORDS.has(tok)) words.add(tok);
+    }
+  }
+  return [...words];
+}
+
+function adMatchesKeywords(ad: any, keywords: string[]): boolean {
+  const text = [ad.texto_anuncio, ad.gancho, ad.cta, ad.url_destino, ad.anunciante]
+    .filter(Boolean).join(" ").toLowerCase();
+  return keywords.some((kw) => text.includes(kw));
+}
+
+// ─── Query Pack Generator ───────────────────────────────────────────────────
 
 async function generateQueryPack(niche: string, apiKey: string): Promise<{
   queries_trends: string[];
@@ -128,6 +152,52 @@ function buildHeuristicQueries(niche: string) {
   };
 }
 
+// ─── Query Pack Cache ───────────────────────────────────────────────────────
+
+async function getOrCreateQueryPack(
+  niche: string,
+  apiKey: string,
+  serviceClient: any
+): Promise<{ pack: any; cacheStatus: "hit" | "miss" }> {
+  const normalizedNiche = niche.trim().toLowerCase();
+
+  try {
+    const { data: cached } = await serviceClient
+      .from("research_query_cache")
+      .select("queries, updated_at")
+      .eq("niche", normalizedNiche)
+      .maybeSingle();
+
+    if (cached) {
+      const age = Date.now() - new Date(cached.updated_at).getTime();
+      const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+      if (age < SEVEN_DAYS) {
+        console.log("Query pack cache HIT for:", normalizedNiche);
+        return { pack: cached.queries, cacheStatus: "hit" };
+      }
+    }
+  } catch (e) {
+    console.warn("Cache lookup failed:", e);
+  }
+
+  // Cache miss — generate
+  const pack = await generateQueryPack(niche, apiKey);
+
+  // Save to cache (fire-and-forget)
+  try {
+    await serviceClient
+      .from("research_query_cache")
+      .upsert(
+        { niche: normalizedNiche, queries: pack, updated_at: new Date().toISOString() },
+        { onConflict: "niche" }
+      );
+  } catch (e) {
+    console.warn("Cache save failed:", e);
+  }
+
+  return { pack, cacheStatus: "miss" };
+}
+
 // ─── Main Handler ───────────────────────────────────────────────────────────
 
 serve(async (req) => {
@@ -145,6 +215,8 @@ serve(async (req) => {
       });
     }
     const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    
+    // User client for auth
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -156,7 +228,13 @@ serve(async (req) => {
       });
     }
 
-    const { niche, sources = ["trends", "ads", "platforms"], generation_context } = await req.json();
+    // Service role client for cache table
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const { niche, sources = ["trends", "ads", "platforms"], generation_context, skip_cache = false } = await req.json();
     const genCtx = validateGenerationContext(generation_context);
 
     if (!niche || typeof niche !== "string" || !niche.trim()) {
@@ -180,12 +258,14 @@ serve(async (req) => {
       ? "https://firecrawl.techstorebrasil.com"
       : "https://api.firecrawl.dev";
 
-    // ═══ STEP 1: Generate Query Pack ═══════════════════════════════════════
-    console.log("Step 1: Generating query pack for niche:", niche);
-    const queryPack = await generateQueryPack(niche, OPENAI_API_KEY);
-    console.log("Query pack generated:", JSON.stringify(queryPack));
+    // ═══ STEP 1: Query Pack (with cache) ═════════════════════════════════════
+    console.log("Step 1: Getting query pack for niche:", niche);
+    const { pack: queryPack, cacheStatus } = skip_cache
+      ? { pack: await generateQueryPack(niche, OPENAI_API_KEY), cacheStatus: "miss" as const }
+      : await getOrCreateQueryPack(niche, OPENAI_API_KEY, serviceClient);
+    console.log("Query pack ready (cache:", cacheStatus, "):", JSON.stringify(queryPack));
 
-    // ═══ STEP 2: Search & Scrape Functions ═════════════════════════════════
+    // ═══ STEP 2: Search & Scrape Functions ═══════════════════════════════════
 
     const firecrawlCounts: Record<string, number> = {};
 
@@ -221,13 +301,47 @@ serve(async (req) => {
       }
     };
 
-    // ═══ STEP 3: Meta Ads with multiple queries, pagination, dedupe ═══════
+    // ─── Google Trends Explore Scrape (A) ────────────────────────────────────
 
-    const fetchMetaAds = async (searchTerms: string[]): Promise<{ ads: any[]; rawCount: number; afterFilterCount: number }> => {
+    const scrapeFirecrawl = async (url: string): Promise<string> => {
+      try {
+        const res = await fetch(`${firecrawlBaseUrl}/v1/scrape`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url,
+            formats: ["markdown"],
+            onlyMainContent: true,
+            waitFor: 3000,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          console.warn("Firecrawl scrape failed for:", url);
+          return "";
+        }
+        return data.data?.markdown || data.markdown || "";
+      } catch (e) {
+        console.warn("Firecrawl scrape error:", e);
+        return "";
+      }
+    };
+
+    // ═══ STEP 3: Meta Ads with multiple queries, pagination, dedupe ═════════
+
+    const fetchMetaAds = async (searchTerms: string[], nicheKeywords: string[]): Promise<{
+      ads: any[];
+      rawCount: number;
+      afterDedupeCount: number;
+      afterLocalFilterCount: number;
+    }> => {
       const META_ACCESS_TOKEN = Deno.env.get("META_ACCESS_TOKEN");
       if (!META_ACCESS_TOKEN) {
         console.warn("META_ACCESS_TOKEN not configured, skipping Meta Ad Library API");
-        return { ads: [], rawCount: 0, afterFilterCount: 0 };
+        return { ads: [], rawCount: 0, afterDedupeCount: 0, afterLocalFilterCount: 0 };
       }
 
       const allAds: any[] = [];
@@ -289,6 +403,18 @@ serve(async (req) => {
 
       // Dedupe by text hash
       mapped = dedupeByTextHash(mapped);
+      const afterDedupeCount = mapped.length;
+
+      // ─── LOCAL RELEVANCE FILTER (B) ─────────────────────────────────────
+      // Filter ads that match at least 1 niche keyword before sending to GPT
+      const beforeFilter = mapped.length;
+      mapped = mapped.filter((ad) => {
+        // Discard ads with empty text AND no URL
+        if (!ad.texto_anuncio && !ad.url_destino) return false;
+        return adMatchesKeywords(ad, nicheKeywords);
+      });
+      const afterLocalFilterCount = mapped.length;
+      console.log(`Meta ads local filter: ${beforeFilter} -> ${afterLocalFilterCount}`);
 
       // Sort by longevity
       mapped.sort((a: any, b: any) => b.dias_ativo - a.dias_ativo);
@@ -302,9 +428,7 @@ serve(async (req) => {
         (ad as any).densidade_anunciante = ad.page_id ? (densityMap[ad.page_id] || 1) : 1;
       }
 
-      const afterFilterCount = mapped.length;
-      console.log(`Meta API: ${afterFilterCount} ads after dedupe`);
-      return { ads: mapped, rawCount, afterFilterCount };
+      return { ads: mapped, rawCount, afterDedupeCount, afterLocalFilterCount };
     };
 
     function buildMetaUrl(query: string, token: string, limit: number): string {
@@ -321,22 +445,29 @@ serve(async (req) => {
       return `https://graph.facebook.com/v22.0/ads_archive?${params.toString()}`;
     }
 
-    // ═══ STEP 4: Execute parallel searches ═════════════════════════════════
+    // ═══ STEP 4: Execute parallel searches ═══════════════════════════════════
+
+    // Build niche keywords for local meta ads filter
+    const nicheKeywords = extractKeywords([niche, ...queryPack.queries_ads]);
 
     const searchPromises: { key: string; promise: Promise<any[]> }[] = [];
-    let metaAdsPromise: Promise<{ ads: any[]; rawCount: number; afterFilterCount: number }> | null = null;
+    let metaAdsPromise: Promise<{ ads: any[]; rawCount: number; afterDedupeCount: number; afterLocalFilterCount: number }> | null = null;
+    let trendsExplorePromise: Promise<string> | null = null;
 
     if (sources.includes("trends")) {
       for (const q of queryPack.queries_trends.slice(0, 3)) {
         searchPromises.push({ key: "trends", promise: searchFirecrawl(q, 12) });
       }
+      // (A) Google Trends Explore scrape
+      const trendsExploreUrl = `https://trends.google.com.br/trends/explore?q=${encodeURIComponent(niche)}&geo=BR`;
+      trendsExplorePromise = scrapeFirecrawl(trendsExploreUrl);
     }
 
     if (sources.includes("ads")) {
       for (const q of queryPack.queries_ads.slice(0, 2)) {
         searchPromises.push({ key: "ads", promise: searchFirecrawl(q + " anúncios criativos escalados", 10) });
       }
-      metaAdsPromise = fetchMetaAds(queryPack.queries_ads);
+      metaAdsPromise = fetchMetaAds(queryPack.queries_ads, nicheKeywords);
     }
 
     if (sources.includes("platforms")) {
@@ -345,31 +476,42 @@ serve(async (req) => {
       }
     }
 
-    const [searchResults, metaAdsResult] = await Promise.all([
+    const [searchResults, metaAdsResult, trendsExploreContent] = await Promise.all([
       Promise.all(searchPromises.map((s) => s.promise)),
       metaAdsPromise,
+      trendsExplorePromise,
     ]);
 
-    // Aggregate and dedupe search results by URL
+    // Aggregate and dedupe search results by URL (D: dedupe by url first)
     const resultsBySource: Record<string, any[]> = { trends: [], ads: [], platforms: [] };
     const seenUrls = new Set<string>();
 
     searchPromises.forEach((s, i) => {
       for (const r of searchResults[i]) {
-        const url = r.url || r.title || "";
-        if (seenUrls.has(url)) continue;
-        seenUrls.add(url);
+        const url = r.url || "";
+        const dedupeKey = url || r.title || "";
+        if (!dedupeKey || seenUrls.has(dedupeKey)) continue;
+        seenUrls.add(dedupeKey);
         resultsBySource[s.key].push(r);
       }
     });
+
+    const trendsExplore = trendsExploreContent || "";
+    const trendsScrapeStatus = trendsExplore.length > 50 ? "ok" : "empty";
+    console.log("Trends explore scrape status:", trendsScrapeStatus, "length:", trendsExplore.length);
 
     console.log("Search results collected:", Object.fromEntries(
       Object.entries(resultsBySource).map(([k, v]) => [k, v.length])
     ));
 
-    // ═══ STEP 5: Build context with noise filtering ════════════════════════
+    // ═══ STEP 5: Build context with noise filtering ══════════════════════════
 
     const contextParts: string[] = [];
+
+    // (A) Google Trends Explore scrape content
+    if (trendsExplore.length > 50) {
+      contextParts.push("## GOOGLE TRENDS (scrape direto)\n" + trendsExplore.slice(0, 4000));
+    }
 
     if (resultsBySource.trends.length) {
       contextParts.push("## TENDÊNCIAS DE BUSCA (via pesquisa web)\n" + resultsBySource.trends
@@ -377,8 +519,14 @@ serve(async (req) => {
         .join("\n\n"));
     }
 
+    // (E) Apply offer signal filter to ads web search results
     if (resultsBySource.ads.length) {
-      contextParts.push("## ANÚNCIOS E CRIATIVOS (via pesquisa web)\n" + resultsBySource.ads
+      const adsWithSignal = resultsBySource.ads.filter((r: any) =>
+        hasOfferSignal(r.markdown || r.description || r.title || "")
+      );
+      const adsToUse = adsWithSignal.length >= 3 ? adsWithSignal : resultsBySource.ads;
+
+      contextParts.push("## ANÚNCIOS E CRIATIVOS (via pesquisa web)\n" + adsToUse
         .map((r: any, i: number) => `### Fonte ${i + 1}: ${r.title || r.url}\n${(r.markdown || r.description || "").slice(0, 1500)}`)
         .join("\n\n"));
     }
@@ -396,18 +544,19 @@ serve(async (req) => {
         .join("\n\n"));
     }
 
-    // Cap at 18k chars, prioritizing relevant content
+    // Cap at 18k chars
     const fullContext = contextParts.join("\n\n---\n\n").slice(0, 18000);
 
-    // ═══ STEP 6: Build Meta ads context ════════════════════════════════════
+    // ═══ STEP 6: Build Meta ads context ══════════════════════════════════════
 
     const realAds = metaAdsResult?.ads || [];
     const metaAdsCountRaw = metaAdsResult?.rawCount || 0;
-    const metaAdsCountFiltered = metaAdsResult?.afterFilterCount || 0;
+    const metaAdsCountAfterDedupe = metaAdsResult?.afterDedupeCount || 0;
+    const metaAdsCountAfterLocalFilter = metaAdsResult?.afterLocalFilterCount || 0;
 
     let metaAdsContext = "";
     if (realAds.length > 0) {
-      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY (${realAds.length} após dedupe, ${metaAdsCountRaw} brutos)\n` +
+      metaAdsContext = `\n\n## ANÚNCIOS REAIS DA META AD LIBRARY (${realAds.length} após filtro local, ${metaAdsCountRaw} brutos)\n` +
         realAds.slice(0, 60).map((ad: any, i: number) =>
           `### Anúncio ${i + 1}: ${ad.anunciante}\n` +
           `- Texto: ${ad.texto_anuncio || "N/A"}\n` +
@@ -423,7 +572,7 @@ serve(async (req) => {
         ).join("\n\n");
     }
 
-    // ═══ STEP 7: AI Analysis ═══════════════════════════════════════════════
+    // ═══ STEP 7: AI Analysis (C: temperature 0.5) ════════════════════════════
 
     const culturalPrompt = buildCulturalSystemPrompt(genCtx);
 
@@ -582,7 +731,7 @@ Retorne SOMENTE JSON válido, sem markdown, sem backticks, sem texto antes ou de
             content: `Nicho pesquisado: "${niche}"\n\n═══ CONTEXTO_WEB (use APENAS para tendências e ofertas_escaladas) ═══\n\n${fullContext}\n\n═══ ANUNCIOS_META (ÚNICA fonte para anuncios_encontrados) ═══\n\n${realAds.length > 0 ? `${metaAdsContext}\n\nDADOS ESTRUTURADOS:\n${JSON.stringify(realAds.slice(0, 60), null, 2)}` : "Nenhum anúncio encontrado via Meta API. Retorne anuncios_encontrados como array vazio."}`
           }
         ],
-        temperature: 0.7,
+        temperature: 0.5, // (C) Lower temperature for more factual analysis
         max_tokens: 16384,
       }),
     });
@@ -620,15 +769,18 @@ Retorne SOMENTE JSON válido, sem markdown, sem backticks, sem texto antes ou de
       parsed = { error: "Não foi possível analisar os resultados", raw: rawContent.slice(0, 2000) };
     }
 
-    // ═══ STEP 8: Return with full metadata ═════════════════════════════════
+    // ═══ STEP 8: Return with full metadata ═══════════════════════════════════
 
     return new Response(JSON.stringify({
       success: true,
       data: parsed,
       metadata: {
         queries_usadas: queryPack,
+        query_pack_cache: cacheStatus,
+        trends_scrape_status: trendsScrapeStatus,
         meta_ads_count_raw: metaAdsCountRaw,
-        meta_ads_count_after_filter: metaAdsCountFiltered,
+        meta_ads_count_after_dedupe: metaAdsCountAfterDedupe,
+        meta_ads_count_after_local_filter: metaAdsCountAfterLocalFilter,
         firecrawl_counts: firecrawlCounts,
         search_results_by_source: Object.fromEntries(
           Object.entries(resultsBySource).map(([k, v]) => [k, v.length])

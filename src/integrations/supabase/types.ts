@@ -728,6 +728,30 @@ export type Database = {
           },
         ]
       }
+      research_query_cache: {
+        Row: {
+          created_at: string
+          id: string
+          niche: string
+          queries: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          niche: string
+          queries?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          niche?: string
+          queries?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       review_comments: {
         Row: {
           author_id: string
