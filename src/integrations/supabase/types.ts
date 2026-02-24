@@ -1173,6 +1173,53 @@ export type Database = {
           },
         ]
       }
+      team_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          generations_limit: number
+          generations_used: number
+          id: string
+          plan: string
+          status: string
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          generations_limit?: number
+          generations_used?: number
+          id?: string
+          plan?: string
+          status?: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          generations_limit?: number
+          generations_used?: number
+          id?: string
+          plan?: string
+          status?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_subscriptions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: true
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teams: {
         Row: {
           created_at: string
@@ -1200,6 +1247,27 @@ export type Database = {
           plan?: string
           seats_limit?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      usage_events: {
+        Row: {
+          created_at: string
+          id: string
+          scope_id: string
+          scope_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          scope_id: string
+          scope_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          scope_id?: string
+          scope_type?: string
         }
         Relationships: []
       }
