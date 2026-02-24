@@ -4,15 +4,16 @@ export interface AgentDef {
   emoji: string;
   role: string;
   description: string;
-  category: "ideation" | "copywriting" | "content" | "products" | "branding";
+  category: "guided" | "ideation" | "copywriting" | "content" | "products" | "branding";
   available: boolean;
   freeAccess?: boolean; // true = available on free plan
 }
 
 // IDs of agents available on free plan (3 basic)
-export const FREE_AGENT_IDS = ["icp-profile", "sales-page", "carousel-creator"];
+export const FREE_AGENT_IDS = ["icp-profile", "sales-page", "carousel-creator", "venda-direta-orchestrator", "oferta-usp"];
 
 export const AGENT_CATEGORIES = [
+  { id: "guided" as const, label: "🚀 Fluxo Guiado V1", emoji: "🚀", color: "from-violet-500 to-purple-500" },
   { id: "ideation" as const, label: "Ideação & Estratégia", emoji: "💡", color: "from-yellow-500 to-amber-500" },
   { id: "copywriting" as const, label: "Copywriting", emoji: "✍️", color: "from-purple-500 to-pink-500" },
   { id: "content" as const, label: "Conteúdo & Social", emoji: "📱", color: "from-blue-500 to-cyan-500" },
@@ -21,6 +22,55 @@ export const AGENT_CATEGORIES = [
 ] as const;
 
 export const AGENTS: AgentDef[] = [
+  // ── Fluxo Guiado V1 ──
+  {
+    id: "venda-direta-orchestrator",
+    name: "Orquestrador — Venda Direta",
+    emoji: "🚀",
+    role: "Orquestrador de Campanha de Venda Direta",
+    description: "Transforma seu objetivo em um plano executável de 8–12 passos com agentes conectados. O ponto de partida ideal para qualquer campanha.",
+    category: "guided",
+    available: true,
+    freeAccess: true,
+  },
+  {
+    id: "oferta-usp",
+    name: "Oferta & USP",
+    emoji: "💰",
+    role: "Especialista em Ofertas e Proposta Única de Vendas",
+    description: "Gera oferta completa com promessa, ICP, mecanismo, benefícios, USP, objeções mapeadas e CTA — tudo pronto para usar.",
+    category: "guided",
+    available: true,
+    freeAccess: true,
+  },
+  {
+    id: "proof-builder",
+    name: "Proof Builder",
+    emoji: "🛡️",
+    role: "Especialista em Provas sem Depoimentos",
+    description: "Cria provas utilizáveis sem cases: bullets de credibilidade, roteiros de demo (60s e 3min), e formas de coletar prova em 7 dias.",
+    category: "guided",
+    available: true,
+  },
+  {
+    id: "ads-studio",
+    name: "Ads Studio",
+    emoji: "📣",
+    role: "Especialista em Pacotes de Anúncios",
+    description: "Gera matriz de 6 ângulos com 12+ anúncios completos (hook, texto, headline, CTA) prontos para Meta Ads.",
+    category: "guided",
+    available: true,
+  },
+  {
+    id: "audit-premium",
+    name: "Auditoria Premium",
+    emoji: "🩺",
+    role: "Auditor de Copy com Score e Revisão",
+    description: "Audita qualquer texto com score 0-10 em 6 dimensões, checklist prioritário e (Pro) texto revisado + 3 variações seguras.",
+    category: "guided",
+    available: true,
+  },
+
   // ── Ideação & Estratégia ──
   {
     id: "icp-profile",

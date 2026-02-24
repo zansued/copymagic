@@ -1,4 +1,4 @@
-import { Rocket, Megaphone, PenTool, ShoppingBag, Mail, Video } from "lucide-react";
+import { Rocket, Megaphone, PenTool, ShoppingBag, Mail, Video, Target } from "lucide-react";
 
 export interface FlowTemplate {
   id: string;
@@ -7,9 +7,28 @@ export interface FlowTemplate {
   icon: typeof Rocket;
   gradient: string;
   prompt: string;
+  isGuided?: boolean;
+  guidedSteps?: { agent_id: string; label: string; emoji: string; copyKey: string }[];
 }
 
 export const FLOW_TEMPLATES: FlowTemplate[] = [
+  {
+    id: "venda-direta",
+    title: "🚀 Campanha de Venda Direta",
+    description: "Fluxo guiado V1: Avatar → Oferta & USP → Provas → Landing → Ads → Auditoria",
+    icon: Target,
+    gradient: "from-violet-500/20 to-fuchsia-500/20",
+    prompt: "Quero criar uma campanha de venda direta completa para meu produto digital.",
+    isGuided: true,
+    guidedSteps: [
+      { agent_id: "icp-profile", label: "Avatar / ICP", emoji: "🎯", copyKey: "avatar" },
+      { agent_id: "oferta-usp", label: "Oferta & USP", emoji: "💰", copyKey: "oferta" },
+      { agent_id: "proof-builder", label: "Proof Builder", emoji: "🛡️", copyKey: "proofs" },
+      { agent_id: "sales-page", label: "Landing de Vendas", emoji: "🏗️", copyKey: "pagina_vendas" },
+      { agent_id: "ads-studio", label: "Ads Studio", emoji: "📣", copyKey: "anuncios" },
+      { agent_id: "audit-premium", label: "Auditoria Premium", emoji: "🩺", copyKey: "" },
+    ],
+  },
   {
     id: "launch-product",
     title: "Lançar Produto Digital",

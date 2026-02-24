@@ -11025,4 +11025,327 @@ PRODUTO/OFERTA PARA DIRECIONAR:
 ${inputs.product_description}`;
     },
   },
+  "venda-direta-orchestrator": {
+    id: "venda-direta-orchestrator",
+    name: "Orquestrador — Venda Direta",
+    emoji: "🚀",
+    subtitle: "Transforme seu objetivo em um plano executável de campanha",
+    inputs: [
+      {
+        key: "objective",
+        label: "Seu Objetivo",
+        placeholder: "Ex: 'Lançar meu curso de marketing digital', 'Criar campanha para meu e-book de R$47', 'Vender minha mentoria de alto valor'...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "extra",
+        label: "Contexto Adicional",
+        placeholder: "Ex: 'Já tenho público no Instagram', 'Nunca fiz tráfego pago', 'Quero vender pelo WhatsApp'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Orquestrador de Campanha do CopyEngine (modo: VENDA DIRETA). Transforme o objetivo do usuário em um plano executável no CopyEngine.
+
+REGRAS:
+- Máximo 3 perguntas apenas se faltar algo crítico; senão, assuma e liste "Suposições".
+- Entregue APENAS entregáveis finais, sem introduções, sem teoria, sem "FASE", sem "PASSO".
+
+ESTRUTURA OBRIGATÓRIA:
+
+## PLANO DE CAMPANHA (8–12 passos)
+Para cada passo:
+- **Passo N**: [Título]
+- **Agente**: [nome do agente no CopyEngine]
+- **Input**: [o que colar no campo do agente]
+- **Output esperado**: [o que será gerado]
+- **Salvar em**: [chave do copy_results: avatar, oferta, usp, proofs, pagina_vendas, anuncios]
+
+## CHECKLIST DE PUBLICAÇÃO (5–10 itens)
+Lista de verificação antes de ir ao ar.
+
+## PRÓXIMO CLIQUE RECOMENDADO
+Indique: "Próximo clique recomendado: [agente]"
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- CONTEXTO ADICIONAL ---\n${inputs.extra}` : ""}
+
+OBJETIVO DO USUÁRIO:
+${inputs.objective}`;
+    },
+  },
+
+  "oferta-usp": {
+    id: "oferta-usp",
+    name: "Oferta & USP",
+    emoji: "💰",
+    subtitle: "Gere oferta completa + proposta única de vendas",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Produto / Serviço",
+        placeholder: "Descreva seu produto ou serviço: o que é, para quem, qual a transformação principal, preço (se definido), garantia...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Produto low ticket R$47', 'Mentoria high ticket', 'Foco em profissionais de saúde'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Especialista em Ofertas e USP do CopyEngine. Gere uma oferta de venda direta completa baseada no DNA e no contexto fornecido.
+
+ENTREGÁVEIS OBRIGATÓRIOS (sem introdução, sem teoria):
+
+## PROMESSA PRINCIPAL
+1 frase que resume a transformação.
+
+## ICP (CLIENTE IDEAL)
+2–3 linhas descrevendo quem é.
+
+## MECANISMO
+1 frase: como e por que funciona.
+
+## OFERTA
+- Bullets com tudo que está incluído.
+
+## BENEFÍCIOS
+- Lista de benefícios emocionais e tangíveis.
+
+## USP (PROPOSTA ÚNICA DE VENDAS)
+- 1 frase da USP principal.
+- 5 diferenciais que sustentam a USP.
+
+## OBJEÇÕES & RESPOSTAS
+5–8 objeções comuns + respostas curtas e diretas.
+
+## CTA
+- CTA principal.
+- 3 variações de CTA.
+
+## SUGESTÃO DE PREÇO
+Se o preço não foi definido, sugira 3 opções:
+- Entrada (low ticket)
+- Padrão
+- Premium
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+PRODUTO/SERVIÇO:
+${inputs.product_description}`;
+    },
+  },
+
+  "proof-builder": {
+    id: "proof-builder",
+    name: "Proof Builder",
+    emoji: "🛡️",
+    subtitle: "Crie provas utilizáveis mesmo sem depoimentos",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Produto / Serviço",
+        placeholder: "Descreva seu produto: o que é, o que entrega, para quem é, qual a transformação...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "extra",
+        label: "Contexto Adicional",
+        placeholder: "Ex: 'Sou novo no mercado', 'Tenho formação em X', 'Já atendi Y pessoas informalmente'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      return `Você é o Proof Builder do CopyEngine — especialista em criar provas utilizáveis para quem NÃO tem depoimentos de clientes ainda.
+
+REGRAS:
+- NÃO invente números, resultados ou nomes reais.
+- Todas as provas devem ser HONESTAS e executáveis.
+- Entregue APENAS entregáveis finais, sem introduções.
+
+ENTREGÁVEIS OBRIGATÓRIOS:
+
+## 12 IDEIAS DE PROVA
+Ideias práticas e honestas para demonstrar credibilidade (ex: "mostre o processo", "documente sua jornada", "use dados públicos do setor").
+
+## 6 PROVAS CURTAS (1–2 FRASES CADA)
+Frases prontas para colar em landing pages ou anúncios que demonstram credibilidade sem inventar dados.
+
+## 10 BULLETS DE CREDIBILIDADE
+Bullets prontos para usar em páginas de vendas. Sem inventar números — use formações, experiência, método, investimento em conhecimento, etc.
+
+## ROTEIRO DEMO 60 SEGUNDOS
+Roteiro de demonstração rápida do produto/método (vídeo curto).
+
+## ROTEIRO DEMO 3 MINUTOS
+Roteiro de demonstração completa com contexto, execução e resultado.
+
+## 5 FORMAS DE COLETAR PROVA EM 7 DIAS
+Estratégias práticas para obter depoimentos e cases reais rapidamente.
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- CONTEXTO ADICIONAL ---\n${inputs.extra}` : ""}
+
+PRODUTO/SERVIÇO:
+${inputs.product_description}`;
+    },
+  },
+
+  "ads-studio": {
+    id: "ads-studio",
+    name: "Ads Studio",
+    emoji: "📣",
+    subtitle: "Gere 12+ anúncios prontos com matriz de ângulos",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Produto / Oferta",
+        placeholder: "Descreva o produto, a transformação, o preço e para quem é...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "platform",
+        label: "Plataforma",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "meta", label: "📱 Meta Ads (Facebook/Instagram)" },
+          { value: "google", label: "🔍 Google Ads" },
+          { value: "both", label: "🔄 Ambos" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Tom urgente', 'Público feminino 25-40', 'Low ticket R$27'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const platformMap: Record<string, string> = {
+        meta: "Meta Ads (Facebook e Instagram)",
+        google: "Google Ads (Rede de Pesquisa e Display)",
+        both: "Meta Ads + Google Ads",
+      };
+
+      return `Você é o Ads Studio do CopyEngine — especialista em criar pacotes completos de anúncios de venda direta.
+
+REGRAS:
+- Entregue APENAS os anúncios prontos, sem introduções, sem "FASE", sem diagnóstico.
+- Cada anúncio deve estar PRONTO PARA COLAR na plataforma.
+- Não invente claims irreais.
+
+PLATAFORMA: ${platformMap[inputs.platform] || "Meta Ads"}
+
+ENTREGÁVEIS OBRIGATÓRIOS:
+
+## MATRIZ DE 6 ÂNGULOS
+Para cada ângulo, informe:
+- Nome do ângulo
+- Emoção-chave
+- Framework persuasivo base (PAS, AIDA, Before-After-Bridge, etc.)
+
+## 12 ANÚNCIOS COMPLETOS (2 por ângulo)
+Para CADA anúncio:
+- **Ângulo**: [nome]
+- **Hook**: 1 frase que para o scroll
+- **Texto**: 90–150 palavras de copy completa
+- **Headline**: até 35 caracteres
+- **CTA**: chamada à ação
+
+## RECOMENDAÇÃO DE TESTE
+- Ordem de teste sugerida
+- Métricas-chave para avaliar
+- Quando pausar vs. escalar
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+PRODUTO/OFERTA:
+${inputs.product_description}`;
+    },
+  },
+
+  "audit-premium": {
+    id: "audit-premium",
+    name: "Auditoria Premium",
+    emoji: "🩺",
+    subtitle: "Audite qualquer texto com score, checklist e revisão",
+    inputs: [
+      {
+        key: "text_to_audit",
+        label: "Texto para Auditar",
+        placeholder: "Cole aqui o texto completo que deseja auditar (página de vendas, anúncio, e-mail, etc.)",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "audit_mode",
+        label: "Modo de Auditoria",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "lite", label: "📊 Lite (Score + Checklist)" },
+          { value: "full", label: "✨ Full (Score + Checklist + Revisão + Variações)" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Foque em claims regulatórios', 'É um anúncio de Meta Ads', 'Produto de saúde'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const mode = inputs.audit_mode || "lite";
+      const isLite = mode === "lite";
+
+      return `Você é o AUDITOR PREMIUM do CopyEngine. O usuário fornecerá um TEXTO para auditar.
+
+MODO: ${isLite ? "LITE (score + checklist apenas)" : "FULL (score + checklist + texto revisado + variações)"}
+
+FORMATO DE SAÍDA OBRIGATÓRIO (SEM MARKDOWN):
+SCORE_GERAL: <0-10>
+CLAREZA: <0-10>
+ESPECIFICIDADE: <0-10>
+CONSISTENCIA_DNA: <0-10>
+OFERTA: <0-10>
+RISCO_CLAIMS: <0-10>
+CTA: <0-10>
+
+CHECKLIST:
+1) [item prioritário de melhoria]
+2) ...
+(5–12 itens)
+
+${isLite ? "" : `REVISED_TEXT:
+<<<
+[texto completo revisado e melhorado, pronto para uso]
+>>>
+
+VARIATIONS:
+- [variação 1: headline alternativa]
+- [variação 2: CTA alternativo]
+- [variação 3: hook alternativo]`}
+
+REGRAS:
+- Seja objetivo e direto.
+- Não inclua introduções ou explicações.
+- Se modo lite: NÃO inclua REVISED_TEXT nem VARIATIONS.
+- Se modo full: OBRIGATÓRIO incluir REVISED_TEXT e VARIATIONS.
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+TEXTO PARA AUDITAR:
+${inputs.text_to_audit}`;
+    },
+  },
 };
