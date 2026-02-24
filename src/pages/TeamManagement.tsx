@@ -166,8 +166,9 @@ export default function TeamManagement() {
     );
   }
 
+  const effectiveSeatsLimit = subscription?.plan === "agency_plus" ? 15 : team.seats_limit;
   const seatsUsed = members.length + invites.length;
-  const seatsAvailable = team.seats_limit - seatsUsed;
+  const seatsAvailable = effectiveSeatsLimit - seatsUsed;
 
   const roleLabel: Record<string, string> = {
     owner: "Owner", admin: "Admin", editor: "Editor", viewer: "Viewer",
@@ -320,11 +321,11 @@ export default function TeamManagement() {
                 </h1>
               )}
               <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                {team.plan.toUpperCase()}
+                {subscription?.plan === "agency_plus" ? "AGENCY PLUS" : team.plan.toUpperCase()}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              {seatsUsed} / {team.seats_limit} seats utilizados
+              {seatsUsed} / {effectiveSeatsLimit} seats utilizados
             </p>
           </div>
 
