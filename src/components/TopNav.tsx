@@ -10,7 +10,7 @@ import { useSubscription } from "@/hooks/use-subscription";
 import { TeamSidebar } from "@/components/TeamSidebar";
 import { InviteNotifications } from "@/components/InviteNotifications";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { DnaBadge } from "@/components/brand/DnaBadge";
+
 
 const menuItems = [
   {
@@ -83,22 +83,8 @@ export function TopNav({ projectName }: { projectName?: string }) {
   const { subscription } = useSubscription();
   const [teamSidebarOpen, setTeamSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [dnaName, setDnaName] = useState<string | null>(null);
 
-  // Fetch active DNA profile name
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("brand_profiles")
-      .select("name")
-      .eq("user_id", user.id)
-      .order("is_default", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setDnaName(data.name);
-      });
-  }, [user]);
+
 
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
 
@@ -151,11 +137,6 @@ export function TopNav({ projectName }: { projectName?: string }) {
                 <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
                   <SheetTitle className="text-left gradient-text text-lg">CopyEngine</SheetTitle>
                 </SheetHeader>
-                {dnaName && (
-                  <div className="px-4 py-3 border-b border-border">
-                    <DnaBadge name={dnaName} compact onClick={() => { setMobileMenuOpen(false); navigate("/brand-profiles"); }} />
-                  </div>
-                )}
                 <div className="flex flex-col py-2">
                   {filteredMenuItems.map((item) => {
                     const Icon = item.icon;
@@ -256,7 +237,6 @@ export function TopNav({ projectName }: { projectName?: string }) {
 
           {/* Right: team + admin + logout (desktop only) */}
           <div className="w-auto shrink-0 flex justify-end items-center gap-1">
-            {dnaName && <DnaBadge name={dnaName} compact />}
             <InviteNotifications />
             {isAgency && (
               <button
