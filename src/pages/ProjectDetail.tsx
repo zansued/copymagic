@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { TopNav } from "@/components/TopNav";
 import { DEFAULT_GENERATION_CONTEXT } from "@/lib/lcm-types";
+import { ProjectCampaignTab } from "@/components/project/ProjectCampaignTab";
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +23,7 @@ export default function ProjectDetail() {
   const [projectName, setProjectName] = useState("");
   const [loading, setLoading] = useState(true);
   const [showLcmSettings, setShowLcmSettings] = useState(false);
+  const [projectTab, setProjectTab] = useState<string>("lab");
 
   const {
     productInput,
@@ -59,7 +61,6 @@ export default function ProjectDetail() {
       }
       setProjectName(data.name);
       if (data.product_input) setProductInput(data.product_input);
-      // Load LCM settings
       setGenerationContext({
         language_code: (data as any).language_code || DEFAULT_GENERATION_CONTEXT.language_code,
         cultural_region: (data as any).cultural_region || DEFAULT_GENERATION_CONTEXT.cultural_region,
@@ -123,68 +124,86 @@ export default function ProjectDetail() {
       <TopNav projectName={projectName} />
 
       <main className="container px-4 py-6">
-        {isInputPhase ? (
-          <div className="max-w-2xl mx-auto space-y-4">
-            <LanguageSelector value={generationContext} onChange={setGenerationContext} />
+        {/* Project-level tabs: Lab de Copy | Campanha */}
+        <Tabs value={projectTab} onValueChange={setProjectTab} className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="lab" className="gap-2">
+              📝 Lab de Copy
+            </TabsTrigger>
+            <TabsTrigger value="campanha" className="gap-2">
+              🚀 Campanha
+            </TabsTrigger>
+          </TabsList>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full mb-6">
-                <TabsTrigger value="research" className="flex-1">🤖 Criar produto com IA</TabsTrigger>
-                <TabsTrigger value="manual" className="flex-1">📦 Já tenho um produto</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="research">
-                <MarketResearch provider={provider} projectId={id!} onUseProduct={handleUseProduct} generationContext={generationContext} />
-              </TabsContent>
-
-              <TabsContent value="manual">
-                <ProductInputForm
-                  value={productInput}
-                  onChange={setProductInput}
-                  onSubmit={() => generateStep(0)}
-                  isGenerating={isGenerating}
-                  provider={provider}
-                  onProviderChange={setProvider}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <LcmBadge context={generationContext} onEdit={() => setShowLcmSettings(!showLcmSettings)} />
-            </div>
-            {showLcmSettings && (
-              <div className="max-w-xl">
+          <TabsContent value="lab">
+            {isInputPhase ? (
+              <div className="max-w-2xl mx-auto space-y-4">
                 <LanguageSelector value={generationContext} onChange={setGenerationContext} />
+
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="w-full mb-6">
+                    <TabsTrigger value="research" className="flex-1">🤖 Criar produto com IA</TabsTrigger>
+                    <TabsTrigger value="manual" className="flex-1">📦 Já tenho um produto</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="research">
+                    <MarketResearch provider={provider} projectId={id!} onUseProduct={handleUseProduct} generationContext={generationContext} />
+                  </TabsContent>
+
+                  <TabsContent value="manual">
+                    <ProductInputForm
+                      value={productInput}
+                      onChange={setProductInput}
+                      onSubmit={() => generateStep(0)}
+                      isGenerating={isGenerating}
+                      provider={provider}
+                      onProviderChange={setProvider}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <LcmBadge context={generationContext} onEdit={() => setShowLcmSettings(!showLcmSettings)} />
+                </div>
+                {showLcmSettings && (
+                  <div className="max-w-xl">
+                    <LanguageSelector value={generationContext} onChange={setGenerationContext} />
+                  </div>
+                )}
+                <div className="flex gap-6 h-[calc(100vh-14rem)]">
+                  <div className="w-52 shrink-0">
+                    <StepSidebar
+                      currentStepIndex={currentStepIndex}
+                      results={results}
+                      isGenerating={isGenerating}
+                      onSelectStep={(i) => setCurrentStepIndex(i)}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <StepOutput
+                      currentStepIndex={currentStepIndex}
+                      results={results}
+                      streamingText={streamingText}
+                      isGenerating={isGenerating}
+                      onGenerate={generateStep}
+                      onStop={stopGeneration}
+                      projectId={id}
+                      onResultsUpdate={(updated) => {
+                        setResults(updated as Record<string, string>);
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             )}
-            <div className="flex gap-6 h-[calc(100vh-11rem)]">
-              <div className="w-52 shrink-0">
-                <StepSidebar
-                  currentStepIndex={currentStepIndex}
-                  results={results}
-                  isGenerating={isGenerating}
-                  onSelectStep={(i) => setCurrentStepIndex(i)}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <StepOutput
-                  currentStepIndex={currentStepIndex}
-                  results={results}
-                  streamingText={streamingText}
-                  isGenerating={isGenerating}
-                  onGenerate={generateStep}
-                  onStop={stopGeneration}
-                  projectId={id}
-                  onResultsUpdate={(updated) => {
-                    setResults(updated as Record<string, string>);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+          </TabsContent>
+
+          <TabsContent value="campanha">
+            <ProjectCampaignTab projectId={id!} />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
