@@ -1,20 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const ALLOWED_ORIGINS = [
-  "https://copyenginepro.lovable.app",
-  "https://id-preview--6437ab2d-a7e3-418d-9d47-e26fcd7aa8cc.lovable.app",
-  "http://localhost:5173",
-  "http://localhost:8080",
-];
-
-function getCorsHeaders(req: Request) {
-  const origin = req.headers.get("Origin") ?? "";
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    "Access-Control-Allow-Origin": allowed,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  };
-}
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
 
 // ─── Profile sections for building brand context ───
 const PROFILE_SECTIONS = [
@@ -139,14 +128,6 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // CORS origin check
-  const origin = req.headers.get("Origin") ?? "";
-  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
-    return new Response(JSON.stringify({ error: "Origem não permitida" }), {
-      status: 403,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
 
   try {
     // ─── Auth ───
