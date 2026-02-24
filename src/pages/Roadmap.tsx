@@ -371,43 +371,6 @@ export default function Roadmap() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
-              {/* Guided Flow CTA - Always visible */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="premium-card p-6 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5"
-              >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <span className="text-4xl">🚀</span>
-                    <div>
-                      <h3 className="font-bold text-foreground text-lg">Campanha de Venda Direta</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Fluxo guiado: Avatar → Oferta → Provas → Landing → Ads → Auditoria
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => navigate("/agents/venda-direta-orchestrator")}
-                    className="gap-2 bg-gradient-to-r from-primary to-accent-foreground hover:opacity-90 shrink-0"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Começar Campanha
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {FLOW_TEMPLATES.find(t => t.id === "venda-direta")?.guidedSteps?.map((step) => (
-                    <button
-                      key={step.agent_id}
-                      onClick={() => navigate(`/agents/${step.agent_id}`)}
-                      className="text-xs px-3 py-1.5 rounded-full border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all cursor-pointer"
-                    >
-                      {step.emoji} {step.label}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-
               {roadmaps.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
