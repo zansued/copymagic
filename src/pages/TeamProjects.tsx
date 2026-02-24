@@ -97,13 +97,15 @@ function AnimatedNumber({ value }: { value: number }) {
 }
 
 // ── Helpers ──
+const STEP_IDS = ["avatar", "oferta", "usp", "pagina_vendas", "upsells", "anuncios", "vsl_longa", "pagina_upsell", "vsl_upsell"];
+
 function completedSteps(results: any): number {
   if (!results || typeof results !== "object") return 0;
-  return Object.keys(results).length;
+  return STEP_IDS.filter(id => !!(results as Record<string, any>)[id]).length;
 }
 
 function getProjectProgress(p: TeamProject): number {
-  return Math.round((completedSteps(p.copy_results) / 9) * 100);
+  return Math.round((completedSteps(p.copy_results) / STEP_IDS.length) * 100);
 }
 
 function getProjectStatus(p: TeamProject): ProjectStatus {
@@ -578,7 +580,7 @@ export default function TeamProjects() {
                 return {
                   id: p.id,
                   title: p.name,
-                  description: `${completedSteps(p.copy_results)}/9 etapas · ${progress}%`,
+                  description: `${completedSteps(p.copy_results)}/${STEP_IDS.length} etapas · ${progress}%`,
                   icon: <StatusIcon className={cn("h-5 w-5", sc.color)} />,
                   footer: (
                     <div className="space-y-2">
@@ -671,7 +673,7 @@ export default function TeamProjects() {
                                   {sc.label}
                                 </Badge>
                                 <span className="text-[10px] text-muted-foreground">
-                                  {completedSteps(p.copy_results)}/9 etapas
+                                  {completedSteps(p.copy_results)}/{STEP_IDS.length} etapas
                                 </span>
                               </div>
                             </div>
