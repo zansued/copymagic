@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, TrendingUp, Megaphone, ShoppingBag, Sparkles, Loader2,
   Target, DollarSign, Lightbulb, BarChart3, Zap, Globe,
-  CheckCircle2, XCircle, AlertTriangle, Eye
+  CheckCircle2, XCircle, AlertTriangle, Eye, RefreshCw
 } from "lucide-react";
 import { AdCard, type AdData } from "@/components/offer-research/AdCard";
 
@@ -51,6 +51,18 @@ interface OfferResearchResult {
     gancho_principal: string;
   };
   termos_alternativos_sugeridos?: string[];
+}
+
+interface ResearchMetadata {
+  queries_usadas?: any;
+  query_pack_cache?: "hit" | "miss";
+  trends_scrape_status?: "ok" | "empty";
+  meta_ads_count_raw?: number;
+  meta_ads_count_after_dedupe?: number;
+  meta_ads_count_after_local_filter?: number;
+  firecrawl_counts?: Record<string, number>;
+  search_results_by_source?: Record<string, number>;
+  context_length?: number;
 }
 
 const sourceOptions = [
@@ -102,12 +114,52 @@ function TagList({ items, color = "secondary" }: { items: string[]; color?: stri
   );
 }
 
+function WeakEvidenceWarning({ metadata, alternatives, onSelectTerm }: {
+  metadata: ResearchMetadata;
+  alternatives?: string[];
+  onSelectTerm: (term: string) => void;
+}) {
+  const metaAds = metadata.meta_ads_count_after_local_filter ?? 0;
+  const totalSearch = metadata.search_results_by_source
+    ? Object.values(metadata.search_results_by_source).reduce((a, b) => a + b, 0)
+    : 0;
+
+  const isWeak = metaAds === 0 && totalSearch < 5;
+  if (!isWeak) return null;
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+      <Card className="p-4 border-amber-500/30 bg-amber-500/10">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 shrink-0" />
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">Evidência fraca para este nicho</p>
+            <p className="text-xs text-muted-foreground">
+              Poucos anúncios e resultados foram encontrados. Tente termos mais específicos ou variações do nicho.
+            </p>
+            {alternatives && alternatives.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {alternatives.map((t, i) => (
+                  <Badge key={i} variant="outline" className="text-xs cursor-pointer hover:bg-primary/10 transition-colors"
+                    onClick={() => onSelectTerm(t)}>
+                    {t}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
 export default function AiResearchTab() {
   const [niche, setNiche] = useState("");
   const [selectedSources, setSelectedSources] = useState<string[]>(["trends", "ads", "platforms"]);
   const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<OfferResearchResult | null>(null);
-    const [metadata, setMetadata] = useState<any>(null);
+  const [result, setResult] = useState<OfferResearchResult | null>(null);
+  const [metadata, setMetadata] = useState<ResearchMetadata | null>(null);
 
   const toggleSource = (id: string) => {
     setSelectedSources(prev =>
@@ -115,7 +167,7 @@ export default function AiResearchTab() {
     );
   };
 
-  const handleSearch = async () => {
+  const handleSearch = async (skipCache = false) => {
     if (!niche.trim()) {
       toast.error("Digite um nicho para pesquisar");
       return;
@@ -131,7 +183,7 @@ export default function AiResearchTab() {
 
     try {
       const { data, error } = await supabase.functions.invoke("offer-research", {
-        body: { niche: niche.trim(), sources: selectedSources },
+        body: { niche: niche.trim(), sources: selectedSources, skip_cache: skipCache },
       });
 
       if (error) throw error;
@@ -163,7 +215,7 @@ export default function AiResearchTab() {
               className="flex-1"
               disabled={loading}
             />
-            <Button onClick={handleSearch} disabled={loading || !niche.trim()} className="gap-2 bg-gradient-to-r from-primary to-accent-foreground px-6">
+            <Button onClick={() => handleSearch()} disabled={loading || !niche.trim()} className="gap-2 bg-gradient-to-r from-primary to-accent-foreground px-6">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               {loading ? "Pesquisando..." : "Pesquisar"}
             </Button>
@@ -221,6 +273,15 @@ export default function AiResearchTab() {
       <AnimatePresence>
         {result && !loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+            {/* Weak evidence warning */}
+            {metadata && (
+              <WeakEvidenceWarning
+                metadata={metadata}
+                alternatives={result.termos_alternativos_sugeridos}
+                onSelectTerm={(t) => setNiche(t)}
+              />
+            )}
+
             <ScoreGauge score={result.score_oportunidade} />
             <Card className="p-4 border-border/50 bg-card/80">
               <p className="text-foreground font-medium flex items-center gap-2">
@@ -367,7 +428,6 @@ export default function AiResearchTab() {
 
               {result.recomendacao_oferta && (
                 <SectionCard title="Recomendação de Oferta" icon={Target} iconColor="text-primary">
-                  {/* ... keep existing code */}
                   <div className="space-y-3">
                     <div className="p-3 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
                       <p className="text-lg font-bold text-foreground">{result.recomendacao_oferta.nome_sugerido}</p>
@@ -427,6 +487,32 @@ export default function AiResearchTab() {
                       <BarChart3 className="h-3 w-3" /> Dados de depuração (queries, contagens)
                     </summary>
                     <Card className="mt-2 p-4 border-border/50 bg-card/80 text-xs space-y-2">
+                      {/* Cache status */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">Query pack cache:</span>
+                        <Badge variant={metadata.query_pack_cache === "hit" ? "secondary" : "outline"} className="text-xs">
+                          {metadata.query_pack_cache === "hit" ? "✓ Cache" : "✗ Gerado"}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-xs gap-1"
+                          onClick={() => handleSearch(true)}
+                          disabled={loading}
+                        >
+                          <RefreshCw className="h-3 w-3" />
+                          Sem cache
+                        </Button>
+                      </div>
+
+                      {/* Trends scrape */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">Google Trends scrape:</span>
+                        <Badge variant={metadata.trends_scrape_status === "ok" ? "secondary" : "outline"} className="text-xs">
+                          {metadata.trends_scrape_status === "ok" ? "✓ OK" : "✗ Vazio"}
+                        </Badge>
+                      </div>
+
                       {metadata.queries_usadas && (
                         <div>
                           <p className="font-medium text-muted-foreground mb-1">Queries usadas:</p>
@@ -440,7 +526,8 @@ export default function AiResearchTab() {
                       )}
                       <div className="flex flex-wrap gap-3">
                         <span>Meta brutos: <strong>{metadata.meta_ads_count_raw ?? "?"}</strong></span>
-                        <span>Meta filtrados: <strong>{metadata.meta_ads_count_after_filter ?? "?"}</strong></span>
+                        <span>Após dedupe: <strong>{metadata.meta_ads_count_after_dedupe ?? "?"}</strong></span>
+                        <span>Após filtro local: <strong>{metadata.meta_ads_count_after_local_filter ?? "?"}</strong></span>
                         <span>Contexto: <strong>{metadata.context_length ?? "?"}</strong> chars</span>
                       </div>
                       {metadata.search_results_by_source && (
