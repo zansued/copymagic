@@ -34,6 +34,16 @@ export const AGENTS: AgentDef[] = [
     freeAccess: true,
   },
   {
+    id: "icp-profile",
+    name: "Avatar / ICP",
+    emoji: "🎯",
+    role: "Especialista em Mapeamento de Cliente Ideal",
+    description: "Cria perfis detalhados do cliente ideal usando o segredo EJACA e Axioma 41-39-20 para você entender seu cliente melhor do que ele mesmo.",
+    category: "guided",
+    available: true,
+    freeAccess: true,
+  },
+  {
     id: "oferta-usp",
     name: "Oferta & USP",
     emoji: "💰",
@@ -49,6 +59,15 @@ export const AGENTS: AgentDef[] = [
     emoji: "🛡️",
     role: "Especialista em Provas sem Depoimentos",
     description: "Cria provas utilizáveis sem cases: bullets de credibilidade, roteiros de demo (60s e 3min), e formas de coletar prova em 7 dias.",
+    category: "guided",
+    available: true,
+  },
+  {
+    id: "sales-page",
+    name: "Landing de Vendas",
+    emoji: "🏗️",
+    role: "Especialista em Páginas de Vendas",
+    description: "Cria páginas de vendas de alta conversão com narrativa persuasiva, provas sociais e CTAs estratégicos.",
     category: "guided",
     available: true,
   },
@@ -72,15 +91,7 @@ export const AGENTS: AgentDef[] = [
   },
 
   // ── Ideação & Estratégia ──
-  {
-    id: "icp-profile",
-    name: "Perfil do Cliente Ideal (ICP)",
-    emoji: "🎯",
-    role: "Especialista em Mapeamento de Cliente Ideal",
-    description: "Cria perfis detalhados do cliente ideal usando o segredo EJACA e Axioma 41-39-20 para você entender seu cliente melhor do que ele mesmo.",
-    category: "ideation",
-    available: true,
-  },
+  // icp-profile moved to guided category
   {
     id: "low-ticket-ideas",
     name: "Ideias de Produto Low Ticket",
@@ -200,16 +211,7 @@ export const AGENTS: AgentDef[] = [
     available: true,
   },
 
-  // ── Copywriting ──
-  {
-    id: "sales-page",
-    name: "Arquiteto de Vendas",
-    emoji: "🏗️",
-    role: "Especialista em Páginas de Vendas",
-    description: "Cria páginas de vendas de alta conversão com narrativa persuasiva, provas sociais e CTAs estratégicos.",
-    category: "copywriting",
-    available: true,
-  },
+  // sales-page moved to guided category
   {
     id: "vsl-writer",
     name: "Roteirista VSL",

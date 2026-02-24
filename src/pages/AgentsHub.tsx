@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Settings, ArrowLeft, Lock, Crown, Map } from "lucide-react";
+import { Settings, ArrowLeft, Lock, Crown, Map, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -177,6 +177,16 @@ export default function AgentsHub() {
                 <span className="text-2xl">{cat.emoji}</span>
                 <h2 className="text-lg font-bold text-foreground">{cat.label}</h2>
                 <div className="h-px flex-1 bg-border" />
+                {cat.id === "guided" && (
+                  <Button
+                    size="sm"
+                    className="gap-2 bg-gradient-to-r from-primary to-accent-foreground hover:opacity-90"
+                    onClick={() => navigate("/agents/guided-campaign")}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Começar Campanha
+                  </Button>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
