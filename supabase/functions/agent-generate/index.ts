@@ -122,7 +122,6 @@ function sanitize(text: string, maxLen = 200): string {
 }
 
 serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
 
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
