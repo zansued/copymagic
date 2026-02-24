@@ -55,7 +55,7 @@ export default function SharedLibrary() {
   const [view, setView] = useState<"list" | "bookshelf">("bookshelf");
   const [selectedItem, setSelectedItem] = useState<SharedLibraryItem | null>(null);
 
-  const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
+  const isAgency = subscription?.plan === "agency" || subscription?.plan === "agency_plus" || subscription?.plan === "lifetime";
 
   if (teamLoading || loading) {
     return (
