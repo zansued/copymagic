@@ -10,9 +10,12 @@ interface PreviewPanelProps {
   html: string | null;
   generating: boolean;
   onHtmlUpdate?: (html: string) => void;
+  generationId?: string | null;
+  pageSpec?: Record<string, unknown> | null;
+  onPageSpecUpdate?: (spec: Record<string, unknown>, html: string) => void;
 }
 
-export function PreviewPanel({ html, generating, onHtmlUpdate }: PreviewPanelProps) {
+export function PreviewPanel({ html, generating, onHtmlUpdate, generationId, pageSpec, onPageSpecUpdate }: PreviewPanelProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);

@@ -922,6 +922,7 @@ export type Database = {
           include_upsells: boolean | null
           language_code: string | null
           locale_code: string | null
+          page_spec: Json | null
           project_id: string
           status: string
           template_key: string
@@ -938,6 +939,7 @@ export type Database = {
           include_upsells?: boolean | null
           language_code?: string | null
           locale_code?: string | null
+          page_spec?: Json | null
           project_id: string
           status?: string
           template_key?: string
@@ -954,6 +956,7 @@ export type Database = {
           include_upsells?: boolean | null
           language_code?: string | null
           locale_code?: string | null
+          page_spec?: Json | null
           project_id?: string
           status?: string
           template_key?: string

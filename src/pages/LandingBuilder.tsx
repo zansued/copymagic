@@ -26,6 +26,7 @@ export default function LandingBuilder() {
   const [brandingColor, setBrandingColor] = useState("#7c3aed");
   const [generating, setGenerating] = useState(false);
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
+  const [pageSpec, setPageSpec] = useState<Record<string, unknown> | null>(null);
   const [currentGenerationId, setCurrentGenerationId] = useState<string | null>(null);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
@@ -59,6 +60,7 @@ export default function LandingBuilder() {
   // Reset state when project changes
   useEffect(() => {
     setGeneratedHtml(null);
+    setPageSpec(null);
     setCurrentGenerationId(null);
   }, [selectedProject]);
 
@@ -114,6 +116,7 @@ export default function LandingBuilder() {
 
       const result = await res.json();
       setGeneratedHtml(result.html);
+      setPageSpec(result.pageSpec || null);
       setCurrentGenerationId(result.meta?.generationId || null);
       setHistoryRefreshKey((k) => k + 1);
       toast.success("Página gerada com sucesso!");
@@ -241,7 +244,14 @@ export default function LandingBuilder() {
           </motion.div>
 
           {/* RIGHT — Preview */}
-          <PreviewPanel html={generatedHtml} generating={generating} onHtmlUpdate={handleHtmlUpdate} />
+          <PreviewPanel
+            html={generatedHtml}
+            generating={generating}
+            onHtmlUpdate={handleHtmlUpdate}
+            generationId={currentGenerationId}
+            pageSpec={pageSpec}
+            onPageSpecUpdate={(spec, html) => { setPageSpec(spec); setGeneratedHtml(html); }}
+          />
         </div>
       </main>
     </div>
