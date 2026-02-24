@@ -118,9 +118,10 @@ export default function Projects() {
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const STEP_IDS = ["avatar", "oferta", "usp", "pagina_vendas", "upsells", "anuncios", "vsl_longa", "pagina_upsell", "vsl_upsell"];
   const completedSteps = (results: any) => {
     if (!results || typeof results !== "object") return 0;
-    return Object.keys(results).length;
+    return STEP_IDS.filter(id => !!(results as Record<string, any>)[id]).length;
   };
 
   return (
@@ -209,7 +210,7 @@ export default function Projects() {
                         })()}
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {completedSteps(p.copy_results)}/9 etapas •{" "}
+                        {completedSteps(p.copy_results)}/{STEP_IDS.length} etapas •{" "}
                         {new Date(p.updated_at).toLocaleDateString("pt-BR")}
                       </p>
                     </button>
