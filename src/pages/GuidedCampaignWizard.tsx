@@ -30,6 +30,8 @@ import { AGENT_WORKSPACE_CONFIGS } from "@/lib/agent-workspace-configs";
 import { GUIDED_STEPS } from "@/lib/guided-flow-config";
 import { profileToMarkdown } from "@/lib/brand-profile-types";
 import ReactMarkdown from "react-markdown";
+import { AiSuggestButton } from "@/components/agent/AiSuggestButton";
+import { GenerationHistory } from "@/components/agent/GenerationHistory";
 
 interface ProjectOption {
   id: string;
@@ -587,9 +589,21 @@ export default function GuidedCampaignWizard() {
 
               {config.inputs.map((input) => (
                 <div key={input.key} className="premium-card p-4 space-y-2">
-                  <Label className="text-sm font-medium text-foreground">
-                    {input.label} {input.required && <span className="text-destructive">*</span>}
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-foreground">
+                      {input.label} {input.required && <span className="text-destructive">*</span>}
+                    </Label>
+                    {input.type === "textarea" && (
+                      <AiSuggestButton
+                        inputLabel={input.label}
+                        inputPlaceholder={input.placeholder || ""}
+                        agentName={config.name}
+                        selectedProfileId={selectedProfileId}
+                        projectId={selectedProjectId}
+                        onSuggestion={(text) => setInputs((p) => ({ ...p, [input.key]: text }))}
+                      />
+                    )}
+                  </div>
                   {input.type === "textarea" && (
                     <Textarea
                       value={inputs[input.key] || ""}
@@ -696,8 +710,24 @@ export default function GuidedCampaignWizard() {
                   {isGenerating && (
                     <span className="inline-block w-2 h-5 bg-primary animate-pulse ml-1" />
                   )}
-                </div>
               </div>
+
+              {/* Generation History */}
+              {user && step && (
+                <GenerationHistory
+                  agentId={step.agentId}
+                  userId={user.id}
+                  onLoad={(historyOutput) => {
+                    setOutput(historyOutput);
+                    setStepOutputs((prev) => ({ ...prev, [step.id]: historyOutput }));
+                    if (step.copyKey) {
+                      saveToCopyResults(step.copyKey, historyOutput);
+                      setStepStatuses((prev) => ({ ...prev, [step.id]: "generated" }));
+                    }
+                  }}
+                />
+              )}
+            </div>
             </div>
           </div>
         </div>
