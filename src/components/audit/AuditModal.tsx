@@ -386,8 +386,8 @@ export function AuditModal({ open, onOpenChange, target, currentText, projectId,
                           className="w-full p-3 flex items-center justify-between text-left"
                         >
                           <div className="flex items-center gap-3">
-                            <span className={`text-lg font-bold ${audit.score.overall >= 8 ? "text-primary" : audit.score.overall >= 6 ? "text-amber-400" : "text-destructive"}`}>
-                              {audit.score.overall.toFixed(1)}
+                            <span className={`text-lg font-bold ${(audit.score?.overall ?? 0) >= 8 ? "text-primary" : (audit.score?.overall ?? 0) >= 6 ? "text-amber-400" : "text-destructive"}`}>
+                              {(audit.score?.overall ?? 0).toFixed(1)}
                             </span>
                             <div>
                               <p className="text-xs font-medium text-foreground">
