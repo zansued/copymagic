@@ -373,6 +373,8 @@ export default function AgentWorkspace() {
                       inputPlaceholder={input.placeholder}
                       agentName={config.name}
                       selectedProfileId={selectedProfileId}
+                      projectId={campaignProjectId}
+                      provider={provider}
                       onSuggestion={(text) => setInput(input.key, text)}
                     />
                   )}

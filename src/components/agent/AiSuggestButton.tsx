@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { profileToMarkdown } from "@/lib/brand-profile-types";
 import { toast } from "@/hooks/use-toast";
 
 interface AiSuggestButtonProps {
@@ -10,10 +9,20 @@ interface AiSuggestButtonProps {
   inputPlaceholder: string;
   agentName: string;
   selectedProfileId: string;
+  projectId?: string | null;
+  provider?: "deepseek" | "openai";
   onSuggestion: (text: string) => void;
 }
 
-export function AiSuggestButton({ inputLabel, inputPlaceholder, agentName, selectedProfileId, onSuggestion }: AiSuggestButtonProps) {
+export function AiSuggestButton({
+  inputLabel,
+  inputPlaceholder,
+  agentName,
+  selectedProfileId,
+  projectId,
+  provider = "deepseek",
+  onSuggestion,
+}: AiSuggestButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleSuggest = async () => {
@@ -24,43 +33,28 @@ export function AiSuggestButton({ inputLabel, inputPlaceholder, agentName, selec
 
     setLoading(true);
     try {
-      const { data: profile } = await supabase
-        .from("brand_profiles")
-        .select("*")
-        .eq("id", selectedProfileId)
-        .single();
-
-      if (!profile) throw new Error("Perfil não encontrado");
-
-      const brandContext = profileToMarkdown(profile.name, {
-        brand_identity: profile.brand_identity as any,
-        brand_voice: profile.brand_voice as any,
-        target_audience: profile.target_audience as any,
-        product_service: profile.product_service as any,
-        credentials: profile.credentials as any,
-      });
-
-      const systemPrompt = `Você é um assistente de preenchimento de formulários para o agente "${agentName}".
-Com base no DNA de Marca abaixo, gere um preenchimento ideal para o campo "${inputLabel}".
-Dica do campo: "${inputPlaceholder}"
-
-Regras:
-- Entregue APENAS o texto de preenchimento, sem explicações ou introduções
-- Seja específico e use as informações reais do DNA
-- O texto deve estar pronto para colar no campo diretamente
-- Máximo de 500 palavras
-
---- DNA DE MARCA ---
-${brandContext}`;
-
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       if (!token) throw new Error("Login necessário");
 
+      const payload: Record<string, any> = {
+        brand_profile_id: selectedProfileId,
+        agent_name: agentName,
+        input_label: inputLabel,
+        input_placeholder: inputPlaceholder,
+        provider,
+        context_mode: "lean",
+        max_words: 250,
+      };
+
+      if (projectId) {
+        payload.project_id = projectId;
+      }
+
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/agent-generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ system_prompt: systemPrompt, provider: "deepseek" }),
+        body: JSON.stringify(payload),
       });
 
       if (!resp.ok) {
