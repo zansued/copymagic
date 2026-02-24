@@ -176,6 +176,10 @@ export default function ProjectDetail() {
                   isGenerating={isGenerating}
                   onGenerate={generateStep}
                   onStop={stopGeneration}
+                  projectId={id}
+                  onResultsUpdate={(updated) => {
+                    setResults(updated as Record<string, string>);
+                  }}
                 />
               </div>
             </div>

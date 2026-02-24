@@ -1,3 +1,4 @@
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,10 @@ import { GlowButton } from "@/components/ui/glow-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { CopyScoreCard } from "@/components/agent/CopyScoreCard";
+import { AuditModal } from "@/components/audit/AuditModal";
 import { STEPS } from "@/lib/steps";
+import { AUDIT_TARGETS } from "@/lib/audit-types";
+import { Sparkles } from "lucide-react";
 
 interface StepOutputProps {
   currentStepIndex: number;
@@ -14,6 +18,8 @@ interface StepOutputProps {
   isGenerating: boolean;
   onGenerate: (index: number, continueFrom?: string) => void;
   onStop: () => void;
+  projectId?: string;
+  onResultsUpdate?: (updatedResults: Record<string, any>) => void;
 }
 
 export function StepOutput({
@@ -23,16 +29,21 @@ export function StepOutput({
   isGenerating,
   onGenerate,
   onStop,
+  projectId,
+  onResultsUpdate,
 }: StepOutputProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const step = STEPS[currentStepIndex];
+  const [auditOpen, setAuditOpen] = useState(false);
+
   if (!step) return null;
 
+  const effectiveProjectId = projectId || id || "";
   const allCompleted = STEPS.every(s => results[s.id]);
-
   const content = isGenerating ? streamingText : results[step.id] || "";
   const hasContent = content.length > 0;
+  const canAudit = !!AUDIT_TARGETS[step.id] && hasContent && !isGenerating;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
@@ -40,7 +51,6 @@ export function StepOutput({
 
   const handleExportPdf = () => {
     const md = content;
-    // Simple markdown → HTML
     const html = md
       .replace(/^### (.+)$/gm, "<h3>$1</h3>")
       .replace(/^## (.+)$/gm, "<h2>$1</h2>")
@@ -70,12 +80,30 @@ export function StepOutput({
     win.onload = () => setTimeout(() => win.print(), 400);
   };
 
+  const handleAuditApplied = (_target: string, newText: string, updatedCopyResults: Record<string, any>) => {
+    if (onResultsUpdate) {
+      onResultsUpdate(updatedCopyResults);
+    }
+  };
+
+  // Check if this step has a recent audit score
+  const lastAudit = results?.audit_last?.[step.id as keyof typeof results];
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             {step.icon} {step.label}
+            {(lastAudit as any)?.score?.overall != null && (
+              <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${
+                (lastAudit as any).score.overall >= 8 ? "bg-primary/10 text-primary" :
+                (lastAudit as any).score.overall >= 6 ? "bg-amber-400/10 text-amber-400" :
+                "bg-destructive/10 text-destructive"
+              }`}>
+                {(lastAudit as any).score.overall.toFixed(1)}/10
+              </span>
+            )}
           </h2>
           <p className="text-sm text-muted-foreground">
             🤖 <span className="font-medium">{step.agent}</span> — {step.description}
@@ -84,6 +112,12 @@ export function StepOutput({
         <div className="flex gap-2">
           {hasContent && !isGenerating && (
             <>
+              {canAudit && (
+                <Button variant="outline" size="sm" onClick={() => setAuditOpen(true)} className="gap-1.5 text-xs">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Auditar
+                </Button>
+              )}
               <CopyScoreCard copy={content} agentName={step.agent} />
               <Button variant="outline" size="sm" onClick={handleExportPdf}>
                 📄 PDF
@@ -150,6 +184,19 @@ export function StepOutput({
             🚀 Planejamento de Campanha →
           </GlowButton>
         </div>
+      )}
+
+      {/* Audit Modal */}
+      {canAudit && (
+        <AuditModal
+          open={auditOpen}
+          onOpenChange={setAuditOpen}
+          target={step.id}
+          currentText={content}
+          projectId={effectiveProjectId}
+          copyResults={results}
+          onApplied={handleAuditApplied}
+        />
       )}
     </div>
   );
