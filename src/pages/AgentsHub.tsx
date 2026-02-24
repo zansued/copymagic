@@ -11,6 +11,7 @@ import { AGENTS, AGENT_CATEGORIES, FREE_AGENT_IDS, type AgentDef } from "@/lib/a
 import { GUIDED_STEPS } from "@/lib/guided-flow-config";
 import { OnboardingTour, type TourStep } from "@/components/onboarding/OnboardingTour";
 import { DnaBadge } from "@/components/brand/DnaBadge";
+import { TopNav } from "@/components/TopNav";
 
 const TOUR_STEPS: TourStep[] = [
   {
@@ -128,11 +129,12 @@ export default function AgentsHub() {
 
   return (
     <div className="min-h-screen bg-background">
+      <TopNav />
       {/* Tour */}
       <OnboardingTour steps={TOUR_STEPS} storageKey="agents-hub-tour-done" />
 
       {/* Header */}
-      <header className="glass-header sticky top-0 z-30" data-tour="hub-header">
+      <header data-tour="hub-header">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate("/")}>

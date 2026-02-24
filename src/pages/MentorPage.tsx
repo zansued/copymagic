@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import MentorChat from "@/components/mentor/MentorChat";
 import MentorFlowPanel, { Flow, FlowStep } from "@/components/mentor/MentorFlowPanel";
 import MentorAgentExecutor from "@/components/mentor/MentorAgentExecutor";
+import { TopNav } from "@/components/TopNav";
 
 interface Message {
   id: string;
@@ -307,7 +308,9 @@ export default function MentorPage() {
   };
 
   return (
-    <div className="h-screen bg-background flex">
+    <div className="h-screen bg-background flex flex-col">
+      <TopNav />
+      <div className="flex-1 flex min-h-0">
       {/* Left sidebar - Conversations */}
       {showSidebar && (
         <div className="w-64 border-r border-border/50 flex flex-col bg-card/30">
@@ -385,6 +388,7 @@ export default function MentorPage() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

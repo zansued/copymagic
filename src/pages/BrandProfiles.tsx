@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TopNav } from "@/components/TopNav";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -186,8 +187,9 @@ export default function BrandProfiles() {
 
   return (
     <div className="min-h-screen bg-background">
+      <TopNav />
       {/* Header */}
-      <header className="glass-header sticky top-0 z-30">
+      <header>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate("/")}>

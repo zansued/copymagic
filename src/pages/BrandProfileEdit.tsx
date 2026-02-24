@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "@/hooks/use-toast";
+import { TopNav } from "@/components/TopNav";
 import {
   PROFILE_SECTIONS,
   EMPTY_BRAND_IDENTITY,
@@ -136,8 +137,9 @@ export default function BrandProfileEdit() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <TopNav />
       {/* Header */}
-      <header className="glass-header sticky top-0 z-30">
+      <header>
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => navigate("/brand-profiles")}>
