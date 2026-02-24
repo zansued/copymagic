@@ -11348,4 +11348,121 @@ TEXTO PARA AUDITAR:
 ${inputs.text_to_audit}`;
     },
   },
+
+  "gamified-copy": {
+    id: "gamified-copy",
+    name: "Copy Gamificada",
+    emoji: "🎮",
+    subtitle: "Crie funis gamificados que convertem via WhatsApp e DM",
+    inputs: [
+      {
+        key: "product_description",
+        label: "Oferta / Produto",
+        placeholder: "Descreva sua oferta: o que é, preço, transformação, garantia, diferenciais...",
+        type: "textarea",
+        required: true,
+      },
+      {
+        key: "channel",
+        label: "Canal Principal",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "whatsapp", label: "💬 WhatsApp / DM" },
+          { value: "email", label: "📧 E-mail" },
+          { value: "stories", label: "📱 Stories (Instagram)" },
+        ],
+      },
+      {
+        key: "tone",
+        label: "Tom da Narrativa",
+        type: "select",
+        placeholder: "",
+        options: [
+          { value: "aventura", label: "⚔️ Aventura / Jornada do Herói" },
+          { value: "investigacao", label: "🔍 Investigação / Mistério" },
+          { value: "desafio", label: "🏆 Desafio / Competição" },
+          { value: "mentoria", label: "🧙 Mentoria / Guia Sábio" },
+        ],
+      },
+      {
+        key: "extra",
+        label: "Instruções Extras",
+        placeholder: "Ex: 'Incluir referência a um case real', 'Tom mais informal', 'Público feminino 30-45'...",
+        type: "textarea",
+      },
+    ],
+    buildPrompt: (inputs, brandContext) => {
+      const channelMap: Record<string, string> = {
+        whatsapp: "WhatsApp/DM (mensagens curtas, emojis, tom conversacional)",
+        email: "E-mail (parágrafos curtos, assuntos chamativos, links de ação)",
+        stories: "Stories do Instagram (texto curto, enquetes, stickers, swipe up)",
+      };
+      const toneMap: Record<string, string> = {
+        aventura: "Aventura épica / Jornada do Herói — o usuário é o protagonista que enfrenta desafios e descobre o 'tesouro' (a oferta)",
+        investigacao: "Investigação / Mistério — o usuário descobre pistas que revelam a verdade oculta sobre seu problema e a solução",
+        desafio: "Desafio / Competição — o usuário acumula pontos e progride em níveis, desbloqueando recompensas até o prêmio final",
+        mentoria: "Mentoria / Guia Sábio — um mentor conduz o usuário por lições práticas até a revelação da oportunidade",
+      };
+
+      return `Você é o Agente de Copy Gamificada do CopyEngine.
+Sua missão é criar um FUNIL GAMIFICADO (história + missões + escolhas) para converter o usuário para a oferta do projeto, usando o DNA de Marca e o Contexto do Projeto.
+
+CANAL: ${channelMap[inputs.channel] || channelMap.whatsapp}
+TOM NARRATIVO: ${toneMap[inputs.tone] || toneMap.aventura}
+
+## Objetivo do funil:
+- Gerar engajamento com progressão (atos/níveis)
+- Fazer o usuário "investir" com microações
+- Introduzir mecanismo e prova sem parecer propaganda
+- Conduzir para CTA final de compra/inscrição
+
+## REGRAS OBRIGATÓRIAS
+- Entregue APENAS os entregáveis finais (sem introduções, sem explicações, sem "FASE 1").
+- Não invente resultados garantidos nem números sem base.
+- Se avoid_real_names=true no contexto, use nomes fictícios/genéricos.
+- Linguagem alinhada ao DNA (tom, formalidade).
+- Máximo: 900 palavras no total. Seja direto.
+
+## ENTREGÁVEIS (FORMATO FIXO)
+
+### 1) TEMA DO JOGO (1 linha)
+
+### 2) PERSONAGENS (2–4)
+Para cada:
+- Nome + papel + personalidade + frase típica
+
+### 3) REGRAS DO FUNIL (curtas)
+- Duração (ex: 5 atos)
+- Progressão (ex: "Ato 1/5")
+- Pontuação/recompensa (simples)
+
+### 4) ATOS (5 atos)
+Para cada ato:
+- **Objetivo do ato** (1 linha)
+- **Mensagem do personagem** (texto pronto para enviar)
+- **Pergunta/Interação** (A/B/C)
+- **Regras de ramificação:**
+  * Se A → resposta
+  * Se B → resposta
+  * Se C → resposta
+
+### 5) CTA FINAL
+- 1 mensagem pronta + 2 variações
+
+### 6) CHECKLIST DE IMPLEMENTAÇÃO (5 itens)
+
+## REGRAS DE QUALIDADE
+- O funil deve "parecer conversa" (natural), não parecer anúncio.
+- Inclua pelo menos 2 pontos de prova: (a) prova por mecanismo, (b) mini demonstração ou microvitória.
+- Inclua 2 objeções e como o personagem lida com elas dentro dos atos.
+- Cada ato deve ter no máximo 3 mensagens curtas (estilo chat).
+
+${brandContext ? `\n--- DNA DE MARCA ---\n${brandContext}` : ""}
+${inputs.extra ? `\n--- INSTRUÇÕES EXTRAS ---\n${inputs.extra}` : ""}
+
+OFERTA/PRODUTO:
+${inputs.product_description}`;
+    },
+  },
 };
