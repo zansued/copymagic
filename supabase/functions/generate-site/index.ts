@@ -1056,7 +1056,159 @@ Return ONLY the fixed valid JSON.`;
       }
     }
 
-    // ========== STEP 2: Render PageSpec → HTML ==========
+    // ========== STEP 2: Branch by format ==========
+    if (format === "nextjs") {
+      // ========== NEXT.JS EXPORT ==========
+      console.log("Step 2/2: Generating Next.js components from PageSpec...");
+
+      const NEXTJS_RENDER_PROMPT = `You are a senior React/Next.js developer. Convert the PageSpec JSON into a complete Next.js App Router project with premium 21dev-quality components.
+
+⚠️ FIDELITY MODE: Use ALL text from PageSpec EXACTLY as provided. Do NOT rewrite or summarize.
+
+OUTPUT FORMAT (ONLY valid JSON, no markdown fences):
+{
+  "files": [
+    { "path": "app/page.tsx", "content": "..." },
+    { "path": "components/HeroSection.tsx", "content": "..." },
+    ...
+  ],
+  "project_name": "slug-name"
+}
+
+REQUIRED FILES:
+1) app/page.tsx — imports and composes ALL section components in order:
+   HeroSection, MarqueeStrip, VideoDemoSection, ProblemSection, StepperTimeline, BentoFeatures,
+   ComparisonTable, ProofCarousel, BonusesGrid, OfferSection, ForWhoSection, FAQAccordion,
+   GuaranteeSection, FinalCTA, StickyCTABar
+   Use "use client" directive. Import from "@/components/X".
+
+2) components/HeroSection.tsx — hero with headline, subheadline, bullets, CTA, trust chips, gradient bg
+3) components/MarqueeStrip.tsx — infinite horizontal scroll of trust items (CSS animation, no library)
+4) components/VideoDemoSection.tsx — 16:9 placeholder player with play button overlay + chapter markers
+5) components/ProblemSection.tsx — card grid from problem.items
+6) components/StepperTimeline.tsx — vertical timeline from solution.steps
+7) components/BentoFeatures.tsx — asymmetric bento grid (2 large + 4-6 small cards)
+8) components/ComparisonTable.tsx — 3-column comparison with check/cross icons, highlighted middle column
+9) components/ProofCarousel.tsx — horizontal scroll-snap testimonial cards
+10) components/BonusesGrid.tsx — glow cards with value badges
+11) components/OfferSection.tsx — value stack + price block + CTA
+12) components/ForWhoSection.tsx — side-by-side green (for) / red (not for) cards
+13) components/FAQAccordion.tsx — client component with useState for accordion toggle
+14) components/GuaranteeSection.tsx — shield icon + guarantee text
+15) components/FinalCTA.tsx — recap headline + CTA
+16) components/StickyCTABar.tsx — fixed bottom bar, hidden initially, shown after 25% scroll (useEffect + scroll listener)
+17) lib/pageSpec.ts — TypeScript types for PageSpec sections
+
+COMPONENT RULES:
+- ALL components are "use client" if they use hooks (FAQ, StickyCTA, Marquee).
+- Server components where possible (Hero, Problem, Solution, Offer, ForWho, Guarantee, FinalCTA).
+- Use Tailwind classes only — NO inline styles.
+- Use lucide-react for icons: import { CheckCircle, XCircle, Play, Shield, ChevronDown } from "lucide-react"
+- Props: each component receives its PageSpec section data as props. The page.tsx file passes hardcoded data from the PageSpec.
+- Container: max-w-6xl mx-auto px-4 sm:px-6 lg:px-8
+- Sections: py-16 sm:py-20 with data-section attributes
+- Cards: rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 sm:p-8
+- CTA buttons: rounded-full px-8 py-4 bg-[var(--primary)] text-white font-semibold hover:scale-105 transition
+- Section intro decorator: pill icon + small caps label + heading
+- Glow effect on bonus/feature cards: relative overflow-hidden group with gradient before pseudo
+- Minimum 6 CTAs spread across components
+- Microcopy under CTAs
+
+PREMIUM PATTERNS:
+- Gradient text: bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] bg-clip-text text-transparent
+- Blob animations in hero (CSS keyframes in globals.css — already provided)
+- Hover lift on cards: hover:-translate-y-1 transition-transform
+- Stagger children with transition-delay
+- Scroll reveal via IntersectionObserver in a useEffect (in client components)
+
+IMPORTANT:
+- app/page.tsx MUST exist and MUST import all 15 section components.
+- Hardcode the PageSpec data directly in page.tsx as const objects (no JSON import needed).
+- Every text field from PageSpec must appear in the output verbatim.
+- If PageSpec has [INSERIR...] placeholders, render them as visible text.`;
+
+      const nextjsPrompt = `PageSpec:
+${JSON.stringify(pageSpec, null, 2)}
+
+Brand: { "primary_color": "${primaryColor}", "style": "${style}" ${options.branding?.logoUrl ? `, "logo_url": "${options.branding.logoUrl}"` : ""} ${options.branding?.title ? `, "site_title": "${options.branding.title}"` : ""} }
+Locale: { "language": "${lang}" }
+
+${opts_images_block(imageSet)}
+
+Generate the complete Next.js project files. Return ONLY valid JSON.`;
+
+      const rawNextjs = await callOpenAI(NEXTJS_RENDER_PROMPT, nextjsPrompt, 16384, 0.55);
+      const nextjsJson = parseJsonFromAI(rawNextjs);
+
+      let files: Array<{ path: string; content: string }> = [];
+      let projectSlug = project.name.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+      try {
+        const parsed = JSON.parse(nextjsJson);
+        files = parsed.files || [];
+        if (parsed.project_name) projectSlug = parsed.project_name;
+      } catch {
+        console.error("Failed to parse Next.js files JSON");
+        throw new Error("Failed to generate Next.js project files");
+      }
+
+      // Ensure app/page.tsx exists
+      const hasPageTsx = files.some(f => f.path === "app/page.tsx");
+      if (!hasPageTsx) {
+        console.warn("AI did not generate app/page.tsx — adding fallback");
+        files.unshift({
+          path: "app/page.tsx",
+          content: `"use client";
+export default function Home() {
+  return (
+    <main className="min-h-screen bg-[var(--bg-deep)] text-[var(--text-primary)]">
+      <div className="max-w-6xl mx-auto px-4 py-20 text-center">
+        <h1 className="text-5xl font-bold mb-4">${options.branding?.title || project.name}</h1>
+        <p className="text-xl text-[var(--text-secondary)]">Landing page gerada por CopyEngine</p>
+      </div>
+    </main>
+  );
+}`,
+        });
+      }
+
+      // Save to DB
+      const { data: saved, error: saveError } = await supabase
+        .from("site_generations")
+        .insert({
+          user_id: userId,
+          project_id: projectId,
+          template_key: templateKey,
+          status: "generated",
+          generated_html: null,
+          page_spec: pageSpec,
+          generated_assets: { nextjs_files: files.map(f => f.path) },
+          language_code: lang,
+          cultural_region: project.cultural_region,
+          branding: options.branding || {},
+          include_upsells: options.includeUpsells || false,
+        })
+        .select()
+        .single();
+
+      if (saveError) console.error("Save error:", saveError);
+
+      return new Response(
+        JSON.stringify({
+          format: "nextjs",
+          files,
+          project_name: projectSlug,
+          pageSpec,
+          meta: {
+            templateKey,
+            projectId,
+            generationId: saved?.id || null,
+          },
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ========== HTML EXPORT (default) ==========
     console.log("Step 2/2: Rendering PageSpec into HTML...");
     const renderPrompt = buildRenderPrompt(pageSpec, {
       primaryColor,
@@ -1132,6 +1284,18 @@ Return ONLY the fixed valid JSON.`;
     );
   }
 });
+
+// ============================================================
+// Helper: image block text for prompts
+// ============================================================
+function opts_images_block(images: FetchedImageSet | null): string {
+  if (!images || images.hero.length === 0) return "";
+  return `PRE-FETCHED REAL IMAGES (USE THESE EXACT URLs):
+HERO: ${images.hero.map((u, i) => `hero_${i + 1}: ${u}`).join("\n")}
+PORTRAITS: ${images.portraits.map((u, i) => `portrait_${i + 1}: ${u}`).join("\n")}
+FEATURES: ${images.features.map((u, i) => `feature_${i + 1}: ${u}`).join("\n")}
+IMPORTANT: Use these EXACT URLs. Do NOT use source.unsplash.com.`;
+}
 
 // ============================================================
 // Build render prompt from PageSpec + options
