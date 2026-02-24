@@ -113,7 +113,7 @@ Do NOT reduce rich copy to skeleton summaries.`;
 // ============================================================
 const HTML_RENDER_PROMPT = `ROLE
 You are "Premium Landing Page Builder", a senior art director + conversion-focused designer.
-Goal: render a structured PageSpec JSON into a visually premium, conversion-optimized single-file HTML landing page.
+Goal: render a structured PageSpec JSON into a visually stunning, 21dev-quality, conversion-optimized single-file HTML landing page.
 
 ═══════════════════════════════════════
 ⚠️ FIDELITY MODE (NON-NEGOTIABLE)
@@ -127,7 +127,7 @@ OUTPUT (STRICT)
 Return ONLY valid JSON:
 {
   "html": "<!doctype html>...</html>",
-  "sections": ["hero","trust-strip","problems","solution","phases","social-proof","bonuses","offer","for-who","faq","guarantee","final-cta","footer"]
+  "sections": ["hero","trust-strip","demo-vsl","problems","solution","features-bento","phases","social-proof","bonuses","offer","comparison","for-who","faq","guarantee","final-cta","footer"]
 }
 
 CONSTRAINTS (NON-NEGOTIABLE)
@@ -141,9 +141,83 @@ CONSTRAINTS (NON-NEGOTIABLE)
    Then: <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
    Init: <script>lucide.createIcons();</script>
 4) Every major section MUST have data-section attribute.
-5) Accessibility: every <img> has descriptive alt, focus states on buttons.
+5) Accessibility: every <img> has descriptive alt, focus states on buttons, aria-labels.
 
+═══════════════════════════════════════
+PREMIUM COMPONENT CATALOG (21DEV-LIKE)
+═══════════════════════════════════════
+You MUST use at least 6 and at most 8 of these 10 components.
+MANDATORY (always include): Bento Grid, Comparison Table, Sticky CTA Bar, Video/VSL Section.
+OPTIONAL (pick 2-4): Tabs, Marquee, Timeline, Social Proof Carousel, Stats Counters, Glow Cards.
+
+1) BENTO GRID (data-component="bento-grid")
+   Asymmetric feature cards: 2 large (col-span-2) + 4-6 small.
+   Each card: rounded-2xl, border border-[var(--border)], bg-[var(--bg-card)], p-6 sm:p-8.
+   Large cards get a background image or gradient. Small cards get icon + title + description.
+   Grid: grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6.
+
+2) TABS / SEGMENTED CONTROL (data-component="tabs")
+   If product serves multiple personas, use tabs (Criador/Infoprodutor/Agência or Before/After).
+   Tab bar: flex gap-2, each tab rounded-full px-6 py-2.5 font-medium cursor-pointer transition.
+   Active: bg-[var(--primary)] text-white. Inactive: bg-[var(--bg-card)] text-[var(--text-secondary)].
+   Tab panels: data-tab-panel="tab-name", only one visible at a time (JS toggles display).
+   Implement via onclick: document.querySelectorAll('[data-tab-panel]').forEach(p => p.style.display = 'none'); 
+   document.querySelector('[data-tab-panel="'+name+'"]').style.display = 'block';
+
+3) COMPARISON TABLE (data-component="comparison-table")
+   3-column: "Produto" vs "Gerador Comum" vs "Agência Tradicional" (adapt to context).
+   Rows: features. Values: green check-circle for yes, red x-circle for no, text for partial.
+   Header row: sticky, blurred background. Middle column (our product) highlighted with bg-[var(--primary)]/10, border-2 border-[var(--primary)].
+   Mobile: horizontal scroll with snap.
+
+4) STICKY CTA BAR (data-component="sticky-cta")
+   Fixed bottom bar. Hidden initially, shown after 25% scroll via JS.
+   Content: microcopy text (left) + CTA button (right).
+   Classes: fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-deep)]/95 backdrop-blur-lg border-t border-[var(--border)] py-3 px-4 sm:px-6 flex items-center justify-between max-w-6xl mx-auto.
+   Microcopy: "Sem risco — garantia de X dias" or similar from PageSpec.
+   CTA: same style as primary CTA but slightly smaller (px-6 py-3).
+   Add transform translate-y-full + transition-transform, JS toggles translate-y-0.
+
+5) MARQUEE / LOGO STRIP (data-component="marquee")
+   Infinite horizontal scroll of trust items (brand names, "Visto em...", stat chips).
+   Structure: overflow-hidden with inner div animate-marquee (flex, width: max-content, duplicated content).
+   Items: pill-shaped bg-[var(--bg-card)] border border-[var(--border)] rounded-full px-4 py-2 text-sm.
+   Pause on hover. Speed: 25s linear infinite.
+
+6) VIDEO / VSL SECTION (data-component="demo-vsl")
+   Placeholder video player: 16:9 aspect ratio, rounded-2xl, bg-black/90 with play button overlay.
+   Play button: centered, w-16 h-16 rounded-full bg-[var(--primary)] flex items-center justify-center.
+   Below player: 3-4 chapter markers (timeline dots with labels) if phases exist.
+   Side bullets: key benefits in a vertical list beside the player on desktop (below on mobile).
+
+7) TIMELINE / STEPPER (data-component="timeline")
+   Vertical timeline for "How it works" / solution.steps.
+   Line: absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[var(--primary)] to-transparent.
+   Each step: relative pl-12. Dot: absolute left-2 w-4 h-4 rounded-full bg-[var(--primary)] ring-4 ring-[var(--bg-deep)].
+   Stagger animation on scroll reveal.
+
+8) SOCIAL PROOF CAROUSEL (data-component="proof-carousel")
+   Horizontal scroll of testimonial cards. overflow-x-auto snap-x snap-mandatory flex gap-4 sm:gap-6.
+   Each card: snap-center min-w-[300px] sm:min-w-[400px] rounded-2xl border bg-[var(--bg-card)] p-6.
+   Card content: quote icon (lucide quote), testimonial text, avatar + name + role.
+   No heavy carousel library — pure CSS scroll-snap.
+
+9) STATS COUNTERS (data-component="stats-counters")
+   3-4 large numbers with labels. Use data-count for animated counting.
+   Layout: grid grid-cols-2 md:grid-cols-4 gap-6.
+   Number: text-4xl sm:text-5xl font-bold text-[var(--primary)].
+   Label: text-sm text-[var(--text-secondary)] mt-1.
+   RULE: only use real numbers from PageSpec. If no numbers exist, use qualitative stats ("+Clareza", "-Retrabalho") WITHOUT invented percentages.
+
+10) GLOW CARDS + GRADIENT BORDERS (data-component="glow-cards")
+    Cards with subtle gradient border on hover.
+    Base: rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] p-6 relative overflow-hidden group.
+    Glow: before:absolute before:inset-0 before:bg-gradient-to-br before:from-[var(--primary)]/5 before:to-transparent before:opacity-0 group-hover:before:opacity-100 before:transition-opacity.
+    Use for bonuses, features, or offer includes.
+
+═══════════════════════════════════════
 DESIGN KIT (FOLLOW EXACTLY)
+═══════════════════════════════════════
 
 A) BASE TOKENS (put in the single <style> block)
 Define :root CSS vars based on brand.style:
@@ -183,57 +257,78 @@ C) LAYOUT RHYTHM (NO EXCEPTIONS)
 - Grids: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8
 
 D) BUTTONS
-- Primary CTA: rounded-full px-8 py-4 sm:px-10 sm:py-5 bg-[var(--primary)] text-white font-semibold uppercase tracking-wide hover:scale-105 hover:shadow-lg transition focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2
-- CTA must appear in: hero, after solution, after bonuses, offer section, final-cta = minimum 5 CTAs
+- Primary CTA: rounded-full px-8 py-4 sm:px-10 sm:py-5 bg-[var(--primary)] text-white font-semibold uppercase tracking-wide hover:scale-105 hover:shadow-lg hover:shadow-[var(--primary)]/25 transition focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2
+- CTA must appear in: hero, after demo/VSL, after solution, after bonuses, offer section, final-cta = minimum 6 CTAs
+- Microcopy under every CTA: trust text like "Sem risco · Garantia de X dias" or "Cancele quando quiser"
 
 E) NAVBAR (REQUIRED)
-- Fixed top, backdrop blur, desktop links to anchors, mobile drawer menu, right side CTA button.
+- Fixed top, backdrop-blur-lg, desktop links to anchors, mobile hamburger drawer, right side CTA button.
 
+═══════════════════════════════════════
 IMAGES
+═══════════════════════════════════════
 - If pre_fetched_images exist, use ONLY those exact URLs.
 - Otherwise use picsum.photos/seed/{keyword}/{w}/{h} and i.pravatar.cc for portraits.
 - All images: object-cover, rounded-xl/2xl, loading="lazy" (except hero).
 
+═══════════════════════════════════════
 REQUIRED SECTIONS (IN THIS EXACT ORDER)
+═══════════════════════════════════════
 1) HERO (data-section="hero") — background image + overlay, badge pill, headline, subhead, bullets, CTA row, trust chips
-2) TRUST STRIP (data-section="trust-strip") — stat blocks with data-count from proof.stats
-3) PROBLEMS (data-section="problems") — card grid from problem.items with falseSolution + truth
-4) SOLUTION / MECHANISM (data-section="solution") — split layout: text + image, steps from solution.steps
-5) PHASES (data-section="phases") — visual timeline from phases array (if exists, otherwise skip)
-6) SOCIAL PROOF (data-section="social-proof") — testimonial cards from testimonials array
-7) BONUSES (data-section="bonuses") — gradient cards from bonuses array with value badges + CTA
-8) OFFER + PRICING (data-section="offer") — value stack from offer.includes, price block + CTA
-9) FOR WHO / NOT FOR WHO (data-section="for-who") — side-by-side grid: green cards with check-circle for forWho.for, red cards with x-circle for forWho.notFor
-10) FAQ (data-section="faq") — accordion from faq array, 8-12 items
-11) GUARANTEE (data-section="guarantee") — shield icon + guarantee text + bullets
-12) FINAL CTA (data-section="final-cta") — recap + CTA
-13) FOOTER (data-section="footer") — disclaimers + links
+2) TRUST STRIP (data-section="trust-strip") — marquee or stat blocks with data-count from proof.stats
+3) DEMO / VSL (data-section="demo-vsl") — video placeholder + chapter markers + side bullets [VIDEO/VSL SECTION component]
+4) PROBLEMS (data-section="problems") — card grid from problem.items with falseSolution + truth
+5) SOLUTION / MECHANISM (data-section="solution") — split layout: text + image, steps via [TIMELINE component]
+6) FEATURES (data-section="features-bento") — [BENTO GRID component] from solution.differentiators or PageSpec features
+7) PHASES (data-section="phases") — visual timeline from phases array (if exists, otherwise skip)
+8) SOCIAL PROOF (data-section="social-proof") — [SOCIAL PROOF CAROUSEL component] from testimonials
+9) BONUSES (data-section="bonuses") — [GLOW CARDS component] from bonuses array with value badges + CTA
+10) OFFER + PRICING (data-section="offer") — value stack from offer.includes, price block + CTA
+11) COMPARISON (data-section="comparison") — [COMPARISON TABLE component]
+12) FOR WHO / NOT FOR WHO (data-section="for-who") — side-by-side grid: green cards for forWho.for, red cards for forWho.notFor
+13) FAQ (data-section="faq") — accordion from faq array, 8-12 items
+14) GUARANTEE (data-section="guarantee") — shield icon + guarantee text + bullets
+15) FINAL CTA (data-section="final-cta") — recap + CTA
+16) FOOTER (data-section="footer") — disclaimers + links
++ [STICKY CTA BAR component] — fixed bottom, hidden initially, shown after 25% scroll
 
+═══════════════════════════════════════
 PREMIUM VISUAL PATTERNS (APPLY)
+═══════════════════════════════════════
 - Gradient text on hero + 1-2 section titles: bg-gradient-to-r from-[var(--primary)] to-[var(--primary-glow)] bg-clip-text text-transparent
-- Blob animations in hero: 2-3 decorative absolute blobs with blur-xl, opacity-20, animate-blob
-- Section intro decorator: icon pill + small caps label + heading + subtitle on every section
-- Categorized card colors on problem/bonus cards: bg-purple-50/5, bg-blue-50/5, bg-green-50/5, etc.
+- Blob animations in hero: 2-3 decorative absolute blobs with blur-3xl, opacity-20, animate-blob
+- Section intro decorator on EVERY section: icon pill (rounded-full bg-[var(--primary)]/10 p-2) + small caps label (text-xs uppercase tracking-widest text-[var(--primary)] font-semibold) + heading + subtitle
+- Categorized card colors on problem/bonus cards: bg-purple-500/5, bg-blue-500/5, bg-green-500/5, etc.
+- Hover lift on cards: hover:-translate-y-1 transition-transform duration-300
+- Subtle gradients on section backgrounds: bg-gradient-to-b from-[var(--bg-deep)] to-[var(--bg-section)]
 
-INTERACTIONS (4 ONLY)
+═══════════════════════════════════════
+INTERACTIONS (JS — LIGHTWEIGHT ONLY)
+═══════════════════════════════════════
 1) Scroll reveal: IntersectionObserver toggling opacity-0/100 and translate-y
 2) Animated counters for data-count elements
 3) FAQ accordion (one open at a time, chevron rotate)
-4) Sticky CTA bar after hero
+4) Sticky CTA bar: hidden initially, shown after scrolling past 25% of page height
+5) Tabs switching (if used): onclick toggles data-tab-panel visibility
+6) Progress bar at top showing scroll progress
+7) Smooth scroll to anchors
 
-CHECKLIST (WHAT MAKES A GREAT SALES PAGE)
-- Hero clarity in 5 seconds (headline + bullets + CTA)
-- CTA present in hero AND repeated every 1-2 sections
-- Proof without inventing numbers
-- Explicit offer + bonuses + guarantee
-- For who / not for who section
-- FAQ with real objections
-- No fake scarcity; ethical urgency only
+═══════════════════════════════════════
+QUALITY CHECKLIST (MANDATORY SELF-REVIEW)
+═══════════════════════════════════════
+Before returning, verify:
+✓ CTA in hero AND repeated every 1-2 sections (minimum 6 CTAs total)
+✓ Sticky CTA bar present with microcopy
+✓ Bento Grid used for features
+✓ Comparison Table present
+✓ Video/VSL placeholder present
+✓ Contrast and spacing are premium (py-16/20, p-6/8, proper text colors)
+✓ Microcopy of trust under CTAs ("cancele quando quiser", "sem risco", etc.) — NO false promises
+✓ Accessibility: aria-label on buttons, alt on images, focus:ring on interactive elements
+✓ Zero inline styles in body
+✓ All PageSpec content rendered verbatim — nothing summarized or omitted
 
-POLISH PASS (MANDATORY)
-Before returning, self-review: spacing py-16/20, card padding p-6/8, contrast, focus states, alt tags, zero inline styles.
-
-Now render the PageSpec into a premium page.`;
+Now render the PageSpec into a premium 21dev-quality page.`;
 
 // ============================================================
 // EDIT SECTION PROMPT
@@ -473,10 +568,49 @@ document.addEventListener('DOMContentLoaded', () => {
     co.observe(el);
   });
 
+  // Progress bar
   const prog = document.createElement('div');
   prog.style.cssText = 'position:fixed;top:0;left:0;height:3px;background:var(--primary,#7c3aed);z-index:99999;transition:width 0.1s linear;width:0';
   document.body.appendChild(prog);
   window.addEventListener('scroll', () => { const p = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100; prog.style.width = p + '%'; });
+
+  // Sticky CTA Bar — show after 25% scroll
+  const stickyCta = document.querySelector('[data-component="sticky-cta"]');
+  if (stickyCta) {
+    stickyCta.classList.add('translate-y-full');
+    stickyCta.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+    let stickyVisible = false;
+    window.addEventListener('scroll', () => {
+      const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      if (scrollPercent > 0.25 && !stickyVisible) {
+        stickyCta.classList.remove('translate-y-full');
+        stickyCta.classList.add('translate-y-0');
+        stickyVisible = true;
+      } else if (scrollPercent <= 0.15 && stickyVisible) {
+        stickyCta.classList.add('translate-y-full');
+        stickyCta.classList.remove('translate-y-0');
+        stickyVisible = false;
+      }
+    });
+  }
+
+  // Tabs / Segmented Control
+  document.querySelectorAll('[data-tab]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const group = tab.closest('[data-component="tabs"]');
+      if (!group) return;
+      const target = tab.getAttribute('data-tab');
+      group.querySelectorAll('[data-tab]').forEach(t => {
+        t.classList.remove('bg-[var(--primary)]', 'text-white');
+        t.classList.add('bg-[var(--bg-card)]', 'text-[var(--text-secondary)]');
+      });
+      tab.classList.add('bg-[var(--primary)]', 'text-white');
+      tab.classList.remove('bg-[var(--bg-card)]', 'text-[var(--text-secondary)]');
+      group.querySelectorAll('[data-tab-panel]').forEach(p => p.style.display = 'none');
+      const panel = group.querySelector('[data-tab-panel="' + target + '"]');
+      if (panel) panel.style.display = 'block';
+    });
+  });
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -491,6 +625,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (val) el.textContent = el.textContent.replace(/[\\d,.]+/, val);
     });
   };
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
 });
 </script>`;
 
