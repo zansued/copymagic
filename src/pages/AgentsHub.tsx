@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Settings, ArrowLeft, Lock, Crown, Map, Sparkles } from "lucide-react";
+import { Settings, ArrowLeft, Lock, Crown, Map, Sparkles, CheckCircle2, Clock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useSubscription } from "@/hooks/use-subscription";
 import { AGENTS, AGENT_CATEGORIES, FREE_AGENT_IDS, type AgentDef } from "@/lib/agents";
+import { GUIDED_STEPS } from "@/lib/guided-flow-config";
 import { OnboardingTour, type TourStep } from "@/components/onboarding/OnboardingTour";
 
 const TOUR_STEPS: TourStep[] = [
@@ -60,8 +62,28 @@ export default function AgentsHub() {
   const { subscription } = useSubscription();
   const [profile, setProfile] = useState<DefaultProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copyResults, setCopyResults] = useState<Record<string, any> | null>(null);
 
   const agentsAccess = subscription?.agents_access ?? "basic";
+
+  // Build a map: agentId → status for guided agents
+  const guidedStatuses = useMemo(() => {
+    const map: Record<string, "pending" | "generated" | "audited"> = {};
+    if (!copyResults) return map;
+    for (const step of GUIDED_STEPS) {
+      if (!step.copyKey) {
+        // audit step: check if audit_last has any target
+        const hasAudit = copyResults.audit_last && Object.keys(copyResults.audit_last).length > 0;
+        map[step.agentId] = hasAudit ? "audited" : "pending";
+      } else if (copyResults[step.copyKey]) {
+        const isAudited = copyResults.audit_last?.[step.copyKey];
+        map[step.agentId] = isAudited ? "audited" : "generated";
+      } else {
+        map[step.agentId] = "pending";
+      }
+    }
+    return map;
+  }, [copyResults]);
 
   useEffect(() => {
     if (!user) return;
@@ -79,6 +101,19 @@ export default function AgentsHub() {
           setProfile(data);
         }
         setLoading(false);
+      });
+    // Fetch latest project copy_results for guided statuses
+    supabase
+      .from("projects")
+      .select("copy_results")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.copy_results && typeof data.copy_results === "object") {
+          setCopyResults(data.copy_results as Record<string, any>);
+        }
       });
   }, [user, navigate]);
 
@@ -199,6 +234,7 @@ export default function AgentsHub() {
                       index={ai}
                       dataTour={isFirst && ai === 0 ? "first-agent" : undefined}
                       lockedByPlan={lockedByPlan}
+                      guidedStatus={cat.id === "guided" ? guidedStatuses[agent.id] : undefined}
                     />
                   );
                 })}
@@ -211,9 +247,17 @@ export default function AgentsHub() {
   );
 }
 
-function AgentCard({ agent, index, dataTour, lockedByPlan }: { agent: AgentDef; index: number; dataTour?: string; lockedByPlan?: boolean }) {
+function AgentCard({ agent, index, dataTour, lockedByPlan, guidedStatus }: { agent: AgentDef; index: number; dataTour?: string; lockedByPlan?: boolean; guidedStatus?: "pending" | "generated" | "audited" }) {
   const navigate = useNavigate();
   const isLocked = !agent.available || lockedByPlan;
+
+  const statusConfig = guidedStatus === "generated"
+    ? { icon: <CheckCircle2 className="h-3 w-3" />, label: "Gerado", className: "bg-primary/10 text-primary border-primary/20" }
+    : guidedStatus === "audited"
+    ? { icon: <Trophy className="h-3 w-3" />, label: "Auditado", className: "bg-accent/10 text-accent-foreground border-accent/20" }
+    : guidedStatus === "pending"
+    ? { icon: <Clock className="h-3 w-3" />, label: "Pendente", className: "bg-muted text-muted-foreground border-border" }
+    : null;
 
   return (
     <motion.button
@@ -231,16 +275,25 @@ function AgentCard({ agent, index, dataTour, lockedByPlan }: { agent: AgentDef; 
       data-tour={dataTour}
       className={`premium-card p-5 text-left w-full group relative transition-all ${
         isLocked
-          ? "opacity-60 cursor-pointer hover:border-amber-500/30"
+          ? "opacity-60 cursor-pointer hover:border-primary/30"
           : "cursor-pointer hover:border-primary/30"
       }`}
     >
-      {lockedByPlan && (
-        <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium">
-          <Crown className="h-3 w-3" />
-          Pro
-        </div>
-      )}
+      {/* Status badges */}
+      <div className="absolute top-3 right-3 flex items-center gap-1.5">
+        {statusConfig && (
+          <Badge variant="outline" className={`gap-1 text-[10px] px-1.5 py-0 h-5 font-medium ${statusConfig.className}`}>
+            {statusConfig.icon}
+            {statusConfig.label}
+          </Badge>
+        )}
+        {lockedByPlan && (
+          <Badge variant="outline" className="gap-1 text-[10px] px-1.5 py-0 h-5 font-medium bg-secondary/50 text-secondary-foreground border-secondary">
+            <Crown className="h-3 w-3" />
+            Pro
+          </Badge>
+        )}
+      </div>
       {!agent.available && !lockedByPlan && (
         <div className="absolute top-3 right-3">
           <Lock className="h-4 w-4 text-muted-foreground" />
