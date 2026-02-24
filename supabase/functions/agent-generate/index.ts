@@ -455,7 +455,6 @@ ${projectCtx ? `--- CONTEXTO DO PROJETO ---\n${projectCtx}` : ""}`;
     });
   } catch (err) {
     console.error("Error:", err);
-    const corsHeaders = getCorsHeaders(req);
     return new Response(JSON.stringify({ error: "Erro interno" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
