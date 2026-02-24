@@ -848,4 +848,13 @@ export const AGENTS: AgentDef[] = [
     category: "content",
     available: true,
   },
+  {
+    id: "gamified-copy",
+    name: "Copy Gamificada",
+    emoji: "🎮",
+    role: "Especialista em Funis Gamificados de Conversão",
+    description: "Cria funis gamificados com história, missões e escolhas interativas que conduzem o usuário naturalmente até a compra — ideal para WhatsApp e DM.",
+    category: "copywriting",
+    available: true,
+  },
 ];
