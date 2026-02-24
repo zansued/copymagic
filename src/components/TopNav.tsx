@@ -86,7 +86,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
 
 
 
-  const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
+  const isAgency = subscription?.plan === "agency" || subscription?.plan === "agency_plus" || subscription?.plan === "lifetime";
 
   const isProjectPage = location.pathname.startsWith("/project/");
   const isSummaryPage = location.pathname.endsWith("/summary");

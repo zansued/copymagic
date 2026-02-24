@@ -93,8 +93,8 @@ export default function TeamManagement() {
     setLastSeenCount(messages.length);
   };
 
-  const isAgency = subscription?.plan === "agency" || subscription?.plan === "lifetime";
-  const MAX_TEAMS = subscription?.plan === "lifetime" ? 5 : 3;
+  const isAgency = subscription?.plan === "agency" || subscription?.plan === "agency_plus" || subscription?.plan === "lifetime";
+  const MAX_TEAMS = subscription?.plan === "lifetime" ? 5 : subscription?.plan === "agency_plus" ? 5 : 3;
 
   if (loading) {
     return (
