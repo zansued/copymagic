@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MenuBar } from "@/components/ui/menu-bar";
-import { Menu, LogOut, Globe, Dna, Bot, Brain, BarChart3, Users, UsersRound, CreditCard, Shield, FolderOpen, Telescope } from "lucide-react";
+import { Menu, LogOut, Globe, Dna, Bot, Brain, BarChart3, UsersRound, CreditCard, Shield, FolderOpen, Telescope } from "lucide-react";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSubscription } from "@/hooks/use-subscription";
 import { TeamSidebar } from "@/components/TeamSidebar";
@@ -66,13 +66,6 @@ const menuItems = [
     iconColor: "text-cyan-400",
   },
   {
-    icon: Users,
-    label: "Compartilhados",
-    path: "/shared-with-me",
-    gradient: "radial-gradient(circle, hsl(40 80% 55% / 0.15) 0%, transparent 70%)",
-    iconColor: "text-amber-400",
-  },
-  {
     icon: CreditCard,
     label: "Planos",
     path: "/pricing",
@@ -126,11 +119,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
     navigate(`/project/${data.id}`);
   };
 
-  // Filter menu items based on plan
-  const filteredMenuItems = menuItems.filter((item) => {
-    if (item.path === "/shared-with-me" && !isAgency) return false;
-    return true;
-  });
+  const filteredMenuItems = menuItems;
 
   const activeLabel = filteredMenuItems.find(
     (i) => location.pathname === i.path
