@@ -10,6 +10,7 @@ import { useSubscription } from "@/hooks/use-subscription";
 import { AGENTS, AGENT_CATEGORIES, FREE_AGENT_IDS, type AgentDef } from "@/lib/agents";
 import { GUIDED_STEPS } from "@/lib/guided-flow-config";
 import { OnboardingTour, type TourStep } from "@/components/onboarding/OnboardingTour";
+import { DnaBadge } from "@/components/brand/DnaBadge";
 
 const TOUR_STEPS: TourStep[] = [
   {
@@ -155,41 +156,37 @@ export default function AgentsHub() {
         </div>
       </header>
 
-      {/* Config summary */}
+      {/* Config summary with DNA Badge */}
       {profile && (
         <div className="max-w-6xl mx-auto px-6 pt-6">
-          <div className="premium-card p-4 flex flex-wrap gap-4 text-sm" data-tour="config-summary">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🧬</span>
-              <span className="text-primary font-medium">{profile.name}</span>
-            </div>
-            {profile.personality_summary && (
-              <>
-                <div className="h-5 w-px bg-border hidden sm:block" />
+          <div className="premium-card p-4 flex flex-wrap items-center gap-5" data-tour="config-summary">
+            <DnaBadge name={profile.name} summary={profile.personality_summary} />
+            <div className="flex flex-wrap gap-4 text-sm">
+              {profile.personality_summary && (
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🎭</span>
                   <span className="text-foreground truncate max-w-[200px]">{profile.personality_summary.slice(0, 60)}...</span>
                 </div>
-              </>
-            )}
-            {profile.audience_summary && (
-              <>
-                <div className="h-5 w-px bg-border hidden sm:block" />
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🎯</span>
-                  <span className="text-foreground truncate max-w-[200px]">{profile.audience_summary.slice(0, 60)}...</span>
-                </div>
-              </>
-            )}
-            {profile.product_summary && (
-              <>
-                <div className="h-5 w-px bg-border hidden sm:block" />
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">📦</span>
-                  <span className="text-foreground truncate max-w-[200px]">{profile.product_summary.slice(0, 60)}...</span>
-                </div>
-              </>
-            )}
+              )}
+              {profile.audience_summary && (
+                <>
+                  <div className="h-5 w-px bg-border hidden sm:block" />
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎯</span>
+                    <span className="text-foreground truncate max-w-[200px]">{profile.audience_summary.slice(0, 60)}...</span>
+                  </div>
+                </>
+              )}
+              {profile.product_summary && (
+                <>
+                  <div className="h-5 w-px bg-border hidden sm:block" />
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📦</span>
+                    <span className="text-foreground truncate max-w-[200px]">{profile.product_summary.slice(0, 60)}...</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
