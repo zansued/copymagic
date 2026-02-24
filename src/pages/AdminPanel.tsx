@@ -29,6 +29,8 @@ interface Metrics {
   total_users: number;
   total_pro: number;
   total_agency: number;
+  total_agency_plus: number;
+  total_lifetime: number;
   total_free: number;
   total_generations: number;
   mrr: number;
@@ -39,6 +41,7 @@ const PLAN_LIMITS: Record<string, number> = {
   starter: 30,
   pro: 100,
   agency: 999999,
+  agency_plus: 999999,
   lifetime: 999999,
 };
 
@@ -161,6 +164,7 @@ export default function AdminPanel() {
   );
 
   const planIcon = (plan: string) => {
+    if (plan === "agency_plus") return <Building2 className="h-3.5 w-3.5" />;
     if (plan === "agency") return <Building2 className="h-3.5 w-3.5" />;
     if (plan === "pro") return <Crown className="h-3.5 w-3.5" />;
     if (plan === "lifetime") return <Shield className="h-3.5 w-3.5" />;
@@ -169,6 +173,7 @@ export default function AdminPanel() {
   };
 
   const planColor = (plan: string) => {
+    if (plan === "agency_plus") return "text-orange-400 bg-orange-400/10 border-orange-400/20";
     if (plan === "agency") return "text-amber-400 bg-amber-400/10 border-amber-400/20";
     if (plan === "pro") return "text-violet-400 bg-violet-400/10 border-violet-400/20";
     if (plan === "lifetime") return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
@@ -193,7 +198,8 @@ export default function AdminPanel() {
               { label: "Total Usuários", value: metrics.total_users, icon: Users, color: "text-blue-400" },
               { label: "MRR", value: `R$ ${metrics.mrr}`, icon: DollarSign, color: "text-green-400" },
               { label: "Plano Pro", value: metrics.total_pro, icon: Crown, color: "text-primary" },
-              { label: "Plano Agency", value: metrics.total_agency, icon: Building2, color: "text-amber-400" },
+              { label: "Agency", value: metrics.total_agency, icon: Building2, color: "text-amber-400" },
+              { label: "Agency Plus", value: metrics.total_agency_plus, icon: Building2, color: "text-orange-400" },
             ].map((m, i) => (
               <motion.div
                 key={m.label}
@@ -329,6 +335,7 @@ export default function AdminPanel() {
                               <SelectItem value="starter">Starter</SelectItem>
                               <SelectItem value="pro">Pro</SelectItem>
                               <SelectItem value="agency">Agency</SelectItem>
+                              <SelectItem value="agency_plus">Agency Plus</SelectItem>
                               <SelectItem value="lifetime">Vitalício</SelectItem>
                             </SelectContent>
                           </Select>

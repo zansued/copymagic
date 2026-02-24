@@ -75,11 +75,13 @@ serve(async (req) => {
         const activeSubs = subs?.filter(s => s.status === "active") || [];
         const totalPro = activeSubs.filter(s => s.plan === "pro").length;
         const totalAgency = activeSubs.filter(s => s.plan === "agency").length;
+        const totalAgencyPlus = activeSubs.filter(s => s.plan === "agency_plus").length;
         const totalLifetime = activeSubs.filter(s => s.plan === "lifetime").length;
         const totalGenerations = subs?.reduce((sum, s) => sum + (s.generations_used || 0), 0) || 0;
         const mrr = activeSubs.reduce((sum, s) => {
           if (s.plan === "pro") return sum + 97;
           if (s.plan === "agency") return sum + 297;
+          if (s.plan === "agency_plus") return sum + 497;
           return sum;
         }, 0);
 
@@ -87,8 +89,9 @@ serve(async (req) => {
           total_users: totalUsersCount,
           total_pro: totalPro,
           total_agency: totalAgency,
+          total_agency_plus: totalAgencyPlus,
           total_lifetime: totalLifetime,
-          total_free: totalUsersCount - totalPro - totalAgency - totalLifetime,
+          total_free: totalUsersCount - totalPro - totalAgency - totalAgencyPlus - totalLifetime,
           total_generations: totalGenerations,
           mrr,
         };
