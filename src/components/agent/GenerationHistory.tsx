@@ -13,6 +13,8 @@ interface Generation {
   output: string;
   provider: string;
   created_at: string;
+  brand_profile_id: string | null;
+  brand_profile_name?: string;
 }
 
 interface GenerationHistoryProps {
@@ -30,12 +32,16 @@ export function GenerationHistory({ agentId, userId, onLoad }: GenerationHistory
     setLoading(true);
     const { data } = await supabase
       .from("agent_generations")
-      .select("id, agent_name, inputs, output, provider, created_at")
+      .select("id, agent_name, inputs, output, provider, created_at, brand_profile_id, brand_profiles(name)")
       .eq("user_id", userId)
       .eq("agent_id", agentId)
       .order("created_at", { ascending: false })
       .limit(20);
-    setItems((data as Generation[]) || []);
+    const mapped = (data || []).map((item: any) => ({
+      ...item,
+      brand_profile_name: item.brand_profiles?.name || null,
+    }));
+    setItems(mapped as Generation[]);
     setLoading(false);
   };
 
@@ -107,6 +113,11 @@ export function GenerationHistory({ agentId, userId, onLoad }: GenerationHistory
                         <Clock className="h-3 w-3" />
                         {format(new Date(item.created_at), "dd MMM yyyy · HH:mm", { locale: ptBR })}
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted/50">{item.provider}</span>
+                        {item.brand_profile_name && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-medium">
+                            🧬 {item.brand_profile_name}
+                          </span>
+                        )}
                       </p>
                       {getInputSummary(item.inputs as Record<string, string>) && (
                         <p className="text-xs text-foreground/70 truncate">
