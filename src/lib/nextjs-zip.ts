@@ -192,7 +192,7 @@ body {
   "README.md": ({ projectName }) =>
     `# ${projectName}
 
-Landing page gerada por **CopyMagic**.
+Landing page premium gerada por **CopyEngine**.
 
 ## Como rodar
 
@@ -201,11 +201,116 @@ npm install
 npm run dev
 \`\`\`
 
+Abra [http://localhost:3000](http://localhost:3000).
+
+## Estrutura
+
+- \`app/page.tsx\` — página principal com todas as seções
+- \`components/\` — componentes reutilizáveis (Hero, BentoGrid, FAQ, etc.)
+- \`lib/pageSpec.ts\` — tipos TypeScript do PageSpec
+
 ## Deploy
 
 Faça deploy na [Vercel](https://vercel.com) com um clique:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+`,
+  "lib/pageSpec.ts": () =>
+    `// PageSpec types for CopyEngine Landing Builder
+
+export interface PageSpecHero {
+  headline: string;
+  subheadline: string;
+  bullets: string[];
+  ctaPrimary: string;
+  ctaSecondary?: string;
+  microcopy?: string;
+  trustItems?: string[];
+}
+
+export interface PageSpecProof {
+  stats: Array<{ value: string; label: string }>;
+  logos: string[];
+}
+
+export interface PageSpecProblemItem {
+  title: string;
+  description: string;
+  falseSolution?: string;
+  truth?: string;
+}
+
+export interface PageSpecStep {
+  title: string;
+  description: string;
+}
+
+export interface PageSpecSolution {
+  title: string;
+  description: string;
+  steps: PageSpecStep[];
+  differentiators?: Array<{ title: string; description: string }>;
+}
+
+export interface PageSpecTestimonial {
+  name: string;
+  role: string;
+  text: string;
+}
+
+export interface PageSpecBonus {
+  title: string;
+  description: string;
+  value?: string;
+}
+
+export interface PageSpecOffer {
+  title: string;
+  includes: string[];
+  price?: string;
+  originalPrice?: string;
+  urgency?: string;
+}
+
+export interface PageSpecForWho {
+  for: string[];
+  notFor: string[];
+}
+
+export interface PageSpecFAQ {
+  question: string;
+  answer: string;
+}
+
+export interface PageSpecGuarantee {
+  title: string;
+  days: number;
+  description: string;
+  bullets?: string[];
+}
+
+export interface PageSpecFinalCta {
+  headline: string;
+  description: string;
+  ctaText: string;
+}
+
+export interface PageSpec {
+  meta: { language: string; detectedNiche?: string };
+  hero: PageSpecHero;
+  proof: PageSpecProof;
+  problem: { title: string; items: PageSpecProblemItem[] };
+  solution: PageSpecSolution;
+  phases?: Array<{ title: string; description: string; outcome: string }>;
+  testimonials: PageSpecTestimonial[];
+  offer: PageSpecOffer;
+  bonuses: PageSpecBonus[];
+  forWho: PageSpecForWho;
+  guarantee: PageSpecGuarantee;
+  faq: PageSpecFAQ[];
+  finalCta: PageSpecFinalCta;
+  footer?: { disclaimers: string[]; links: string[] };
+}
 `,
 };
 
