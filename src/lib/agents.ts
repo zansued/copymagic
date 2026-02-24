@@ -13,7 +13,7 @@ export interface AgentDef {
 export const FREE_AGENT_IDS = ["icp-profile", "sales-page", "carousel-creator", "venda-direta-orchestrator", "oferta-usp"];
 
 export const AGENT_CATEGORIES = [
-  { id: "guided" as const, label: "🚀 Fluxo Guiado V1", emoji: "🚀", color: "from-violet-500 to-purple-500" },
+  { id: "guided" as const, label: "Fluxo Guiado V1", emoji: "🚀", color: "from-violet-500 to-purple-500" },
   { id: "ideation" as const, label: "Ideação & Estratégia", emoji: "💡", color: "from-yellow-500 to-amber-500" },
   { id: "copywriting" as const, label: "Copywriting", emoji: "✍️", color: "from-purple-500 to-pink-500" },
   { id: "content" as const, label: "Conteúdo & Social", emoji: "📱", color: "from-blue-500 to-cyan-500" },
