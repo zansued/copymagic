@@ -1332,6 +1332,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      current_user_email: { Args: never; Returns: string }
       get_admin_metrics: { Args: never; Returns: Json }
       get_admin_users: {
         Args: never
