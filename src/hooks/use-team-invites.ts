@@ -62,24 +62,15 @@ export function useTeamInvites() {
     async (invite: PendingInvite) => {
       if (!user) return false;
 
-      // Update invite status to accepted
-      const { error: updateError } = await supabase
-        .from("team_invites")
-        .update({ status: "accepted" })
-        .eq("id", invite.id);
+      const { error } = await supabase.rpc(
+        "respond_to_team_invite" as never,
+        { p_invite_id: invite.id, p_action: "accepted" } as never
+      );
 
-      if (updateError) return false;
-
-      // Insert as team member
-      const { error: insertError } = await supabase
-        .from("team_members")
-        .insert({
-          team_id: invite.team_id,
-          user_id: user.id,
-          role: invite.role,
-        });
-
-      if (insertError) return false;
+      if (error) {
+        console.error("[useTeamInvites] acceptInvite error", error);
+        return false;
+      }
 
       await fetchInvites();
       return true;
@@ -89,15 +80,22 @@ export function useTeamInvites() {
 
   const rejectInvite = useCallback(
     async (inviteId: string) => {
-      const { error } = await supabase
-        .from("team_invites")
-        .update({ status: "rejected" })
-        .eq("id", inviteId);
+      if (!user) return false;
 
-      if (!error) await fetchInvites();
-      return !error;
+      const { error } = await supabase.rpc(
+        "respond_to_team_invite" as never,
+        { p_invite_id: inviteId, p_action: "rejected" } as never
+      );
+
+      if (error) {
+        console.error("[useTeamInvites] rejectInvite error", error);
+        return false;
+      }
+
+      await fetchInvites();
+      return true;
     },
-    [fetchInvites]
+    [user, fetchInvites]
   );
 
   return { invites, loading, acceptInvite, rejectInvite, refetch: fetchInvites };
