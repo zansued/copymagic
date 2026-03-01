@@ -7,6 +7,7 @@ import { MenuBar } from "@/components/ui/menu-bar";
 import { Menu, LogOut, Globe, Dna, Bot, Brain, BarChart3, UsersRound, CreditCard, Shield, FolderOpen, Telescope } from "lucide-react";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useTeam } from "@/hooks/use-team";
 import { TeamSidebar } from "@/components/TeamSidebar";
 import { InviteNotifications } from "@/components/InviteNotifications";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -81,12 +82,14 @@ export function TopNav({ projectName }: { projectName?: string }) {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const { subscription } = useSubscription();
+  const { team } = useTeam();
   const [teamSidebarOpen, setTeamSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 
 
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "agency_plus";
+  const hasTeamAccess = isAgency || !!team;
 
   const isProjectPage = location.pathname.startsWith("/project/");
   const isSummaryPage = location.pathname.endsWith("/summary");
@@ -159,7 +162,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
                       </button>
                     );
                   })}
-                  {isAgency && (
+                  {hasTeamAccess && (
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
@@ -238,7 +241,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
           {/* Right: team + admin + logout (desktop only) */}
           <div className="w-auto shrink-0 flex justify-end items-center gap-1">
             <InviteNotifications />
-            {isAgency && (
+            {hasTeamAccess && (
               <button
                 onClick={() => setTeamSidebarOpen(true)}
                 className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors ${
@@ -273,7 +276,7 @@ export function TopNav({ projectName }: { projectName?: string }) {
       </nav>
 
       {/* Team Sidebar (Agency only) */}
-      {isAgency && (
+      {hasTeamAccess && (
         <TeamSidebar open={teamSidebarOpen} onClose={() => setTeamSidebarOpen(false)} />
       )}
     </>
