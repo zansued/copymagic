@@ -94,6 +94,7 @@ export default function TeamManagement() {
   };
 
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "agency_plus";
+  const hasTeamAccess = isAgency || !!team;
   const MAX_TEAMS = subscription?.plan === "lifetime" ? 5 : subscription?.plan === "agency_plus" ? 5 : 3;
 
   if (loading) {
@@ -107,7 +108,7 @@ export default function TeamManagement() {
     );
   }
 
-  if (!isAgency) {
+  if (!hasTeamAccess) {
     return (
       <div className="min-h-screen bg-background">
         <TopNav />

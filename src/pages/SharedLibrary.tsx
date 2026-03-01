@@ -56,6 +56,7 @@ export default function SharedLibrary() {
   const [selectedItem, setSelectedItem] = useState<SharedLibraryItem | null>(null);
 
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "agency_plus";
+  const hasTeamAccess = isAgency || !!team;
 
   if (teamLoading || loading) {
     return (
@@ -68,7 +69,7 @@ export default function SharedLibrary() {
     );
   }
 
-  if (!isAgency || !team) {
+  if (!hasTeamAccess || !team) {
     return (
       <div className="min-h-screen bg-background">
         <TopNav />
