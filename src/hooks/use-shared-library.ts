@@ -11,6 +11,7 @@ export interface SharedLibraryItem {
   agent_name: string | null;
   tags: string[];
   category: string;
+  brand_profile_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -42,7 +43,7 @@ export function useSharedLibrary() {
   }, [fetchItems]);
 
   const addItem = useCallback(
-    async (item: { title: string; content: string; agent_name?: string; tags?: string[]; category?: string }, userId: string) => {
+    async (item: { title: string; content: string; agent_name?: string; tags?: string[]; category?: string; brand_profile_name?: string }, userId: string) => {
       if (!team) return null;
 
       const { data, error } = await supabase
@@ -55,6 +56,7 @@ export function useSharedLibrary() {
           agent_name: item.agent_name ?? null,
           tags: item.tags ?? [],
           category: item.category ?? "geral",
+          brand_profile_name: item.brand_profile_name ?? null,
         })
         .select()
         .single();
@@ -66,7 +68,7 @@ export function useSharedLibrary() {
   );
 
   const updateItem = useCallback(
-    async (id: string, updates: { title?: string; content?: string; tags?: string[]; category?: string }) => {
+    async (id: string, updates: { title?: string; content?: string; tags?: string[]; category?: string; brand_profile_name?: string }) => {
       const { error } = await supabase
         .from("shared_library")
         .update(updates)

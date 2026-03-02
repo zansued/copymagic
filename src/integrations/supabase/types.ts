@@ -891,6 +891,7 @@ export type Database = {
       shared_library: {
         Row: {
           agent_name: string | null
+          brand_profile_name: string | null
           category: string | null
           content: string
           created_at: string
@@ -903,6 +904,7 @@ export type Database = {
         }
         Insert: {
           agent_name?: string | null
+          brand_profile_name?: string | null
           category?: string | null
           content?: string
           created_at?: string
@@ -915,6 +917,7 @@ export type Database = {
         }
         Update: {
           agent_name?: string | null
+          brand_profile_name?: string | null
           category?: string | null
           content?: string
           created_at?: string
