@@ -1016,8 +1016,22 @@ serve(async (req) => {
 
     const { product_input, step, previous_context, provider = "deepseek", continue_from, generation_context } = await req.json();
 
-    if (!product_input || typeof product_input !== "string" || product_input.length > 50000) {
-      return new Response(JSON.stringify({ error: "Entrada de produto inválida ou muito longa (máximo 50.000 caracteres)" }), {
+    if (typeof product_input !== "string" && product_input !== undefined && product_input !== null) {
+      return new Response(JSON.stringify({ error: "Entrada de produto inválida" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const safeProductInput = (typeof product_input === "string" ? product_input : "").trim();
+
+    if (safeProductInput.length > 50000) {
+      return new Response(JSON.stringify({ error: "Entrada de produto muito longa (máximo 50.000 caracteres)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!safeProductInput && !previous_context) {
+      return new Response(JSON.stringify({ error: "Entrada de produto é obrigatória na primeira etapa" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -1067,7 +1081,7 @@ REGRAS ABSOLUTAS DO SISTEMA:
 
     messages.push({
       role: "user",
-      content: `PRODUTO: ${product_input}\n\n${agent.instructions}`
+      content: safeProductInput ? `PRODUTO: ${safeProductInput}\n\n${agent.instructions}` : agent.instructions
     });
 
     // If continuing from previous incomplete output, inject it as assistant message
