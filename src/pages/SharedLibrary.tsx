@@ -354,13 +354,14 @@ export default function SharedLibrary() {
                       }
                     />
                     <div className="flex flex-col items-center gap-0.5">
-                      <Badge variant="outline" className="text-[10px]">
-                        {catLabel}
-                      </Badge>
-                      {item.brand_profile_name && (
+                      {item.brand_profile_name ? (
                         <Badge variant="secondary" className="text-[10px] gap-0.5">
-                          <Dna className="h-2.5 w-2.5" />
-                          {item.brand_profile_name.length > 14 ? item.brand_profile_name.slice(0, 12) + "…" : item.brand_profile_name}
+                          <Dna className="h-2.5 w-2.5 text-primary" />
+                          {item.brand_profile_name.length > 16 ? item.brand_profile_name.slice(0, 14) + "…" : item.brand_profile_name}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px]">
+                          {catLabel}
                         </Badge>
                       )}
                     </div>
