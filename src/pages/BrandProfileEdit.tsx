@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Save, Check, FileDown } from "lucide-react";
@@ -46,8 +46,10 @@ export default function BrandProfileEdit() {
   const [activeSection, setActiveSection] = useState(0);
   const [saved, setSaved] = useState(false);
 
+  const hasLoaded = useRef(false);
+
   useEffect(() => {
-    if (!user || !id) return;
+    if (!user || !id || hasLoaded.current) return;
     supabase
       .from("brand_profiles")
       .select("*")
@@ -59,6 +61,7 @@ export default function BrandProfileEdit() {
           navigate("/brand-profiles");
           return;
         }
+        hasLoaded.current = true;
         setName(data.name);
         setSections({
           brand_identity: { ...EMPTY_BRAND_IDENTITY, ...(data.brand_identity as any || {}) },
