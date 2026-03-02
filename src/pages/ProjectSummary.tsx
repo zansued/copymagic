@@ -295,9 +295,9 @@ export default function ProjectSummary() {
           </div>
         )}
 
-        {/* Copy all button */}
+        {/* Action buttons */}
         {completedSteps.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-10 flex justify-center">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-10 flex justify-center gap-4 flex-wrap">
             <button
               onClick={() => {
                 const allContent = STEPS
@@ -310,6 +310,60 @@ export default function ProjectSummary() {
               className="premium-button text-primary-foreground px-6 py-3 rounded-lg font-semibold text-sm"
             >
               📋 Copiar Tudo
+            </button>
+            <button
+              onClick={() => {
+                const sections = STEPS
+                  .filter((s) => results[s.id])
+                  .map((s) => {
+                    const html = results[s.id]
+                      .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+                      .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+                      .replace(/^# (.+)$/gm, "<h1>$1</h1>")
+                      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+                      .replace(/^- (.+)$/gm, "<li>$1</li>")
+                      .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+                      .replace(/\n{2,}/g, "<br/><br/>")
+                      .replace(/\n/g, "<br/>");
+                    return `<section class="step-section"><div class="step-header"><span class="step-icon">${s.icon}</span><div><h2 class="step-title">${s.label}</h2><p class="step-agent">🤖 ${s.agent}</p></div></div><div class="step-body">${html}</div></section>`;
+                  })
+                  .join("");
+
+                const win = window.open("", "_blank");
+                if (!win) return;
+                win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${projectName} — Resumo Completo</title>
+                  <style>
+                    @media print { body { background:#fff!important; color:#000!important; } .step-section { break-inside: avoid; } }
+                    * { box-sizing: border-box; }
+                    body { font-family: Georgia, 'Times New Roman', serif; padding: 40px 50px; line-height: 1.8; color: #000; background: #fff; max-width: 900px; margin: 0 auto; }
+                    .cover { text-align: center; margin-bottom: 48px; padding-bottom: 32px; border-bottom: 3px solid #333; }
+                    .cover h1 { font-size: 28px; margin-bottom: 8px; }
+                    .cover .meta { font-size: 13px; color: #666; }
+                    .step-section { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid #ddd; }
+                    .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+                    .step-icon { font-size: 28px; }
+                    .step-title { font-size: 20px; margin: 0; }
+                    .step-agent { font-size: 12px; color: #888; margin: 2px 0 0 0; }
+                    .step-body { font-size: 14px; }
+                    h1 { font-size: 20px; margin-top: 20px; } h2 { font-size: 17px; margin-top: 18px; } h3 { font-size: 15px; margin-top: 14px; }
+                    ul { padding-left: 20px; } li { margin-bottom: 4px; }
+                    strong { color: #111; }
+                  </style></head><body>
+                  <div class="cover">
+                    <h1>${projectName}</h1>
+                    <p class="meta">${completedSteps.length} etapas completas · Gerado por CopyEngine</p>
+                    ${mainHeadline ? `<p style="font-style:italic;margin-top:12px;font-size:16px;">"${mainHeadline}"</p>` : ""}
+                  </div>
+                  ${sections}
+                </body></html>`);
+                win.document.close();
+                win.onload = () => setTimeout(() => win.print(), 500);
+              }}
+              className="premium-button text-primary-foreground px-6 py-3 rounded-lg font-semibold text-sm"
+              style={{ background: "linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)))" }}
+            >
+              📄 Exportar PDF Completo
             </button>
           </motion.div>
         )}
