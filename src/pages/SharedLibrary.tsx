@@ -14,7 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { BookOpen, Plus, Search, Trash2, Pencil, Copy, Loader2, Tag, LayoutList, Library, Share2, FileDown } from "lucide-react";
+import { BookOpen, Plus, Search, Trash2, Pencil, Copy, Loader2, Tag, LayoutList, Library, Share2, FileDown, Dna } from "lucide-react";
 import { Book } from "@/components/ui/book";
 import ReactMarkdown from "react-markdown";
 
@@ -48,12 +48,16 @@ export default function SharedLibrary() {
 
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterDna, setFilterDna] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<SharedLibraryItem | null>(null);
   const [form, setForm] = useState({ title: "", content: "", category: "geral", tags: "" });
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState<"list" | "bookshelf">("bookshelf");
   const [selectedItem, setSelectedItem] = useState<SharedLibraryItem | null>(null);
+
+  // Unique DNA names from items
+  const dnaNames = Array.from(new Set(items.map((i) => i.brand_profile_name).filter(Boolean))) as string[];
 
   const isAgency = subscription?.plan === "agency" || subscription?.plan === "agency_plus";
   const hasTeamAccess = isAgency || !!team;
@@ -98,7 +102,8 @@ export default function SharedLibrary() {
       item.content.toLowerCase().includes(search.toLowerCase()) ||
       item.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
     const matchesCategory = filterCategory === "all" || item.category === filterCategory;
-    return matchesSearch && matchesCategory;
+    const matchesDna = filterDna === "all" || item.brand_profile_name === filterDna || (filterDna === "__none__" && !item.brand_profile_name);
+    return matchesSearch && matchesCategory && matchesDna;
   });
 
   const openNew = () => {
@@ -280,6 +285,25 @@ export default function SharedLibrary() {
               ))}
             </SelectContent>
           </Select>
+          {dnaNames.length > 0 && (
+            <Select value={filterDna} onValueChange={setFilterDna}>
+              <SelectTrigger className="w-[160px]">
+                <div className="flex items-center gap-1.5 truncate">
+                  <Dna className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span className="truncate">{filterDna === "all" ? "Todos os DNAs" : filterDna === "__none__" ? "Sem DNA" : filterDna}</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os DNAs</SelectItem>
+                <SelectItem value="__none__">Sem DNA</SelectItem>
+                {dnaNames.map((name) => (
+                  <SelectItem key={name} value={name}>
+                    🧬 {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Items */}
@@ -321,12 +345,25 @@ export default function SharedLibrary() {
                               🤖 {item.agent_name}
                             </span>
                           )}
+                          {item.brand_profile_name && (
+                            <span className="text-[7px] text-white/80 font-medium truncate max-w-[90px]">
+                              🧬 {item.brand_profile_name}
+                            </span>
+                          )}
                         </div>
                       }
                     />
-                    <Badge variant="outline" className="text-[10px]">
-                      {catLabel}
-                    </Badge>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <Badge variant="outline" className="text-[10px]">
+                        {catLabel}
+                      </Badge>
+                      {item.brand_profile_name && (
+                        <Badge variant="secondary" className="text-[10px] gap-0.5">
+                          <Dna className="h-2.5 w-2.5" />
+                          {item.brand_profile_name.length > 14 ? item.brand_profile_name.slice(0, 12) + "…" : item.brand_profile_name}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -353,6 +390,12 @@ export default function SharedLibrary() {
                           {item.agent_name && (
                             <Badge variant="secondary" className="text-[10px]">
                               {item.agent_name}
+                            </Badge>
+                          )}
+                          {item.brand_profile_name && (
+                            <Badge variant="secondary" className="text-[10px] gap-0.5">
+                              <Dna className="h-2.5 w-2.5" />
+                              {item.brand_profile_name}
                             </Badge>
                           )}
                         </div>
@@ -478,6 +521,12 @@ export default function SharedLibrary() {
                       {selectedItem.agent_name && (
                         <Badge variant="secondary" className="text-[10px]">
                           🤖 {selectedItem.agent_name}
+                        </Badge>
+                      )}
+                      {selectedItem.brand_profile_name && (
+                        <Badge variant="secondary" className="text-[10px] gap-0.5">
+                          <Dna className="h-2.5 w-2.5" />
+                          {selectedItem.brand_profile_name}
                         </Badge>
                       )}
                       <span className="text-[11px] text-muted-foreground">
