@@ -54,9 +54,16 @@ Deno.serve(async (req) => {
 
     // Prefer self-hosted key, fallback to connector key
     const apiKey = Deno.env.get('FIRECRAWL_SELF_HOSTED_KEY') || Deno.env.get('FIRECRAWL_API_KEY');
-    const baseUrl = Deno.env.get('FIRECRAWL_SELF_HOSTED_KEY')
-      ? 'https://firecrawl.techstorebrasil.com'
-      : 'https://api.firecrawl.dev';
+    let baseUrl = Deno.env.get('FIRECRAWL_BASE_URL') || "https://firecrawl.techstorebrasil.com";
+    
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, -1);
+    }
+    
+    // If not using self-hosted and no base URL, fallback to official
+    if (!Deno.env.get('FIRECRAWL_BASE_URL') && !Deno.env.get('FIRECRAWL_SELF_HOSTED_KEY')) {
+      baseUrl = 'https://api.firecrawl.dev';
+    }
     if (!apiKey) {
       console.error('No Firecrawl API key configured');
       return new Response(
