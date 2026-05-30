@@ -53,9 +53,15 @@ serve(async (req) => {
     }
 
     const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_SELF_HOSTED_KEY") || Deno.env.get("FIRECRAWL_API_KEY");
-    const firecrawlBaseUrl = Deno.env.get("FIRECRAWL_SELF_HOSTED_KEY")
-      ? "https://firecrawl.techstorebrasil.com"
-      : "https://api.firecrawl.dev";
+    let firecrawlBaseUrl = Deno.env.get("FIRECRAWL_BASE_URL") || "https://firecrawl.techstorebrasil.com";
+    
+    if (firecrawlBaseUrl.endsWith("/")) {
+      firecrawlBaseUrl = firecrawlBaseUrl.slice(0, -1);
+    }
+    
+    if (!Deno.env.get("FIRECRAWL_BASE_URL") && !Deno.env.get("FIRECRAWL_SELF_HOSTED_KEY")) {
+      firecrawlBaseUrl = "https://api.firecrawl.dev";
+    }
     if (!FIRECRAWL_API_KEY) throw new Error("FIRECRAWL_API_KEY não configurada");
 
     // Step 1: Search the web for trends/pains related to the query
