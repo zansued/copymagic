@@ -122,7 +122,7 @@ serve(async (req) => {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "deepseek-flash",
         temperature: 0.7,
         max_tokens: 8000,
         messages: [
