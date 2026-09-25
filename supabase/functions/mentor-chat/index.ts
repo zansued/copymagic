@@ -186,7 +186,7 @@ serve(async (req) => {
       ? "https://api.openai.com/v1/chat/completions"
       : "https://api.deepseek.com/v1/chat/completions";
 
-    const model = provider === "openai" ? "gpt-4o" : "deepseek-chat";
+    const model = provider === "openai" ? "gpt-4o-mini" : "deepseek-chat";
 
     if (!apiKey) {
       return new Response(JSON.stringify({ error: `API key para ${provider} não configurada` }), {

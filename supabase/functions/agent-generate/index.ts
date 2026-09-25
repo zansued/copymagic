@@ -408,7 +408,7 @@ ${projectCtx ? `--- CONTEXTO DO PROJETO ---\n${projectCtx}` : ""}`;
       ? "https://api.openai.com/v1/chat/completions"
       : "https://api.deepseek.com/v1/chat/completions";
 
-    const model = provider === "openai" ? "gpt-4o" : "deepseek-chat";
+    const model = provider === "openai" ? "gpt-4o-mini" : "deepseek-chat";
     const maxTokens = provider === "openai" ? 16384 : 8192;
 
     if (!apiKey) {
